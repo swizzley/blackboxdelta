@@ -2,6 +2,9 @@
 title = 'Vistra Corp (VST)'
 date = 2023-09-19T09:52:59-06:00
 draft = true
+featured_image = 'logos/VST.svg'
+tags = ['2023-09-19', 'Stock', 'Long']
+slug = 'VST'
 +++
 # Technological Advancements and Vistra Corp's Long-Term Growth Prospects
 

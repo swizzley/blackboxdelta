@@ -2,6 +2,9 @@
 title = 'Blackstone Inc (BX)'
 date = 2023-09-19T09:51:58-06:00
 draft = true
+featured_image = 'logos/BX.svg'
+tags = ['2023-09-19', 'Stock', 'Long']
+slug = 'BX'
 +++
 **Capitalizing on Promising Prospects: Going Long on Blackstone Inc**
 

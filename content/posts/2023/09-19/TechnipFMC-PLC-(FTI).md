@@ -2,6 +2,9 @@
 title = 'TechnipFMC PLC (FTI)'
 date = 2023-09-19T09:53:19-06:00
 draft = true
+featured_image = 'logos/FTI.svg'
+tags = ['2023-09-19', 'Stock', 'Long']
+slug = 'FTI'
 +++
 # TechnipFMC PLC's Utilization of Big Data and Analytics for Enhanced Market Insights: Benefits for Long-Term Investors
 

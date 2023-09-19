@@ -2,6 +2,8 @@
 title = 'Northern Dynasty Minerals Ltd (NDM.TO)'
 date = 2023-09-19T09:54:03-06:00
 draft = true
+tags = ['2023-09-19', 'Stock', 'Long']
+slug = 'NDM.TO'
 +++
 # The Influence of Northern Dynasty Minerals Ltd's Innovative Products on Long-Term Investment Strategies
 
