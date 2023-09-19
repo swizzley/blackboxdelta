@@ -2,9 +2,10 @@
 title = 'Uranium Energy Corp (UEC)'
 date = 2023-09-19T09:53:41-06:00
 draft = true
-featured_image = 'logos/UEC.svg'
 tags = ['2023-09-19', 'Stock', 'Long']
 slug = 'UEC'
+description = 'NYSE MKT LLC'
+featured_image = 'logos/UEC.svg'
 +++
 # Uranium Energy Corp's Acquisitions and Partnerships: Implications for Long-Term Investors
 

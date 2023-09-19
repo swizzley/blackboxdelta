@@ -1,10 +1,38 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tags on Black Box Delta 1</title>
+    <title>Tags on Black Box Delta</title>
     <link>https://blackboxdelta.com/tags/</link>
-    <description>Recent content in Tags on Black Box Delta 1</description>
+    <description>Recent content in Tags on Black Box Delta</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language><atom:link href="https://blackboxdelta.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language>
+    <lastBuildDate>Tue, 19 Sep 2023 09:54:03 -0600</lastBuildDate><atom:link href="https://blackboxdelta.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>2023-09-19</title>
+      <link>https://blackboxdelta.com/tags/2023-09-19/</link>
+      <pubDate>Tue, 19 Sep 2023 09:54:03 -0600</pubDate>
+      
+      <guid>https://blackboxdelta.com/tags/2023-09-19/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Long</title>
+      <link>https://blackboxdelta.com/tags/long/</link>
+      <pubDate>Tue, 19 Sep 2023 09:54:03 -0600</pubDate>
+      
+      <guid>https://blackboxdelta.com/tags/long/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Stock</title>
+      <link>https://blackboxdelta.com/tags/stock/</link>
+      <pubDate>Tue, 19 Sep 2023 09:54:03 -0600</pubDate>
+      
+      <guid>https://blackboxdelta.com/tags/stock/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>

@@ -2,23 +2,73 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://blackboxdelta.com/posts/2023-09-18-novo-integrated-sciences-inc/</loc>
-    <lastmod>2023-09-18T22:00:12-06:00</lastmod>
+    <loc>https://blackboxdelta.com/tags/2023-09-19/</loc>
+    <lastmod>2023-09-19T09:54:03-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url><url>
     <loc>https://blackboxdelta.com/</loc>
-    <lastmod>2023-09-18T22:00:12-06:00</lastmod>
+    <lastmod>2023-09-19T09:54:03-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://blackboxdelta.com/tags/long/</loc>
+    <lastmod>2023-09-19T09:54:03-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://blackboxdelta.com/posts/2023/09-19/ndm.to/</loc>
+    <lastmod>2023-09-19T09:54:03-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url><url>
     <loc>https://blackboxdelta.com/posts/</loc>
-    <lastmod>2023-09-18T22:00:12-06:00</lastmod>
+    <lastmod>2023-09-19T09:54:03-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url><url>
-    <loc>https://blackboxdelta.com/posts/2023-09-18_nvos/</loc>
-    <lastmod>2023-09-18T21:51:22-06:00</lastmod>
-  </url><url>
-    <loc>https://blackboxdelta.com/posts/my-first-post/</loc>
-    <lastmod>2023-09-17T08:25:16-06:00</lastmod>
-  </url><url>
-    <loc>https://blackboxdelta.com/categories/</loc>
+    <loc>https://blackboxdelta.com/tags/stock/</loc>
+    <lastmod>2023-09-19T09:54:03-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url><url>
     <loc>https://blackboxdelta.com/tags/</loc>
+    <lastmod>2023-09-19T09:54:03-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://blackboxdelta.com/posts/2023/09-19/uec/</loc>
+    <lastmod>2023-09-19T09:53:41-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://blackboxdelta.com/posts/2023/09-19/fti/</loc>
+    <lastmod>2023-09-19T09:53:19-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://blackboxdelta.com/posts/2023/09-19/vst/</loc>
+    <lastmod>2023-09-19T09:52:59-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://blackboxdelta.com/posts/2023/09-19/hal/</loc>
+    <lastmod>2023-09-19T09:52:40-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://blackboxdelta.com/posts/2023/09-19/afrm/</loc>
+    <lastmod>2023-09-19T09:52:20-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://blackboxdelta.com/posts/2023/09-19/bx/</loc>
+    <lastmod>2023-09-19T09:51:58-06:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url><url>
+    <loc>https://blackboxdelta.com/categories/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>

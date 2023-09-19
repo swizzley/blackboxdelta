@@ -2,9 +2,10 @@
 title = 'Affirm Holdings Inc (AFRM)'
 date = 2023-09-19T09:52:20-06:00
 draft = true
-featured_image = 'logos/AFRM.svg'
 tags = ['2023-09-19', 'Stock', 'Long']
 slug = 'AFRM'
+description = 'NASDAQ NMS - GLOBAL MARKET'
+featured_image = 'logos/AFRM.svg'
 +++
 # The Role of Strategic Partnerships and Collaborations in Affirm Holdings Inc's Long-Term Success
 

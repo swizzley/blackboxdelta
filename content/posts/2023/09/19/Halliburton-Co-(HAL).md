@@ -2,9 +2,10 @@
 title = 'Halliburton Co (HAL)'
 date = 2023-09-19T09:52:40-06:00
 draft = true
-featured_image = 'logos/HAL.svg'
 tags = ['2023-09-19', 'Stock', 'Long']
 slug = 'HAL'
+description = 'NEW YORK STOCK EXCHANGE, INC.'
+featured_image = 'logos/HAL.svg'
 +++
 # Halliburton Co: A Cultural and Management Powerhouse for Long-Term Investors
 
