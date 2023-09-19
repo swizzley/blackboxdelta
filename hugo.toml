@@ -1,0 +1,4 @@
+baseURL = 'https://blackboxdelta.com/'
+languageCode = 'en-us'
+title = 'Black Box Delta'
+theme = 'ananke'
