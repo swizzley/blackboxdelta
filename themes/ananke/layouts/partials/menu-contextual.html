@@ -3,6 +3,42 @@
   https://gohugo.io/content-management/toc/
 */}}
 
+{{ $Symbol := "" }}
+{{ $Description := .Description }}
+{{ $Title := .Title }}
+{{ if eq $Description "NASDAQ NMS - GLOBAL MARKET" }}
+{{ $Symbol = "NASDAQ" }}
+{{ else if eq $Description "NEW YORK STOCK EXCHANGE, INC." }}
+{{ $Symbol = "NYSE" }}
+{{ else if eq $Description "TORONTO STOCK EXCHANGE" }}
+{{ $Symbol = "TSX" }}
+{{ else if eq $Description "NYSE MKT LLC" }}
+{{ $Symbol = "AMEX" }}
+{{ else }}
+{{ $Symbol = "Unknown" }}
+{{ end }}
+{{ $Symbol := printf "%s:%s" $Symbol .Slug }}
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div class="tradingview-widget-container__widget"></div>
+  <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
+    {
+      "interval": "1D",
+            "width": 300,
+            "isTransparent": false,
+            "height": 450,
+            "symbol": "{{$Symbol}}",
+            "showIntervalTabs": true,
+            "locale": "en",
+            "colorTheme": "light"
+    }
+  </script>
+</div>
+<!-- TradingView Widget END -->
+
+
+
 {{- if .Params.toc -}}
   <div class="bg-light-gray pa3 nested-list-reset nested-copy-line-height nested-links">
     <p class="f5 b mb3">{{ i18n "whatsInThis" . }}</p>

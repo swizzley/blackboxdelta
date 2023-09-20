@@ -5,6 +5,25 @@
 
 {{ define "main" }}
   {{ $section := .Site.GetPage "section" .Section }}
+
+{{ $Symbol := "" }}
+{{ $Description := .Description }}
+{{ $Title := .Title }}
+{{ if eq $Description "NASDAQ NMS - GLOBAL MARKET" }}
+{{ $Symbol = "NASDAQ" }}
+{{ else if eq $Description "NEW YORK STOCK EXCHANGE, INC." }}
+{{ $Symbol = "NYSE" }}
+{{ else if eq $Description "TORONTO STOCK EXCHANGE" }}
+{{ $Symbol = "TSX" }}
+{{ else if eq $Description "NYSE MKT LLC" }}
+{{ $Symbol = "AMEX" }}
+{{ else }}
+{{ $Symbol = "Unknown" }}
+{{ end }}
+{{ $Symbol := printf "%s:%s" $Symbol .Slug }}
+
+
+
   <article class="flex-l flex-wrap justify-between mw8 center ph3">
     <header class="mt4 w-100">
       <aside class="instapaper_ignoref b helvetica tracked">
@@ -52,39 +71,14 @@
         <div class="tradingview-widget-copyright"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
-          console.log('{{- .Title -}}', '{{- .Description -}}')
-          function getAbbreviation(input) {
-            switch (input) {
-              case "NASDAQ NMS - GLOBAL MARKET":
-                return "NASDAQ";
-              case "NEW YORK STOCK EXCHANGE, INC.":
-                return "NYSE";
-              case "TORONTO STOCK EXCHANGE":
-                return "TSX";
-              case "NYSE MKT LLC":
-                return "AMEX";
-              default:
-                return "Unknown";
-            }
-          }
 
-          function extractCharactersInParentheses(inputString) {
-            const matches = inputString.match(/\(([^)]+)\)$/);
-            if (matches && matches.length > 1) {
-              return matches[1];
-            } else {
-              return null; // No match found
-            }
-          }
 
-          const symbol = getAbbreviation({{- .Description -}}) + ":" + extractCharactersInParentheses({{- .Title -}})
-          console.log(symbol)
-
+          console.log("mySymbol: '{{- $Symbol -}}'");
           new TradingView.widget(
                   {
                     "width": 'auto',
                     "height": 400,
-                    "symbol": symbol,
+                    "symbol": {{ $Symbol }},
                     "interval": "D",
                     "timezone": "Etc/UTC",
                     "theme": "dark",
@@ -100,6 +94,7 @@
         </script>
       </div>
       <!-- TradingView Widget END -->
+
     </header>
 
     <div class="nested-copy-line-height lh-copy {{ $.Param "post_content_classes"  | default "serif"}} f4 nested-links {{ $.Param "text_color" | default "mid-gray" }} {{ cond (eq $.Site.Language.LanguageDirection "rtl") "pl4-l" "pr4-l" }} w-two-thirds-l">
@@ -119,5 +114,23 @@
       {{- partial "menu-contextual.html" . -}}
     </aside>
 
+    <!-- TradingView Widget BEGIN -->
+    <div class="tradingview-widget-container">
+      <div class="tradingview-widget-container__widget"></div>
+      <div class="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span class="blue-text">Track all markets on TradingView</span></a></div>
+      <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-financials.js" async>
+        {
+          "colorTheme": "light",
+                "isTransparent": false,
+                "largeChartUrl": "",
+                "displayMode": "regular",
+                "width": "100%",
+                "height": 800,
+                "symbol": "{{$Symbol}}",
+                "locale": "en"
+        }
+      </script>
+    </div>
+    <!-- TradingView Widget END -->
   </article>
 {{ end }}
