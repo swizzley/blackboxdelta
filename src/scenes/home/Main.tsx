@@ -1,7 +1,7 @@
 import Nav from "../common/Nav";
 import Foot from "../common/Foot";
 import Containers from "./Containers";
-import {PostType} from "./Types";
+import {PostType} from "../../Types";
 import React from "react";
 
 interface PostProps {

@@ -6,7 +6,7 @@ import {MagnifyingGlassIcon} from "@heroicons/react/20/solid";
 const user = {
     name: 'Swizzley',
     email: 'contact@blackboxdelta.com',
-    imageUrl: '/public/img/bbd-logo-main.svg',
+    imageUrl: '/img/bbd-logo-main.svg',
 }
 const navigation = [
     {name: 'Home', href: '#', current: true},
@@ -16,7 +16,7 @@ const userNavigation = [
     {name: 'Your Profile', href: '#'},
 ]
 
-function classNames(...classes) {
+function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
 }
 
@@ -33,7 +33,7 @@ export default function Nav() {
                                     <span className="sr-only">Black Box Delta</span>
                                     <img
                                         className="h-12 w-auto"
-                                        src="public/img/bbd-logo.svg"
+                                        src="/img/bbd-logo.svg"
                                         alt="Black Box Delat"
                                     />
                                 </a>
@@ -49,7 +49,7 @@ export default function Nav() {
                                 {/*            className="relative flex rounded-full bg-gray-600 text-sm ring-2 ring-white ring-opacity-20 focus:outline-none focus:ring-opacity-100">*/}
                                 {/*            <span className="absolute -inset-1.5"/>*/}
                                 {/*            <span className="sr-only">Open user menu</span>*/}
-                                {/*            <img className="h-8 w-8 rounded-full" src="public/img/bbd-logo-main.svg"*/}
+                                {/*            <img className="h-8 w-8 rounded-full" src="/img/bbd-logo-main.svg"*/}
                                 {/*                 alt=""/>*/}
                                 {/*        </Menu.Button>*/}
                                 {/*    </div>*/}
@@ -195,7 +195,7 @@ export default function Nav() {
                                                 <div>
                                                     <img
                                                         className="h-8 w-auto"
-                                                        src="/public/img/bbd-logo-main.svg"
+                                                        src="/img/bbd-logo-main.svg"
                                                         alt="Black Box Delta"
                                                     />
                                                 </div>
@@ -230,7 +230,7 @@ export default function Nav() {
                                             <div className="flex items-center px-5">
                                                 <div className="flex-shrink-0">
                                                     <img className="h-10 w-10 rounded-full"
-                                                         src="public/img/bbd-logo-main.svg"
+                                                         src="/img/bbd-logo-main.svg"
                                                          alt=""/>
                                                 </div>
                                                 <div className="ml-3 min-w-0 flex-1">

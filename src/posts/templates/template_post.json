@@ -1,0 +1,46 @@
+{
+  "id": 1,
+  "symbol": "AAPL",
+  "logo": false,
+  "year": 2023,
+  "month": 9,
+  "day": 1,
+  "title": "",
+  "author": "",
+  "date": "",
+  "url": "",
+  "content": [
+    {
+      "section": "Overview",
+      "text": ""
+    },
+    {
+      "section": "Financials",
+      "text": ""
+    },
+    {
+      "section": "Portfolio",
+      "text": ""
+    },
+    {
+      "section": "Innovations",
+      "text": ""
+    },
+    {
+      "section": "Market",
+      "text": ""
+    },
+    {
+      "section": "Dividends",
+      "text": ""
+    },
+    {
+      "section": "Outlook",
+      "text": ""
+    },
+    {
+      "section": "Disclaimer",
+      "text": ""
+    }
+  ]
+}

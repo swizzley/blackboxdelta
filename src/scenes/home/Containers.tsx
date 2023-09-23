@@ -1,7 +1,7 @@
 import PostCard from "./PostCard";
 import React from "react";
 
-import {PostType} from "./Types";
+import {PostType} from "../../Types";
 
 interface PostProps {
     posts: PostType[];
@@ -16,9 +16,6 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                     {/* Left column */}
                     <div className="grid grid-cols-1 gap-4 lg:col-span-2">
                         <section aria-labelledby="section-1-title">
-                            <h2 className="sr-only" id="section-1-title">
-                                Section title
-                            </h2>
                             <div className="rounded-lg bg-white shadow">
                                 <div className="p-6 h-screen">
                                     {posts.map((post) => (

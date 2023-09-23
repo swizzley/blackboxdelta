@@ -1,39 +1,40 @@
-import React, { Fragment } from 'react'
-import { Menu, Transition } from '@headlessui/react'
-import { CodeBracketIcon, EllipsisVerticalIcon, FlagIcon, StarIcon } from '@heroicons/react/20/solid'
+import React, {Fragment} from 'react'
+import {Menu, Transition} from '@headlessui/react'
+import {CodeBracketIcon, EllipsisVerticalIcon, FlagIcon, StarIcon} from '@heroicons/react/20/solid'
+import {PostType} from "../../Types";
 
-function classNames(...classes) {
+function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
 }
-import {PostType} from "./Types";
 
 interface PostProps {
     post: PostType;
 }
 
 const PostCard: React.FC<PostProps> = ({ post }) => {
+    console.log("POSTCARD", post)
     if (!post) {
         return <></>
     }
     return (
         <div className="bg-white px-4 py-5 sm:px-6">
             <div className="flex space-x-3">
-                <a className="flex-shrink-0" href={`/post/${post.year}/${post.month}/${post.day}/${post.id}`}>
+                <a className="flex-shrink-0" href={post.url}>
                     <img
                         className="h-10 w-10 rounded-full"
-                        src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                        src={post.logo ? `logos/${post.id}` : "/img/bbd-logo.svg"}
                         alt=""
                     />
                 </a>
                 <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-gray-900">
-                        <a href="#" className="hover:underline">
-                            Chelsea Hagon
+                        <a href={post.url} className="hover:underline">
+                            {post.title}
                         </a>
                     </p>
                     <p className="text-sm text-gray-500">
-                        <a href="#" className="hover:underline">
-                            December 9 at 11:43 AM
+                        <a href={post.url} className="hover:underline">
+                            {post.date}
                         </a>
                     </p>
                 </div>
