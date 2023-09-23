@@ -1,18 +1,30 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Main from './scenes/home/Main';
-import {Post} from './scenes/home/Post';
-import posts from './posts/recent.json'
-import site from './posts/sitemap.json'
-import {PostType, Site} from "./Types";
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import {Main as Home} from './scenes/home/Main';
+import {Main as Post} from './scenes/post/Main';
+
+import {Site} from "./Types";
+import {useEffect, useState} from "react";
+import axios from 'axios'
+
 export default function App() {
-    const siteMap: Site[] = site;
-    const recent: PostType[] = posts;
-    console.log("SITEMAP", siteMap)
-    console.log("POSTS", recent)
+    const [siteMap, setSiteMap] = useState<Site[]>([]);
+
+    useEffect(() => {
+        const jsonFilePath = `/sitemap.json`;
+        axios.get(jsonFilePath)
+            .then((response) => {
+                console.log("RESP", response.data)
+                setSiteMap(response.data);
+            })
+            .catch((error) => {
+                console.error('Error loading JSON data:', error);
+            });
+    }, []);
+    
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Main posts={recent}/>} />
+                <Route path="/" element={<Home/>}/>
                 {siteMap.map((site) => (
                     <Route
                         key={site.id}

@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react';
 import {PostType} from "../../Types";
+import axios from 'axios'
 
-export function Post() {
+export function Main() {
     const pathname = window.location.pathname
     const path = pathname.split("/")
     const symbol = path[4]
@@ -21,15 +22,17 @@ export function Post() {
     });
 
     useEffect(() => {
-        import(/* @vite-ignore */`../../posts/${path[1]}/${path[2]}/${path[3]}/${symbol}.json`)
-            .then((module) => module.default)
-            .then((data) => {
-                setPost(data);
+        const jsonFilePath = `/posts/${path[1]}/${path[2]}/${path[3]}/${symbol}.json`;
+        axios.get(jsonFilePath)
+            .then((response) => {
+                console.log("RESP", response.data)
+                setPost(response.data);
             })
             .catch((error) => {
                 console.error('Error loading JSON data:', error);
             });
     }, []);
+
 
     console.log("POST:", post)
 
