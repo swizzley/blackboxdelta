@@ -2,28 +2,16 @@ import React from "react";
 import {PostType} from "../../Types";
 import Section from "../common/Section";
 import {Timeline} from "react-tradingview-embed";
-// import {TickerTape} from "react-tradingview-embed";
 
 interface PostProps {
     posts: PostType[];
 }
 
 const Containers: React.FC<PostProps> = ({posts}) => {
-    // const tickerSymbols = posts.map((post) => ({
-    //     proName: `${post.exchange}:${post.symbol}`,
-    //     title: post.symbol,
-    // }));
 
     return (
         <main className="-mt-24 pb-8">
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-
-                {/*<TickerTape widgetProps={*/}
-                {/*    {*/}
-                {/*        symbols: tickerSymbols,*/}
-                {/*        isTransparent: true*/}
-                {/*    }*/}
-                {/*}/>*/}
 
                 {/* Main 3 column grid */}
                 <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-8">
@@ -47,6 +35,7 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                             <div className="bg-white shadow">
                                 <div className="">
                                     <div className="container left-0 pb-24">
+
                                         <Timeline widgetProps={
                                             {
                                                 colorTheme: "light",

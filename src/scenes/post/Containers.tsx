@@ -1,14 +1,47 @@
-import React from "react";
+import {useEffect, useState} from "react";
 import {BlogPostSection, PostType} from "../../Types";
 import {AdvancedChart, FundamentalData, TechnicalAnalysis} from "react-tradingview-embed";
 import Disclaimer from "../common/Disclaimer";
+import axios from 'axios'
 
+export default function Containers() {
+    const pathname = window.location.pathname
+    const path = pathname.split("/")
+    const year = path[1]
+    const month = path[2]
+    const day = path[3]
+    const symbol = path[4]
 
-interface PostProps {
-    post: PostType;
-}
+    const [post, setPost] = useState<PostType>({
+        author: "",
+        content: [],
+        date: "",
+        day: 0,
+        exchange: "",
+        id: 0,
+        logo: false,
+        month: 0,
+        summary: "",
+        symbol: "",
+        title: "",
+        url: "",
+        year: 0
+    });
 
-const Containers: React.FC<PostProps> = ({post}) => {
+    useEffect(() => {
+        const jsonFilePath = `/posts/${year}/${month}/${day}/${symbol}.json`;
+        axios.get(jsonFilePath)
+            .then((response) => {
+                setPost(response.data);
+            })
+            .catch((error) => {
+                console.error('Error loading JSON data:', error);
+            });
+    }, []);
+
+    if (post.id <= 0) {
+        return <div/>
+    }
 
     return (
         <main className="-mt-24 pb-8">
@@ -38,7 +71,7 @@ const Containers: React.FC<PostProps> = ({post}) => {
                                         }/>
                                     </div>
                                     <div className={"container px-8 pt-8 font-serif"}>
-                                        {post.content.map((section:BlogPostSection, index) => (
+                                        {post.content.map((section: BlogPostSection, index) => (
                                             <div key={index}>
                                                 <span className="text-lg">{section.section}:</span>
                                                 <p className="text-sm pb-4">{section.text}</p>
@@ -88,4 +121,3 @@ const Containers: React.FC<PostProps> = ({post}) => {
         </main>
     )
 }
-export default Containers

@@ -36,7 +36,7 @@ export default function Nav() {
                                     <span className="sr-only">Black Box Delta</span>
                                     <img
                                         className="h-12 w-auto"
-                                        src="/img/bbd-logo.svg"
+                                        src="/img/bbd-logo-nav.svg"
                                         alt="Black Box Delat"
                                     />
                                 </a>
@@ -110,7 +110,7 @@ export default function Nav() {
                             <div className="absolute right-0 flex-shrink-0 lg:hidden">
                                 {/* Mobile menu button */}
                                 <Popover.Button
-                                    className="relative inline-flex items-center justify-center bg-transparent p-2 text-cyan-800 hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+                                    className="relative inline-flex items-center justify-center bg-transparent p-2 text-white hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                                     <span className="absolute -inset-0.5"/>
                                     <span className="sr-only">Open main menu</span>
                                     {open ? (
