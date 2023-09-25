@@ -1,7 +1,7 @@
-import PostCard from "./PostCard";
 import React from "react";
-
 import {PostType} from "../../Types";
+import Section from "../common/Section";
+import {Timeline}  from "react-tradingview-embed";
 
 interface PostProps {
     posts: PostType[];
@@ -17,10 +17,8 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                     <div className="grid grid-cols-1 gap-4 lg:col-span-2">
                         <section aria-labelledby="section-1-title">
                             <div className="rounded-lg bg-white shadow">
-                                <div className="p-6 h-screen">
-                                    {posts.map((post) => (
-                                        <PostCard key={post.id} post={post}/>
-                                    ))}
+                                <div className="w-full">
+                                    <Section posts={posts}/>
                                 </div>
                             </div>
                         </section>
@@ -30,10 +28,20 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                     <div className="grid grid-cols-1 gap-4">
                         <section aria-labelledby="section-2-title">
                             <h2 className="sr-only" id="section-2-title">
-                                Section title
+                                News
                             </h2>
                             <div className="rounded-lg bg-white shadow">
-                                <div className="p-6 h-screen">Tags & Categories</div>
+                                <div className="">
+                                    <div className="container left-0 pb-24">
+                                        <Timeline  widgetProps={
+                                            {
+                                                colorTheme: "light",
+                                                width: innerWidth < 800 ? innerWidth - 48 : 384,
+                                            }
+                                        } />;
+                                    </div>
+
+                                </div>
                             </div>
                         </section>
                     </div>

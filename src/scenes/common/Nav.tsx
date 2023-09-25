@@ -9,8 +9,11 @@ const user = {
     imageUrl: '/img/bbd-logo-main.svg',
 }
 const navigation = [
-    {name: 'Home', href: '#', current: true},
-    {name: 'Latest', href: '#', current: false},
+    {name: 'Latest Signals', href: '/', current: true},
+    {name: 'Stocks', href: '/stocks', current: false},
+    {name: 'Forex', href: 'forex', current: false},
+    {name: 'Crypto', href: 'crypto', current: false},
+    {name: 'Performance', href: 'perf', current: false},
 ]
 const userNavigation = [
     {name: 'Your Profile', href: '#'},
@@ -29,7 +32,7 @@ export default function Nav() {
                         <div className="relative flex items-center justify-center py-5 lg:justify-between">
                             {/* Logo */}
                             <div className="absolute left-0 flex-shrink-0 lg:static">
-                                <a href="#">
+                                <a href="/">
                                     <span className="sr-only">Black Box Delta</span>
                                     <img
                                         className="h-12 w-auto"
@@ -107,7 +110,7 @@ export default function Nav() {
                             <div className="absolute right-0 flex-shrink-0 lg:hidden">
                                 {/* Mobile menu button */}
                                 <Popover.Button
-                                    className="relative inline-flex items-center justify-center rounded-md bg-transparent p-2 text-indigo-200 hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+                                    className="relative inline-flex items-center justify-center rounded-md bg-transparent p-2 text-cyan-800 hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                                     <span className="absolute -inset-0.5"/>
                                     <span className="sr-only">Open main menu</span>
                                     {open ? (
@@ -127,7 +130,7 @@ export default function Nav() {
                                                 key={item.name}
                                                 href={item.href}
                                                 className={classNames(
-                                                    item.current ? 'text-white' : 'text-indigo-100',
+                                                    item.current ? 'text-white' : 'text-cyan-500',
                                                     'rounded-md bg-white bg-opacity-0 px-3 py-2 text-sm font-medium hover:bg-opacity-10'
                                                 )}
                                                 aria-current={item.current ? 'page' : undefined}
@@ -201,7 +204,7 @@ export default function Nav() {
                                                 </div>
                                                 <div className="-mr-2">
                                                     <Popover.Button
-                                                        className="relative inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                                                        className="relative inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan-500">
                                                         <span className="absolute -inset-0.5"/>
                                                         <span className="sr-only">Close menu</span>
                                                         <XMarkIcon className="h-6 w-6" aria-hidden="true"/>
@@ -215,7 +218,7 @@ export default function Nav() {
                                                         key={item.name}
                                                         href={item.href}
                                                         className={classNames(
-                                                            item.current ? 'text-white' : 'text-indigo-100',
+                                                            item.current ? 'text-white' : 'text-cyan-500',
                                                             "block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"
                                                         )}
                                                         aria-current={item.current ? 'page' : undefined}

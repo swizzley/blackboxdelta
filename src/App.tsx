@@ -5,6 +5,7 @@ import {Main as Post} from './scenes/post/Main';
 import {Site} from "./Types";
 import {useEffect, useState} from "react";
 import axios from 'axios'
+import Error404 from "./scenes/common/404";
 
 export default function App() {
     const [siteMap, setSiteMap] = useState<Site[]>([]);
@@ -20,7 +21,7 @@ export default function App() {
                 console.error('Error loading JSON data:', error);
             });
     }, []);
-    
+
     return (
         <Router>
             <Routes>
@@ -32,6 +33,7 @@ export default function App() {
                         element={<Post/>}
                     />
                 ))}
+                <Route path="*" element={<Error404/>}/>
             </Routes>
         </Router>
     );

@@ -1,14 +1,7 @@
 {
-  "id": 1,
-  "symbol": "AAPL",
-  "logo": false,
-  "year": 2023,
-  "month": 9,
-  "day": 1,
   "title": "",
-  "author": "",
+  "summary": "",
   "date": "",
-  "url": "",
   "content": [
     {
       "section": "Overview",
@@ -36,10 +29,6 @@
     },
     {
       "section": "Outlook",
-      "text": ""
-    },
-    {
-      "section": "Disclaimer",
       "text": ""
     }
   ]

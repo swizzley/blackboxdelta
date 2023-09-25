@@ -16,11 +16,13 @@ export interface Site {
 export interface PostType {
     id: number;
     symbol: string;
+    exchange: string;
     logo: boolean;
     year: number;
     month: number;
     day: number;
     title: string;
+    summary: string;
     author: string;
     date: string;
     url: string;

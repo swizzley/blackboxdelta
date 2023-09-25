@@ -2,7 +2,7 @@
 
 export default function Foot() {
     return (
-        <footer className="bg-gray-600">
+        <footer className="bg-gray-600 fixed bottom-0 w-full">
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
                 <div className="border-t border-gray-300 py-8 text-center text-sm text-gray-300 sm:text-left">
                     <span className="block sm:inline">&copy; 2023 Black Box Delta LLC</span>{' '}
@@ -10,5 +10,5 @@ export default function Foot() {
                 </div>
             </div>
         </footer>
-    )
+    );
 }
