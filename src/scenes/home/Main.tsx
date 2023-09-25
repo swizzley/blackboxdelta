@@ -2,7 +2,7 @@ import Nav from "../common/Nav";
 import Foot from "../common/Foot";
 import Containers from "./Containers";
 import {PostType} from "../../Types";
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import axios from 'axios'
 
 

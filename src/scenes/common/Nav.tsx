@@ -97,7 +97,7 @@ export default function Nav() {
                                         </div>
                                         <input
                                             id="desktop-search"
-                                            className="block w-full rounded-md border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
+                                            className="block w-full border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
                                             placeholder="Search"
                                             type="search"
                                             name="search"
@@ -110,7 +110,7 @@ export default function Nav() {
                             <div className="absolute right-0 flex-shrink-0 lg:hidden">
                                 {/* Mobile menu button */}
                                 <Popover.Button
-                                    className="relative inline-flex items-center justify-center rounded-md bg-transparent p-2 text-cyan-800 hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+                                    className="relative inline-flex items-center justify-center bg-transparent p-2 text-cyan-800 hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                                     <span className="absolute -inset-0.5"/>
                                     <span className="sr-only">Open main menu</span>
                                     {open ? (
@@ -131,7 +131,7 @@ export default function Nav() {
                                                 href={item.href}
                                                 className={classNames(
                                                     item.current ? 'text-white' : 'text-cyan-500',
-                                                    'rounded-md bg-white bg-opacity-0 px-3 py-2 text-sm font-medium hover:bg-opacity-10'
+                                                    'bg-white bg-opacity-0 px-3 py-2 text-sm font-medium hover:bg-opacity-10'
                                                 )}
                                                 aria-current={item.current ? 'page' : undefined}
                                             >
@@ -152,7 +152,7 @@ export default function Nav() {
                                             </div>
                                             <input
                                                 id="mobile-search"
-                                                className="block w-full rounded-md border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
+                                                className="block w-full border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
                                                 placeholder="Search"
                                                 type="search"
                                                 name="search"

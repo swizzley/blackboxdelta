@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function Disclaimer() {
     return (
         <div className="font-serif pb-24 px-8 pt-4">

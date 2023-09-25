@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {PostType} from "../../Types";
 import axios from 'axios'
 import Nav from "../common/Nav";
@@ -18,9 +18,11 @@ export function Main() {
         content: [],
         date: "",
         day: 0,
+        exchange: "",
         id: 0,
         logo: false,
         month: 0,
+        summary: "",
         symbol: "",
         title: "",
         url: "",
@@ -37,6 +39,10 @@ export function Main() {
                 console.error('Error loading JSON data:', error);
             });
     }, []);
+
+    if (!post) {
+        return <div/>
+    }
 
     return (
         <div>

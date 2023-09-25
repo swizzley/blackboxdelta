@@ -1,12 +1,14 @@
 {
   "id": 1,
   "symbol": "AAPL",
+  "exchange": "NASDAQ",
   "logo": false,
   "year": 2023,
   "month": 9,
   "day": 21,
   "title": "Going Long on Apple Inc. (AAPL): A Strategic Investment Decision",
-  "author": "Your Name",
+  "summary": "TODO",
+  "author": "Swizzley Bartfast",
   "date": "September 21, 2023",
   "url": "/posts/2023/09/21/AAPL",
   "content": [
@@ -37,10 +39,6 @@
     {
       "section": "Outlook",
       "text": "In conclusion, the decision to go long on Apple Inc. (AAPL) is underpinned by its financial strength, diversified product portfolio, innovation-centric approach, global market presence, shareholder-friendly policies, and promising outlook. However, prospective investors are advised to conduct thorough research and align their investment objectives with their risk tolerance."
-    },
-    {
-      "section": "Disclaimer",
-      "text": "This content is for informational purposes only and should not be considered financial advice. Investing in stocks carries inherent risks, and individuals should consult with a qualified financial advisor before making investment decisions."
     }
   ]
 }

@@ -1,7 +1,6 @@
 import React from "react";
 import {BlogPostSection, PostType} from "../../Types";
 import {AdvancedChart, FundamentalData, TechnicalAnalysis} from "react-tradingview-embed";
-import section from "../common/Section";
 import Disclaimer from "../common/Disclaimer";
 
 
@@ -10,9 +9,6 @@ interface PostProps {
 }
 
 const Containers: React.FC<PostProps> = ({post}) => {
-
-    const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    console.log(screenWidth)
 
     return (
         <main className="-mt-24 pb-8">
@@ -37,9 +33,7 @@ const Containers: React.FC<PostProps> = ({post}) => {
                                                 withdateranges: true,
                                                 allow_symbol_change: false,
                                                 enable_publishing: false,
-                                                container_id: "tradingview_a8429",
-                                                style: 1,
-                                                timezone: "Etc/UTC"
+                                                container_id: "tradingview_a8429"
                                             }
                                         }/>
                                     </div>
