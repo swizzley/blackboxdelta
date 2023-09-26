@@ -32,7 +32,7 @@ export default function Containers() {
         const jsonFilePath = `/posts/${year}/${month}/${day}/${symbol}.json`;
         axios.get(jsonFilePath)
             .then((response) => {
-                setPost(response.data);
+                setPost(JSON.parse(response.data));
             })
             .catch((error) => {
                 console.error('Error loading JSON data:', error);
@@ -73,7 +73,7 @@ export default function Containers() {
                                     <div className={"container px-8 pt-8 font-serif"}>
                                         {post.content.map((section: BlogPostSection, index) => (
                                             <div key={index}>
-                                                <span className="text-lg">{section.section}:</span>
+                                                <span className="text-lg">{section.section}</span>
                                                 <p className="text-sm pb-4">{section.text}</p>
                                             </div>
                                         ))}

@@ -12,21 +12,25 @@ export default function App() {
 
     useEffect(() => {
         const jsonFilePath = `/sitemap.json`;
-        axios.get(jsonFilePath)
+        axios.get(jsonFilePath,{})
             .then((response) => {
                 console.log("RESP", response.data)
-                setSiteMap(response.data);
+                setSiteMap(JSON.parse(response.data));
             })
             .catch((error) => {
                 console.error('Error loading JSON data:', error);
             });
     }, []);
 
+    if (siteMap === null) {
+        return null;
+    }
+
     return (
         <Router>
             <Routes>
                 <Route path="/" element={<Home/>}/>
-                {siteMap.map((site) => (
+                {siteMap.map((site: Site, index: number) => (
                     <Route
                         key={site.id}
                         path={site.url}

@@ -46,7 +46,7 @@ const Section: React.FC<PostProps> = ({posts}) => {
                                                 {post.title}
                                             </a>
                                         </h3>
-                                        <p className="mt-5 text-xl font-light leading-6 text-gray-600">{post.content[0].text}</p>
+                                        <p className="mt-5 text-xl font-light leading-6 text-gray-600">{post.summary}</p>
                                     </div>
                                 </div>
                             </article>
