@@ -1,9 +1,10 @@
 import {Bars3Icon, XMarkIcon} from "@heroicons/react/24/outline";
-import {Menu, Popover, Transition} from "@headlessui/react";
+import {Popover, Transition} from "@headlessui/react";
 import {Fragment} from "react";
 import {MagnifyingGlassIcon} from "@heroicons/react/20/solid";
 import {useTheme} from '../../context/Theme';
-import {FormControlLabel, Switch} from "@mui/material";
+import {Switch} from "@mui/material";
+import {styled} from '@mui/material/styles';
 
 const user = {
     name: 'Swizzley',
@@ -17,9 +18,6 @@ const navigation = [
     {name: 'Crypto', href: 'crypto', current: false},
     {name: 'Performance', href: 'perf', current: false},
 ]
-// const userNavigation = [
-//     {name: 'Your Profile', href: '#'},
-// ]
 
 function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
@@ -28,9 +26,55 @@ function classNames(...classes: string[]) {
 export default function Nav() {
 
     const {isDarkMode, toggleDarkMode} = useTheme();
-
+    const MaterialUISwitch = styled(Switch)(({}) => ({
+        width: 62,
+        height: 34,
+        padding: 7,
+        '& .MuiSwitch-switchBase': {
+            margin: 1,
+            padding: 0,
+            transform: 'translateX(6px)',
+            '&.Mui-checked': {
+                color: '#fff',
+                transform: 'translateX(22px)',
+                '& .MuiSwitch-thumb:before': {
+                    backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
+                        '#fff',
+                    )}" d="M4.2 2.5l-.7 1.8-1.8.7 1.8.7.7 1.8.6-1.8L6.7 5l-1.9-.7-.6-1.8zm15 8.3a6.7 6.7 0 11-6.6-6.6 5.8 5.8 0 006.6 6.6z"/></svg>')`,
+                },
+                '& + .MuiSwitch-track': {
+                    opacity: 1,
+                    backgroundColor: isDarkMode ? '#8796A5' : '#aab4be',
+                },
+            },
+        },
+        '& .MuiSwitch-thumb': {
+            backgroundColor: isDarkMode ? '#003892' : '#001e3c',
+            width: 32,
+            height: 32,
+            '&:before': {
+                content: "''",
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                left: 0,
+                top: 0,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 20 20"><path fill="${encodeURIComponent(
+                    '#fff',
+                )}" d="M9.305 1.667V3.75h1.389V1.667h-1.39zm-4.707 1.95l-.982.982L5.09 6.072l.982-.982-1.473-1.473zm10.802 0L13.927 5.09l.982.982 1.473-1.473-.982-.982zM10 5.139a4.872 4.872 0 00-4.862 4.86A4.872 4.872 0 0010 14.862 4.872 4.872 0 0014.86 10 4.872 4.872 0 0010 5.139zm0 1.389A3.462 3.462 0 0113.471 10a3.462 3.462 0 01-3.473 3.472A3.462 3.462 0 016.527 10 3.462 3.462 0 0110 6.528zM1.665 9.305v1.39h2.083v-1.39H1.666zm14.583 0v1.39h2.084v-1.39h-2.084zM5.09 13.928L3.616 15.4l.982.982 1.473-1.473-.982-.982zm9.82 0l-.982.982 1.473 1.473.982-.982-1.473-1.473zM9.305 16.25v2.083h1.389V16.25h-1.39z"/></svg>')`,
+            },
+        },
+        '& .MuiSwitch-track': {
+            opacity: 1,
+            backgroundColor: isDarkMode ? '#8796A5' : '#aab4be',
+            borderRadius: 20 / 2,
+        },
+    }));
     return (
-        <Popover as="header" className={`${isDarkMode ? 'bg-slate-900' : 'bg-gray-500'} transition-colors duration-500 pb-24`}>
+        <Popover as="header"
+                 className={`${isDarkMode ? 'bg-slate-900' : 'bg-gray-500'} transition-colors duration-500 pb-24`}>
             {({open}) => (
                 <>
                     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -49,50 +93,37 @@ export default function Nav() {
 
                             {/* Right section on desktop */}
                             <div className="hidden lg:ml-4 lg:flex lg:items-center lg:pr-0.5">
+                                <div
+                                    className={`${isDarkMode ? 'text-white' : 'text-black'} transition-colors duration-500 bg-transparent`}>
+
+                                    <MaterialUISwitch onChange={toggleDarkMode}
+                                                      checked={isDarkMode}
+
+                                    />
+
+                                </div>
                                 {/* Profile dropdown */}
-                                <Menu as="div" className="relative ml-4 flex-shrink-0">
-                                    <div>
-                                        <Menu.Button
-                                            className="relative flex rounded-full bg-gray-600 text-sm ring-2 ring-white ring-opacity-20 focus:outline-none focus:ring-opacity-100">
-                                            <span className="absolute -inset-1.5"/>
-                                            <span className="sr-only">Open user menu</span>
-                                            <img className="h-8 w-8 rounded-full" src="/img/bbd-logo-main.svg"
-                                                 alt=""/>
-                                        </Menu.Button>
-                                    </div>
-                                    <Transition
-                                        as={Fragment}
-                                        leave="transition ease-in duration-75"
-                                        leaveFrom="transform opacity-100 scale-100"
-                                        leaveTo="transform opacity-0 scale-95"
-                                    >
-                                        <Menu.Items
-                                            className="absolute -right-2 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                            {/*{userNavigation.map((item) => (*/}
-                                            {/*    <Menu.Item key={item.name}>*/}
-                                            {/*        {({active}) => (*/}
-                                            {/*            <a*/}
-                                            {/*                href={item.href}*/}
-                                            {/*                className={classNames(*/}
-                                            {/*                    active ? 'bg-gray-100' : '',*/}
-                                            {/*                    'block px-4 py-2 text-sm text-gray-700'*/}
-                                            {/*                )}*/}
-                                            {/*            >*/}
-                                            {/*                {item.name}*/}
-                                            {/*            </a>*/}
-                                            {/*        )}*/}
-                                            {/*    </Menu.Item>*/}
-                                            {/*))}*/}
-                                            <FormControlLabel
-                                                value="start"
-                                                className={`${isDarkMode ? 'text-black' : 'bg-light'} transition-colors duration-500`}
-                                                control={<Switch color="primary" onChange={toggleDarkMode} checked={isDarkMode}/>}
-                                                label={`${isDarkMode ? "Light Mode" : "Dark Mode"}`}
-                                                labelPlacement="start"
-                                            />
-                                        </Menu.Items>
-                                    </Transition>
-                                </Menu>
+                                {/*<Menu as="div" className="relative ml-4 flex-shrink-0">*/}
+                                {/*    <div>*/}
+                                {/*        <Menu.Button*/}
+                                {/*            className="relative flex rounded-full bg-gray-600 text-sm ring-2 ring-white ring-opacity-20 focus:outline-none focus:ring-opacity-100">*/}
+                                {/*            <span className="absolute -inset-1.5"/>*/}
+                                {/*            <span className="sr-only">Open user menu</span>*/}
+                                {/*            <img className="h-8 w-8 rounded-full" src="/img/bbd-logo-main.svg"*/}
+                                {/*                 alt=""/>*/}
+                                {/*        </Menu.Button>*/}
+                                {/*    </div>*/}
+                                {/*    <Transition*/}
+                                {/*        as={Fragment}*/}
+                                {/*        leave="transition ease-in duration-75"*/}
+                                {/*        leaveFrom="transform opacity-100 scale-100"*/}
+                                {/*        leaveTo="transform opacity-0 scale-95"*/}
+                                {/*    >*/}
+                                {/*        <Menu.Items*/}
+                                {/*            className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 absolute -right-2 z-10 mt-2 w-48 origin-top-right rounded-md py-2 ring-1 ring-black ring-opacity-5 focus:outline-none`}>*/}
+                                {/*        </Menu.Items>*/}
+                                {/*    </Transition>*/}
+                                {/*</Menu>*/}
                             </div>
 
                             {/* Search */}
@@ -254,24 +285,13 @@ export default function Nav() {
                                                         className="truncate text-sm font-medium text-gray-500">{user.email}</div>
                                                 </div>
                                             </div>
-                                            <FormControlLabel
-                                                className={`${isDarkMode ? '' : 'text-white'} transition-colors duration-500`}
-                                                value="start"
-                                                control={<Switch color="primary" onChange={toggleDarkMode} checked={isDarkMode}/>}
-                                                label={`${isDarkMode ? "Light Mode" : "Dark Mode"}`}
-                                                labelPlacement="start"
-                                            />
-                                            {/*<div className="mt-3 space-y-1 px-2">*/}
-                                            {/*    {userNavigation.map((item) => (*/}
-                                            {/*        <a*/}
-                                            {/*            key={item.name}*/}
-                                            {/*            href={item.href}*/}
-                                            {/*            className="block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"*/}
-                                            {/*        >*/}
-                                            {/*            {item.name}*/}
-                                            {/*        </a>*/}
-                                            {/*    ))}*/}
-                                            {/*</div>*/}
+                                            <div
+                                                className={`${isDarkMode ? 'text-white' : 'text-black'} transition-colors duration-500 bg-transparent`}>
+
+                                                <MaterialUISwitch onChange={toggleDarkMode}
+                                                                  checked={isDarkMode}/>
+
+                                            </div>
                                         </div>
                                     </div>
                                 </Popover.Panel>
