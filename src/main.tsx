@@ -15,6 +15,5 @@ if (rootElement) {
         </React.StrictMode>
     );
 } else {
-    // Handle the case where 'root' element is not found, for example:
     console.error("The 'root' element with ID 'root' was not found in the document.");
 }

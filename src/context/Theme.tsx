@@ -17,7 +17,11 @@ export const useTheme = (): ThemeContextProps => {
 };
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        // Try to get the theme preference from local storage
+        const storedTheme = localStorage.getItem('theme');
+        return storedTheme === 'dark';
+    });
 
     const toggleDarkMode = () => {
         setIsDarkMode((prevMode) => !prevMode);
@@ -25,10 +29,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     useEffect(() => {
         if (isDarkMode) {
-            document.documentElement.classList.add('bg-night');
+            document.documentElement.classList.add('bg-gray-800');
         } else {
-            document.documentElement.classList.remove('bg-night');
+            document.documentElement.classList.remove('bg-gray-800');
         }
+        // Store the theme preference in local storage
+        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     }, [isDarkMode]);
 
     return (

@@ -12,14 +12,14 @@ const Section: React.FC<PostProps> = ({posts}) => {
     const { isDarkMode } = useTheme();
 
     return (
-        <div  className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 sm:py-32`}>
-            <div className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 -mt-48 mx-auto max-w-7xl px-6 lg:px-8`}>
+        <div  className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 sm:py-32 rounded-lg`}>
+            <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 -mt-48 mx-auto max-w-7xl px-6 lg:px-8`}>
                 <div className="mx-auto max-w-2xl lg:max-w-4xl">
-                    <div className="mt-16 space-y-20 lg:mt-20 lg:space-y-20">
+                    <div className="mt-16 lg:mt-20 space-y-4">
                         {posts.map((post) => (
-                            <article key={post.id} className="relative isolate flex flex-col gap-4 lg:flex-row">
+                            <article key={post.id} className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} relative isolate flex flex-col lg:flex-row p-4 rounded-lg`}>
                                 <div>
-                                    <div className={"container mx-auto left-0 -ml-6"}>
+                                    <div className={"container mx-auto left-0 p-4"}>
                                         <SymbolInfo widgetProps={
                                             {
                                                 symbol: `${post.exchange}:${post.symbol}`,

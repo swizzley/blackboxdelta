@@ -1,8 +1,9 @@
 import {Bars3Icon, XMarkIcon} from "@heroicons/react/24/outline";
-import {Popover, Transition} from "@headlessui/react";
+import {Menu, Popover, Transition} from "@headlessui/react";
 import {Fragment} from "react";
 import {MagnifyingGlassIcon} from "@heroicons/react/20/solid";
-import { useTheme } from '../../context/Theme';
+import {useTheme} from '../../context/Theme';
+import {FormControlLabel, Switch} from "@mui/material";
 
 const user = {
     name: 'Swizzley',
@@ -16,9 +17,9 @@ const navigation = [
     {name: 'Crypto', href: 'crypto', current: false},
     {name: 'Performance', href: 'perf', current: false},
 ]
-const userNavigation = [
-    {name: 'Your Profile', href: '#'},
-]
+// const userNavigation = [
+//     {name: 'Your Profile', href: '#'},
+// ]
 
 function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
@@ -26,10 +27,10 @@ function classNames(...classes: string[]) {
 
 export default function Nav() {
 
-    const { isDarkMode, toggleDarkMode } = useTheme();
+    const {isDarkMode, toggleDarkMode} = useTheme();
 
     return (
-        <Popover as="header" className={`${isDarkMode ? 'bg-dark' : 'bg-light'}} transition-colors duration-500 pb-24`}>
+        <Popover as="header" className={`${isDarkMode ? 'bg-slate-900' : 'bg-gray-500'} transition-colors duration-500 pb-24`}>
             {({open}) => (
                 <>
                     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -41,75 +42,73 @@ export default function Nav() {
                                     <img
                                         className="h-12 w-auto"
                                         src="/img/bbd-logo-nav.svg"
-                                        alt="Black Box Delat"
+                                        alt="Black Box Delta"
                                     />
                                 </a>
                             </div>
 
                             {/* Right section on desktop */}
                             <div className="hidden lg:ml-4 lg:flex lg:items-center lg:pr-0.5">
-                                <div className={`bg-${isDarkMode ? 'black' : 'white'} text-${isDarkMode ? 'white' : 'black'} transition-colors duration-500`}>
-                                    <button
-                                        className={`p-2 m-4 rounded-full border-2 border-${isDarkMode ? 'white' : 'black'} bg-${isDarkMode ? 'black' : 'white'} text-${isDarkMode ? 'white' : 'black'} hover:bg-${isDarkMode ? 'white' : 'black'} hover:text-${isDarkMode ? 'black' : 'white'}`}
-                                        onClick={toggleDarkMode}
-                                    >
-                                        {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                                    </button>
-                                    {/* Your UI components go here */}
-                                </div>
                                 {/* Profile dropdown */}
-                                {/*<Menu as="div" className="relative ml-4 flex-shrink-0">*/}
-                                {/*    <div>*/}
-                                {/*        <Menu.Button*/}
-                                {/*            className="relative flex rounded-full bg-gray-600 text-sm ring-2 ring-white ring-opacity-20 focus:outline-none focus:ring-opacity-100">*/}
-                                {/*            <span className="absolute -inset-1.5"/>*/}
-                                {/*            <span className="sr-only">Open user menu</span>*/}
-                                {/*            <img className="h-8 w-8 rounded-full" src="/img/bbd-logo-main.svg"*/}
-                                {/*                 alt=""/>*/}
-                                {/*        </Menu.Button>*/}
-                                {/*    </div>*/}
-                                {/*    <Transition*/}
-                                {/*        as={Fragment}*/}
-                                {/*        leave="transition ease-in duration-75"*/}
-                                {/*        leaveFrom="transform opacity-100 scale-100"*/}
-                                {/*        leaveTo="transform opacity-0 scale-95"*/}
-                                {/*    >*/}
-                                {/*        <Menu.Items*/}
-                                {/*            className="absolute -right-2 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">*/}
-                                {/*            {userNavigation.map((item) => (*/}
-                                {/*                <Menu.Item key={item.name}>*/}
-                                {/*                    {({active}) => (*/}
-                                {/*                        <a*/}
-                                {/*                            href={item.href}*/}
-                                {/*                            className={classNames(*/}
-                                {/*                                active ? 'bg-gray-100' : '',*/}
-                                {/*                                'block px-4 py-2 text-sm text-gray-700'*/}
-                                {/*                            )}*/}
-                                {/*                        >*/}
-                                {/*                            {item.name}*/}
-                                {/*                        </a>*/}
-                                {/*                    )}*/}
-                                {/*                </Menu.Item>*/}
-                                {/*            ))}*/}
-                                {/*        </Menu.Items>*/}
-                                {/*    </Transition>*/}
-                                {/*</Menu>*/}
+                                <Menu as="div" className="relative ml-4 flex-shrink-0">
+                                    <div>
+                                        <Menu.Button
+                                            className="relative flex rounded-full bg-gray-600 text-sm ring-2 ring-white ring-opacity-20 focus:outline-none focus:ring-opacity-100">
+                                            <span className="absolute -inset-1.5"/>
+                                            <span className="sr-only">Open user menu</span>
+                                            <img className="h-8 w-8 rounded-full" src="/img/bbd-logo-main.svg"
+                                                 alt=""/>
+                                        </Menu.Button>
+                                    </div>
+                                    <Transition
+                                        as={Fragment}
+                                        leave="transition ease-in duration-75"
+                                        leaveFrom="transform opacity-100 scale-100"
+                                        leaveTo="transform opacity-0 scale-95"
+                                    >
+                                        <Menu.Items
+                                            className="absolute -right-2 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                            {/*{userNavigation.map((item) => (*/}
+                                            {/*    <Menu.Item key={item.name}>*/}
+                                            {/*        {({active}) => (*/}
+                                            {/*            <a*/}
+                                            {/*                href={item.href}*/}
+                                            {/*                className={classNames(*/}
+                                            {/*                    active ? 'bg-gray-100' : '',*/}
+                                            {/*                    'block px-4 py-2 text-sm text-gray-700'*/}
+                                            {/*                )}*/}
+                                            {/*            >*/}
+                                            {/*                {item.name}*/}
+                                            {/*            </a>*/}
+                                            {/*        )}*/}
+                                            {/*    </Menu.Item>*/}
+                                            {/*))}*/}
+                                            <FormControlLabel
+                                                value="start"
+                                                className={`${isDarkMode ? 'text-black' : 'bg-light'} transition-colors duration-500`}
+                                                control={<Switch color="primary" onChange={toggleDarkMode} checked={isDarkMode}/>}
+                                                label={`${isDarkMode ? "Light Mode" : "Dark Mode"}`}
+                                                labelPlacement="start"
+                                            />
+                                        </Menu.Items>
+                                    </Transition>
+                                </Menu>
                             </div>
 
                             {/* Search */}
-                            <div className="min-w-0 flex-1 px-12 lg:hidden">
-                                <div className="mx-auto w-full max-w-xs">
+                            <div className="min-w-0 flex-1 px-12 lg:hidden rounded-lg">
+                                <div className="mx-auto w-full max-w-xs rounded-lg">
                                     <label htmlFor="desktop-search" className="sr-only">
                                         Search
                                     </label>
-                                    <div className="relative text-white focus-within:text-gray-600">
+                                    <div className="rounded-lg relative text-white focus-within:text-gray-600">
                                         <div
-                                            className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                            className="rounded-lg pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                             <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true"/>
                                         </div>
                                         <input
                                             id="desktop-search"
-                                            className="block w-full border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
+                                            className="rounded-lg block w-full border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
                                             placeholder="Search"
                                             type="search"
                                             name="search"
@@ -153,18 +152,18 @@ export default function Nav() {
                                     </nav>
                                 </div>
                                 <div>
-                                    <div className="mx-auto w-full max-w-md">
+                                    <div className="mx-auto w-full max-w-md rounded-lg">
                                         <label htmlFor="mobile-search" className="sr-only">
                                             Search
                                         </label>
-                                        <div className="relative text-white focus-within:text-gray-600">
+                                        <div className="relative text-white focus-within:text-gray-600 rounded-lg">
                                             <div
-                                                className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                                className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 rounded-lg">
                                                 <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true"/>
                                             </div>
                                             <input
                                                 id="mobile-search"
-                                                className="block w-full border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
+                                                className="rounded-lg block w-full border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
                                                 placeholder="Search"
                                                 type="search"
                                                 name="search"
@@ -255,17 +254,24 @@ export default function Nav() {
                                                         className="truncate text-sm font-medium text-gray-500">{user.email}</div>
                                                 </div>
                                             </div>
-                                            <div className="mt-3 space-y-1 px-2">
-                                                {userNavigation.map((item) => (
-                                                    <a
-                                                        key={item.name}
-                                                        href={item.href}
-                                                        className="block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"
-                                                    >
-                                                        {item.name}
-                                                    </a>
-                                                ))}
-                                            </div>
+                                            <FormControlLabel
+                                                className={`${isDarkMode ? '' : 'text-white'} transition-colors duration-500`}
+                                                value="start"
+                                                control={<Switch color="primary" onChange={toggleDarkMode} checked={isDarkMode}/>}
+                                                label={`${isDarkMode ? "Light Mode" : "Dark Mode"}`}
+                                                labelPlacement="start"
+                                            />
+                                            {/*<div className="mt-3 space-y-1 px-2">*/}
+                                            {/*    {userNavigation.map((item) => (*/}
+                                            {/*        <a*/}
+                                            {/*            key={item.name}*/}
+                                            {/*            href={item.href}*/}
+                                            {/*            className="block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"*/}
+                                            {/*        >*/}
+                                            {/*            {item.name}*/}
+                                            {/*        </a>*/}
+                                            {/*    ))}*/}
+                                            {/*</div>*/}
                                         </div>
                                     </div>
                                 </Popover.Panel>
