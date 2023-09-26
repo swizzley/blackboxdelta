@@ -1,13 +1,16 @@
 import React from "react";
-import {PostType} from "../../Types";
+import {PostType} from '../../context/Types';
 import Section from "../common/Section";
 import {Timeline} from "react-tradingview-embed";
+import {useTheme} from "../../context/Theme";
 
 interface PostProps {
     posts: PostType[];
 }
 
 const Containers: React.FC<PostProps> = ({posts}) => {
+
+    const { isDarkMode } = useTheme();
 
     return (
         <main className="-mt-24 pb-8">
@@ -18,7 +21,7 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                     {/* Left column */}
                     <div className="grid grid-cols-1 gap-4 lg:col-span-2">
                         <section aria-labelledby="section-1-title">
-                            <div className="bg-white shadow">
+                            <div className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 shadow`}>
                                 <div className="w-full">
                                     <Section posts={posts}/>
                                 </div>
@@ -32,13 +35,13 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                             <h2 className="sr-only" id="section-2-title">
                                 News
                             </h2>
-                            <div className="bg-white shadow">
+                            <div className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 shadow`}>
                                 <div className="">
                                     <div className="container left-0 pb-24">
 
                                         <Timeline widgetProps={
                                             {
-                                                colorTheme: "light",
+                                                colorTheme: isDarkMode ? 'dark' : 'light',
                                                 width: innerWidth < 800 ? innerWidth - 48 : 384,
                                             }
                                         }/>

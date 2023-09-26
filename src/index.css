@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.bg-night {
+    @apply bg-gray-800
+}
+
+.bg-dark {
+    @apply bg-gray-800 text-zinc-50;
+}
+
+.bg-light {
+    @apply bg-gray-600 text-white;
+}

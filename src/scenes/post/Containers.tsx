@@ -1,10 +1,13 @@
 import {useEffect, useState} from "react";
-import {BlogPostSection, PostType} from "../../Types";
+import {BlogPostSection, PostType} from "../../context/Types";
 import {AdvancedChart, FundamentalData, TechnicalAnalysis} from "react-tradingview-embed";
 import Disclaimer from "../common/Disclaimer";
 import axios from 'axios'
+import {useTheme} from "../../context/Theme";
 
 export default function Containers() {
+    const { isDarkMode } = useTheme();
+
     const pathname = window.location.pathname
     const path = pathname.split("/")
     const year = path[1]
@@ -32,7 +35,7 @@ export default function Containers() {
         const jsonFilePath = `/posts/${year}/${month}/${day}/${symbol}.json`;
         axios.get(jsonFilePath)
             .then((response) => {
-                setPost(JSON.parse(response.data));
+                setPost(response.data);
             })
             .catch((error) => {
                 console.error('Error loading JSON data:', error);
@@ -51,13 +54,13 @@ export default function Containers() {
                     {/* Left column */}
                     <div className="grid grid-cols-1 gap-4 lg:col-span-2">
                         <section aria-labelledby="section-1-title">
-                            <div className="rounded-lg bg-white shadow">
+                            <div className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 shadow`}>
                                 <div className="">
                                     <div className={"container mx-auto left-0"}>
                                         <AdvancedChart widgetProps={
                                             {
                                                 symbol: `${post.exchange}:${post.symbol}`,
-                                                theme: "light",
+                                                theme: isDarkMode ? "dark" : "light",
                                                 hide_top_toolbar: true,
                                                 height: 450,
                                                 interval: "D",
@@ -96,7 +99,7 @@ export default function Containers() {
                                         <TechnicalAnalysis widgetProps={
                                             {
                                                 symbol: `${post.exchange}:${post.symbol}`,
-                                                colorTheme: "light",
+                                                colorTheme: isDarkMode ? "dark" : "light",
                                                 width: innerWidth < 800 ? innerWidth - 48 : 385,
                                                 interval: "1D"
                                             }
@@ -107,7 +110,7 @@ export default function Containers() {
                                             {
                                                 symbol: `${post.exchange}:${post.symbol}`,
                                                 width: innerWidth < 800 ? innerWidth - 48 : 385,
-                                                colorTheme: 'light',
+                                                colorTheme: isDarkMode ? "dark" : "light",
                                                 height: 777
                                             }
                                         }/>

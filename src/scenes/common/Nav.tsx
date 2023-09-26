@@ -1,7 +1,8 @@
 import {Bars3Icon, XMarkIcon} from "@heroicons/react/24/outline";
 import {Popover, Transition} from "@headlessui/react";
-import {Fragment} from "react";
+import {Fragment, useState} from "react";
 import {MagnifyingGlassIcon} from "@heroicons/react/20/solid";
+import { useTheme } from '../../context/Theme';
 
 const user = {
     name: 'Swizzley',
@@ -24,8 +25,11 @@ function classNames(...classes: string[]) {
 }
 
 export default function Nav() {
+
+    const { isDarkMode, toggleDarkMode } = useTheme();
+
     return (
-        <Popover as="header" className="bg-gray-600 pb-24">
+        <Popover as="header" className={`${isDarkMode ? 'bg-dark' : 'bg-light'}} transition-colors duration-500 pb-24`}>
             {({open}) => (
                 <>
                     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -44,7 +48,15 @@ export default function Nav() {
 
                             {/* Right section on desktop */}
                             <div className="hidden lg:ml-4 lg:flex lg:items-center lg:pr-0.5">
-
+                                <div className={`bg-${isDarkMode ? 'black' : 'white'} text-${isDarkMode ? 'white' : 'black'} transition-colors duration-500`}>
+                                    <button
+                                        className={`p-2 m-4 rounded-full border-2 border-${isDarkMode ? 'white' : 'black'} bg-${isDarkMode ? 'black' : 'white'} text-${isDarkMode ? 'white' : 'black'} hover:bg-${isDarkMode ? 'white' : 'black'} hover:text-${isDarkMode ? 'black' : 'white'}`}
+                                        onClick={toggleDarkMode}
+                                    >
+                                        {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                                    </button>
+                                    {/* Your UI components go here */}
+                                </div>
                                 {/* Profile dropdown */}
                                 {/*<Menu as="div" className="relative ml-4 flex-shrink-0">*/}
                                 {/*    <div>*/}

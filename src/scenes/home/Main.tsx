@@ -1,7 +1,7 @@
 import Nav from "../common/Nav";
 import Foot from "../common/Foot";
 import Containers from "./Containers";
-import {PostType} from "../../Types";
+import {PostType} from "../../context/Types";
 import {useEffect, useState} from "react";
 import axios from 'axios'
 
@@ -13,7 +13,7 @@ export function Main() {
         const jsonFilePath = `/posts/recent.json`;
         axios.get(jsonFilePath)
             .then((response) => {
-                console.log("RESP", response.data)
+                console.log("RECENT", response.data)
                 setRecent(response.data);
             })
             .catch((error) => {
