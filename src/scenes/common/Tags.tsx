@@ -31,7 +31,7 @@ export default function Tags(props: TagsProps) {
                     <div key={data.key}
                          className={`${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} px-3 py-1 rounded-full`}>
                         <a href={data.href}>
-                            <span className={`${isDarkMode ? 'text-cyan-300' : ''}`}>{data.label}</span>
+                            <span className={`${isDarkMode ? '' : ''}`}>{data.label}</span>
                         </a>
                     </div>
                 );

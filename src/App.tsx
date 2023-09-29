@@ -7,11 +7,16 @@ import {useEffect, useState} from "react";
 import axios from 'axios'
 import Error404 from "./scenes/common/404";
 
+
 export default function App() {
     const [siteMap, setSiteMap] = useState<Site[]>([]);
-
-    const homepage = true
+    const [, setWindowWidth] = useState(window.innerWidth);
     useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+        };
+        window.addEventListener('resize', handleResize);
+
         const jsonFilePath = `/sitemap.json`;
         axios.get(jsonFilePath)
             .then((response) => {
@@ -20,7 +25,7 @@ export default function App() {
             .catch((error) => {
                 console.error('Error loading JSON data:', error);
             });
-    }, [homepage]);
+    }, []);
     if (siteMap.length < 1) {
         return null;
     }
@@ -30,7 +35,8 @@ export default function App() {
     const uniqueDates = Array.from(
         new Set(siteMap.map((siteMap) => siteMap.date.replace(/-/g, '\/')))
     );
-    
+
+
 
     return (
         <Router>

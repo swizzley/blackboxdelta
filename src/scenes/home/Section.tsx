@@ -36,9 +36,6 @@ export function Section(props: SectionProps) {
             break;
     }
 
-
-
-
     let itemsPerPage = 10;
     const [lastFetchedItem, setLastFetchedItem] = useState<number>(0);
 
@@ -169,11 +166,11 @@ export function Section(props: SectionProps) {
                                 </div>
 
                                 <div>
-                                    <div className="flex items-center gap-x-4 text-xs">
+                                    <a className="flex items-center gap-x-4 text-xs" href={`/posts/${post.date.replace(/-/g, '\/')}`}>
                                         <time dateTime={post.date} className="text-gray-400">
                                             {post.date}
                                         </time>
-                                    </div>
+                                    </a>
                                     <div className="group relative max-w-xl">
                                         <h3 className="mt-3 text-2xl font-medium leading-6 group-hover:text-gray-600">
                                             <a href={post.url}>

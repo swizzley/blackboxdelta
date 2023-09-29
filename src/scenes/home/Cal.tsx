@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {useState} from 'react';
 import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
@@ -10,6 +9,7 @@ export default function Cal() {
     const [selectedDate, setSelectedDate] = useState(null); // Initialize state to store selected date
 
     // Callback function to handle date selection
+    // @ts-ignore
     const handleDateChange = (newDate) => {
         setSelectedDate(newDate);
         const formattedDate = dayjs(newDate).format('YYYY-MM-DD');
