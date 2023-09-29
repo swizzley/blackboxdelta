@@ -2,6 +2,7 @@ import {Site as SiteMap} from '../../context/Types';
 import Section from "./Section";
 import {useTheme} from "../../context/Theme";
 import Tags from "../common/Tags";
+import Cal from "./Cal";
 
 interface ContainersProps {
     Site: SiteMap[];
@@ -36,8 +37,15 @@ export function Containers(props: ContainersProps) {
                                 Tags
                             </h2>
                             <div
-                                className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 shadow rounded-lg`}>
+                                className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-500 shadow rounded-lg mb-4`}>
                                 <Tags Site={Site}/>
+                            </div>
+                            <h2 className="sr-only" id="section-2-title">
+                                Dates
+                            </h2>
+                            <div
+                                className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-500 shadow rounded-lg`}>
+                                <Cal/>
                             </div>
                         </section>
                     </div>

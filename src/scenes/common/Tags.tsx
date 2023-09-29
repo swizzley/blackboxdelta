@@ -22,17 +22,16 @@ export default function Tags(props: TagsProps) {
     }));
 
     const [tagData] = React.useState<Tag[]>(tags);
-
-
     tagData.sort((a, b) => a.label.localeCompare(b.label));
+
     return (
         <div className={`flex flex-wrap justify-start p-2 list-none rounded-lg gap-x-2 gap-y-2 overflow-x-auto`}>
             {tagData.map((data) => {
                 return (
                     <div key={data.key}
-                         className={`${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'} px-2 rounded-full`}>
+                         className={`${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} px-3 py-1 rounded-full`}>
                         <a href={data.href}>
-                            <span className={`${isDarkMode ? 'text-cyan-500' : ''}`}>{data.label}</span>
+                            <span className={`${isDarkMode ? 'text-cyan-300' : ''}`}>{data.label}</span>
                         </a>
                     </div>
                 );

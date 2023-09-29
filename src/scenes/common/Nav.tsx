@@ -179,7 +179,7 @@ export default function Nav(props: NavProps) {
                                             />
                                             <div>
                                                 {searchQuery &&
-                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500 pb-24 divide-y divide-gray-100`}>
+                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500 pb-24 divide-y divide-gray-100 rounded-lg`}>
                                                         {searchQuery && filteredResults.map((result) => (
                                                             <li key={result.id} className="flex gap-x-4 p-5">
                                                                 <a className="min-w-0" href={result.url}>
@@ -252,7 +252,7 @@ export default function Nav(props: NavProps) {
                                             />
                                             <div>
                                                 {searchQuery &&
-                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500  divide-y divide-gray-100`}>
+                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500  divide-y divide-gray-100 rounded-lg`}>
                                                         {searchQuery && filteredResults.map((result) => (
                                                             <li key={result.id} className="flex gap-x-4 p-5">
                                                                 <img className={`h-12 w-12 flex-none rounded-full ${isDarkMode ? 'bg-dark' : 'bg-light'}`} src='/img/bbd-logo.svg' alt="" />

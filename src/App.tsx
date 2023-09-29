@@ -15,27 +15,27 @@ export default function App() {
         const jsonFilePath = `/sitemap.json`;
         axios.get(jsonFilePath)
             .then((response) => {
-                console.log("SITEMAP", response.data)
                 setSiteMap(response.data);
-                console.log(siteMap)
             })
             .catch((error) => {
                 console.error('Error loading JSON data:', error);
             });
     }, [homepage]);
-
     if (siteMap.length < 1) {
         return null;
     }
-
     const uniqueTags = Array.from(
         new Set(siteMap.flatMap((site) => site.tags))
     );
+    const uniqueDates = Array.from(
+        new Set(siteMap.map((siteMap) => siteMap.date.replace(/-/g, '\/')))
+    );
+    
 
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Home Site={siteMap} Mode="All"/>}/>
+                <Route path="/" element={<Home Site={siteMap} Mode="all"/>}/>
                 {siteMap.length > 0 && siteMap.map((site) => (
                     <Route
                         key={site.id}
@@ -49,8 +49,14 @@ export default function App() {
                         path={`/${tag}`}
                         element={<Home Site={siteMap} Mode={tag}/>}
                     />
-                ))
-                }
+                ))}
+                {uniqueDates.length > 0 && uniqueDates.map((date) => (
+                    <Route
+                        key={date}
+                        path={`/posts/${date}`}
+                        element={<Home Site={siteMap} Mode={'date'}/>}
+                    />
+                ))}
                 <Route path="*" element={<Error404/>}/>
             </Routes>
         </Router>

@@ -16,12 +16,27 @@ export function Section(props: SectionProps) {
     let sortedSite = [...Site];
     sortedSite.sort((a, b) => b.id - a.id);
 
-    // Filter the sortedSite based on Mode
-    if (Mode !== "All") {
-        sortedSite = sortedSite.filter((siteMap) =>
-            siteMap.tags.some((tag) => tag.toLowerCase() === Mode.toLowerCase())
-        )
+    switch (Mode.toLowerCase()) {
+        case "all":
+            // No filtering needed for "All"
+            break;
+        case "date":
+            const path = window.location.pathname
+            const trimPath = path.replace(/\/posts\//g, '');
+            const formattedDate = trimPath.replace(/\//g, '-');
+            sortedSite = sortedSite.filter((siteMap) =>
+                siteMap.date === formattedDate
+            );
+            break;
+        default:
+            // Filter the sortedSite based on Mode
+            sortedSite = sortedSite.filter((siteMap) =>
+                siteMap.tags.some((tag) => tag.toLowerCase() === Mode.toLowerCase())
+            );
+            break;
     }
+
+
 
 
     let itemsPerPage = 10;

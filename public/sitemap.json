@@ -55,5 +55,19 @@
       "Long",
       "ChumbaWumba"
     ]
+  },
+  {
+    "id": 5,
+    "company": "Halliburton Co",
+    "symbol": "HAL",
+    "title": "Historical Performance of Halliburton Co Stock during Economic Recessions and Recoveries",
+    "date": "2023-09-29",
+    "day": "Wednesday",
+    "url": "/posts/2023/09/29/HAL",
+    "tags": [
+      "Stock",
+      "Energy",
+      "Short"
+    ]
   }
 ]
