@@ -10,10 +10,12 @@ export default function Containers() {
 
     const pathname = window.location.pathname
     const path = pathname.split("/")
-    const year = path[1]
-    const month = path[2]
-    const day = path[3]
-    const symbol = path[4]
+    const year = path[2]
+    const month = path[3]
+    const day = path[4]
+    const symbol = path[5]
+
+    console.log("PATHNAME", path)
 
     const [post, setPost] = useState<PostType>({
         company: {

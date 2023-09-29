@@ -36,7 +36,7 @@ export default function App() {
                     <Route
                         key={site.id}
                         path={site.url}
-                        element={<Post/>}
+                        element={<Post Site={siteMap}/>}
                     />
                 ))}
                 <Route path="*" element={<Error404/>}/>

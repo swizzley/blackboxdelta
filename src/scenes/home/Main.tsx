@@ -11,7 +11,7 @@ export function Main(props: MainProps) {
     const {Site} = props;
     return (
         <div>
-            <Nav/>
+            <Nav Site={Site}/>
             <Containers Site={Site}/>
             <Foot/>
         </div>

@@ -1,10 +1,11 @@
 import {Bars3Icon, XMarkIcon} from "@heroicons/react/24/outline";
 import {Popover, Transition} from "@headlessui/react";
-import {Fragment} from "react";
+import {Fragment, useEffect, useState} from "react";
 import {MagnifyingGlassIcon} from "@heroicons/react/20/solid";
 import {useTheme} from '../../context/Theme';
 import {Switch} from "@mui/material";
 import {styled} from '@mui/material/styles';
+import {Site as SiteMap} from "../../context/Types";
 
 const user = {
     name: 'Swizzley',
@@ -12,10 +13,9 @@ const user = {
     imageUrl: '/img/bbd-logo-main.svg',
 }
 const navigation = [
-    {name: 'Latest', href: '/', current: true},
-    {name: 'Stocks', href: '/stocks', current: false},
-    {name: 'Forex', href: 'forex', current: false},
-    {name: 'Crypto', href: 'crypto', current: false},
+    {name: 'All', href: '/', current: true},
+    {name: 'Long', href: '/long', current: false},
+    {name: 'Short', href: '/short', current: false},
     {name: 'Performance', href: 'perf', current: false},
 ]
 
@@ -23,9 +23,33 @@ function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
 }
 
-export default function Nav() {
+interface NavProps {
+    Site: SiteMap[];
+}
+
+export default function Nav(props: NavProps) {
+    const {Site} = props;
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [filteredResults, setFilteredResults] = useState<SiteMap[]>([]);
+
+    // Update filteredResults whenever searchQuery or Site changes
+    useEffect(() => {
+        const lowercaseQuery = searchQuery.toLowerCase();
+        const filtered = Site.filter((item) =>
+            // Check if any field in the item matches the search query (case-insensitive)
+            Object.values(item).some((value) =>
+                typeof value === 'string' && value.toLowerCase().includes(lowercaseQuery)
+            )
+        );
+        setFilteredResults(filtered);
+    }, [searchQuery, Site]);
+
+    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+    };
 
     const {isDarkMode, toggleDarkMode} = useTheme();
+
     const MaterialUISwitch = styled(Switch)(({}) => ({
         width: 62,
         height: 34,
@@ -72,6 +96,7 @@ export default function Nav() {
             borderRadius: 20 / 2,
         },
     }));
+
     return (
         <Popover as="header"
                  className={`${isDarkMode ? 'bg-slate-900' : 'bg-gray-500'} transition-colors duration-500 pb-24`}>
@@ -129,7 +154,7 @@ export default function Nav() {
                             {/* Search */}
                             <div className="min-w-0 flex-1 px-12 lg:hidden rounded-lg">
                                 <div className="mx-auto w-full max-w-xs rounded-lg">
-                                    <label htmlFor="desktop-search" className="sr-only">
+                                    <label htmlFor="mobile-search" className="sr-only">
                                         Search
                                     </label>
                                     <div className="rounded-lg relative text-white focus-within:text-gray-600">
@@ -137,13 +162,25 @@ export default function Nav() {
                                             className="rounded-lg pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                             <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true"/>
                                         </div>
-                                        <input
-                                            id="desktop-search"
-                                            className="rounded-lg block w-full border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
-                                            placeholder="Search"
-                                            type="search"
-                                            name="search"
-                                        />
+                                        <div>
+                                            <input
+                                                id="mobile-search"
+                                                className="rounded-lg block w-full border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
+                                                placeholder="Search"
+                                                type="search"
+                                                name="search"
+                                                value={searchQuery}
+                                                onChange={handleSearchInputChange}
+                                            />
+                                            <div>
+                                                {searchQuery && filteredResults.map((result) => (
+                                                    <a href={result.url} key={result.id} className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 pb-24`}>
+                                                        {/* Render filtered results */}
+                                                        <p>{result.title}</p>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -184,28 +221,45 @@ export default function Nav() {
                                 </div>
                                 <div>
                                     <div className="mx-auto w-full max-w-md rounded-lg">
-                                        <label htmlFor="mobile-search" className="sr-only">
+                                        <label htmlFor="desktop-search" className="sr-only">
                                             Search
                                         </label>
                                         <div className="relative text-white focus-within:text-gray-600 rounded-lg">
-                                            <div
-                                                className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 rounded-lg">
-                                                <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true"/>
-                                            </div>
+                                            {!searchQuery &&
+                                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 rounded-lg">
+                                                    <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true"/>
+                                                </div>
+                                            }
                                             <input
-                                                id="mobile-search"
+                                                id="desktop-search"
                                                 className="rounded-lg block w-full border-0 bg-white/20 py-1.5 pl-10 pr-3 text-white placeholder:text-white focus:bg-white focus:text-gray-900 focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm sm:leading-6"
                                                 placeholder="Search"
                                                 type="search"
                                                 name="search"
+                                                value={searchQuery}
+                                                onChange={handleSearchInputChange}
                                             />
+                                            <div>
+                                                {searchQuery &&
+                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} absolute transition-colors duration-500 pb-24 divide-y divide-gray-100`}>
+                                                        {searchQuery && filteredResults.map((result) => (
+                                                            <li key={result.id} className="flex gap-x-4 p-5">
+                                                                <img className={`h-12 w-12 flex-none rounded-full ${isDarkMode ? 'bg-dark' : 'bg-light'}`} src='/img/bbd-logo.svg' alt="" />
+                                                                <a className="min-w-0" href={result.url}>
+                                                                    <div className={`text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.title}</div>
+                                                                    <div className={`mt-1 truncate text-xs leading-5 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.date}</div>
+                                                                </a>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                     <Transition.Root as={Fragment}>
                         <div className="lg:hidden">
                             <Transition.Child

@@ -15,7 +15,7 @@ export function Section(props: SectionProps) {
     const sortedSite = [...Site];
     sortedSite.sort((a, b) => b.id - a.id);
 
-    let itemsPerPage = 1;
+    let itemsPerPage = 10;
 
     const [lastFetchedItem, setLastFetchedItem] = useState<number>(0);
 

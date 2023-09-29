@@ -1,13 +1,18 @@
 import Nav from "../common/Nav";
 import Containers from "../post/Containers";
 import Foot from "../common/Foot";
+import {Site as SiteMap} from "../../context/Types";
 
-export function Main() {
+interface PostProps {
+    Site: SiteMap[];
+}
 
+export function Main(props: PostProps) {
+    const {Site} = props;
 
     return (
         <div>
-            <Nav/>
+            <Nav Site={Site}/>
             <Containers/>
             <Foot/>
         </div>
