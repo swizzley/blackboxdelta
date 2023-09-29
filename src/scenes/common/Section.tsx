@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import  {useEffect, useState} from "react";
 import {PostType, Site as SiteMap} from '../../context/Types';
 import {useTheme} from "../../context/Theme";
 import axios from 'axios'
@@ -41,7 +41,7 @@ export function Section(props: SectionProps) {
             );
 
         return Promise.all(fetchPromises)
-            .then((results) => results.filter((result) => result !== null));
+            .then((results) => results.filter((result) => result !== null)) as Promise<PostType[]>;
     }
 
     const [posts, setPosts] = useState<PostType[]>([]);
@@ -91,22 +91,22 @@ export function Section(props: SectionProps) {
             if (lastFetchedItem + 1 < sortedSite.length) {
                 const nextItemIndex = lastFetchedItem + itemsPerPage;
                 sortedSite.map((site: SiteMap) => {
-                        axios
-                            .get(site.url + '.json')
-                            .then((response) => {
-                                if (response.status === 200) {
-                                    const data: PostType = response.data;
-                                    setLastFetchedItem(nextItemIndex);
-                                    setPosts((prevPosts) => [...prevPosts, data]);
-                                } else {
-                                    throw new Error(`Failed to fetch data from ${site.url}.json`);
-                                }
-                            })
-                            .catch((error) => {
-                                console.error('Error loading JSON data:', error);
-                                return
-                            })
-                    })
+                    axios
+                        .get(site.url + '.json')
+                        .then((response) => {
+                            if (response.status === 200) {
+                                const data: PostType = response.data;
+                                setLastFetchedItem(nextItemIndex);
+                                setPosts((prevPosts) => [...prevPosts, data]);
+                            } else {
+                                throw new Error(`Failed to fetch data from ${site.url}.json`);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error loading JSON data:', error);
+                            return
+                        })
+                })
             } else {
                 setHasMoreItems(false)
             }

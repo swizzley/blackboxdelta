@@ -6,7 +6,7 @@ import axios from 'axios'
 import {useTheme} from "../../context/Theme";
 
 export default function Containers() {
-    const { isDarkMode } = useTheme();
+    const {isDarkMode} = useTheme();
 
     const pathname = window.location.pathname
     const path = pathname.split("/")
@@ -16,18 +16,30 @@ export default function Containers() {
     const symbol = path[4]
 
     const [post, setPost] = useState<PostType>({
-        author: "",
+        company: {
+            country: "",
+            symbol: "",
+            currency: "",
+            exchange: "",
+            ipo: "",
+            name: "",
+            marketCap: 0,
+            phone: "",
+            outstanding: "",
+            website: "",
+            logo: "",
+            industry: "",
+        },
         content: [],
         date: "",
         day: 0,
-        exchange: "",
         id: 0,
-        logo: false,
         month: 0,
-        summary: "",
-        symbol: "",
+        news: [],
+        tags: [],
         title: "",
         url: "",
+        weekday: "",
         year: 0
     });
 
@@ -54,12 +66,13 @@ export default function Containers() {
                     {/* Left column */}
                     <div className="grid grid-cols-1 gap-4 lg:col-span-2">
                         <section aria-labelledby="section-1-title">
-                            <div className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 shadow`}>
+                            <div
+                                className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 shadow`}>
                                 <div className="">
                                     <div className={"container mx-auto left-0"}>
                                         <AdvancedChart widgetProps={
                                             {
-                                                symbol: `${post.exchange}:${post.symbol}`,
+                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
                                                 theme: isDarkMode ? "dark" : "light",
                                                 hide_top_toolbar: true,
                                                 height: 450,
@@ -98,7 +111,7 @@ export default function Containers() {
                                     <div className={"container mx-auto left-0"}>
                                         <TechnicalAnalysis widgetProps={
                                             {
-                                                symbol: `${post.exchange}:${post.symbol}`,
+                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 width: innerWidth < 800 ? innerWidth - 48 : 385,
                                                 interval: "1D"
@@ -108,7 +121,7 @@ export default function Containers() {
                                     <div className={"container mx-auto left-0 -mt-24"}>
                                         <FundamentalData widgetProps={
                                             {
-                                                symbol: `${post.exchange}:${post.symbol}`,
+                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
                                                 width: innerWidth < 800 ? innerWidth - 48 : 385,
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 height: 777

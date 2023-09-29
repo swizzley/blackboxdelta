@@ -11,7 +11,7 @@ interface PostProps {
     post: PostType;
 }
 
-const PostCard: React.FC<PostProps> = ({ post }) => {
+const PostCard: React.FC<PostProps> = ({post}) => {
     console.log("POSTCARD", post)
     if (!post) {
         return <></>
@@ -22,7 +22,7 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
                 <a className="flex-shrink-0" href={post.url}>
                     <img
                         className="h-10 w-10 rounded-full"
-                        src={post.logo ? `logos/${post.id}` : "/img/bbd-logo.svg"}
+                        src={post.company.logo ? `logos/${post.id}` : "/img/bbd-logo.svg"}
                         alt=""
                     />
                 </a>
@@ -41,9 +41,10 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
                 <div className="flex flex-shrink-0 self-center">
                     <Menu as="div" className="relative inline-block text-left">
                         <div>
-                            <Menu.Button className="-m-2 flex items-center rounded-full p-2 text-gray-400 hover:text-gray-600">
+                            <Menu.Button
+                                className="-m-2 flex items-center rounded-full p-2 text-gray-400 hover:text-gray-600">
                                 <span className="sr-only">Open options</span>
-                                <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+                                <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true"/>
                             </Menu.Button>
                         </div>
 
@@ -56,10 +57,11 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
                             leaveFrom="transform opacity-100 scale-100"
                             leaveTo="transform opacity-0 scale-95"
                         >
-                            <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                            <Menu.Items
+                                className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                 <div className="py-1">
                                     <Menu.Item>
-                                        {({ active }) => (
+                                        {({active}) => (
                                             <a
                                                 href="#"
                                                 className={classNames(
@@ -67,13 +69,13 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
                                                     'flex px-4 py-2 text-sm'
                                                 )}
                                             >
-                                                <StarIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+                                                <StarIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true"/>
                                                 <span>Add to favorites</span>
                                             </a>
                                         )}
                                     </Menu.Item>
                                     <Menu.Item>
-                                        {({ active }) => (
+                                        {({active}) => (
                                             <a
                                                 href="#"
                                                 className={classNames(
@@ -81,13 +83,14 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
                                                     'flex px-4 py-2 text-sm'
                                                 )}
                                             >
-                                                <CodeBracketIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+                                                <CodeBracketIcon className="mr-3 h-5 w-5 text-gray-400"
+                                                                 aria-hidden="true"/>
                                                 <span>Embed</span>
                                             </a>
                                         )}
                                     </Menu.Item>
                                     <Menu.Item>
-                                        {({ active }) => (
+                                        {({active}) => (
                                             <a
                                                 href="#"
                                                 className={classNames(
@@ -95,7 +98,7 @@ const PostCard: React.FC<PostProps> = ({ post }) => {
                                                     'flex px-4 py-2 text-sm'
                                                 )}
                                             >
-                                                <FlagIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
+                                                <FlagIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true"/>
                                                 <span>Report content</span>
                                             </a>
                                         )}

@@ -1,4 +1,3 @@
-import React from "react";
 import {Site as SiteMap} from '../../context/Types';
 import Section from "../common/Section";
 import {Timeline} from "react-tradingview-embed";
