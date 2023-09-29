@@ -1,16 +1,16 @@
 import React from "react";
-import {PostType} from '../../context/Types';
+import {Site as SiteMap} from '../../context/Types';
 import Section from "../common/Section";
 import {Timeline} from "react-tradingview-embed";
 import {useTheme} from "../../context/Theme";
 
-interface PostProps {
-    posts: PostType[];
+interface ContainersProps {
+    Site: SiteMap[];
 }
 
-const Containers: React.FC<PostProps> = ({posts}) => {
-
-    const { isDarkMode } = useTheme();
+export function Containers(props: ContainersProps) {
+    const {Site} = props;
+    const {isDarkMode} = useTheme();
 
     return (
         <main className="-mt-24 pb-8">
@@ -23,7 +23,7 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                         <section aria-labelledby="section-1-title">
                             <div className="">
                                 <div className="w-full">
-                                    <Section posts={posts}/>
+                                    <Section Site={Site}/>
                                 </div>
                             </div>
                         </section>
@@ -35,13 +35,14 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                             <h2 className="sr-only" id="section-2-title">
                                 News
                             </h2>
-                            <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 shadow rounded-lg`}>
+                            <div
+                                className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 shadow rounded-lg`}>
                                 <div className="">
                                     <div className="container left-0 pb-0 rounded-lg">
                                         <Timeline widgetProps={
                                             {
                                                 colorTheme: isDarkMode ? 'dark' : 'light',
-                                                width: innerWidth < 1200 ? innerWidth < 800 ? innerWidth - 48: innerWidth / 3.35 | 0 : 384,
+                                                width: innerWidth < 1200 ? innerWidth < 800 ? innerWidth - 48 : innerWidth / 3.35 | 0 : 384,
                                                 height: 800
                                             }
                                         }/>
@@ -56,4 +57,5 @@ const Containers: React.FC<PostProps> = ({posts}) => {
         </main>
     )
 }
+
 export default Containers

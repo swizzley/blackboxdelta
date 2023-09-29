@@ -1,30 +1,149 @@
-import React from "react";
-import {PostType} from '../../context/Types';
-import {SymbolInfo} from "react-tradingview-embed";
+import React, {useEffect, useState} from "react";
+import {PostType, Site as SiteMap} from '../../context/Types';
 import {useTheme} from "../../context/Theme";
+import axios from 'axios'
+import {SymbolInfo} from "react-tradingview-embed";
 
-interface PostProps {
-    posts: PostType[];
+interface SectionProps {
+    Site: SiteMap[];
 }
 
+export function Section(props: SectionProps) {
+    const {isDarkMode} = useTheme();
+    const {Site} = props;
 
-const Section: React.FC<PostProps> = ({posts}) => {
-    const { isDarkMode } = useTheme();
+    const sortedSite = [...Site];
+    sortedSite.sort((a, b) => b.id - a.id);
+
+    let itemsPerPage = 1;
+
+    const [lastFetchedItem, setLastFetchedItem] = useState<number>(0);
+
+    function initPosts() {
+        const fetchPromises = sortedSite
+            .slice(0, itemsPerPage)
+            .map((siteMap: SiteMap) =>
+                axios
+                    .get(siteMap.url + '.json')
+                    .then((response) => {
+                        if (response.status === 200) {
+                            const data: PostType = response.data;
+                            setLastFetchedItem(itemsPerPage - 1);
+                            return data;
+                        } else {
+                            throw new Error(`Failed to fetch data from ${siteMap.url}.json`);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error loading JSON data:', error);
+                        return
+                    })
+            );
+
+        return Promise.all(fetchPromises)
+            .then((results) => results.filter((result) => result !== null));
+    }
+
+    const [posts, setPosts] = useState<PostType[]>([]);
+
+    useEffect(() => {
+        initPosts()
+            .then((sectionPosts: PostType[]) => {
+                setPosts(sectionPosts);
+            });
+    }, []); // Ensure this effect runs only once on component mount
+
+    const [hasMoreItems, setHasMoreItems] = useState<boolean>(true);
+    const [isFetching, setIsFetching] = useState<boolean>(false);
+
+    // Inside your component
+    const [scrollPosition, setScrollPosition] = useState(0);
+
+    // Create a function to handle the scroll event
+    const handleScroll = () => {
+        const scrollHeight = document.documentElement.scrollHeight;
+        const scrollTop = document.documentElement.scrollTop;
+        const clientHeight = document.documentElement.clientHeight;
+
+        if (!hasMoreItems || isFetching) {
+            return;
+        }
+
+        if (scrollTop + clientHeight >= scrollHeight - 200) {
+            setScrollPosition(scrollTop); // Update the scroll position
+        }
+    };
+
+    // Attach the debounced scroll event listener
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [hasMoreItems, isFetching]);
+
+    // Use another useEffect to fetch data when the scroll position changes
+    useEffect(() => {
+        if (scrollPosition > 110) {
+            setIsFetching(true);
+
+            // Ensure nextItemIndex is within bounds
+            if (lastFetchedItem + 1 < sortedSite.length) {
+                const nextItemIndex = lastFetchedItem + itemsPerPage;
+                sortedSite.map((site: SiteMap) => {
+                        axios
+                            .get(site.url + '.json')
+                            .then((response) => {
+                                if (response.status === 200) {
+                                    const data: PostType = response.data;
+                                    setLastFetchedItem(nextItemIndex);
+                                    setPosts((prevPosts) => [...prevPosts, data]);
+                                } else {
+                                    throw new Error(`Failed to fetch data from ${site.url}.json`);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error loading JSON data:', error);
+                                return
+                            })
+                    })
+            } else {
+                setHasMoreItems(false)
+            }
+        }
+    }, [scrollPosition, lastFetchedItem, itemsPerPage, sortedSite]);
+
+
+    // Create a Set to store unique post IDs
+    const uniquePostIds = new Set();
+    // Filter posts to remove duplicates based on post ID
+    const deduplicatedPosts = posts.filter((post) => {
+        if (!uniquePostIds.has(post.id)) {
+            uniquePostIds.add(post.id);
+            return true;
+        }
+        return false;
+    });
+
+    console.log("POSTS:", deduplicatedPosts)
 
     return (
-        <div  className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 sm:py-32 rounded-lg`}>
-            <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 -mt-48 mx-auto max-w-7xl px-6 lg:px-8`}>
+        <div
+            className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 sm:py-32 rounded-lg`}>
+            <div
+                className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 -mt-48 mx-auto max-w-7xl px-6 lg:px-8`}>
                 <div className="mx-auto max-w-2xl lg:max-w-4xl">
                     <div className="mt-16 lg:mt-20 space-y-4">
-                        {posts.map((post) => (
-                            <article key={post.id} className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} relative isolate flex flex-col lg:flex-row p-4 rounded-lg`}>
+                        {deduplicatedPosts.map((post: PostType, index: number) => (
+                            <article key={index}
+                                     className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} relative isolate flex flex-col lg:flex-row p-4 rounded-lg`}>
                                 <div>
                                     <div className={"container mx-auto left-0 p-4"}>
                                         <SymbolInfo widgetProps={
                                             {
-                                                symbol: `${post.exchange}:${post.symbol}`,
-                                                colorTheme: isDarkMode ? "dark": "light",
-                                                width: innerWidth < 1000 ? innerWidth < 800 ? innerWidth - 150: innerWidth / 1.6 | 0 : 310,
+                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
+                                                colorTheme: isDarkMode ? "dark" : "light",
+                                                width: innerWidth < 1000 ? innerWidth < 800 ? innerWidth - 150 : innerWidth / 1.6 | 0 : 310,
                                             }
                                         }/>
                                     </div>
@@ -43,7 +162,7 @@ const Section: React.FC<PostProps> = ({posts}) => {
                                                 {post.title}
                                             </a>
                                         </h3>
-                                        <p className="mt-5 text-xl font-light leading-6 ">{post.summary}</p>
+                                        <p className="mt-5 text-xl font-light leading-6 ">{post.content[0].text}</p>
                                     </div>
                                 </div>
                             </article>
@@ -54,4 +173,5 @@ const Section: React.FC<PostProps> = ({posts}) => {
         </div>
     )
 }
+
 export default Section;

@@ -1,26 +1,12 @@
 [
   {
     "id": 1,
-    "company": "",
+    "company": "Apple Inc.",
     "symbol": "AAPL",
     "title": "Going Long on Apple Inc. (AAPL): A Strategic Investment Decision",
     "date": "2023-09-21",
     "day": "Thursday",
-    "url": "/2023/09/21/AAPL",
-    "tags": [
-      "stock",
-      "buy",
-      "long"
-    ]
-  },
-  {
-    "id": 2,
-    "company": "",
-    "symbol": "HAL",
-    "title": "Investing in Halliburton Co: A Lucrative Opportunity in the Energy Sector",
-    "date": "2023-09-21",
-    "day": "Thursday",
-    "url": "/2023/09/21/HAL",
+    "url": "/posts/2023/09/21/AAPL",
     "tags": [
       "stock",
       "buy",
@@ -34,13 +20,43 @@
     "title": "Historical Performance of Halliburton Co Stock during Economic Recessions and Recoveries",
     "date": "2023-09-27",
     "day": "Wednesday",
-    "url": "/posts/2023/09/27",
+    "url": "/posts/2023/09/27/HAL",
     "tags": [
       "stock",
       "Halliburton Co",
       "HAL",
       "Energy",
       "US"
+    ]
+  },
+  {
+    "id": 3,
+    "company": "Halliburton Co",
+    "symbol": "HAL",
+    "title": "Historical Performance of Halliburton Co Stock during Economic Recessions and Recoveries",
+    "date": "2023-09-28",
+    "day": "Wednesday",
+    "url": "/posts/2023/09/28/HAL",
+    "tags": [
+      "stock",
+      "Halliburton Co",
+      "HAL",
+      "Energy",
+      "US"
+    ]
+  },
+  {
+    "id": 4,
+    "company": "Apple Inc.",
+    "symbol": "AAPL",
+    "title": "Going Long on Apple Inc. (AAPL): A Strategic Investment Decision",
+    "date": "2023-09-29",
+    "day": "Thursday",
+    "url": "/posts/2023/09/29/AAPL",
+    "tags": [
+      "stock",
+      "buy",
+      "long"
     ]
   }
 ]

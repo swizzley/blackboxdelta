@@ -31,7 +31,7 @@ export default function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Home/>}/>
+                <Route path="/" element={<Home Site={siteMap}/>}/>
                 {siteMap.length > 0 && siteMap.map((site) => (
                     <Route
                         key={site.id}

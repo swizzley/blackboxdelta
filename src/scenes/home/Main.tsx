@@ -1,32 +1,21 @@
 import Nav from "../common/Nav";
 import Foot from "../common/Foot";
 import Containers from "./Containers";
-import {PostType} from "../../context/Types";
-import {useEffect, useState} from "react";
-import axios from 'axios'
+import {Site as SiteMap} from "../../context/Types";
 
+interface MainProps {
+    Site: SiteMap[];
+}
 
-export function Main() {
-    const [recent, setRecent] = useState<PostType[]>([]);
-
-    useEffect(() => {
-        const jsonFilePath = `/posts/recent.json`;
-        axios.get(jsonFilePath)
-            .then((response) => {
-                console.log("RECENT", response.data)
-                setRecent(response.data);
-            })
-            .catch((error) => {
-                console.error('Error loading JSON data:', error);
-            });
-    }, []);
-
+export function Main(props: MainProps) {
+    const {Site} = props;
     return (
         <div>
             <Nav/>
-            <Containers posts={recent}/>
+            <Containers Site={Site}/>
             <Foot/>
         </div>
     )
 }
+
 export default Main

@@ -12,7 +12,7 @@ const user = {
     imageUrl: '/img/bbd-logo-main.svg',
 }
 const navigation = [
-    {name: 'Latest Signals', href: '/', current: true},
+    {name: 'Latest', href: '/', current: true},
     {name: 'Stocks', href: '/stocks', current: false},
     {name: 'Forex', href: 'forex', current: false},
     {name: 'Crypto', href: 'crypto', current: false},

@@ -15,21 +15,46 @@ export interface Site {
 
 export interface PostType {
     id: number;
-    symbol: string;
-    exchange: string;
-    logo: boolean;
+    company: Company;
     year: number;
     month: number;
     day: number;
+    weekday: string;
     title: string;
-    summary: string;
-    author: string;
     date: string;
     url: string;
     content: BlogPostSection[];
+    tags: string[];
+    news: News[];
 }
 
 export interface BlogPostSection {
     section: string;
     text: string;
+}
+
+export interface Company {
+    country: string;
+    currency: string;
+    exchange: string;
+    ipo: string;
+    marketCap: number;
+    name: string;
+    phone: string;
+    outstanding: string;
+    symbol: string;
+    website: string;
+    logo: any;
+    industry: string;
+}
+
+export interface News {
+    category: string;
+    date: number;
+    headline: string;
+    id: number;
+    image: string;
+    publisher: string;
+    summary: string;
+    url: string;
 }
