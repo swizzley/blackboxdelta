@@ -179,12 +179,18 @@ export default function Nav(props: NavProps) {
                                                 onChange={handleSearchInputChange}
                                             />
                                             <div>
-                                                {searchQuery && filteredResults.map((result) => (
-                                                    <a href={result.url} key={result.id} className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 pb-24`}>
-                                                        {/* Render filtered results */}
-                                                        <p>{result.title}</p>
-                                                    </a>
-                                                ))}
+                                                {searchQuery &&
+                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500 pb-24 divide-y divide-gray-100`}>
+                                                        {searchQuery && filteredResults.map((result) => (
+                                                            <li key={result.id} className="flex gap-x-4 p-5">
+                                                                <a className="min-w-0" href={result.url}>
+                                                                    <div className={`max-w-xs truncate text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.title}</div>
+                                                                    <div className={`mt-1 text-xs leading-5 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.date}</div>
+                                                                </a>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                }
                                             </div>
                                         </div>
                                     </div>
@@ -247,13 +253,13 @@ export default function Nav(props: NavProps) {
                                             />
                                             <div>
                                                 {searchQuery &&
-                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} absolute transition-colors duration-500 pb-24 divide-y divide-gray-100`}>
+                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500  divide-y divide-gray-100`}>
                                                         {searchQuery && filteredResults.map((result) => (
                                                             <li key={result.id} className="flex gap-x-4 p-5">
                                                                 <img className={`h-12 w-12 flex-none rounded-full ${isDarkMode ? 'bg-dark' : 'bg-light'}`} src='/img/bbd-logo.svg' alt="" />
                                                                 <a className="min-w-0" href={result.url}>
-                                                                    <div className={`text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.title}</div>
-                                                                    <div className={`mt-1 truncate text-xs leading-5 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.date}</div>
+                                                                    <div className={`max-w-xs truncate text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.title}</div>
+                                                                    <div className={`mt-1 text-xs leading-5 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.date}</div>
                                                                 </a>
                                                             </li>
                                                         ))}
