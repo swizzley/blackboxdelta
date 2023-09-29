@@ -30,7 +30,7 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                     </div>
 
                     {/* Right column */}
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className={`grid grid-cols-1 gap-4 w-[${innerWidth / 4 | 0}px] h-screen`}>
                         <section aria-labelledby="section-2-title">
                             <h2 className="sr-only" id="section-2-title">
                                 News
@@ -41,7 +41,7 @@ const Containers: React.FC<PostProps> = ({posts}) => {
                                         <Timeline widgetProps={
                                             {
                                                 colorTheme: isDarkMode ? 'dark' : 'light',
-                                                width: innerWidth < 800 ? innerWidth - 48 : 384,
+                                                width: innerWidth < 1200 ? innerWidth < 800 ? innerWidth - 48: innerWidth / 3.35 | 0 : 384,
                                                 height: 800
                                             }
                                         }/>

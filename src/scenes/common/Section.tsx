@@ -24,7 +24,7 @@ const Section: React.FC<PostProps> = ({posts}) => {
                                             {
                                                 symbol: `${post.exchange}:${post.symbol}`,
                                                 colorTheme: isDarkMode ? "dark": "light",
-                                                width: innerWidth < 800 ? innerWidth - 48 : 310,
+                                                width: innerWidth < 1000 ? innerWidth < 800 ? innerWidth - 150: innerWidth / 1.6 | 0 : 310,
                                             }
                                         }/>
                                     </div>
@@ -35,12 +35,6 @@ const Section: React.FC<PostProps> = ({posts}) => {
                                         <time dateTime={post.date} className="text-gray-400">
                                             {post.date}
                                         </time>
-                                        <a
-                                            href={post.url}
-                                            className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-900' : 'bg-gray-200 text-gray-500 hover:bg-gray-800'} relative z-10 rounded-full px-3 py-1.5 font-medium `}
-                                        >
-                                            {post.title}
-                                        </a>
                                     </div>
                                     <div className="group relative max-w-xl">
                                         <h3 className="mt-3 text-2xl font-medium leading-6 group-hover:text-gray-600">
