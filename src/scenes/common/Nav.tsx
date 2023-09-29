@@ -12,11 +12,13 @@ const user = {
     email: 'contact@blackboxdelta.com',
     imageUrl: '/img/bbd-logo-main.svg',
 }
-const navigation = [
-    {name: 'All', href: '/', current: true},
-    {name: 'Long', href: '/Long', current: false},
-    {name: 'Short', href: '/Short', current: false},
-]
+
+interface NavigationItem {
+    name: string;
+    href: string;
+    current: boolean;
+}
+
 
 function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ')
@@ -30,6 +32,12 @@ export default function Nav(props: NavProps) {
     const {Site} = props;
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [filteredResults, setFilteredResults] = useState<SiteMap[]>([]);
+
+    const [navigation, setNavigation] = useState<NavigationItem[]>([
+        {name: 'All', href: '/', current: location.pathname === '/'},
+        {name: 'Long', href: '/Long', current: location.pathname === '/Long'},
+        {name: 'Short', href: '/Short', current: location.pathname === '/Short'},
+    ]);
 
     // Update filteredResults whenever searchQuery or Site changes
     useEffect(() => {
@@ -179,12 +187,15 @@ export default function Nav(props: NavProps) {
                                             />
                                             <div>
                                                 {searchQuery &&
-                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500 pb-24 divide-y divide-gray-100 rounded-lg`}>
+                                                    <ul role="list"
+                                                        className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500 pb-24 divide-y divide-gray-100 rounded-lg`}>
                                                         {searchQuery && filteredResults.map((result) => (
                                                             <li key={result.id} className="flex gap-x-4 p-5">
                                                                 <a className="min-w-0" href={result.url}>
-                                                                    <div className={`max-w-xs truncate text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.title}</div>
-                                                                    <div className={`mt-1 text-xs leading-5 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.date}</div>
+                                                                    <div
+                                                                        className={`max-w-xs truncate text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.title}</div>
+                                                                    <div
+                                                                        className={`mt-1 text-xs leading-5 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.date}</div>
                                                                 </a>
                                                             </li>
                                                         ))}
@@ -200,7 +211,7 @@ export default function Nav(props: NavProps) {
                             <div className="absolute right-0 flex-shrink-0 lg:hidden">
                                 {/* Mobile menu button */}
                                 <Popover.Button
-                                    className="relative inline-flex items-center justify-center bg-transparent p-2 text-white hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+                                    className="relative inline-flex items-center justify-center bg-transparent p-2 text-white hover:bg-white hover:bg-opacity-10 hover:text-white rounded-full focus:outline-none focus:ring-2 focus:ring-white">
                                     <span className="absolute -inset-0.5"/>
                                     <span className="sr-only">Open main menu</span>
                                     {open ? (
@@ -221,13 +232,24 @@ export default function Nav(props: NavProps) {
                                                 href={item.href}
                                                 className={classNames(
                                                     item.current ? 'text-white' : 'text-cyan-500',
-                                                    'bg-white bg-opacity-0 px-3 py-2 text-sm font-medium hover:bg-opacity-10'
+                                                    'bg-white bg-opacity-0 px-3 py-2 text-sm font-medium hover:bg-opacity-10 rounded-lg'
                                                 )}
                                                 aria-current={item.current ? 'page' : undefined}
+                                                onClick={() => {
+                                                    // Create a new array with updated current property
+                                                    const updatedNavigation = navigation.map((navItem) => ({
+                                                        ...navItem,
+                                                        current: navItem.name === item.name ? !navItem.current : false,
+                                                    }));
+
+                                                    // Update the state with the new array
+                                                    setNavigation(updatedNavigation);
+                                                }}
                                             >
                                                 {item.name}
                                             </a>
                                         ))}
+
                                     </nav>
                                 </div>
                                 <div>
@@ -237,7 +259,8 @@ export default function Nav(props: NavProps) {
                                         </label>
                                         <div className="relative text-white focus-within:text-gray-600 rounded-lg">
                                             {!searchQuery &&
-                                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 rounded-lg">
+                                                <div
+                                                    className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 rounded-lg">
                                                     <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true"/>
                                                 </div>
                                             }
@@ -252,13 +275,18 @@ export default function Nav(props: NavProps) {
                                             />
                                             <div>
                                                 {searchQuery &&
-                                                    <ul role="list" className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500  divide-y divide-gray-100 rounded-lg`}>
+                                                    <ul role="list"
+                                                        className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500  divide-y divide-gray-100 rounded-lg`}>
                                                         {searchQuery && filteredResults.map((result) => (
                                                             <li key={result.id} className="flex gap-x-4 p-5">
-                                                                <img className={`h-12 w-12 flex-none rounded-full ${isDarkMode ? 'bg-dark' : 'bg-light'}`} src='/img/bbd-logo.svg' alt="" />
+                                                                <img
+                                                                    className={`h-12 w-12 flex-none rounded-full ${isDarkMode ? 'bg-dark' : 'bg-light'}`}
+                                                                    src='/img/bbd-logo.svg' alt=""/>
                                                                 <a className="min-w-0" href={result.url}>
-                                                                    <div className={`max-w-xs truncate text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.title}</div>
-                                                                    <div className={`mt-1 text-xs leading-5 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.date}</div>
+                                                                    <div
+                                                                        className={`max-w-xs truncate text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.title}</div>
+                                                                    <div
+                                                                        className={`mt-1 text-xs leading-5 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.date}</div>
                                                                 </a>
                                                             </li>
                                                         ))}

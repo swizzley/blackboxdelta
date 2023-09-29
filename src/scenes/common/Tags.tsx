@@ -18,18 +18,21 @@ export default function Tags(props: TagsProps) {
     const tags: Tag[] = uniqueTags.map((tag, index) => ({
         key: index,
         label: tag,
-        href: `/${tag}`
+        href: `/${tag}`,
+        current: location.pathname.includes(`/${tag}`)
     }));
 
     const [tagData] = React.useState<Tag[]>(tags);
     tagData.sort((a, b) => a.label.localeCompare(b.label));
 
+    console.log(tagData)
+
     return (
-        <div className={`flex flex-wrap justify-start p-2 list-none rounded-lg gap-x-2 gap-y-2 overflow-x-auto`}>
+        <div className={`flex flex-wrap justify-center p-2 list-none rounded-lg gap-x-2 gap-y-2 overflow-x-auto`}>
             {tagData.map((data) => {
                 return (
                     <div key={data.key}
-                         className={`${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'} px-3 py-1 rounded-full`}>
+                         className={`${data.current ? 'bg-cyan-300' : isDarkMode ? 'bg-gray-500' : 'bg-gray-300'} px-3 py-1 rounded-full`}>
                         <a href={data.href}>
                             <span className={`${isDarkMode ? '' : ''}`}>{data.label}</span>
                         </a>

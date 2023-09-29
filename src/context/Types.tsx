@@ -63,4 +63,5 @@ export interface Tag {
     key: number;
     label: string;
     href: string;
+    current: boolean;
 }
