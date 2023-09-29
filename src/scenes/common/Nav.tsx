@@ -14,9 +14,8 @@ const user = {
 }
 const navigation = [
     {name: 'All', href: '/', current: true},
-    {name: 'Long', href: '/long', current: false},
-    {name: 'Short', href: '/short', current: false},
-    {name: 'Performance', href: 'perf', current: false},
+    {name: 'Long', href: '/Long', current: false},
+    {name: 'Short', href: '/Short', current: false},
 ]
 
 function classNames(...classes: string[]) {

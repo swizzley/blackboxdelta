@@ -58,3 +58,9 @@ export interface News {
     summary: string;
     url: string;
 }
+
+export interface Tag {
+    key: number;
+    label: string;
+    href: string;
+}

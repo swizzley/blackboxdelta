@@ -28,10 +28,14 @@ export default function App() {
         return null;
     }
 
+    const uniqueTags = Array.from(
+        new Set(siteMap.flatMap((site) => site.tags))
+    );
+
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Home Site={siteMap}/>}/>
+                <Route path="/" element={<Home Site={siteMap} Mode="All"/>}/>
                 {siteMap.length > 0 && siteMap.map((site) => (
                     <Route
                         key={site.id}
@@ -39,6 +43,14 @@ export default function App() {
                         element={<Post Site={siteMap}/>}
                     />
                 ))}
+                {uniqueTags.length > 0 && uniqueTags.map((tag) => (
+                    <Route
+                        key={tag}
+                        path={`/${tag}`}
+                        element={<Home Site={siteMap} Mode={tag}/>}
+                    />
+                ))
+                }
                 <Route path="*" element={<Error404/>}/>
             </Routes>
         </Router>

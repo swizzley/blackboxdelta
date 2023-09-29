@@ -1,14 +1,15 @@
 import {Site as SiteMap} from '../../context/Types';
-import Section from "../common/Section";
-import {Timeline} from "react-tradingview-embed";
+import Section from "./Section";
 import {useTheme} from "../../context/Theme";
+import Tags from "../common/Tags";
 
 interface ContainersProps {
     Site: SiteMap[];
+    Mode: string
 }
 
 export function Containers(props: ContainersProps) {
-    const {Site} = props;
+    const {Site, Mode} = props;
     const {isDarkMode} = useTheme();
 
     return (
@@ -22,7 +23,7 @@ export function Containers(props: ContainersProps) {
                         <section aria-labelledby="section-1-title">
                             <div className="">
                                 <div className="w-full">
-                                    <Section Site={Site}/>
+                                    <Section Site={Site} Mode={Mode}/>
                                 </div>
                             </div>
                         </section>
@@ -32,22 +33,11 @@ export function Containers(props: ContainersProps) {
                     <div className={`grid grid-cols-1 gap-4 w-[${innerWidth / 4 | 0}px] h-screen`}>
                         <section aria-labelledby="section-2-title">
                             <h2 className="sr-only" id="section-2-title">
-                                News
+                                Tags
                             </h2>
                             <div
-                                className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 shadow rounded-lg`}>
-                                <div className="">
-                                    <div className="container left-0 pb-0 rounded-lg">
-                                        <Timeline widgetProps={
-                                            {
-                                                colorTheme: isDarkMode ? 'dark' : 'light',
-                                                width: innerWidth < 1200 ? innerWidth < 800 ? innerWidth - 48 : innerWidth / 3.35 | 0 : 384,
-                                                height: 800
-                                            }
-                                        }/>
-                                    </div>
-
-                                </div>
+                                className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 shadow rounded-lg`}>
+                                <Tags Site={Site}/>
                             </div>
                         </section>
                     </div>

@@ -8,9 +8,9 @@
     "day": "Thursday",
     "url": "/posts/2023/09/21/AAPL",
     "tags": [
-      "stock",
-      "buy",
-      "long"
+      "Stock",
+      "Technology",
+      "Long"
     ]
   },
   {
@@ -22,11 +22,9 @@
     "day": "Wednesday",
     "url": "/posts/2023/09/27/HAL",
     "tags": [
-      "stock",
-      "Halliburton Co",
-      "HAL",
+      "Stock",
       "Energy",
-      "US"
+      "Short"
     ]
   },
   {
@@ -38,11 +36,9 @@
     "day": "Wednesday",
     "url": "/posts/2023/09/28/HAL",
     "tags": [
-      "stock",
-      "Halliburton Co",
-      "HAL",
+      "Stock",
       "Energy",
-      "US"
+      "Short"
     ]
   },
   {
@@ -54,9 +50,10 @@
     "day": "Thursday",
     "url": "/posts/2023/09/29/AAPL",
     "tags": [
-      "stock",
-      "buy",
-      "long"
+      "Stock",
+      "Technology",
+      "Long",
+      "ChumbaWumba"
     ]
   }
 ]

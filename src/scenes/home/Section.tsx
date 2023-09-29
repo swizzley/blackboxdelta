@@ -1,4 +1,4 @@
-import  {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {PostType, Site as SiteMap} from '../../context/Types';
 import {useTheme} from "../../context/Theme";
 import axios from 'axios'
@@ -6,17 +6,25 @@ import {SymbolInfo} from "react-tradingview-embed";
 
 interface SectionProps {
     Site: SiteMap[];
+    Mode: string
 }
 
 export function Section(props: SectionProps) {
     const {isDarkMode} = useTheme();
-    const {Site} = props;
+    const {Site, Mode} = props;
 
-    const sortedSite = [...Site];
+    let sortedSite = [...Site];
     sortedSite.sort((a, b) => b.id - a.id);
 
-    let itemsPerPage = 10;
+    // Filter the sortedSite based on Mode
+    if (Mode !== "All") {
+        sortedSite = sortedSite.filter((siteMap) =>
+            siteMap.tags.some((tag) => tag.toLowerCase() === Mode.toLowerCase())
+        )
+    }
 
+
+    let itemsPerPage = 10;
     const [lastFetchedItem, setLastFetchedItem] = useState<number>(0);
 
     function initPosts() {
@@ -45,7 +53,6 @@ export function Section(props: SectionProps) {
     }
 
     const [posts, setPosts] = useState<PostType[]>([]);
-
     useEffect(() => {
         initPosts()
             .then((sectionPosts: PostType[]) => {
@@ -113,7 +120,6 @@ export function Section(props: SectionProps) {
         }
     }, [scrollPosition, lastFetchedItem, itemsPerPage, sortedSite]);
 
-
     // Create a Set to store unique post IDs
     const uniquePostIds = new Set();
     // Filter posts to remove duplicates based on post ID
@@ -124,8 +130,6 @@ export function Section(props: SectionProps) {
         }
         return false;
     });
-
-    console.log("POSTS:", deduplicatedPosts)
 
     return (
         <div

@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {BlogPostSection, PostType} from "../../context/Types";
-import {AdvancedChart, FundamentalData, TechnicalAnalysis} from "react-tradingview-embed";
+import {AdvancedChart, CompanyProfile, FundamentalData, TechnicalAnalysis, Timeline} from "react-tradingview-embed";
 import Disclaimer from "../common/Disclaimer";
 import axios from 'axios'
 import {useTheme} from "../../context/Theme";
@@ -84,7 +84,6 @@ export default function Containers() {
                                                 withdateranges: true,
                                                 allow_symbol_change: false,
                                                 enable_publishing: false,
-                                                container_id: "tradingview_a8429"
                                             }
                                         }/>
                                     </div>
@@ -108,7 +107,8 @@ export default function Containers() {
                             <h2 className="sr-only" id="section-2-title">
                                 Data
                             </h2>
-                            <div className="rounded-lg bg-white shadow">
+                            <div
+                                className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 shadow rounded-lg bg-white shadow`}>
                                 <div className="">
                                     <div className={"container mx-auto left-0"}>
                                         <TechnicalAnalysis widgetProps={
@@ -121,6 +121,28 @@ export default function Containers() {
                                         }/>
                                     </div>
                                     <div className={"container mx-auto left-0 -mt-24"}>
+                                        <Timeline widgetProps={
+                                            {
+                                                colorTheme: isDarkMode ? 'dark' : 'light',
+                                                width: innerWidth < 1200 ? innerWidth < 800 ? innerWidth - 48 : innerWidth / 3.35 | 0 : 384,
+                                                height: 777,
+                                                // @ts-ignore
+                                                feedMode: "symbol",
+                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
+                                            }
+                                        }/>
+                                    </div>
+                                    <div className={"container mx-auto left-0"}>
+                                        <CompanyProfile widgetProps={
+                                            {
+                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
+                                                width: innerWidth < 800 ? innerWidth - 48 : 385,
+                                                colorTheme: isDarkMode ? "dark" : "light",
+                                                height: 777
+                                            }
+                                        }/>
+                                    </div>
+                                    <div className={"container mx-auto left-0"}>
                                         <FundamentalData widgetProps={
                                             {
                                                 symbol: `${post.company.exchange}:${post.company.symbol}`,
