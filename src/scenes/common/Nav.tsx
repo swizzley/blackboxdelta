@@ -35,12 +35,18 @@ export default function Nav(props: NavProps) {
     // Update filteredResults whenever searchQuery or Site changes
     useEffect(() => {
         const lowercaseQuery = searchQuery.toLowerCase();
-        const filtered = Site.filter((item) =>
+        const filtered = Site.filter((item) => {
             // Check if any field in the item matches the search query (case-insensitive)
-            Object.values(item).some((value) =>
-                typeof value === 'string' && value.toLowerCase().includes(lowercaseQuery)
-            )
-        );
+            return (
+                Object.values(item).some((value) =>
+                    typeof value === 'string' &&
+                    value.toLowerCase().includes(lowercaseQuery)
+                ) ||
+                item.tags.some((tag) =>
+                    tag.toLowerCase().includes(lowercaseQuery)
+                )
+            );
+        });
         setFilteredResults(filtered);
     }, [searchQuery, Site]);
 
