@@ -3,6 +3,7 @@ import {PostType, Site as SiteMap} from '../../context/Types';
 import {useTheme} from "../../context/Theme";
 import axios from 'axios'
 import {SymbolInfo} from "react-tradingview-embed";
+import {exchangeName} from "../common/Util";
 
 interface SectionProps {
     Site: SiteMap[];
@@ -143,28 +144,17 @@ export function Section(props: SectionProps) {
         return false;
     });
 
-    function exchangeName(exchange: string) {
-        switch (exchange) {
-            case "NEW YORK STOCK EXCHANGE, INC.":
-                return "NYSE"
-            case "NASDAQ NMS - GLOBAL MARKET":
-                return "NASDAQ"
-            case "NYSE MKT LLC":
-                return "AMEX"
-            case "TORONTO STOCK EXCHANGE":
-                return "TSX"
-            case "TEL AVIV STOCK EXCHANGE":
-                return "TASE"
-            case "TSX VENTURE EXCHANGE - NEX":
-                return "NEX"
-            case "OTC MARKETS":
-                return "OTC"
-            case "AEQUITAS NEO EXCHANGE":
-                return "NEO"
-            default:
-                return exchange
-        }
+
+
+    function date(d: string) {
+        const dateComponents = d.split("-");
+        const year = parseInt(dateComponents[0]);
+        const month = parseInt(dateComponents[1])-1;
+        const day = parseInt(dateComponents[2]);
+        return new Date(year, month, day);
     }
+
+    console.log("POSTS:", deduplicatedPosts.length)
 
     return (
         <div
@@ -184,14 +174,15 @@ export function Section(props: SectionProps) {
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 width: innerWidth < 1000 ? innerWidth < 800 ? innerWidth - 150 : innerWidth / 1.6 | 0 : 310,
                                             }
-                                        }/>
+                                        }
+                                        />
                                     </div>
                                 </div>
 
                                 <div>
                                     <a className="flex items-center gap-x-4 text-xs" href={`/posts/${post.date.replace(/-/g, '\/')}`}>
-                                        <time dateTime={post.date} className="text-gray-400">
-                                            {post.date}
+                                        <time dateTime={date(post.date).toDateString()} className="text-gray-400">
+                                            {date(post.date).toDateString()}
                                         </time>
                                     </a>
                                     <div className="group relative max-w-xl">

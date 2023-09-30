@@ -25,8 +25,6 @@ export default function Tags(props: TagsProps) {
     const [tagData] = React.useState<Tag[]>(tags);
     tagData.sort((a, b) => a.label.localeCompare(b.label));
 
-    console.log(tagData)
-
     return (
         <div className={`flex flex-wrap justify-center p-2 list-none rounded-lg gap-x-2 gap-y-2 overflow-x-auto`}>
             {tagData.map((data) => {

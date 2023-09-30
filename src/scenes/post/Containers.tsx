@@ -4,6 +4,7 @@ import {AdvancedChart, CompanyProfile, FundamentalData, TechnicalAnalysis, Timel
 import Disclaimer from "../common/Disclaimer";
 import axios from 'axios'
 import {useTheme} from "../../context/Theme";
+import {exchangeName} from "../common/Util";
 
 export default function Containers() {
     const {isDarkMode} = useTheme();
@@ -14,8 +15,6 @@ export default function Containers() {
     const month = path[3]
     const day = path[4]
     const symbol = path[5]
-
-    console.log("PATHNAME", path)
 
     const [post, setPost] = useState<PostType>({
         company: {
@@ -60,29 +59,14 @@ export default function Containers() {
         return <div/>
     }
 
-    function exchangeName(exchange: string) {
-        switch (exchange) {
-            case "NEW YORK STOCK EXCHANGE, INC.":
-                return "NYSE"
-            case "NASDAQ NMS - GLOBAL MARKET":
-                return "NASDAQ"
-            case "NYSE MKT LLC":
-                return "AMEX"
-            case "TORONTO STOCK EXCHANGE":
-                return "TSX"
-            case "TEL AVIV STOCK EXCHANGE":
-                return "TASE"
-            case "TSX VENTURE EXCHANGE - NEX":
-                return "NEX"
-            case "OTC MARKETS":
-                return "OTC"
-            case "AEQUITAS NEO EXCHANGE":
-                return "NEO"
-            default:
-                return exchange
-        }
+    function date(d: number) {
+        return new Date(d * 1000)
     }
 
+    // Function to handle image load failure
+    const handleImageLoadError = (ex) => {
+        console.log("ERROR LOADING EXCHANGE", ex)
+    };
     return (
         <main className="-mt-24 pb-8">
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -108,10 +92,15 @@ export default function Containers() {
                                                 allow_symbol_change: false,
                                                 enable_publishing: false,
                                             }
-                                        }/>
+                                        }
+                                                       onLoad={() => handleImageLoadError("loaded")}
+                                                       onError={() => handleImageLoadError(post.company.exchange)}
+                                        />
                                     </div>
                                     <div className={"container px-8 pt-8 font-serif"}>
-                                        {post.content.map((section: BlogPostSection, index) => (
+                                        <a className={`text-2xl hover:underline`}
+                                           href={post.company.website} target={`_blank`}>{post.company.name}</a>
+                                        {post.content && post.content.map((section: BlogPostSection, index) => (
                                             <div key={index}>
                                                 <span className="text-lg">{section.section}</span>
                                                 <p className="text-sm pb-4">{section.text}</p>
@@ -143,19 +132,52 @@ export default function Containers() {
                                             }
                                         }/>
                                     </div>
-                                    <div className={"container mx-auto left-0 -mt-24"}>
-                                        <Timeline widgetProps={
-                                            {
-                                                colorTheme: isDarkMode ? 'dark' : 'light',
-                                                width: innerWidth < 1200 ? innerWidth < 800 ? innerWidth - 48 : innerWidth / 3.35 | 0 : 384,
-                                                height: 777,
-                                                // @ts-ignore
-                                                feedMode: "symbol",
-                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
-                                            }
-                                        }/>
-                                    </div>
-                                    <div className={"container mx-auto left-0"}>
+                                    {
+                                        post.news ?
+                                            <div
+                                                className={`${innerWidth < 800 ? `w-[${innerWidth - 48}px]` : 'w-[385px]'} border-[1px] border-gray-600 bg-[#1e222d] relative -mt-24 `}>
+                                                <div className={`text-3xl pb-2 pt-4 font-light  `}>
+                                                    <span
+                                                        className={`pl-4 pr-2 text-[#2862FF]`}>{post.company.symbol}</span>
+                                                    <span>Timeline</span>
+                                                </div>
+                                                <ul role="list"
+                                                    className={` divide-y h-[777px] overflow-y-auto`}>
+                                                    {post.news.map((news) => (
+                                                        <li key={news.id}
+                                                            className={`${isDarkMode ? 'bg-[#1e222d]' : 'bg-light'} flex gap-x-4 py-5`}>
+                                                            <img className="h-12 w-12 flex-none rounded-full ml-2"
+                                                                 src={news.image ? news.image : '/img/bbd-logo.svg'}
+                                                                 alt=""/>
+                                                            <div className="flex-auto">
+                                                                <div
+                                                                    className={`${isDarkMode ? 'bg-[#1e222d]' : 'bg-light'} ${console.log(innerWidth) && innerWidth < 800 ? `w-full` : 'w-[300px]'} flex items-baseline justify-between gap-x-4`}>
+                                                                    <a href={news.url} target={`_blank`} className="text-sm font-semibold leading-6 truncate">{news.headline}</a>
+                                                                    <a href={news.url} target={`_blank`} className="flex-none text-xs mr-3">
+                                                                        <time dateTime={date(news.date).toDateString()}>{date(news.date).toDateString()}</time>
+                                                                    </a>
+                                                                </div>
+                                                                <a href={news.url} target={`_blank`} className="mt-1 line-clamp-2 text-sm leading-6 text-gray-400 ">{news.summary}</a>
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                            :
+                                            <div className={"container mx-auto left-0 -mt-24"}>
+                                                <Timeline widgetProps={
+                                                    {
+                                                        colorTheme: isDarkMode ? 'dark' : 'light',
+                                                        width: innerWidth < 1200 ? innerWidth < 800 ? innerWidth - 48 : innerWidth / 3.35 | 0 : 384,
+                                                        height: 777,
+                                                        // @ts-ignore
+                                                        feedMode: "symbol",
+                                                        symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
+                                                    }
+                                                }/>
+                                            </div>
+                                    }
+                                    <div className={" container mx-auto left-0"}>
                                         <CompanyProfile widgetProps={
                                             {
                                                 symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
@@ -165,6 +187,7 @@ export default function Containers() {
                                             }
                                         }/>
                                     </div>
+
                                     <div className={"container mx-auto left-0"}>
                                         <FundamentalData widgetProps={
                                             {
