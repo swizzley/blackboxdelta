@@ -177,7 +177,7 @@ export function Section(props: SectionProps) {
                             <article key={index}
                                      className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} relative isolate flex flex-col lg:flex-row p-4 rounded-lg`}>
                                 <div>
-                                    <div className={"container mx-auto left-0 p-4"}>
+                                    <div className={`container mx-auto left-0 mr-5 ${innerWidth < 1024 ? innerWidth < 800 ? `w-[${innerWidth - 150}px]` : `w-[${innerWidth / 1.6 | 0}px]` : `w-[310px]`}`}>
                                         <SymbolInfo widgetProps={
                                             {
                                                 symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
@@ -185,6 +185,9 @@ export function Section(props: SectionProps) {
                                                 width: innerWidth < 1024 ? innerWidth < 800 ? innerWidth - 150 : innerWidth / 1.6 | 0 : 310,
                                             }
                                         }
+                                                    onLoad={() => {
+                                                        console.log('loaded')
+                                                    }}
                                         />
                                     </div>
                                 </div>
