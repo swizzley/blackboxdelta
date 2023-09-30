@@ -30,7 +30,7 @@ export default function Tags(props: TagsProps) {
             {tagData.map((data) => {
                 return (
                     <div key={data.key}
-                         className={`${data.current ? 'bg-cyan-300' : isDarkMode ? 'bg-gray-500' : 'bg-gray-300'} px-3 py-1 rounded-full`}>
+                         className={`${data.current ? 'bg-cyan-300' : isDarkMode ? 'bg-gray-500' : 'bg-gray-300'} px-3 py-1 rounded-full font-light`}>
                         <a href={data.href}>
                             <span className={`${isDarkMode ? '' : ''}`}>{data.label}</span>
                         </a>

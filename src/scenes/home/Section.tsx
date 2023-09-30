@@ -168,9 +168,9 @@ export function Section(props: SectionProps) {
 
     return (
         <div
-            className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 sm:py-32 rounded-lg`}>
+            className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} rounded-lg transition-colors duration-500 sm:py-32`}>
             <div
-                className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 -mt-48 mx-auto max-w-7xl px-6 lg:px-8`}>
+                className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} rounded-lg shadow-lg transition-colors duration-500 -mt-48 mx-auto max-w-7xl px-6 lg:px-8`}>
                 <div className="mx-auto max-w-2xl lg:max-w-4xl">
                     <div className="mt-16 lg:mt-20 space-y-4">
                         {deduplicatedPosts.map((post: PostType, index: number) => (
