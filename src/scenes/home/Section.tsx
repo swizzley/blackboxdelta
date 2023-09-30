@@ -143,6 +143,29 @@ export function Section(props: SectionProps) {
         return false;
     });
 
+    function exchangeName(exchange: string) {
+        switch (exchange) {
+            case "NEW YORK STOCK EXCHANGE, INC.":
+                return "NYSE"
+            case "NASDAQ NMS - GLOBAL MARKET":
+                return "NASDAQ"
+            case "NYSE MKT LLC":
+                return "AMEX"
+            case "TORONTO STOCK EXCHANGE":
+                return "TSX"
+            case "TEL AVIV STOCK EXCHANGE":
+                return "TASE"
+            case "TSX VENTURE EXCHANGE - NEX":
+                return "NEX"
+            case "OTC MARKETS":
+                return "OTC"
+            case "AEQUITAS NEO EXCHANGE":
+                return "NEO"
+            default:
+                return exchange
+        }
+    }
+
     return (
         <div
             className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} transition-colors duration-500 sm:py-32 rounded-lg`}>
@@ -157,7 +180,7 @@ export function Section(props: SectionProps) {
                                     <div className={"container mx-auto left-0 p-4"}>
                                         <SymbolInfo widgetProps={
                                             {
-                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
+                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 width: innerWidth < 1000 ? innerWidth < 800 ? innerWidth - 150 : innerWidth / 1.6 | 0 : 310,
                                             }

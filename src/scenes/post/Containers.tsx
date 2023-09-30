@@ -60,6 +60,29 @@ export default function Containers() {
         return <div/>
     }
 
+    function exchangeName(exchange: string) {
+        switch (exchange) {
+            case "NEW YORK STOCK EXCHANGE, INC.":
+                return "NYSE"
+            case "NASDAQ NMS - GLOBAL MARKET":
+                return "NASDAQ"
+            case "NYSE MKT LLC":
+                return "AMEX"
+            case "TORONTO STOCK EXCHANGE":
+                return "TSX"
+            case "TEL AVIV STOCK EXCHANGE":
+                return "TASE"
+            case "TSX VENTURE EXCHANGE - NEX":
+                return "NEX"
+            case "OTC MARKETS":
+                return "OTC"
+            case "AEQUITAS NEO EXCHANGE":
+                return "NEO"
+            default:
+                return exchange
+        }
+    }
+
     return (
         <main className="-mt-24 pb-8">
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -74,7 +97,7 @@ export default function Containers() {
                                     <div className={"container mx-auto left-0"}>
                                         <AdvancedChart widgetProps={
                                             {
-                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
+                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                                 theme: isDarkMode ? "dark" : "light",
                                                 hide_top_toolbar: true,
                                                 height: 450,
@@ -113,7 +136,7 @@ export default function Containers() {
                                     <div className={"container mx-auto left-0"}>
                                         <TechnicalAnalysis widgetProps={
                                             {
-                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
+                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 width: innerWidth < 800 ? innerWidth - 48 : 385,
                                                 interval: "1D"
@@ -128,14 +151,14 @@ export default function Containers() {
                                                 height: 777,
                                                 // @ts-ignore
                                                 feedMode: "symbol",
-                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
+                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                             }
                                         }/>
                                     </div>
                                     <div className={"container mx-auto left-0"}>
                                         <CompanyProfile widgetProps={
                                             {
-                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
+                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                                 width: innerWidth < 800 ? innerWidth - 48 : 385,
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 height: 777
@@ -145,7 +168,7 @@ export default function Containers() {
                                     <div className={"container mx-auto left-0"}>
                                         <FundamentalData widgetProps={
                                             {
-                                                symbol: `${post.company.exchange}:${post.company.symbol}`,
+                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                                 width: innerWidth < 800 ? innerWidth - 48 : 385,
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 height: 777
