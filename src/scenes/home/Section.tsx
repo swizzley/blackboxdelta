@@ -185,9 +185,6 @@ export function Section(props: SectionProps) {
                                                 width: innerWidth < 1024 ? innerWidth < 800 ? innerWidth - 150 : innerWidth / 1.6 | 0 : 310,
                                             }
                                         }
-                                                    onLoad={() => {
-                                                        console.log('loaded')
-                                                    }}
                                         />
                                     </div>
                                 </div>
