@@ -63,10 +63,6 @@ export default function Containers() {
         return new Date(d * 1000)
     }
 
-    // Function to handle image load failure
-    const handleImageLoadError = (ex) => {
-        console.log("ERROR LOADING EXCHANGE", ex)
-    };
     return (
         <main className="-mt-24 pb-8">
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -93,8 +89,6 @@ export default function Containers() {
                                                 enable_publishing: false,
                                             }
                                         }
-                                                       onLoad={() => handleImageLoadError("loaded")}
-                                                       onError={() => handleImageLoadError(post.company.exchange)}
                                         />
                                     </div>
                                     <div className={"container px-8 pt-8 font-serif"}>
@@ -151,7 +145,7 @@ export default function Containers() {
                                                                  alt=""/>
                                                             <div className="flex-auto">
                                                                 <div
-                                                                    className={`${isDarkMode ? 'bg-[#1e222d]' : 'bg-light'} ${console.log(innerWidth) && innerWidth < 800 ? `w-full` : 'w-[300px]'} flex items-baseline justify-between gap-x-4`}>
+                                                                    className={`${isDarkMode ? 'bg-[#1e222d]' : 'bg-light'} ${innerWidth < 800 ? `w-full` : 'w-[300px]'} flex items-baseline justify-between gap-x-4`}>
                                                                     <a href={news.url} target={`_blank`} className="text-sm font-semibold leading-6 truncate">{news.headline}</a>
                                                                     <a href={news.url} target={`_blank`} className="flex-none text-xs mr-3">
                                                                         <time dateTime={date(news.date).toDateString()}>{date(news.date).toDateString()}</time>
