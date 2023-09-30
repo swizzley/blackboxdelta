@@ -37,7 +37,7 @@ export function Section(props: SectionProps) {
             break;
     }
 
-    let itemsPerPage = 10;
+    const [itemsPerPage, setItemsPerPage] = useState<number>(10);
     const [lastFetchedItem, setLastFetchedItem] = useState<number>(0);
 
     function initPosts() {
@@ -85,11 +85,13 @@ export function Section(props: SectionProps) {
         const scrollTop = document.documentElement.scrollTop;
         const clientHeight = document.documentElement.clientHeight;
 
+        // console.log("Scroll Position", scrollTop + clientHeight, scrollHeight-3500)
+
         if (!hasMoreItems || isFetching) {
             return;
         }
 
-        if (scrollTop + clientHeight >= scrollHeight - 200) {
+        if (scrollTop + clientHeight >= scrollHeight - 3500) {
             setScrollPosition(scrollTop); // Update the scroll position
         }
     };
@@ -104,13 +106,21 @@ export function Section(props: SectionProps) {
 
     // Use another useEffect to fetch data when the scroll position changes
     useEffect(() => {
-        if (scrollPosition > 110) {
+        if (lastFetchedItem > 0) {
+            setItemsPerPage(1)
+        }
+
+        if (scrollPosition > 0) {
             setIsFetching(true);
 
             // Ensure nextItemIndex is within bounds
             if (lastFetchedItem + 1 < sortedSite.length) {
                 const nextItemIndex = lastFetchedItem + itemsPerPage;
-                sortedSite.map((site: SiteMap) => {
+                for (let i = lastFetchedItem; i < nextItemIndex; i++) {
+                    const site = sortedSite[i];
+                    if (!site) {
+                        break
+                    }
                     axios
                         .get(site.url + '.json')
                         .then((response) => {
@@ -124,14 +134,17 @@ export function Section(props: SectionProps) {
                         })
                         .catch((error) => {
                             console.error('Error loading JSON data:', error);
+                            setIsFetching(false);
                             return
-                        })
-                })
+                        }).finally(() => {
+                        setIsFetching(false);
+                    })
+                }
             } else {
                 setHasMoreItems(false)
             }
         }
-    }, [scrollPosition, lastFetchedItem, itemsPerPage, sortedSite]);
+    }, [scrollPosition]);
 
     // Create a Set to store unique post IDs
     const uniquePostIds = new Set();
@@ -145,16 +158,13 @@ export function Section(props: SectionProps) {
     });
 
 
-
     function date(d: string) {
         const dateComponents = d.split("-");
         const year = parseInt(dateComponents[0]);
-        const month = parseInt(dateComponents[1])-1;
+        const month = parseInt(dateComponents[1]) - 1;
         const day = parseInt(dateComponents[2]);
         return new Date(year, month, day);
     }
-
-    console.log("POSTS:", deduplicatedPosts.length)
 
     return (
         <div
@@ -172,7 +182,7 @@ export function Section(props: SectionProps) {
                                             {
                                                 symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                                 colorTheme: isDarkMode ? "dark" : "light",
-                                                width: innerWidth < 1000 ? innerWidth < 800 ? innerWidth - 150 : innerWidth / 1.6 | 0 : 310,
+                                                width: innerWidth < 1024 ? innerWidth < 800 ? innerWidth - 150 : innerWidth / 1.6 | 0 : 310,
                                             }
                                         }
                                         />
@@ -180,7 +190,8 @@ export function Section(props: SectionProps) {
                                 </div>
 
                                 <div>
-                                    <a className="flex items-center gap-x-4 text-xs" href={`/posts/${post.date.replace(/-/g, '\/')}`}>
+                                    <a className="flex items-center gap-x-4 text-xs"
+                                       href={`/posts/${post.date.replace(/-/g, '\/')}`}>
                                         <time dateTime={date(post.date).toDateString()} className="text-gray-400">
                                             {date(post.date).toDateString()}
                                         </time>

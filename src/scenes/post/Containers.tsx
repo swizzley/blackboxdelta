@@ -127,7 +127,7 @@ export default function Containers() {
                                             {
                                                 symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                                 colorTheme: isDarkMode ? "dark" : "light",
-                                                width: innerWidth < 800 ? innerWidth - 48 : 385,
+                                                width: innerWidth < 1024 ? innerWidth - 48 : 385,
                                                 interval: "1D"
                                             }
                                         }/>
@@ -135,7 +135,7 @@ export default function Containers() {
                                     {
                                         post.news ?
                                             <div
-                                                className={`${innerWidth < 800 ? `w-[${innerWidth - 48}px]` : 'w-[385px]'} border-[1px] border-gray-600 bg-[#1e222d] relative -mt-24 `}>
+                                                className={`${innerWidth < 1024 ? `w-[${innerWidth - 48}px]` : 'w-[385px]'} border-[1px] border-gray-600 bg-[#1e222d] relative -mt-24 `}>
                                                 <div className={`text-3xl pb-2 pt-4 font-light  `}>
                                                     <span
                                                         className={`pl-4 pr-2 text-[#2862FF]`}>{post.company.symbol}</span>
@@ -168,7 +168,7 @@ export default function Containers() {
                                                 <Timeline widgetProps={
                                                     {
                                                         colorTheme: isDarkMode ? 'dark' : 'light',
-                                                        width: innerWidth < 1200 ? innerWidth < 800 ? innerWidth - 48 : innerWidth / 3.35 | 0 : 384,
+                                                        width: innerWidth < 1024 ? innerWidth < 800 ? innerWidth - 48 : innerWidth / 3.35 | 0 : 384,
                                                         height: 777,
                                                         // @ts-ignore
                                                         feedMode: "symbol",
@@ -181,7 +181,7 @@ export default function Containers() {
                                         <CompanyProfile widgetProps={
                                             {
                                                 symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
-                                                width: innerWidth < 800 ? innerWidth - 48 : 385,
+                                                width: innerWidth < 1024 ? innerWidth - 48 : 385,
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 height: 777
                                             }
@@ -192,7 +192,7 @@ export default function Containers() {
                                         <FundamentalData widgetProps={
                                             {
                                                 symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
-                                                width: innerWidth < 800 ? innerWidth - 48 : 385,
+                                                width: innerWidth < 1024 ? innerWidth - 48 : 385,
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 height: 777
                                             }
