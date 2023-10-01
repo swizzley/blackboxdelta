@@ -6,7 +6,7 @@
 
 .slide-down {
     transition: max-height 0.3s ease-in-out;
-    max-height: 78vh; /* Adjust the max height as needed */
+    max-height: 100vh; /* Adjust the max height as needed */
     overflow: hidden;
 }
 

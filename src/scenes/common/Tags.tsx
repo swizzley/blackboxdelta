@@ -26,11 +26,11 @@ export default function Tags(props: TagsProps) {
     tagData.sort((a, b) => a.label.localeCompare(b.label));
 
     return (
-        <div className={`flex flex-wrap justify-center p-2 list-none rounded-lg gap-x-2 gap-y-2 overflow-x-auto`}>
+        <div className={`flex flex-wrap justify-center p-2 list-none rounded-lg gap-x-1 gap-y-2 `}>
             {tagData.map((data) => {
                 return (
                     <div key={data.key}
-                         className={`${data.current ? 'bg-cyan-300' : isDarkMode ? 'bg-gray-500' : 'bg-gray-300'} px-3 py-1 rounded-full font-light`}>
+                         className={`${data.current ? 'bg-cyan-300' : isDarkMode ? 'bg-gray-500' : 'bg-gray-300'} text-sm px-2 py-1 rounded-full font-light`}>
                         <a href={data.href}>
                             <span className={`${isDarkMode ? '' : ''}`}>{data.label}</span>
                         </a>

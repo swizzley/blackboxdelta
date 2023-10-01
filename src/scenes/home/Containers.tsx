@@ -57,10 +57,6 @@ export function Containers(props: ContainersProps) {
                                 )}
                                 {isTagsDrawerOpen && (
                                     <div>
-                                        <h2 className="sr-only" id="tags">
-                                            Tags
-                                        </h2>
-                                        <Tags Site={Site}/>
                                         <h2 className="sr-only" id="section-2-title">
                                             Dates
                                         </h2>
@@ -69,6 +65,10 @@ export function Containers(props: ContainersProps) {
                                         >
                                             <Cal/>
                                         </div>
+                                        <h2 className="sr-only" id="tags">
+                                            Tags
+                                        </h2>
+                                        <Tags Site={Site}/>
                                     </div>
                                 )}
                             </div>

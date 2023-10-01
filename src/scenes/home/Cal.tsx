@@ -3,7 +3,7 @@ import {LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {DateCalendar} from '@mui/x-date-pickers/DateCalendar';
 import dayjs, {Dayjs} from 'dayjs';
-
+import '../../assets/global.css'
 
 export default function Cal() {
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
@@ -36,8 +36,8 @@ export default function Cal() {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DateCalendar
-                onChange={handleDateChange} // Attach the callback function
-                value={selectedDate} // Set the selected date (for controlled component)
+                onChange={handleDateChange}
+                value={selectedDate}
             />
         </LocalizationProvider>
     );
