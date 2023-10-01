@@ -5,6 +5,7 @@ import Tags from "../common/Tags";
 import Cal from "./Cal";
 import {useEffect, useState} from "react";
 import {ChevronDoubleDownIcon} from "@heroicons/react/20/solid";
+import '../../assets/global.css'
 
 interface ContainersProps {
     Site: SiteMap[];
@@ -13,8 +14,8 @@ interface ContainersProps {
 
 export function Containers(props: ContainersProps) {
     const {Site, Mode} = props;
-    const {isDarkMode} = useTheme();
-    const [isTagsDrawerOpen, setIsTagsDrawerOpen] = useState(false); // State to manage drawer open/close
+    const {isDarkMode, width, adjustWidth} = useTheme();
+    const [isTagsDrawerOpen, setIsTagsDrawerOpen] = useState(false);
 
     // Function to handle toggling the drawer
     const toggleTagsDrawer = () => {
@@ -25,21 +26,22 @@ export function Containers(props: ContainersProps) {
             setIsTagsDrawerOpen(true)
         }
     }, [innerWidth]);
+
+
     return (
         <main className="-mt-24 pb-8">
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-
                 {/* Main 3 column grid */}
                 <div className="grid grid-cols-1 items-start lg:grid-cols-3 lg:gap-8">
                     {/* Left column */}
-                    <div className={`grid grid-cols-1 gap-4 w-[${innerWidth / 4 | 0}px] h-screen`}>
+                    <div  className={`${isTagsDrawerOpen ? 'slide-down' : 'slide-up'} grid grid-cols-1 gap-4 h-screen rounded-lg`}>
                         <section aria-labelledby="bbd-filters">
                             <div
-                                className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-500 shadow rounded-lg mb-4`}>
+                                className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-500 shadow rounded-lg `}>
                                 {innerWidth < 1024 ? (
                                     <button
                                         onClick={toggleTagsDrawer}
-                                        className={`shadow-lg font-light flex items-center justify-between ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-500 rounded-lg mb-4 w-full`}
+                                        className={`shadow-lg font-light flex items-center justify-between ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-500 rounded-lg w-full`}
                                     >
                                         <span className={`ml-4 text-lg`}>Filter Signals</span>
                                         <ChevronDoubleDownIcon className="w-6 h-6"/>
@@ -47,7 +49,7 @@ export function Containers(props: ContainersProps) {
                                 ) : (
                                     <button
                                         onClick={toggleTagsDrawer}
-                                        className={`hidden ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-500 rounded-lg mb-4 w-full`}
+                                        className={`hidden ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-500 rounded-lg  w-full`}
                                     >
                                         <span className={`ml-4`}>Filters</span>
                                         <ChevronDoubleDownIcon className="w-6 h-6"/>
@@ -75,7 +77,7 @@ export function Containers(props: ContainersProps) {
 
                     {/* Right Main column */}
                     <div
-                        className={`grid grid-cols-1 gap-4 lg:col-span-2 ${innerWidth < 1024 ? isTagsDrawerOpen ? '-mt-[200px]' : '-mt-[720px]' : ''}`}>
+                        className={`grid grid-cols-1 gap-4 lg:col-span-2`}>
                         <section aria-labelledby="bbd-signals">
                             <div className="">
                                 <div className="w-full">

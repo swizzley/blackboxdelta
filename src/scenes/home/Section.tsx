@@ -166,6 +166,31 @@ export function Section(props: SectionProps) {
         return new Date(year, month, day);
     }
 
+    function widthString() {
+        switch (true) {
+            case innerWidth <= 768:
+                return `w-[${innerWidth - 128}px]`
+
+            case innerWidth < 1024:
+                return `w-[${innerWidth / 1.6 | 0}px]`
+
+            default:
+                return `w-[310px]`
+        }
+    }
+    function width() {
+        switch (true) {
+            case innerWidth <= 768:
+                return innerWidth - 105
+
+            case innerWidth < 1024:
+                return innerWidth / 1.6 | 0
+
+            default:
+                return 310
+        }
+    }
+
     return (
         <div
             className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} rounded-lg transition-colors duration-500 sm:py-32`}>
@@ -177,12 +202,13 @@ export function Section(props: SectionProps) {
                             <article key={index}
                                      className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} relative isolate flex flex-col lg:flex-row p-4 rounded-lg`}>
                                 <div>
-                                    <div className={`container mx-auto left-0 mr-5 ${innerWidth < 1024 ? innerWidth < 800 ? `w-[${innerWidth - 150}px]` : `w-[${innerWidth / 1.6 | 0}px]` : `w-[310px]`}`}>
+                                    <div
+                                        className={`container mx-auto left-0 mr-5 ${widthString()}`}>
                                         <SymbolInfo widgetProps={
                                             {
                                                 symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                                 colorTheme: isDarkMode ? "dark" : "light",
-                                                width: innerWidth < 1024 ? innerWidth < 800 ? innerWidth - 150 : innerWidth / 1.6 | 0 : 310,
+                                                width: width(),
                                             }
                                         }
                                         />

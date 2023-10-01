@@ -61,7 +61,7 @@ export default function Nav(props: NavProps) {
         setSearchQuery(e.target.value);
     };
 
-    const {isDarkMode, toggleDarkMode} = useTheme();
+    const {isDarkMode, toggleDarkMode, width} = useTheme();
 
     const MaterialUISwitch = styled(Switch)(({}) => ({
         width: 62,
@@ -123,7 +123,7 @@ export default function Nav(props: NavProps) {
                                     <span className="sr-only">Black Box Delta</span>
                                     <img
                                         className="h-12 w-auto"
-                                        src="/img/bbd-logo-nav.svg"
+                                        src={innerWidth < 1024 ? `/img/bbd-logo.svg` : `/img/bbd-logo-nav.svg`}
                                         alt="Black Box Delta"
                                     />
                                 </a>

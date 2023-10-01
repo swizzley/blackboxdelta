@@ -1,0 +1,20 @@
+.slide-up {
+    transition: max-height 0.3s ease-in-out;
+    max-height: 5vh; /* Adjust the max height as needed */
+    overflow: hidden;
+}
+
+.slide-down {
+    transition: max-height 0.3s ease-in-out;
+    max-height: 68vh; /* Adjust the max height as needed */
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .slide-up {
+        max-height: 19vh; /* Adjust for mobile screens */
+    }
+    .slide-down {
+        max-height: 97vh; /* Adjust for mobile screens */
+    }
+}

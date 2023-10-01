@@ -1,9 +1,11 @@
 // ThemeContext.tsx
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 
 interface ThemeContextProps {
     isDarkMode: boolean;
     toggleDarkMode: () => void;
+    width: number;
+    adjustWidth: (number) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
@@ -16,15 +18,21 @@ export const useTheme = (): ThemeContextProps => {
     return context;
 };
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const [isDarkMode, setIsDarkMode] = useState(() => {
         // Try to get the theme preference from local storage
         const storedTheme = localStorage.getItem('theme');
         return storedTheme === 'dark';
     });
 
+    const [width, setWidth] = useState<number>(innerWidth);
+
     const toggleDarkMode = () => {
         setIsDarkMode((prevMode) => !prevMode);
+    };
+
+    const adjustWidth = (w:number) => {
+        setWidth(w)
     };
 
     useEffect(() => {
@@ -38,7 +46,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [isDarkMode]);
 
     return (
-        <ThemeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+        <ThemeContext.Provider value={{isDarkMode, toggleDarkMode, width, adjustWidth}}>
             {children}
         </ThemeContext.Provider>
     );
