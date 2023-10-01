@@ -4,6 +4,7 @@ import {useTheme} from "../../context/Theme";
 import axios from 'axios'
 import {SymbolInfo} from "react-tradingview-embed";
 import {exchangeName} from "../common/Util";
+import {debounce} from "@mui/material";
 
 interface SectionProps {
     Site: SiteMap[];
@@ -37,7 +38,7 @@ export function Section(props: SectionProps) {
             break;
     }
 
-    const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+    const [itemsPerPage, setItemsPerPage] = useState<number>(8);
     const [lastFetchedItem, setLastFetchedItem] = useState<number>(0);
 
     function initPosts() {
@@ -79,13 +80,11 @@ export function Section(props: SectionProps) {
     // Inside your component
     const [scrollPosition, setScrollPosition] = useState(0);
 
-    // Create a function to handle the scroll event
-    const handleScroll = () => {
+    // Create a debounced version of handleScroll
+    const debouncedHandleScroll = debounce(() => {
         const scrollHeight = document.documentElement.scrollHeight;
         const scrollTop = document.documentElement.scrollTop;
         const clientHeight = document.documentElement.clientHeight;
-
-        // console.log("Scroll Position", scrollTop + clientHeight, scrollHeight-3500)
 
         if (!hasMoreItems || isFetching) {
             return;
@@ -94,57 +93,65 @@ export function Section(props: SectionProps) {
         if (scrollTop + clientHeight >= scrollHeight - 3500) {
             setScrollPosition(scrollTop); // Update the scroll position
         }
-    };
+    }, 30);
 
     // Attach the debounced scroll event listener
     useEffect(() => {
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', debouncedHandleScroll);
         return () => {
-            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('scroll', debouncedHandleScroll);
         };
     }, [hasMoreItems, isFetching]);
 
-    // Use another useEffect to fetch data when the scroll position changes
-    useEffect(() => {
-        if (lastFetchedItem > 0) {
-            setItemsPerPage(1)
-        }
 
+    // Use another debounced useEffect for fetching data when scroll position changes
+    useEffect(() => {
+        const debouncedFetchData = debounce(() => {
+
+            if (scrollPosition > 0) {
+                setIsFetching(true);
+
+                // Ensure nextItemIndex is within bounds
+                if (lastFetchedItem + 1 < sortedSite.length) {
+                    const nextItemIndex = lastFetchedItem + itemsPerPage;
+                    for (let i = lastFetchedItem; i < nextItemIndex; i++) {
+                        const site = sortedSite[i];
+                        if (!site) {
+                            break
+                        }
+                        axios
+                            .get(site.url + '.json')
+                            .then((response) => {
+                                if (response.status === 200) {
+                                    const data: PostType = response.data;
+                                    setLastFetchedItem(nextItemIndex);
+                                    setPosts((prevPosts) => [...prevPosts, data]);
+                                } else {
+                                    throw new Error(`Failed to fetch data from ${site.url}.json`);
+                                }
+                            })
+                            .catch((error) => {
+                                console.error('Error loading JSON data:', error);
+                                setIsFetching(false);
+                                return
+                            }).finally(() => {
+                            setIsFetching(false);
+                        })
+                    }
+                } else {
+                    setHasMoreItems(false)
+                }
+            }
+            setIsFetching(false);
+        }, 300);
+
+        // Call debouncedFetchData when scroll position changes
         if (scrollPosition > 0) {
             setIsFetching(true);
-
-            // Ensure nextItemIndex is within bounds
-            if (lastFetchedItem + 1 < sortedSite.length) {
-                const nextItemIndex = lastFetchedItem + itemsPerPage;
-                for (let i = lastFetchedItem; i < nextItemIndex; i++) {
-                    const site = sortedSite[i];
-                    if (!site) {
-                        break
-                    }
-                    axios
-                        .get(site.url + '.json')
-                        .then((response) => {
-                            if (response.status === 200) {
-                                const data: PostType = response.data;
-                                setLastFetchedItem(nextItemIndex);
-                                setPosts((prevPosts) => [...prevPosts, data]);
-                            } else {
-                                throw new Error(`Failed to fetch data from ${site.url}.json`);
-                            }
-                        })
-                        .catch((error) => {
-                            console.error('Error loading JSON data:', error);
-                            setIsFetching(false);
-                            return
-                        }).finally(() => {
-                        setIsFetching(false);
-                    })
-                }
-            } else {
-                setHasMoreItems(false)
-            }
+            debouncedFetchData();
         }
     }, [scrollPosition]);
+
 
     // Create a Set to store unique post IDs
     const uniquePostIds = new Set();
@@ -166,31 +173,6 @@ export function Section(props: SectionProps) {
         return new Date(year, month, day);
     }
 
-    function widthString() {
-        switch (true) {
-            case innerWidth <= 768:
-                return `w-[${innerWidth - 128}px]`
-
-            case innerWidth < 1024:
-                return `w-[${innerWidth / 1.6 | 0}px]`
-
-            default:
-                return `w-[310px]`
-        }
-    }
-    function width() {
-        switch (true) {
-            case innerWidth <= 768:
-                return innerWidth - 105
-
-            case innerWidth < 1024:
-                return innerWidth / 1.6 | 0
-
-            default:
-                return 310
-        }
-    }
-
     return (
         <div
             className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-200'} rounded-lg transition-colors duration-500 sm:py-32`}>
@@ -202,21 +184,7 @@ export function Section(props: SectionProps) {
                             <article key={index}
                                      className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} relative isolate flex flex-col lg:flex-row p-4 rounded-lg`}>
                                 <div>
-                                    <div
-                                        className={`container mx-auto left-0 mr-5 ${widthString()}`}>
-                                        <SymbolInfo widgetProps={
-                                            {
-                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
-                                                colorTheme: isDarkMode ? "dark" : "light",
-                                                width: width(),
-                                            }
-                                        }
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <a className="flex items-center gap-x-4 text-xs"
+                                    <a className="flex items-center gap-x-4 text-xs pt-1"
                                        href={`/posts/${post.date.replace(/-/g, '\/')}`}>
                                         <time dateTime={date(post.date).toDateString()} className="text-gray-400">
                                             {date(post.date).toDateString()}

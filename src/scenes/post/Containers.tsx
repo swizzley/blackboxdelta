@@ -1,6 +1,13 @@
 import {useEffect, useState} from "react";
 import {BlogPostSection, PostType} from "../../context/Types";
-import {AdvancedChart, CompanyProfile, FundamentalData, TechnicalAnalysis, Timeline} from "react-tradingview-embed";
+import {
+    AdvancedChart,
+    CompanyProfile,
+    FundamentalData,
+    SymbolInfo,
+    TechnicalAnalysis,
+    Timeline
+} from "react-tradingview-embed";
 import Disclaimer from "../common/Disclaimer";
 import axios from 'axios'
 import {useTheme} from "../../context/Theme";
@@ -145,6 +152,17 @@ export default function Containers() {
                             <div
                                 className={`${isDarkMode ? 'bg-dark' : 'bg-light'} transition-colors duration-500 shadow rounded-lg bg-white shadow`}>
                                 <div className={`p-1`}>
+                                    <div
+                                        className={`container mx-auto mr-5 ${widthString()}`}>
+                                        <SymbolInfo widgetProps={
+                                            {
+                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
+                                                colorTheme: isDarkMode ? "dark" : "light",
+                                                width: width(),
+                                            }
+                                        }
+                                        />
+                                    </div>
                                     <div className={"container mx-auto left-0 -ml-[0.5px]"}>
                                         <TechnicalAnalysis widgetProps={
                                             {
