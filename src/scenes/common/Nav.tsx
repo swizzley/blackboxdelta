@@ -61,7 +61,7 @@ export default function Nav(props: NavProps) {
         setSearchQuery(e.target.value);
     };
 
-    const {isDarkMode, toggleDarkMode, width} = useTheme();
+    const {isDarkMode, toggleDarkMode} = useTheme();
 
     const MaterialUISwitch = styled(Switch)(({}) => ({
         width: 62,
@@ -188,12 +188,12 @@ export default function Nav(props: NavProps) {
                                             <div>
                                                 {searchQuery &&
                                                     <ul role="list"
-                                                        className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 absolute transition-colors duration-500 pb-24 divide-y divide-gray-100 rounded-lg`}>
+                                                        className={`${isDarkMode ? 'bg-dark' : 'bg-light'} z-10 w-full absolute transition-colors duration-500 pb-24 divide-y divide-gray-100 rounded-lg`}>
                                                         {searchQuery && filteredResults.map((result) => (
                                                             <li key={result.id} className="flex gap-x-4 p-5">
                                                                 <a className="min-w-0" href={result.url}>
                                                                     <div
-                                                                        className={`max-w-xs truncate text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.title}</div>
+                                                                        className={`max-w-xs truncate text-sm font-semibold leading-6 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>({result.symbol}) {result.title}</div>
                                                                     <div
                                                                         className={`mt-1 text-xs leading-5 ${isDarkMode ? 'bg-dark' : 'bg-light'}`}>{result.date}</div>
                                                                 </a>
@@ -234,7 +234,7 @@ export default function Nav(props: NavProps) {
                                                     item.current ? 'text-white' : 'text-cyan-500',
                                                     'bg-white bg-opacity-0 px-3 py-2 text-sm font-medium hover:bg-opacity-10 rounded-lg'
                                                 )}
-                                                aria-current={item.current ? 'page' : undefined}
+                                                aria-current={item.current ? 'page' : false }
                                                 onClick={() => {
                                                     // Create a new array with updated current property
                                                     const updatedNavigation = navigation.map((navItem) => ({

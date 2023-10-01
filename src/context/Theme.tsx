@@ -4,8 +4,6 @@ import React, {createContext, useContext, useEffect, useState} from 'react';
 interface ThemeContextProps {
     isDarkMode: boolean;
     toggleDarkMode: () => void;
-    width: number;
-    adjustWidth: (number) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
@@ -25,14 +23,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({children
         return storedTheme === 'dark';
     });
 
-    const [width, setWidth] = useState<number>(innerWidth);
-
     const toggleDarkMode = () => {
         setIsDarkMode((prevMode) => !prevMode);
-    };
-
-    const adjustWidth = (w:number) => {
-        setWidth(w)
     };
 
     useEffect(() => {
@@ -46,7 +38,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({children
     }, [isDarkMode]);
 
     return (
-        <ThemeContext.Provider value={{isDarkMode, toggleDarkMode, width, adjustWidth}}>
+        <ThemeContext.Provider value={{isDarkMode, toggleDarkMode}}>
             {children}
         </ThemeContext.Provider>
     );

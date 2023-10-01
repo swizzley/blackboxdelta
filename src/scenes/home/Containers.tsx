@@ -14,7 +14,7 @@ interface ContainersProps {
 
 export function Containers(props: ContainersProps) {
     const {Site, Mode} = props;
-    const {isDarkMode, width, adjustWidth} = useTheme();
+    const {isDarkMode} = useTheme();
     const [isTagsDrawerOpen, setIsTagsDrawerOpen] = useState(false);
 
     // Function to handle toggling the drawer

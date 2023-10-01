@@ -2,8 +2,6 @@ import {useEffect, useState} from "react";
 import {PostType, Site as SiteMap} from '../../context/Types';
 import {useTheme} from "../../context/Theme";
 import axios from 'axios'
-import {SymbolInfo} from "react-tradingview-embed";
-import {exchangeName} from "../common/Util";
 import {debounce} from "@mui/material";
 
 interface SectionProps {
@@ -38,7 +36,7 @@ export function Section(props: SectionProps) {
             break;
     }
 
-    const [itemsPerPage, setItemsPerPage] = useState<number>(8);
+    const [itemsPerPage, ] = useState<number>(8);
     const [lastFetchedItem, setLastFetchedItem] = useState<number>(0);
 
     function initPosts() {
@@ -194,7 +192,7 @@ export function Section(props: SectionProps) {
                                         <h3 className="mt-3 text-2xl font-medium leading-6 group-hover:text-gray-600">
                                             <a href={post.url}>
                                                 <span className="absolute inset-0"/>
-                                                {post.title}
+                                                ({post.company.symbol}) {post.title}
                                             </a>
                                         </h3>
                                         <p className="mt-5 text-xl font-light leading-6 ">{post.content[0].text}</p>
