@@ -10,10 +10,14 @@ export default function Tags(props: TagsProps) {
     const {isDarkMode} = useTheme();
     const {Site} = props;
     // Remove duplicates from allTags to get uniqueTags
-    const excludedTags = ["Long", "Short"];
+    const excludedTags = ["Long", "Short", "stock"];
+    // const uniqueTags = Array.from(
+    //     new Set(Site.flatMap((site) => site.tags))
+    // ).filter((tag) => !excludedTags.includes(tag));
     const uniqueTags = Array.from(
-        new Set(Site.flatMap((site) => site.tags))
+        new Set(Site.map((site) => site.tags[0]))
     ).filter((tag) => !excludedTags.includes(tag));
+
 
     const tags: Tag[] = uniqueTags.map((tag, index) => ({
         key: index,

@@ -1,7 +1,7 @@
 import {Site as SiteMap} from '../../context/Types';
 import Section from "./Section";
 import {useTheme} from "../../context/Theme";
-import Tags from "../common/Tags";
+import Tags from "./Tags";
 import Cal from "./Cal";
 import {useEffect, useState} from "react";
 import {ChevronDoubleDownIcon} from "@heroicons/react/20/solid";

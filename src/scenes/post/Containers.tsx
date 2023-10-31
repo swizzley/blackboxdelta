@@ -12,6 +12,7 @@ import Disclaimer from "../common/Disclaimer";
 import axios from 'axios'
 import {useTheme} from "../../context/Theme";
 import {exchangeName} from "../common/Util";
+import Tags from "./Tags";
 
 export default function Containers() {
     const {isDarkMode} = useTheme();
@@ -127,6 +128,7 @@ export default function Containers() {
                                         }
                                         />
                                     </div>
+                                    <Tags Post={post}/>
                                     <div className={"container px-8 pt-8 font-serif"}>
                                         <a className={`text-2xl hover:underline`}
                                            href={post.company.website} target={`_blank`}>{post.company.name}</a>
