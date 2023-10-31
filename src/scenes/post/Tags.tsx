@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {PostType, Site as SiteMap, Tag} from "../../context/Types";
+import {PostType, Tag} from "../../context/Types";
 import {useTheme} from "../../context/Theme";
 
 interface TagsProps {
@@ -24,7 +24,8 @@ export default function Tags(props: TagsProps) {
     tagNames.sort((a, b) => a.label.localeCompare(b.label));
 
     return (
-        <div className={`${isDarkMode ? 'bg-gray-900' : 'bg-gray-400'} mx-2 flex flex-wrap justify-center p-2 list-none rounded-lg gap-x-1 gap-y-2`}>
+        <div
+            className={`${isDarkMode ? 'bg-gray-900' : 'bg-gray-400'} mx-2 flex flex-wrap justify-center p-2 list-none rounded-lg gap-x-1 gap-y-2`}>
             {tagNames.map((data) => {
                 return (
                     <div key={data.key}
