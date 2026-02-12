@@ -49,7 +49,14 @@ export default function Containers() {
         title: "",
         url: "",
         weekday: "",
-        year: 0
+        year: 0,
+        quote: {
+            EntryPrice: 0,
+            Rationale: "",
+            StopLoss: 0,
+            TakeProfit: 0,
+            TradePossible: false,
+        }
     });
 
     useEffect(() => {
@@ -129,6 +136,26 @@ export default function Containers() {
                                         />
                                     </div>
                                     <Tags Post={post}/>
+                                    <div className={`my-6 p-4 rounded-lg shadow border ${isDarkMode ? 'bg-[#23272f] border-gray-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
+                                        <h3 className="text-lg font-semibold mb-2">Prediction</h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                            <div>
+                                                <span className="font-medium">Entry:</span> {post.quote.EntryPrice !== undefined ? post.quote.EntryPrice : '-'}
+                                            </div>
+                                            <div>
+                                                <span className="font-medium">Stop:</span> {post.quote.StopLoss !== undefined ? post.quote.StopLoss : '-'}
+                                            </div>
+                                            <div>
+                                                <span className="font-medium">Profit:</span> {post.quote.TakeProfit !== undefined ? post.quote.TakeProfit : '-'}
+                                            </div>
+                                        </div>
+                                        {post.quote.Rationale && (
+                                            <div className="mt-3">
+                                                <span className="font-medium">Rationale:</span>
+                                                <p className="ml-2 text-sm italic">{post.quote.Rationale}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className={"container px-8 pt-8 font-serif"}>
                                         <a className={`text-2xl hover:underline`}
                                            href={post.company.website} target={`_blank`}>{post.company.name}</a>

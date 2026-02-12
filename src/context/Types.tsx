@@ -26,6 +26,15 @@ export interface PostType {
     content: BlogPostSection[];
     tags: string[];
     news: News[];
+    quote: Quote;
+}
+
+export interface Quote {
+    TradePossible: boolean;
+    EntryPrice: number;
+    TakeProfit: number;
+    StopLoss: number;
+    Rationale: string;
 }
 
 export interface BlogPostSection {
