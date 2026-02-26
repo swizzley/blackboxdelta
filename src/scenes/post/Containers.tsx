@@ -138,7 +138,7 @@ export default function Containers() {
                                     <Tags Post={post}/>
                                     <div className={`my-6 p-4 rounded-lg shadow border ${isDarkMode ? 'bg-[#23272f] border-gray-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
                                         <h3 className="text-lg font-semibold mb-2">Prediction</h3>
-                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                                             <div>
                                                 <span className="font-medium">Entry:</span> {post.quote.EntryPrice !== undefined ? post.quote.EntryPrice : '-'}
                                             </div>
@@ -147,6 +147,9 @@ export default function Containers() {
                                             </div>
                                             <div>
                                                 <span className="font-medium">Profit:</span> {post.quote.TakeProfit !== undefined ? post.quote.TakeProfit : '-'}
+                                            </div>
+                                            <div>
+                                                <span className="font-medium">Timeframe:</span> {post.quote.Timeframe !== undefined ? post.quote.Timeframe : '-'}
                                             </div>
                                         </div>
                                         {post.quote.Rationale && (

@@ -35,6 +35,7 @@ export interface Quote {
     TakeProfit: number;
     StopLoss: number;
     Rationale: string;
+    Timeframe: string;
 }
 
 export interface BlogPostSection {
