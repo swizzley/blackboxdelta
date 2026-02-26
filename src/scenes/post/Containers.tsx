@@ -56,7 +56,8 @@ export default function Containers() {
             StopLoss: 0,
             TakeProfit: 0,
             TradePossible: false,
-        }
+            Timeframe: "",
+        },
     });
 
     useEffect(() => {
