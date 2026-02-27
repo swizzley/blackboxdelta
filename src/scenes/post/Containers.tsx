@@ -95,13 +95,13 @@ export default function Containers() {
     function width() {
         switch (true) {
             case innerWidth <= 768:
-                return  (92 / 100) * window.innerWidth | 0;
+                return (92 / 100) * window.innerWidth | 0;
 
             case innerWidth < 1024:
                 return (74 / 100) * window.innerWidth | 0;
 
             default:
-                return  (29 / 100) * window.innerWidth | 0;
+                return (29 / 100) * window.innerWidth | 0;
         }
     }
 
@@ -137,20 +137,25 @@ export default function Containers() {
                                         />
                                     </div>
                                     <Tags Post={post}/>
-                                    <div className={`my-6 p-4 rounded-lg shadow border ${isDarkMode ? 'bg-[#23272f] border-gray-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
+                                    <div
+                                        className={`my-6 p-4 rounded-lg shadow border ${isDarkMode ? 'bg-[#23272f] border-gray-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}>
                                         <h3 className="text-lg font-semibold mb-2">Prediction</h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
                                             <div>
-                                                <span className="font-medium">Entry:</span> {post.quote.EntryPrice !== undefined ? post.quote.EntryPrice : '-'}
+                                                <span
+                                                    className="font-medium">Entry:</span> {post.quote.EntryPrice !== undefined ? post.quote.EntryPrice : '-'}
                                             </div>
                                             <div>
-                                                <span className="font-medium">Stop:</span> {post.quote.StopLoss !== undefined ? post.quote.StopLoss : '-'}
+                                                <span
+                                                    className="font-medium">Stop:</span> {post.quote.StopLoss !== undefined ? post.quote.StopLoss : '-'}
                                             </div>
                                             <div>
-                                                <span className="font-medium">Profit:</span> {post.quote.TakeProfit !== undefined ? post.quote.TakeProfit : '-'}
+                                                <span
+                                                    className="font-medium">Profit:</span> {post.quote.TakeProfit !== undefined ? post.quote.TakeProfit : '-'}
                                             </div>
                                             <div>
-                                                <span className="font-medium">Timeframe:</span> {post.quote.Timeframe !== undefined ? post.quote.Timeframe : '-'}
+                                                <span
+                                                    className="font-medium">Timeframe:</span> {post.quote.Timeframe !== undefined ? post.quote.Timeframe : '-'}
                                             </div>
                                         </div>
                                         {post.quote.Rationale && (
@@ -206,7 +211,7 @@ export default function Containers() {
                                             }
                                         }/>
                                     </div>
-                                    {
+                                    {post.tags.includes("stock") && (
                                         post.news ?
                                             <div
                                                 className={`${widthString()} box-border border-[1px] ${isDarkMode ? 'bg-[#1e222d] border-gray-600' : 'bg-light border-gray-200'} relative -mt-24`}>
@@ -225,19 +230,25 @@ export default function Containers() {
                                                                 src={news.image ? news.image : '/img/bbd-logo.svg'}
                                                                 alt=""/>
                                                             <div className={`${widthString()}`}>
-                                                                <div className={`${isDarkMode ? 'bg-[#1e222d]' : 'bg-light'} `}>
-                                                                    <a href={news.url} target="_blank" className="text-xs text-gray-500">
-                                                                        <time dateTime={date(news.date).toDateString()}>{date(news.date).toDateString()}</time>
+                                                                <div
+                                                                    className={`${isDarkMode ? 'bg-[#1e222d]' : 'bg-light'} `}>
+                                                                    <a href={news.url} target="_blank"
+                                                                       className="text-xs text-gray-500">
+                                                                        <time
+                                                                            dateTime={date(news.date).toDateString()}>{date(news.date).toDateString()}</time>
                                                                     </a>
                                                                 </div>
 
-                                                                <div className={`${isDarkMode ? 'bg-[#1e222d]' : 'bg-light'} py-2`}>
-                                                                    <a href={news.url} target="_blank" className="text-sm font-semibold leading-6 flex-wrap">
+                                                                <div
+                                                                    className={`${isDarkMode ? 'bg-[#1e222d]' : 'bg-light'} py-2`}>
+                                                                    <a href={news.url} target="_blank"
+                                                                       className="text-sm font-semibold leading-6 flex-wrap">
                                                                         {news.headline}
                                                                     </a>
                                                                 </div>
 
-                                                                <a href={news.url} target="_blank" className="mt-1 text-sm leading-6 text-gray-400">
+                                                                <a href={news.url} target="_blank"
+                                                                   className="mt-1 text-sm leading-6 text-gray-400">
                                                                     {news.summary}
                                                                 </a>
                                                             </div>
@@ -259,28 +270,30 @@ export default function Containers() {
                                                     }
                                                 }/>
                                             </div>
-                                    }
-                                    <div className={" container mx-auto left-0 -ml-[0.5px]"}>
-                                        <CompanyProfile widgetProps={
-                                            {
+                                    )}
+                                    {/* Only show CompanyProfile if post.tags includes 'stock' */}
+                                    {post.tags.includes("stock") && (
+                                        <div className={" container mx-auto left-0 -ml-[0.5px]"}>
+                                            <CompanyProfile widgetProps={{
                                                 symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
                                                 width: width(),
                                                 colorTheme: isDarkMode ? "dark" : "light",
                                                 height: 777
-                                            }
-                                        }/>
-                                    </div>
-
-                                    <div className={"container mx-auto left-0 -ml-[0.5px]"}>
-                                        <FundamentalData widgetProps={
-                                            {
-                                                symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
-                                                width: width(),
-                                                colorTheme: isDarkMode ? "dark" : "light",
-                                                height: 777
-                                            }
-                                        }/>
-                                    </div>
+                                            }}/>
+                                        </div>
+                                    )}
+                                    {post.tags.includes("stock") && (
+                                        <div className={"container mx-auto left-0 -ml-[0.5px]"}>
+                                            <FundamentalData widgetProps={
+                                                {
+                                                    symbol: `${exchangeName(post.company.exchange)}:${post.company.symbol}`,
+                                                    width: width(),
+                                                    colorTheme: isDarkMode ? "dark" : "light",
+                                                    height: 777
+                                                }
+                                            }/>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </section>
