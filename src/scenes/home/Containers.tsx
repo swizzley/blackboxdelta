@@ -1,7 +1,7 @@
 import {Site as SiteMap} from '../../context/Types';
 import Section from "./Section";
 import {useTheme} from "../../context/Theme";
-import Tags from "./Tags";
+// import Tags from "./Tags";
 import Cal from "./Cal";
 import {useEffect, useState} from "react";
 import {ChevronDoubleDownIcon} from "@heroicons/react/20/solid";
@@ -34,7 +34,8 @@ export function Containers(props: ContainersProps) {
                 {/* Main 3 column grid */}
                 <div className="grid grid-cols-1 items-start lg:grid-cols-3 lg:gap-8">
                     {/* Left column */}
-                    <div  className={`${isTagsDrawerOpen ? 'slide-down' : 'slide-up'} grid grid-cols-1 gap-4 h-screen rounded-lg`}>
+                    <div
+                        className={`${isTagsDrawerOpen ? 'slide-down' : 'slide-up'} grid grid-cols-1 gap-4 h-screen rounded-lg`}>
                         <section aria-labelledby="bbd-filters">
                             <div
                                 className={`${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'} transition-colors duration-500 shadow rounded-lg `}>
@@ -68,7 +69,7 @@ export function Containers(props: ContainersProps) {
                                         <h2 className="sr-only" id="tags">
                                             Tags
                                         </h2>
-                                        <Tags Site={Site}/>
+                                        {/*<Tags Site={Site}/>*/}
                                     </div>
                                 )}
                             </div>
