@@ -1,13 +1,13 @@
 {
-  "generated": "2026-03-04T16:35:08Z",
+  "generated": "2026-03-04T16:36:50Z",
   "all_time": {
     "total_orders": 546,
     "pending": 0,
-    "open_positions": 11,
-    "closed_orders": 535,
-    "total_pl": -11.26,
+    "open_positions": 10,
+    "closed_orders": 536,
+    "total_pl": -11.27,
     "winners": 122,
-    "losers": 361,
+    "losers": 362,
     "breakeven": 52,
     "win_loss_ratio": 0.34,
     "win_rate_pct": 22.8,
@@ -52,11 +52,11 @@
       "timeframe": "scalp",
       "total_orders": 515,
       "pending": 0,
-      "open_positions": 11,
-      "closed_orders": 504,
-      "total_pl": -9.4,
+      "open_positions": 10,
+      "closed_orders": 505,
+      "total_pl": -9.41,
       "winners": 119,
-      "losers": 354,
+      "losers": 355,
       "breakeven": 31,
       "win_loss_ratio": 0.34,
       "win_rate_pct": 23.6,
@@ -92,5 +92,29 @@
       "daily_pl": -2.72
     }
   ],
-  "score_series": null
+  "score_series": [
+    {
+      "date": "2026-03-04",
+      "avg_final_score": 6.04,
+      "avg_confidence": 0.74,
+      "avg_trend": 1.22,
+      "avg_ma": 3.77,
+      "avg_crossover": 0.05,
+      "avg_oscillator": -1.14,
+      "avg_volatility": 1.4,
+      "avg_volume": 1.81,
+      "avg_fib_stack": 3.46,
+      "avg_momentum_projection": 1.42,
+      "avg_structure": 3.38,
+      "avg_cycle": 1.19,
+      "avg_pattern": -0.38,
+      "count": 1133
+    }
+  ],
+  "recommendation_counts": {
+    "Buy": 181,
+    "Moderate Buy": 483,
+    "Moderate Sell": 389,
+    "Sell": 80
+  }
 }
