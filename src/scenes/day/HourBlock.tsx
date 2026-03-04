@@ -54,10 +54,20 @@ export default function HourBlock({data}: HourBlockProps) {
     const plStr = `${s.total_pl >= 0 ? '+' : '-'}$${Math.abs(s.total_pl).toFixed(2)}`;
     const plColor = s.total_pl > 0 ? 'text-emerald-500' : s.total_pl < 0 ? 'text-red-500' : (isDarkMode ? 'text-gray-300' : 'text-gray-600');
 
-    // Find biggest winner and biggest loser
+    // Derived stats from orders
     const closed = data.orders.filter(o => o.profit !== null && o.status === 'CLOSED');
     const bestTrade = closed.length > 0 ? closed.reduce((a, b) => (a.profit ?? 0) > (b.profit ?? 0) ? a : b) : null;
     const worstTrade = closed.length > 0 ? closed.reduce((a, b) => (a.profit ?? 0) < (b.profit ?? 0) ? a : b) : null;
+
+    const longs = data.orders.filter(o => o.direction === 'Long').length;
+    const shorts = data.orders.length - longs;
+
+    // Avg duration from orders that have it
+    const durations = closed.filter(o => o.duration_mins !== null).map(o => o.duration_mins!);
+    const avgDur = durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : null;
+
+    // Avg P&L per closed trade
+    const avgPL = closed.length > 0 ? closed.reduce((sum, o) => sum + (o.profit ?? 0), 0) / closed.length : null;
 
     const td = `px-3 py-1.5 text-sm whitespace-nowrap`;
 
@@ -88,13 +98,26 @@ export default function HourBlock({data}: HourBlockProps) {
                         {s.winners}W / {s.losers}L
                         {s.win_rate_pct !== null && <span className="ml-1 text-xs">({s.win_rate_pct}%)</span>}
                     </span>
+                    <span className={`hidden sm:inline text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                        {longs}L/{shorts}S
+                    </span>
+                    {avgDur !== null && (
+                        <span className={`hidden md:inline text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} title="Avg trade duration">
+                            ~{avgDur}m
+                        </span>
+                    )}
+                    {avgPL !== null && (
+                        <span className={`hidden md:inline text-xs ${avgPL > 0 ? 'text-emerald-500' : avgPL < 0 ? 'text-red-500' : (isDarkMode ? 'text-gray-500' : 'text-gray-400')}`} title="Avg P&L per trade">
+                            avg {avgPL >= 0 ? '+' : '-'}${Math.abs(avgPL).toFixed(2)}
+                        </span>
+                    )}
                     {bestTrade && bestTrade.profit !== null && bestTrade.profit > 0 && (
-                        <span className="hidden sm:inline text-xs text-emerald-500" title={`Best: ${bestTrade.symbol.replace('_','/')}`}>
+                        <span className="hidden lg:inline text-xs text-emerald-500" title={`Best: ${bestTrade.symbol.replace('_','/')}`}>
                             ▲ +${bestTrade.profit.toFixed(2)}
                         </span>
                     )}
                     {worstTrade && worstTrade.profit !== null && worstTrade.profit < 0 && (
-                        <span className="hidden sm:inline text-xs text-red-500" title={`Worst: ${worstTrade.symbol.replace('_','/')}`}>
+                        <span className="hidden lg:inline text-xs text-red-500" title={`Worst: ${worstTrade.symbol.replace('_','/')}`}>
                             ▼ -${Math.abs(worstTrade.profit).toFixed(2)}
                         </span>
                     )}
