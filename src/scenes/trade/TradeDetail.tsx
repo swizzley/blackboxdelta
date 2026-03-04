@@ -499,7 +499,7 @@ function formatDuration(mins: number): string {
     return `${Math.floor(mins / 1440)}d ${Math.floor((mins % 1440) / 60)}h`;
 }
 
-const GITLAB_BASE = 'http://gambit.aspendenver.local/dmorgan';
+const GITLAB_BASE = 'http://gitlab.aspendenver.local/dmorgan';
 
 function VersionLinks({versions, isDarkMode}: { versions: Record<string, { sha: string; message: string }>; isDarkMode: boolean }) {
     const services = Object.entries(versions);
