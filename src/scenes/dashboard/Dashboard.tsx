@@ -7,6 +7,7 @@ import StatCard from '../common/StatCard';
 import PLChart from './PLChart';
 import TimeframeBreakdown from './TimeframeBreakdown';
 import CalendarHeatmap from './CalendarHeatmap';
+import WinRateChart from './WinRateChart';
 import ScoreTrendChart from './ScoreTrendChart';
 import RecommendationRadar from './RecommendationRadar';
 import TimeframeRadar from './TimeframeRadar';
@@ -126,6 +127,11 @@ export default function Dashboard() {
                             </button>
                         ))}
                     </div>
+
+                    {/* Win Rate Chart — full width, most prominent */}
+                    {filteredCalendar && Object.keys(filteredCalendar).length > 1 && (
+                        <WinRateChart data={filteredCalendar}/>
+                    )}
 
                     {/* Stat Cards */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
