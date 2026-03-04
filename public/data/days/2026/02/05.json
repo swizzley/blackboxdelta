@@ -1,0 +1,403 @@
+{
+  "date": "2026-02-05",
+  "summary": {
+    "total_orders": 9,
+    "pending": 0,
+    "open_positions": 0,
+    "closed_orders": 9,
+    "total_pl": 46.4,
+    "winners": 6,
+    "losers": 3,
+    "breakeven": 0,
+    "win_loss_ratio": 2.0,
+    "win_rate_pct": 66.7,
+    "avg_win": 7.55,
+    "avg_loss": -9.01,
+    "avg_time_in_trade_mins": 180,
+    "by_timeframe": [
+      {
+        "timeframe": "swing",
+        "total_orders": 5,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 5,
+        "total_pl": 14.06,
+        "winners": 3,
+        "losers": 1,
+        "breakeven": 1,
+        "win_loss_ratio": 3.0,
+        "win_rate_pct": 60.0,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": null
+      },
+      {
+        "timeframe": "intraday",
+        "total_orders": 2,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 2,
+        "total_pl": -10.38,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 1,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": null
+      },
+      {
+        "timeframe": "scalp",
+        "total_orders": 2,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 2,
+        "total_pl": 9.19,
+        "winners": 1,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 1.0,
+        "win_rate_pct": 50.0,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": null
+      }
+    ]
+  },
+  "hours": [
+    {
+      "hour": 8,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -3.85,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": -3.85,
+        "avg_time_in_trade_mins": 5
+      },
+      "orders": [
+        {
+          "id": "12114",
+          "symbol": "GBP_JPY",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "MARKET_ORDER",
+          "entry": 188.486,
+          "exit": 188.456,
+          "stop_loss": 188.158,
+          "take_profit": 189.147,
+          "quantity": 1000,
+          "profit": -3.8476,
+          "created": "2026-02-05T08:24:00Z",
+          "closed": "2026-02-05T08:29:00Z",
+          "duration_mins": 5
+        }
+      ]
+    },
+    {
+      "hour": 9,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -10.38,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": -10.38,
+        "avg_time_in_trade_mins": 5
+      },
+      "orders": [
+        {
+          "id": "12115",
+          "symbol": "NZD_USD",
+          "direction": "Short",
+          "timeframe": "intraday",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 0.61431,
+          "exit": 0.61499,
+          "stop_loss": 0.62101,
+          "take_profit": 0.60535,
+          "quantity": -5000,
+          "profit": -10.3796,
+          "created": "2026-02-05T09:12:00Z",
+          "closed": "2026-02-05T09:17:00Z",
+          "duration_mins": 5
+        }
+      ]
+    },
+    {
+      "hour": 10,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": 6.66,
+        "winners": 1,
+        "losers": 0,
+        "breakeven": 0,
+        "win_loss_ratio": null,
+        "win_rate_pct": 100.0,
+        "avg_win": 6.66,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": 3
+      },
+      "orders": [
+        {
+          "id": "12116",
+          "symbol": "EUR_USD",
+          "direction": "Long",
+          "timeframe": "swing",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.08684,
+          "exit": 1.08721,
+          "stop_loss": 1.08182,
+          "take_profit": 1.09751,
+          "quantity": 2000,
+          "profit": 6.6603,
+          "created": "2026-02-05T10:32:00Z",
+          "closed": "2026-02-05T10:35:00Z",
+          "duration_mins": 3
+        }
+      ]
+    },
+    {
+      "hour": 11,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -9.44,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": -9.44,
+        "avg_time_in_trade_mins": 45
+      },
+      "orders": [
+        {
+          "id": "12117",
+          "symbol": "GBP_USD",
+          "direction": "Long",
+          "timeframe": "swing",
+          "status": "CLOSED",
+          "type": "MARKET_ORDER",
+          "entry": 1.27242,
+          "exit": 1.27195,
+          "stop_loss": 1.267,
+          "take_profit": 1.28063,
+          "quantity": 1000,
+          "profit": -9.4434,
+          "created": "2026-02-05T11:05:00Z",
+          "closed": "2026-02-05T11:50:00Z",
+          "duration_mins": 45
+        }
+      ]
+    },
+    {
+      "hour": 12,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": 10.74,
+        "winners": 1,
+        "losers": 0,
+        "breakeven": 0,
+        "win_loss_ratio": null,
+        "win_rate_pct": 100.0,
+        "avg_win": 10.74,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": 15
+      },
+      "orders": [
+        {
+          "id": "12118",
+          "symbol": "AUD_NZD",
+          "direction": "Short",
+          "timeframe": "swing",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.09116,
+          "exit": 1.09061,
+          "stop_loss": 1.09459,
+          "take_profit": 1.0846,
+          "quantity": -3000,
+          "profit": 10.7404,
+          "created": "2026-02-05T12:20:00Z",
+          "closed": "2026-02-05T12:35:00Z",
+          "duration_mins": 15
+        }
+      ]
+    },
+    {
+      "hour": 13,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": 0,
+        "winners": 0,
+        "losers": 0,
+        "breakeven": 1,
+        "win_loss_ratio": null,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": 6
+      },
+      "orders": [
+        {
+          "id": "12119",
+          "symbol": "EUR_USD",
+          "direction": "Long",
+          "timeframe": "intraday",
+          "status": "CLOSED",
+          "type": "MARKET_ORDER",
+          "entry": 1.08606,
+          "exit": 1.08701,
+          "stop_loss": 1.08327,
+          "take_profit": 1.0922,
+          "quantity": 1000,
+          "profit": 0,
+          "created": "2026-02-05T13:23:00Z",
+          "closed": "2026-02-05T13:29:00Z",
+          "duration_mins": 6
+        }
+      ]
+    },
+    {
+      "hour": 14,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": 6.1,
+        "winners": 1,
+        "losers": 0,
+        "breakeven": 0,
+        "win_loss_ratio": null,
+        "win_rate_pct": 100.0,
+        "avg_win": 6.1,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": 7
+      },
+      "orders": [
+        {
+          "id": "12120",
+          "symbol": "CAD_JPY",
+          "direction": "Short",
+          "timeframe": "swing",
+          "status": "CLOSED",
+          "type": "MARKET_ORDER",
+          "entry": 110.255,
+          "exit": 110.145,
+          "stop_loss": 111.014,
+          "take_profit": 109.862,
+          "quantity": -2000,
+          "profit": 6.1039,
+          "created": "2026-02-05T14:07:00Z",
+          "closed": "2026-02-05T14:14:00Z",
+          "duration_mins": 7
+        }
+      ]
+    },
+    {
+      "hour": 15,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": 0,
+        "winners": 0,
+        "losers": 0,
+        "breakeven": 1,
+        "win_loss_ratio": null,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": 25
+      },
+      "orders": [
+        {
+          "id": "12121",
+          "symbol": "EUR_JPY",
+          "direction": "Long",
+          "timeframe": "swing",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 162.011,
+          "exit": 162.075,
+          "stop_loss": 161.605,
+          "take_profit": 162.93,
+          "quantity": 3000,
+          "profit": 0,
+          "created": "2026-02-05T15:31:00Z",
+          "closed": "2026-02-05T15:56:00Z",
+          "duration_mins": 25
+        }
+      ]
+    },
+    {
+      "hour": 16,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": 13.04,
+        "winners": 1,
+        "losers": 0,
+        "breakeven": 0,
+        "win_loss_ratio": null,
+        "win_rate_pct": 100.0,
+        "avg_win": 13.04,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": 5
+      },
+      "orders": [
+        {
+          "id": "12122",
+          "symbol": "CAD_JPY",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 109.744,
+          "exit": 109.874,
+          "stop_loss": 109.344,
+          "take_profit": 110.162,
+          "quantity": 3000,
+          "profit": 13.0415,
+          "created": "2026-02-05T16:47:00Z",
+          "closed": "2026-02-05T16:52:00Z",
+          "duration_mins": 5
+        }
+      ]
+    }
+  ]
+}

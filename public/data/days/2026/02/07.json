@@ -1,0 +1,329 @@
+{
+  "date": "2026-02-07",
+  "summary": {
+    "total_orders": 7,
+    "pending": 0,
+    "open_positions": 0,
+    "closed_orders": 7,
+    "total_pl": -25.3,
+    "winners": 2,
+    "losers": 5,
+    "breakeven": 0,
+    "win_loss_ratio": 0.4,
+    "win_rate_pct": 28.6,
+    "avg_win": -12.09,
+    "avg_loss": -3.08,
+    "avg_time_in_trade_mins": 5,
+    "by_timeframe": [
+      {
+        "timeframe": "swing",
+        "total_orders": 4,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 4,
+        "total_pl": 17.92,
+        "winners": 2,
+        "losers": 2,
+        "breakeven": 0,
+        "win_loss_ratio": 1.0,
+        "win_rate_pct": 50.0,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": null
+      },
+      {
+        "timeframe": "intraday",
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -1.62,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": null
+      },
+      {
+        "timeframe": "scalp",
+        "total_orders": 2,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 2,
+        "total_pl": -5.33,
+        "winners": 0,
+        "losers": 2,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": null
+      }
+    ]
+  },
+  "hours": [
+    {
+      "hour": 9,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": 11.96,
+        "winners": 1,
+        "losers": 0,
+        "breakeven": 0,
+        "win_loss_ratio": null,
+        "win_rate_pct": 100.0,
+        "avg_win": 11.96,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": 90
+      },
+      "orders": [
+        {
+          "id": "12129",
+          "symbol": "AUD_NZD",
+          "direction": "Short",
+          "timeframe": "swing",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.09076,
+          "exit": 1.08993,
+          "stop_loss": 1.09583,
+          "take_profit": 1.08062,
+          "quantity": -2000,
+          "profit": 11.9623,
+          "created": "2026-02-07T09:05:00Z",
+          "closed": "2026-02-07T10:35:00Z",
+          "duration_mins": 90
+        }
+      ]
+    },
+    {
+      "hour": 10,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": 9.45,
+        "winners": 1,
+        "losers": 0,
+        "breakeven": 0,
+        "win_loss_ratio": null,
+        "win_rate_pct": 100.0,
+        "avg_win": 9.45,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": 5
+      },
+      "orders": [
+        {
+          "id": "12130",
+          "symbol": "USD_CHF",
+          "direction": "Short",
+          "timeframe": "swing",
+          "status": "CLOSED",
+          "type": "MARKET_ORDER",
+          "entry": 0.89951,
+          "exit": 0.89823,
+          "stop_loss": 0.90555,
+          "take_profit": 0.89449,
+          "quantity": -2000,
+          "profit": 9.4475,
+          "created": "2026-02-07T10:01:00Z",
+          "closed": "2026-02-07T10:06:00Z",
+          "duration_mins": 5
+        }
+      ]
+    },
+    {
+      "hour": 11,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -1.88,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": -1.88,
+        "avg_time_in_trade_mins": 10
+      },
+      "orders": [
+        {
+          "id": "12131",
+          "symbol": "EUR_CHF",
+          "direction": "Long",
+          "timeframe": "swing",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 0.9633,
+          "exit": 0.96282,
+          "stop_loss": 0.96013,
+          "take_profit": 0.97257,
+          "quantity": 5000,
+          "profit": -1.8845,
+          "created": "2026-02-07T11:15:00Z",
+          "closed": "2026-02-07T11:25:00Z",
+          "duration_mins": 10
+        }
+      ]
+    },
+    {
+      "hour": 12,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -2.92,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": -2.92,
+        "avg_time_in_trade_mins": 210
+      },
+      "orders": [
+        {
+          "id": "12132",
+          "symbol": "EUR_USD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "MARKET_ORDER",
+          "entry": 1.09058,
+          "exit": 1.09089,
+          "stop_loss": 1.09569,
+          "take_profit": 1.08713,
+          "quantity": -2000,
+          "profit": -2.9248,
+          "created": "2026-02-07T12:07:00Z",
+          "closed": "2026-02-07T15:37:00Z",
+          "duration_mins": 210
+        }
+      ]
+    },
+    {
+      "hour": 13,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -1.6,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": -1.6,
+        "avg_time_in_trade_mins": 5
+      },
+      "orders": [
+        {
+          "id": "12133",
+          "symbol": "EUR_CHF",
+          "direction": "Short",
+          "timeframe": "swing",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 0.96419,
+          "exit": 0.96481,
+          "stop_loss": 0.96922,
+          "take_profit": 0.95371,
+          "quantity": -5000,
+          "profit": -1.6023,
+          "created": "2026-02-07T13:47:00Z",
+          "closed": "2026-02-07T13:52:00Z",
+          "duration_mins": 5
+        }
+      ]
+    },
+    {
+      "hour": 14,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -2.4,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": -2.4,
+        "avg_time_in_trade_mins": 8
+      },
+      "orders": [
+        {
+          "id": "12134",
+          "symbol": "GBP_CHF",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.11975,
+          "exit": 1.12038,
+          "stop_loss": 1.12221,
+          "take_profit": 1.11418,
+          "quantity": -3000,
+          "profit": -2.4037,
+          "created": "2026-02-07T14:20:00Z",
+          "closed": "2026-02-07T14:28:00Z",
+          "duration_mins": 8
+        }
+      ]
+    },
+    {
+      "hour": 15,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -1.62,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0.0,
+        "win_rate_pct": 0.0,
+        "avg_win": null,
+        "avg_loss": -1.62,
+        "avg_time_in_trade_mins": 210
+      },
+      "orders": [
+        {
+          "id": "12135",
+          "symbol": "AUD_USD",
+          "direction": "Long",
+          "timeframe": "intraday",
+          "status": "CLOSED",
+          "type": "MARKET_ORDER",
+          "entry": 0.65108,
+          "exit": 0.65085,
+          "stop_loss": 0.64582,
+          "take_profit": 0.65782,
+          "quantity": 2000,
+          "profit": -1.6151,
+          "created": "2026-02-07T15:26:00Z",
+          "closed": "2026-02-07T18:56:00Z",
+          "duration_mins": 210
+        }
+      ]
+    }
+  ]
+}
