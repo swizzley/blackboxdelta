@@ -10,6 +10,7 @@ export default function TimeframeBreakdown({data}: TimeframeBreakdownProps) {
     const {isDarkMode} = useTheme();
 
     const timeframes = data.map(d => d.timeframe.charAt(0).toUpperCase() + d.timeframe.slice(1));
+    const hasDirection = data.some(d => d.long_pl !== 0 || d.short_pl !== 0);
 
     const option = {
         backgroundColor: 'transparent',

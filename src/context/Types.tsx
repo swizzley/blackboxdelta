@@ -137,6 +137,39 @@ export interface Score {
     recommendation: string;
 }
 
+// Analysis data (from swizzley-analyzer)
+export interface AnalysisData {
+    runs: AnalysisRun[];
+    todos: AnalysisTodo[];
+}
+
+export interface AnalysisRun {
+    run_id: string;
+    created_at: string;
+    model: string;
+    order_count: number;
+    todo_count: number;
+    synthesis: string;
+}
+
+export interface AnalysisTodo {
+    id: number;
+    run_id: string;
+    priority: number;
+    category: string;
+    title: string;
+    description: string;
+    expected_impact: string;
+    evidence: string;
+    affected_files: string[];
+    complexity: string;
+    status: 'open' | 'in_progress' | 'implemented' | 'wont_fix' | 'obsolete';
+    implemented_at?: string;
+    implemented_sha?: string;
+    implemented_by?: string;
+    notes?: string;
+}
+
 // Daily-aggregated score averages for dashboard chart
 export interface ScoreDataPoint {
     date: string;
