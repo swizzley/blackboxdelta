@@ -718,5 +718,19 @@
       "l": 0.611589,
       "c": 0.6117
     }
-  ]
+  ],
+  "versions": {
+    "finmon": {
+      "sha": "e1c282cc2512b790ef0e665ea30643ae6ef83f1b",
+      "message": "Regenerate trade files missing version data"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    }
+  }
 }

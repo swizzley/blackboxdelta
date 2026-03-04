@@ -1,0 +1,137 @@
+{
+  "id": "5860",
+  "trade_id": "5861",
+  "symbol": "GBP_USD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.33654,
+  "stop_loss": 1.33731,
+  "take_profit": 1.33012,
+  "quantity": -18,
+  "profit": null,
+  "created": "2026-03-04T15:53:07.078824311Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 5421,
+  "risk_reward": 8.337662337663135,
+  "candles": [
+    {
+      "t": "2026-03-04T15:44:00Z",
+      "o": 1.3374,
+      "h": 1.3375,
+      "l": 1.3371,
+      "c": 1.33733
+    },
+    {
+      "t": "2026-03-04T15:45:00Z",
+      "o": 1.33735,
+      "h": 1.33755,
+      "l": 1.33703,
+      "c": 1.33713
+    },
+    {
+      "t": "2026-03-04T15:46:00Z",
+      "o": 1.33722,
+      "h": 1.3375,
+      "l": 1.33718,
+      "c": 1.33734
+    },
+    {
+      "t": "2026-03-04T15:47:00Z",
+      "o": 1.3373,
+      "h": 1.3374,
+      "l": 1.3367,
+      "c": 1.33701
+    },
+    {
+      "t": "2026-03-04T15:48:00Z",
+      "o": 1.33696,
+      "h": 1.3373,
+      "l": 1.3367,
+      "c": 1.33692
+    },
+    {
+      "t": "2026-03-04T15:49:00Z",
+      "o": 1.33695,
+      "h": 1.33725,
+      "l": 1.33676,
+      "c": 1.33707
+    },
+    {
+      "t": "2026-03-04T15:50:00Z",
+      "o": 1.3371,
+      "h": 1.3373,
+      "l": 1.3367,
+      "c": 1.33707
+    },
+    {
+      "t": "2026-03-04T15:51:00Z",
+      "o": 1.33705,
+      "h": 1.3373,
+      "l": 1.3364,
+      "c": 1.33665
+    },
+    {
+      "t": "2026-03-04T15:52:00Z",
+      "o": 1.33664,
+      "h": 1.3368,
+      "l": 1.33645,
+      "c": 1.33665
+    },
+    {
+      "t": "2026-03-04T15:53:00Z",
+      "o": 1.33662,
+      "h": 1.3371,
+      "l": 1.33649,
+      "c": 1.33685
+    },
+    {
+      "t": "2026-03-04T15:54:00Z",
+      "o": 1.33695,
+      "h": 1.3372,
+      "l": 1.33678,
+      "c": 1.33706
+    }
+  ],
+  "score": {
+    "Symbol": "GBPUSD",
+    "T": 1772639460000,
+    "Time": "",
+    "trend_score": -11,
+    "ma_score": -84,
+    "crossover_score": -8,
+    "oscillator_score": -2,
+    "volatility_score": -7,
+    "volume_score": 2,
+    "fib_stack_score": -38,
+    "momentum_projection_score": -3,
+    "structure_score": 1,
+    "cycle_score": 1,
+    "pattern_score": -2,
+    "final_score": -23.23,
+    "confidence": 0.7945,
+    "entry_price": 1.337,
+    "stop_price": 1.33715,
+    "tp_price": 1.33554,
+    "risk_reward": 9.78,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    }
+  }
+}
