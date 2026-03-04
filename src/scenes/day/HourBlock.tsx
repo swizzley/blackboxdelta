@@ -62,9 +62,15 @@ export default function HourBlock({data}: HourBlockProps) {
     const longs = data.orders.filter(o => o.direction === 'Long').length;
     const shorts = data.orders.length - longs;
 
-    // Avg duration from orders that have it
-    const durations = closed.filter(o => o.duration_mins !== null).map(o => o.duration_mins!);
-    const avgDur = durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : null;
+    // Duration stats from orders that have it
+    const durations = closed.filter(o => o.duration_mins !== null).map(o => o.duration_mins!).sort((a, b) => a - b);
+    const minDur = durations.length > 0 ? durations[0] : null;
+    const maxDur = durations.length > 0 ? durations[durations.length - 1] : null;
+    const medDur = durations.length > 0
+        ? durations.length % 2 === 1
+            ? durations[Math.floor(durations.length / 2)]
+            : Math.round((durations[durations.length / 2 - 1] + durations[durations.length / 2]) / 2)
+        : null;
 
     // Avg P&L per closed trade
     const avgPL = closed.length > 0 ? closed.reduce((sum, o) => sum + (o.profit ?? 0), 0) / closed.length : null;
@@ -101,9 +107,9 @@ export default function HourBlock({data}: HourBlockProps) {
                     <span className={`hidden sm:inline text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                         {longs}L/{shorts}S
                     </span>
-                    {avgDur !== null && (
-                        <span className={`hidden md:inline text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} title="Avg trade duration">
-                            ~{avgDur}m
+                    {medDur !== null && (
+                        <span className={`hidden md:inline text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} title={`Duration: ${minDur}m / ${medDur}m / ${maxDur}m (min/med/max)`}>
+                            {minDur}–{maxDur}m
                         </span>
                     )}
                     {avgPL !== null && (
@@ -132,7 +138,7 @@ export default function HourBlock({data}: HourBlockProps) {
                         <div>Win Rate: <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{s.win_rate_pct !== null ? `${s.win_rate_pct}%` : 'N/A'}</span></div>
                         <div>Avg Win: <span className="text-emerald-500">{s.avg_win !== null ? `+${s.avg_win.toFixed(2)}` : 'N/A'}</span></div>
                         <div>Avg Loss: <span className="text-red-500">{s.avg_loss !== null ? s.avg_loss.toFixed(2) : 'N/A'}</span></div>
-                        <div>Avg Duration: <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{s.avg_time_in_trade_mins !== null ? `${s.avg_time_in_trade_mins}m` : 'N/A'}</span></div>
+                        <div>Duration: <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{minDur !== null ? `${minDur}/${medDur}/${maxDur}m` : 'N/A'}</span></div>
                     </div>
 
                     {/* Orders table */}
