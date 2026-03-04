@@ -4,16 +4,17 @@
   "symbol": "USD_DKK",
   "direction": "Short",
   "timeframe": "scalp",
-  "status": "FILLED",
+  "status": "CLOSED",
   "type": "LIMIT_ORDER",
   "entry": 6.42628,
+  "exit": 6.4266520930232565,
   "stop_loss": 6.4282900000000005,
   "take_profit": 6.42098,
   "quantity": -43,
-  "profit": null,
+  "profit": -0.016,
   "created": "2026-03-04T07:34:11.829506486Z",
-  "closed": null,
-  "duration_mins": null,
+  "closed": "2026-03-04T07:37:04Z",
+  "duration_mins": 2,
   "alert_id": 4449,
   "risk_reward": 2.6368159203976713,
   "candles": [
@@ -86,6 +87,27 @@
       "h": 6.42755,
       "l": 6.42591,
       "c": 6.4267
+    },
+    {
+      "t": "2026-03-04T07:35:00Z",
+      "o": 6.4271,
+      "h": 6.42759,
+      "l": 6.42516,
+      "c": 6.4264
+    },
+    {
+      "t": "2026-03-04T07:36:00Z",
+      "o": 6.42597,
+      "h": 6.42748,
+      "l": 6.42505,
+      "c": 6.42713
+    },
+    {
+      "t": "2026-03-04T07:37:00Z",
+      "o": 6.42715,
+      "h": 6.42861,
+      "l": 6.42695,
+      "c": 6.42696
     }
   ],
   "score": {
