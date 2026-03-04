@@ -14,6 +14,8 @@
     "avg_win": 0.03,
     "avg_loss": -0.05,
     "avg_time_in_trade_mins": 60,
+    "long_pl": -0.91,
+    "short_pl": -0.69,
     "by_timeframe": [
       {
         "timeframe": "swing",
@@ -29,7 +31,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": null,
-        "avg_time_in_trade_mins": null
+        "avg_time_in_trade_mins": null,
+        "long_pl": 0,
+        "short_pl": 0
       },
       {
         "timeframe": "intraday",
@@ -45,7 +49,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": -0.07,
-        "avg_time_in_trade_mins": 165
+        "avg_time_in_trade_mins": 165,
+        "long_pl": -0.14,
+        "short_pl": 0
       },
       {
         "timeframe": "scalp",
@@ -61,7 +67,9 @@
         "win_rate_pct": 13.4,
         "avg_win": 0.03,
         "avg_loss": -0.04,
-        "avg_time_in_trade_mins": 56
+        "avg_time_in_trade_mins": 56,
+        "long_pl": -0.77,
+        "short_pl": -0.69
       }
     ]
   },
@@ -81,7 +89,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": -0.12,
-        "avg_time_in_trade_mins": 3
+        "avg_time_in_trade_mins": 3,
+        "long_pl": 0,
+        "short_pl": -0.25
       },
       "orders": [
         {
@@ -167,7 +177,9 @@
         "win_rate_pct": 33.3,
         "avg_win": 0.14,
         "avg_loss": -0.05,
-        "avg_time_in_trade_mins": 3
+        "avg_time_in_trade_mins": 3,
+        "long_pl": -0.05,
+        "short_pl": 0.14
       },
       "orders": [
         {
@@ -285,7 +297,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": null,
-        "avg_time_in_trade_mins": null
+        "avg_time_in_trade_mins": null,
+        "long_pl": 0,
+        "short_pl": 0
       },
       "orders": [
         {
@@ -401,7 +415,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": -0.13,
-        "avg_time_in_trade_mins": 53
+        "avg_time_in_trade_mins": 53,
+        "long_pl": -0.13,
+        "short_pl": 0
       },
       "orders": [
         {
@@ -455,7 +471,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": null,
-        "avg_time_in_trade_mins": null
+        "avg_time_in_trade_mins": null,
+        "long_pl": 0,
+        "short_pl": 0
       },
       "orders": [
         {
@@ -571,7 +589,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": null,
-        "avg_time_in_trade_mins": null
+        "avg_time_in_trade_mins": null,
+        "long_pl": 0,
+        "short_pl": 0
       },
       "orders": [
         {
@@ -655,7 +675,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": null,
-        "avg_time_in_trade_mins": null
+        "avg_time_in_trade_mins": null,
+        "long_pl": 0,
+        "short_pl": 0
       },
       "orders": [
         {
@@ -707,7 +729,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": -0.03,
-        "avg_time_in_trade_mins": 60
+        "avg_time_in_trade_mins": 60,
+        "long_pl": -0.06,
+        "short_pl": -0.18
       },
       "orders": [
         {
@@ -1383,7 +1407,9 @@
         "win_rate_pct": 9.5,
         "avg_win": 0.03,
         "avg_loss": -0.04,
-        "avg_time_in_trade_mins": 49
+        "avg_time_in_trade_mins": 49,
+        "long_pl": -0.32,
+        "short_pl": -0.38
       },
       "orders": [
         {
@@ -2147,7 +2173,9 @@
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": -0.05,
-        "avg_time_in_trade_mins": 211
+        "avg_time_in_trade_mins": 211,
+        "long_pl": -0.16,
+        "short_pl": -0.1
       },
       "orders": [
         {
@@ -2337,7 +2365,9 @@
         "win_rate_pct": 42.9,
         "avg_win": 0.02,
         "avg_loss": -0.03,
-        "avg_time_in_trade_mins": 37
+        "avg_time_in_trade_mins": 37,
+        "long_pl": -0.19,
+        "short_pl": 0.09
       },
       "orders": [
         {

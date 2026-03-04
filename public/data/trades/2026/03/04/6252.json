@@ -1,0 +1,158 @@
+{
+  "id": "6252",
+  "trade_id": "6253",
+  "symbol": "CAD_SGD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.93326,
+  "stop_loss": 0.93264,
+  "take_profit": 0.93477,
+  "quantity": 16,
+  "profit": null,
+  "created": "2026-03-04T17:38:11.309445234Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 5609,
+  "risk_reward": 2.4354838709679414,
+  "candles": [
+    {
+      "t": "2026-03-04T17:29:00Z",
+      "o": 0.932927,
+      "h": 0.932985,
+      "l": 0.932377,
+      "c": 0.932841
+    },
+    {
+      "t": "2026-03-04T17:30:00Z",
+      "o": 0.932807,
+      "h": 0.932971,
+      "l": 0.93238,
+      "c": 0.932893
+    },
+    {
+      "t": "2026-03-04T17:31:00Z",
+      "o": 0.932736,
+      "h": 0.932994,
+      "l": 0.932319,
+      "c": 0.932764
+    },
+    {
+      "t": "2026-03-04T17:32:00Z",
+      "o": 0.932901,
+      "h": 0.933019,
+      "l": 0.932408,
+      "c": 0.932938
+    },
+    {
+      "t": "2026-03-04T17:33:00Z",
+      "o": 0.93283,
+      "h": 0.933015,
+      "l": 0.932316,
+      "c": 0.932989
+    },
+    {
+      "t": "2026-03-04T17:34:00Z",
+      "o": 0.932958,
+      "h": 0.933072,
+      "l": 0.932369,
+      "c": 0.933041
+    },
+    {
+      "t": "2026-03-04T17:35:00Z",
+      "o": 0.932918,
+      "h": 0.933174,
+      "l": 0.932505,
+      "c": 0.933106
+    },
+    {
+      "t": "2026-03-04T17:36:00Z",
+      "o": 0.933,
+      "h": 0.933125,
+      "l": 0.932463,
+      "c": 0.93296
+    },
+    {
+      "t": "2026-03-04T17:37:00Z",
+      "o": 0.933058,
+      "h": 0.933136,
+      "l": 0.9328,
+      "c": 0.932923
+    },
+    {
+      "t": "2026-03-04T17:38:00Z",
+      "o": 0.933,
+      "h": 0.933151,
+      "l": 0.932518,
+      "c": 0.93298
+    },
+    {
+      "t": "2026-03-04T17:39:00Z",
+      "o": 0.932971,
+      "h": 0.933156,
+      "l": 0.932593,
+      "c": 0.93264
+    },
+    {
+      "t": "2026-03-04T17:40:00Z",
+      "o": 0.933124,
+      "h": 0.933221,
+      "l": 0.932503,
+      "c": 0.933113
+    },
+    {
+      "t": "2026-03-04T17:41:00Z",
+      "o": 0.93301,
+      "h": 0.933126,
+      "l": 0.932465,
+      "c": 0.932951
+    },
+    {
+      "t": "2026-03-04T17:42:00Z",
+      "o": 0.933012,
+      "h": 0.933119,
+      "l": 0.932506,
+      "c": 0.93286
+    }
+  ],
+  "score": {
+    "Symbol": "CADSGD",
+    "T": 1772645760000,
+    "Time": "",
+    "trend_score": 8,
+    "ma_score": 21,
+    "crossover_score": 10,
+    "oscillator_score": 4,
+    "volatility_score": 2,
+    "volume_score": 4,
+    "fib_stack_score": 25,
+    "momentum_projection_score": 11,
+    "structure_score": 7,
+    "cycle_score": 0,
+    "pattern_score": -3,
+    "final_score": 23.04,
+    "confidence": 0.6772,
+    "entry_price": 0.93272,
+    "stop_price": 0.9321,
+    "tp_price": 0.93423,
+    "risk_reward": 2.44,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "b5698030945152420da89f449ba732558c5c2a57",
+      "message": "Add direction series to dashboard JSON"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
