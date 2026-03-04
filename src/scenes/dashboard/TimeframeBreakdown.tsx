@@ -16,9 +16,24 @@ export default function TimeframeBreakdown({data}: TimeframeBreakdownProps) {
         tooltip: {
             trigger: 'axis',
             axisPointer: {type: 'shadow'},
+            formatter: (params: any) => {
+                const tf = params[0]?.axisValue ?? '';
+                let html = `<b>${tf}</b>`;
+                let total = 0;
+                for (const p of params) {
+                    if (p.value === 0) continue;
+                    const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};margin-right:4px;"></span>`;
+                    const sign = p.value >= 0 ? '+' : '-';
+                    html += `<br/>${marker}${p.seriesName}: <b>${sign}$${Math.abs(p.value).toFixed(2)}</b>`;
+                    total += p.value;
+                }
+                const totalSign = total >= 0 ? '+' : '-';
+                html += `<br/><b>Total: ${totalSign}$${Math.abs(total).toFixed(2)}</b>`;
+                return html;
+            },
         },
         legend: {
-            data: ['P&L', 'Win Rate %'],
+            data: ['Long P&L', 'Short P&L'],
             textStyle: {color: isDarkMode ? '#9ca3af' : '#374151'},
             top: 0,
         },
@@ -35,40 +50,26 @@ export default function TimeframeBreakdown({data}: TimeframeBreakdownProps) {
             axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280'},
             axisLine: {lineStyle: {color: isDarkMode ? '#374151' : '#d1d5db'}},
         },
-        yAxis: [
-            {
-                type: 'value',
-                name: 'P&L',
-                axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280', formatter: (v: number) => `$${v}`},
-                splitLine: {lineStyle: {color: isDarkMode ? '#1e293b' : '#f3f4f6'}},
-            },
-            {
-                type: 'value',
-                name: 'Win %',
-                max: 100,
-                axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280'},
-                splitLine: {show: false},
-            },
-        ],
+        yAxis: {
+            type: 'value',
+            name: 'P&L',
+            axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280', formatter: (v: number) => `$${v}`},
+            splitLine: {lineStyle: {color: isDarkMode ? '#1e293b' : '#f3f4f6'}},
+        },
         series: [
             {
-                name: 'P&L',
+                name: 'Long P&L',
                 type: 'bar',
-                data: data.map(d => d.total_pl),
-                itemStyle: {
-                    color: (params: any) => params.value >= 0 ? '#10b981' : '#ef4444',
-                    borderRadius: [4, 4, 0, 0],
-                },
+                stack: 'pl',
+                data: data.map(d => d.long_pl),
+                itemStyle: {color: '#10b981'},
             },
             {
-                name: 'Win Rate %',
+                name: 'Short P&L',
                 type: 'bar',
-                yAxisIndex: 1,
-                data: data.map(d => d.win_rate_pct ?? 0),
-                itemStyle: {
-                    color: '#6366f1',
-                    borderRadius: [4, 4, 0, 0],
-                },
+                stack: 'pl',
+                data: data.map(d => d.short_pl),
+                itemStyle: {color: '#f59e0b'},
             },
         ],
     };
