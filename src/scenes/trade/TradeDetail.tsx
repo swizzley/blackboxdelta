@@ -120,6 +120,11 @@ export default function TradeDetail() {
                                     ))}
                                 </dl>
                             </div>
+
+                            {/* Service Versions */}
+                            {trade.versions && Object.keys(trade.versions).length > 0 && (
+                                <VersionLinks versions={trade.versions} isDarkMode={isDarkMode}/>
+                            )}
                         </>
                     )}
                 </div>
@@ -148,13 +153,17 @@ function TradeChart({trade, isDarkMode}: { trade: OrderDetail; isDarkMode: boole
     const entryIdx = findClosestIndex(candles.map(c => c.t), trade.created);
     const exitIdx = trade.closed ? findClosestIndex(candles.map(c => c.t), trade.closed) : null;
 
-    // Color-code entry/exit candles: purple for entry, amber for exit
+    // Color-code entry/exit candles: purple for entry, amber for exit, pink for same-candle
     // ECharts candlestick: [open, close, low, high]
     const entryColor = '#8b5cf6';  // purple
     const exitColor = '#f59e0b';   // amber
+    const sameColor = '#e11d48';   // pink — entry & exit on same candle
+    const isSameCandle = exitIdx !== null && entryIdx === exitIdx;
     const ohlc = candles.map((c, i) => {
         const item: any = {value: [c.o, c.c, c.l, c.h]};
-        if (i === entryIdx) {
+        if (isSameCandle && i === entryIdx) {
+            item.itemStyle = {color: sameColor, borderColor: sameColor, color0: sameColor, borderColor0: sameColor};
+        } else if (i === entryIdx) {
             item.itemStyle = {color: entryColor, borderColor: entryColor, color0: entryColor, borderColor0: entryColor};
         } else if (exitIdx !== null && i === exitIdx) {
             item.itemStyle = {color: exitColor, borderColor: exitColor, color0: exitColor, borderColor0: exitColor};
@@ -284,8 +293,14 @@ function TradeChart({trade, isDarkMode}: { trade: OrderDetail; isDarkMode: boole
                 <ReactECharts option={option} style={{height: '500px'}}/>
             </div>
             <div className={`flex items-center gap-5 mt-2 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm" style={{background: '#8b5cf6'}}/> Entry candle</span>
-                {exitIdx !== null && <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm" style={{background: '#f59e0b'}}/> Exit candle</span>}
+                {isSameCandle ? (
+                    <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm" style={{background: '#e11d48'}}/> Entry + Exit candle</span>
+                ) : (
+                    <>
+                        <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm" style={{background: '#8b5cf6'}}/> Entry candle</span>
+                        {exitIdx !== null && <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm" style={{background: '#f59e0b'}}/> Exit candle</span>}
+                    </>
+                )}
                 <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm" style={{background: '#10b981'}}/> Bullish</span>
                 <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm" style={{background: '#ef4444'}}/> Bearish</span>
             </div>
@@ -482,4 +497,35 @@ function formatDuration(mins: number): string {
     if (mins < 60) return `${mins}m`;
     if (mins < 1440) return `${Math.floor(mins / 60)}h ${mins % 60}m`;
     return `${Math.floor(mins / 1440)}d ${Math.floor((mins % 1440) / 60)}h`;
+}
+
+const GITLAB_BASE = 'http://gambit.aspendenver.local/dmorgan';
+
+function VersionLinks({versions, isDarkMode}: { versions: Record<string, { sha: string; message: string }>; isDarkMode: boolean }) {
+    const services = Object.entries(versions);
+    return (
+        <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-4 mt-6 transition-colors duration-500`}>
+            <h3 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Service Versions</h3>
+            <div className="space-y-2">
+                {services.map(([name, v]) => (
+                    <div key={name} className="flex items-start gap-3">
+                        <span className={`text-xs font-medium w-28 shrink-0 pt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {name}
+                        </span>
+                        <a
+                            href={`${GITLAB_BASE}/${name}/commit/${v.sha}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-cyan-500 hover:text-cyan-400 font-mono"
+                        >
+                            {v.sha.slice(0, 8)}
+                        </a>
+                        <span className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {v.message}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 }
