@@ -1,24 +1,34 @@
 import ReactECharts from 'echarts-for-react';
 import {useTheme} from '../../context/Theme';
-import {CalendarData} from '../../context/Types';
+import {CalendarData, DirectionDataPoint} from '../../context/Types';
 
 interface WinRateChartProps {
     data: CalendarData;
+    direction?: DirectionDataPoint[];
 }
 
-export default function WinRateChart({data}: WinRateChartProps) {
+export default function WinRateChart({data, direction}: WinRateChartProps) {
     const {isDarkMode} = useTheme();
 
-    // Build sorted daily series from calendar data
     const dates = Object.keys(data).sort();
 
-    // Compute rolling win rate and daily win rate
-    let cumWins = 0;
-    let cumTotal = 0;
+    // Index direction data by date for quick lookup
+    const dirMap = new Map<string, DirectionDataPoint>();
+    if (direction) {
+        for (const d of direction) dirMap.set(d.date, d);
+    }
+
+    // Compute rolling win rates: overall, long, short
+    let cumWins = 0, cumTotal = 0;
+    let cumLongWins = 0, cumLongTotal = 0;
+    let cumShortWins = 0, cumShortTotal = 0;
 
     const dailyWinRate: (number | null)[] = [];
     const rollingWinRate: (number | null)[] = [];
-    const dailyTrades: number[] = [];
+    const rollingLongWR: (number | null)[] = [];
+    const rollingShortWR: (number | null)[] = [];
+    const longTrades: number[] = [];
+    const shortTrades: number[] = [];
 
     for (const d of dates) {
         const day = data[d];
@@ -26,20 +36,27 @@ export default function WinRateChart({data}: WinRateChartProps) {
         cumWins += day.winners;
         cumTotal += closed;
 
-        dailyTrades.push(day.total);
+        // Direction breakdown
+        const dir = dirMap.get(d);
+        const dayLong = dir ? dir.long_wins + dir.long_losses : 0;
+        const dayShort = dir ? dir.short_wins + dir.short_losses : 0;
+        longTrades.push(dayLong);
+        shortTrades.push(dayShort);
 
-        if (closed > 0) {
-            dailyWinRate.push(Math.round(day.winners / closed * 1000) / 10);
-        } else {
-            dailyWinRate.push(null);
+        if (dir) {
+            cumLongWins += dir.long_wins;
+            cumLongTotal += dayLong;
+            cumShortWins += dir.short_wins;
+            cumShortTotal += dayShort;
         }
 
-        if (cumTotal > 0) {
-            rollingWinRate.push(Math.round(cumWins / cumTotal * 1000) / 10);
-        } else {
-            rollingWinRate.push(null);
-        }
+        dailyWinRate.push(closed > 0 ? Math.round(day.winners / closed * 1000) / 10 : null);
+        rollingWinRate.push(cumTotal > 0 ? Math.round(cumWins / cumTotal * 1000) / 10 : null);
+        rollingLongWR.push(cumLongTotal > 0 ? Math.round(cumLongWins / cumLongTotal * 1000) / 10 : null);
+        rollingShortWR.push(cumShortTotal > 0 ? Math.round(cumShortWins / cumShortTotal * 1000) / 10 : null);
     }
+
+    const hasDirection = dirMap.size > 0;
 
     const option = {
         backgroundColor: 'transparent',
@@ -49,21 +66,25 @@ export default function WinRateChart({data}: WinRateChartProps) {
                 const date = params[0]?.axisValue ?? '';
                 let html = `<b>${date}</b>`;
                 for (const p of params) {
-                    if (p.value !== null && p.value !== undefined) {
-                        const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};margin-right:4px;"></span>`;
-                        if (p.seriesName === 'Trades') {
-                            html += `<br/>${marker}${p.seriesName}: <b>${p.value}</b>`;
-                        } else {
-                            html += `<br/>${marker}${p.seriesName}: <b>${p.value}%</b>`;
-                        }
+                    if (p.value === null || p.value === undefined) continue;
+                    const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};margin-right:4px;"></span>`;
+                    if (p.seriesName === 'Long' || p.seriesName === 'Short') {
+                        html += `<br/>${marker}${p.seriesName}: <b>${Math.abs(p.value)}</b>`;
+                    } else if (p.seriesName === 'Trades') {
+                        html += `<br/>${marker}${p.seriesName}: <b>${p.value}</b>`;
+                    } else {
+                        html += `<br/>${marker}${p.seriesName}: <b>${p.value}%</b>`;
                     }
                 }
                 return html;
             },
         },
         legend: {
-            data: ['Daily Win Rate', 'Cumulative Win Rate', 'Trades'],
-            textStyle: {color: isDarkMode ? '#9ca3af' : '#374151'},
+            data: [
+                'Daily Win Rate', 'Cumulative',
+                ...(hasDirection ? ['Long WR', 'Short WR', 'Long', 'Short'] : ['Trades']),
+            ],
+            textStyle: {color: isDarkMode ? '#9ca3af' : '#374151', fontSize: 11},
             top: 0,
         },
         grid: {
@@ -99,15 +120,40 @@ export default function WinRateChart({data}: WinRateChartProps) {
             },
         ],
         series: [
-            {
-                name: 'Trades',
-                type: 'bar',
-                yAxisIndex: 1,
-                data: dailyTrades,
-                itemStyle: {color: isDarkMode ? 'rgba(100,116,139,0.3)' : 'rgba(148,163,184,0.3)'},
-                barMaxWidth: 20,
-                z: 0,
-            },
+            // Background trade bars — split into long/short if available
+            ...(hasDirection ? [
+                {
+                    name: 'Long',
+                    type: 'bar',
+                    stack: 'trades',
+                    yAxisIndex: 1,
+                    data: longTrades,
+                    itemStyle: {color: isDarkMode ? 'rgba(16,185,129,0.25)' : 'rgba(16,185,129,0.2)'},
+                    barMaxWidth: 20,
+                    z: 0,
+                },
+                {
+                    name: 'Short',
+                    type: 'bar',
+                    stack: 'trades',
+                    yAxisIndex: 1,
+                    data: shortTrades,
+                    itemStyle: {color: isDarkMode ? 'rgba(245,158,11,0.25)' : 'rgba(245,158,11,0.2)'},
+                    barMaxWidth: 20,
+                    z: 0,
+                },
+            ] : [
+                {
+                    name: 'Trades',
+                    type: 'bar',
+                    yAxisIndex: 1,
+                    data: dates.map(d => data[d].total),
+                    itemStyle: {color: isDarkMode ? 'rgba(100,116,139,0.3)' : 'rgba(148,163,184,0.3)'},
+                    barMaxWidth: 20,
+                    z: 0,
+                },
+            ]),
+            // Daily win rate scatter
             {
                 name: 'Daily Win Rate',
                 type: 'scatter',
@@ -121,8 +167,9 @@ export default function WinRateChart({data}: WinRateChartProps) {
                 },
                 z: 2,
             },
+            // Cumulative win rate — overall
             {
-                name: 'Cumulative Win Rate',
+                name: 'Cumulative',
                 type: 'line',
                 data: rollingWinRate,
                 smooth: true,
@@ -133,20 +180,43 @@ export default function WinRateChart({data}: WinRateChartProps) {
                         type: 'linear',
                         x: 0, y: 0, x2: 0, y2: 1,
                         colorStops: [
-                            {offset: 0, color: 'rgba(6,182,212,0.2)'},
+                            {offset: 0, color: 'rgba(6,182,212,0.15)'},
                             {offset: 1, color: 'rgba(6,182,212,0)'},
                         ],
                     },
                 },
                 z: 1,
                 connectNulls: true,
-                // 50% reference line
                 markLine: {
                     silent: true,
                     lineStyle: {color: isDarkMode ? '#475569' : '#cbd5e1', type: 'dashed'},
                     data: [{yAxis: 50, label: {formatter: '50%', position: 'insideEndTop', color: isDarkMode ? '#64748b' : '#94a3b8'}}],
                 },
             },
+            // Long cumulative win rate
+            ...(hasDirection ? [{
+                name: 'Long WR',
+                type: 'line',
+                data: rollingLongWR,
+                smooth: true,
+                lineStyle: {width: 2, color: '#10b981', type: 'dashed' as const},
+                itemStyle: {color: '#10b981'},
+                symbol: 'none',
+                z: 1,
+                connectNulls: true,
+            }] : []),
+            // Short cumulative win rate
+            ...(hasDirection ? [{
+                name: 'Short WR',
+                type: 'line',
+                data: rollingShortWR,
+                smooth: true,
+                lineStyle: {width: 2, color: '#f59e0b', type: 'dashed' as const},
+                itemStyle: {color: '#f59e0b'},
+                symbol: 'none',
+                z: 1,
+                connectNulls: true,
+            }] : []),
         ],
     };
 
