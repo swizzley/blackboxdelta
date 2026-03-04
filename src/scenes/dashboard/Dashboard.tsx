@@ -12,7 +12,8 @@ import ScoreTrendChart from './ScoreTrendChart';
 import RecommendationRadar from './RecommendationRadar';
 import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
-import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint} from '../../context/Types';
+import DirectionChart from './DirectionChart';
+import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint} from '../../context/Types';
 
 type Period = '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'All';
 
@@ -58,6 +59,11 @@ export default function Dashboard() {
             cum += d.daily_pl;
             return {...d, cumulative_pl: Math.round(cum * 100) / 100};
         });
+    }, [dashboard, cutoff]);
+
+    const filteredDirection = useMemo<DirectionDataPoint[]>(() => {
+        if (!dashboard?.direction_series) return [];
+        return filterByDate(dashboard.direction_series, cutoff);
     }, [dashboard, cutoff]);
 
     const filteredScores = useMemo<ScoreDataPoint[]>(() => {
@@ -153,24 +159,23 @@ export default function Dashboard() {
                         />
                     </div>
 
-                    {/* Charts */}
+                    {/* Charts — time series pair */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                         <PLChart data={filteredPL}/>
-                        <TimeframeBreakdown data={dashboard.by_timeframe}/>
+                        {filteredDirection.length > 0 && <DirectionChart data={filteredDirection}/>}
                     </div>
 
-                    {/* Recommendation + Timeframe Radar */}
+                    {/* Charts — categorical pair */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                        <TimeframeBreakdown data={dashboard.by_timeframe}/>
                         {dashboard.recommendation_counts && <RecommendationRadar data={dashboard.recommendation_counts}/>}
-                        <TimeframeRadar data={dashboard.by_timeframe}/>
                     </div>
 
-                    {/* Score Trend (needs 2+ days of data) */}
-                    {filteredScores.length > 1 && (
-                        <div className="mb-6">
-                            <ScoreTrendChart data={filteredScores}/>
-                        </div>
-                    )}
+                    {/* Radar + Score Trend */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                        <TimeframeRadar data={dashboard.by_timeframe}/>
+                        {filteredScores.length > 1 && <ScoreTrendChart data={filteredScores}/>}
+                    </div>
 
                     {/* More Stats */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

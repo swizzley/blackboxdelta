@@ -4,8 +4,19 @@ export interface DashboardData {
     all_time: TimeframeStats;
     by_timeframe: TimeframeRow[];
     pl_series: PLDataPoint[];
+    direction_series: DirectionDataPoint[];
     score_series: ScoreDataPoint[];
     recommendation_counts?: Record<string, number>;
+}
+
+export interface DirectionDataPoint {
+    date: string;
+    long_wins: number;
+    long_losses: number;
+    short_wins: number;
+    short_losses: number;
+    long_pl: number;
+    short_pl: number;
 }
 
 export interface TimeframeStats {
