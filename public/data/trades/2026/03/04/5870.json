@@ -1,0 +1,144 @@
+{
+  "id": "5870",
+  "trade_id": "5871",
+  "symbol": "GBP_CAD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.8247,
+  "stop_loss": 1.82655,
+  "take_profit": 1.8053,
+  "quantity": -22,
+  "profit": null,
+  "created": "2026-03-04T15:56:11.765881046Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 5424,
+  "risk_reward": 10.486486486487058,
+  "candles": [
+    {
+      "t": "2026-03-04T15:47:00Z",
+      "o": 1.82764,
+      "h": 1.82765,
+      "l": 1.8267,
+      "c": 1.8272
+    },
+    {
+      "t": "2026-03-04T15:48:00Z",
+      "o": 1.82722,
+      "h": 1.82748,
+      "l": 1.8267,
+      "c": 1.8273
+    },
+    {
+      "t": "2026-03-04T15:49:00Z",
+      "o": 1.8273,
+      "h": 1.82753,
+      "l": 1.8268,
+      "c": 1.82737
+    },
+    {
+      "t": "2026-03-04T15:50:00Z",
+      "o": 1.82739,
+      "h": 1.82743,
+      "l": 1.8266,
+      "c": 1.82712
+    },
+    {
+      "t": "2026-03-04T15:51:00Z",
+      "o": 1.82696,
+      "h": 1.82726,
+      "l": 1.82617,
+      "c": 1.82631
+    },
+    {
+      "t": "2026-03-04T15:52:00Z",
+      "o": 1.82654,
+      "h": 1.82654,
+      "l": 1.82606,
+      "c": 1.82616
+    },
+    {
+      "t": "2026-03-04T15:53:00Z",
+      "o": 1.82616,
+      "h": 1.82661,
+      "l": 1.82616,
+      "c": 1.82622
+    },
+    {
+      "t": "2026-03-04T15:54:00Z",
+      "o": 1.82619,
+      "h": 1.8264,
+      "l": 1.82596,
+      "c": 1.82619
+    },
+    {
+      "t": "2026-03-04T15:55:00Z",
+      "o": 1.82617,
+      "h": 1.82642,
+      "l": 1.82521,
+      "c": 1.82551
+    },
+    {
+      "t": "2026-03-04T15:56:00Z",
+      "o": 1.82531,
+      "h": 1.82579,
+      "l": 1.8251,
+      "c": 1.8251
+    },
+    {
+      "t": "2026-03-04T15:57:00Z",
+      "o": 1.8252,
+      "h": 1.82568,
+      "l": 1.82515,
+      "c": 1.82535
+    },
+    {
+      "t": "2026-03-04T15:58:00Z",
+      "o": 1.8255,
+      "h": 1.82577,
+      "l": 1.8253,
+      "c": 1.82556
+    }
+  ],
+  "score": {
+    "Symbol": "GBPCAD",
+    "T": 1772639640000,
+    "Time": "",
+    "trend_score": -11,
+    "ma_score": -85,
+    "crossover_score": -12,
+    "oscillator_score": 3,
+    "volatility_score": -8,
+    "volume_score": 2,
+    "fib_stack_score": -34,
+    "momentum_projection_score": -12,
+    "structure_score": -4,
+    "cycle_score": -1,
+    "pattern_score": -1,
+    "final_score": -29.12,
+    "confidence": 0.7714,
+    "entry_price": 1.82639,
+    "stop_price": 1.82659,
+    "tp_price": 1.82416,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    }
+  }
+}

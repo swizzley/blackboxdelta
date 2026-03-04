@@ -1,0 +1,123 @@
+{
+  "id": "5890",
+  "trade_id": "5891",
+  "symbol": "GBP_USD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.33621,
+  "stop_loss": 1.33696,
+  "take_profit": 1.33245,
+  "quantity": -29,
+  "profit": null,
+  "created": "2026-03-04T15:59:10.730174728Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 5432,
+  "risk_reward": 5.013333333333124,
+  "candles": [
+    {
+      "t": "2026-03-04T15:50:00Z",
+      "o": 1.3371,
+      "h": 1.3373,
+      "l": 1.3367,
+      "c": 1.33707
+    },
+    {
+      "t": "2026-03-04T15:51:00Z",
+      "o": 1.33705,
+      "h": 1.3373,
+      "l": 1.3364,
+      "c": 1.33665
+    },
+    {
+      "t": "2026-03-04T15:52:00Z",
+      "o": 1.33664,
+      "h": 1.3368,
+      "l": 1.33645,
+      "c": 1.33665
+    },
+    {
+      "t": "2026-03-04T15:53:00Z",
+      "o": 1.33662,
+      "h": 1.3371,
+      "l": 1.33649,
+      "c": 1.33685
+    },
+    {
+      "t": "2026-03-04T15:54:00Z",
+      "o": 1.33695,
+      "h": 1.3372,
+      "l": 1.33678,
+      "c": 1.33706
+    },
+    {
+      "t": "2026-03-04T15:55:00Z",
+      "o": 1.33707,
+      "h": 1.33707,
+      "l": 1.3361,
+      "c": 1.33616
+    },
+    {
+      "t": "2026-03-04T15:56:00Z",
+      "o": 1.33628,
+      "h": 1.3365,
+      "l": 1.33599,
+      "c": 1.33607
+    },
+    {
+      "t": "2026-03-04T15:57:00Z",
+      "o": 1.33603,
+      "h": 1.33642,
+      "l": 1.33603,
+      "c": 1.33634
+    },
+    {
+      "t": "2026-03-04T15:58:00Z",
+      "o": 1.33636,
+      "h": 1.3367,
+      "l": 1.33626,
+      "c": 1.3364
+    }
+  ],
+  "score": {
+    "Symbol": "GBPUSD",
+    "T": 1772639820000,
+    "Time": "",
+    "trend_score": -15,
+    "ma_score": -87,
+    "crossover_score": -9,
+    "oscillator_score": -4,
+    "volatility_score": -8,
+    "volume_score": 2,
+    "fib_stack_score": -24,
+    "momentum_projection_score": -13,
+    "structure_score": -3,
+    "cycle_score": 1,
+    "pattern_score": 3,
+    "final_score": -36.88,
+    "confidence": 0.7945,
+    "entry_price": 1.33635,
+    "stop_price": 1.33649,
+    "tp_price": 1.33554,
+    "risk_reward": 5.58,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    }
+  }
+}
