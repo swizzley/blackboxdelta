@@ -103,6 +103,31 @@
       "c": 1.16412
     }
   ],
+  "score": {
+    "Symbol": "EURUSD",
+    "T": 1772640120000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 35,
+    "crossover_score": 1,
+    "oscillator_score": 4,
+    "volatility_score": 8,
+    "volume_score": 4,
+    "fib_stack_score": 38,
+    "momentum_projection_score": 3,
+    "structure_score": 7,
+    "cycle_score": 3,
+    "pattern_score": 0,
+    "final_score": 28.58,
+    "confidence": 0.7757,
+    "entry_price": 1.16399,
+    "stop_price": 1.16387,
+    "tp_price": 1.16465,
+    "risk_reward": 5.8,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

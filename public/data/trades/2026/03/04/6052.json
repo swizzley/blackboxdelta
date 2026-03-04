@@ -115,8 +115,40 @@
       "h": 209.85,
       "l": 209.76,
       "c": 209.846
+    },
+    {
+      "t": "2026-03-04T16:35:00Z",
+      "o": 209.893,
+      "h": 209.91,
+      "l": 209.81,
+      "c": 209.864
     }
   ],
+  "score": {
+    "Symbol": "GBPJPY",
+    "T": 1772641620000,
+    "Time": "",
+    "trend_score": -11,
+    "ma_score": -67,
+    "crossover_score": -4,
+    "oscillator_score": -7,
+    "volatility_score": -7,
+    "volume_score": -2,
+    "fib_stack_score": -19,
+    "momentum_projection_score": -15,
+    "structure_score": -1,
+    "cycle_score": 2,
+    "pattern_score": -1,
+    "final_score": -27.88,
+    "confidence": 0.8582,
+    "entry_price": 209.779,
+    "stop_price": 209.796,
+    "tp_price": 209.596,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

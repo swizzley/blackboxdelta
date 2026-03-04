@@ -69,7 +69,21 @@
           "closed": "2026-02-26T13:53:57Z",
           "duration_mins": 617,
           "alert_id": 2,
-          "risk_reward": 3.003759398496499
+          "risk_reward": 3.003759398496499,
+          "versions": {
+            "finmon": {
+              "sha": "e1c282cc2512b790ef0e665ea30643ae6ef83f1b",
+              "message": "Regenerate trade files missing version data"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+              "message": "Update swizzley-common vendor: parseTime=true in DSN"
+            }
+          }
         }
       ]
     },
@@ -107,7 +121,21 @@
           "closed": "2026-02-26T04:05:11Z",
           "duration_mins": 0,
           "alert_id": 7,
-          "risk_reward": 2.8333333333365407
+          "risk_reward": 2.8333333333365407,
+          "versions": {
+            "finmon": {
+              "sha": "e1c282cc2512b790ef0e665ea30643ae6ef83f1b",
+              "message": "Regenerate trade files missing version data"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+              "message": "Update swizzley-common vendor: parseTime=true in DSN"
+            }
+          }
         }
       ]
     }

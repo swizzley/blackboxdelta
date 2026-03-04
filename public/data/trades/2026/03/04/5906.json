@@ -96,6 +96,31 @@
       "c": 10.4509
     }
   ],
+  "score": {
+    "Symbol": "GBPHKD",
+    "T": 1772639940000,
+    "Time": "",
+    "trend_score": -10,
+    "ma_score": -56,
+    "crossover_score": -6,
+    "oscillator_score": -10,
+    "volatility_score": -7,
+    "volume_score": 0,
+    "fib_stack_score": -16,
+    "momentum_projection_score": -12,
+    "structure_score": 1,
+    "cycle_score": 3,
+    "pattern_score": -2,
+    "final_score": -23.4,
+    "confidence": 0.657,
+    "entry_price": 10.4484,
+    "stop_price": 10.4495,
+    "tp_price": 10.4385,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

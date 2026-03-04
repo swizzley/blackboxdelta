@@ -124,6 +124,31 @@
       "c": 1.3369
     }
   ],
+  "score": {
+    "Symbol": "GBPUSD",
+    "T": 1772641620000,
+    "Time": "",
+    "trend_score": -12,
+    "ma_score": -88,
+    "crossover_score": -15,
+    "oscillator_score": -5,
+    "volatility_score": -8,
+    "volume_score": -2,
+    "fib_stack_score": -25,
+    "momentum_projection_score": -14,
+    "structure_score": -1,
+    "cycle_score": 2,
+    "pattern_score": -1,
+    "final_score": -40.37,
+    "confidence": 0.6932,
+    "entry_price": 1.33587,
+    "stop_price": 1.33601,
+    "tp_price": 1.33493,
+    "risk_reward": 7,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Sell"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

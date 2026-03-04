@@ -138,6 +138,31 @@
       "c": 1.36614
     }
   ],
+  "score": {
+    "Symbol": "USDCAD",
+    "T": 1772640240000,
+    "Time": "",
+    "trend_score": -15,
+    "ma_score": -126,
+    "crossover_score": -12,
+    "oscillator_score": 4,
+    "volatility_score": -8,
+    "volume_score": -2,
+    "fib_stack_score": -45,
+    "momentum_projection_score": -13,
+    "structure_score": -1,
+    "cycle_score": 2,
+    "pattern_score": 3,
+    "final_score": -44.36,
+    "confidence": 0.712,
+    "entry_price": 1.36538,
+    "stop_price": 1.36549,
+    "tp_price": 1.36444,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Sell"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

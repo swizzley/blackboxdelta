@@ -96,6 +96,31 @@
       "c": 4.63616
     }
   ],
+  "score": {
+    "Symbol": "NZDHKD",
+    "T": 1772640480000,
+    "Time": "",
+    "trend_score": 12,
+    "ma_score": 45,
+    "crossover_score": -3,
+    "oscillator_score": 3,
+    "volatility_score": 7,
+    "volume_score": 4,
+    "fib_stack_score": 24,
+    "momentum_projection_score": 5,
+    "structure_score": 7,
+    "cycle_score": 2,
+    "pattern_score": 0,
+    "final_score": 25.99,
+    "confidence": 0.7439,
+    "entry_price": 4.63647,
+    "stop_price": 4.63526,
+    "tp_price": 4.64734,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

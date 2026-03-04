@@ -159,6 +159,31 @@
       "c": 0.78041
     }
   ],
+  "score": {
+    "Symbol": "USDCHF",
+    "T": 1772640660000,
+    "Time": "",
+    "trend_score": -11,
+    "ma_score": -26,
+    "crossover_score": 10,
+    "oscillator_score": -2,
+    "volatility_score": -7,
+    "volume_score": 2,
+    "fib_stack_score": -33,
+    "momentum_projection_score": -14,
+    "structure_score": 0,
+    "cycle_score": 2,
+    "pattern_score": -2,
+    "final_score": -23.53,
+    "confidence": 0.6802,
+    "entry_price": 0.77935,
+    "stop_price": 0.77946,
+    "tp_price": 0.77837,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

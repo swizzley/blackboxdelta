@@ -131,6 +131,31 @@
       "c": 0.75561
     }
   ],
+  "score": {
+    "Symbol": "NZDSGD",
+    "T": 1772640240000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 20,
+    "crossover_score": -5,
+    "oscillator_score": 6,
+    "volatility_score": 7,
+    "volume_score": 4,
+    "fib_stack_score": -4,
+    "momentum_projection_score": 13,
+    "structure_score": 6,
+    "cycle_score": 0,
+    "pattern_score": -1,
+    "final_score": 21.43,
+    "confidence": 0.6802,
+    "entry_price": 0.75592,
+    "stop_price": 0.75575,
+    "tp_price": 0.75689,
+    "risk_reward": 5.45,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

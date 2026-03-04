@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-04T17:18:04Z",
+  "generated": "2026-03-04T17:19:41Z",
   "all_time": {
     "total_orders": 558,
     "pending": 0,
@@ -142,26 +142,26 @@
   "score_series": [
     {
       "date": "2026-03-04",
-      "avg_final_score": 5.71,
+      "avg_final_score": 5.7,
       "avg_confidence": 0.74,
       "avg_trend": 1.08,
-      "avg_ma": 3.05,
+      "avg_ma": 3.03,
       "avg_crossover": -0.06,
       "avg_oscillator": -1.16,
       "avg_volatility": 1.36,
       "avg_volume": 1.81,
-      "avg_fib_stack": 3.24,
+      "avg_fib_stack": 3.22,
       "avg_momentum_projection": 1.3,
       "avg_structure": 3.35,
       "avg_cycle": 1.18,
-      "avg_pattern": -0.36,
-      "count": 1190
+      "avg_pattern": -0.35,
+      "count": 1192
     }
   ],
   "recommendation_counts": {
     "Buy": 183,
-    "Moderate Buy": 510,
-    "Moderate Sell": 410,
+    "Moderate Buy": 511,
+    "Moderate Sell": 411,
     "Sell": 87
   }
 }

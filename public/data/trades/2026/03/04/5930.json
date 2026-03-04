@@ -152,6 +152,31 @@
       "c": 209.904
     }
   ],
+  "score": {
+    "Symbol": "GBPJPY",
+    "T": 1772640120000,
+    "Time": "",
+    "trend_score": -11,
+    "ma_score": -86,
+    "crossover_score": -3,
+    "oscillator_score": -7,
+    "volatility_score": -7,
+    "volume_score": -2,
+    "fib_stack_score": -19,
+    "momentum_projection_score": -15,
+    "structure_score": -1,
+    "cycle_score": 1,
+    "pattern_score": 8,
+    "final_score": -28.02,
+    "confidence": 0.8264,
+    "entry_price": 209.99,
+    "stop_price": 210.009,
+    "tp_price": 209.776,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

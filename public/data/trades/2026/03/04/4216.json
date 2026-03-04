@@ -186,16 +186,16 @@
   },
   "versions": {
     "finmon": {
-      "sha": "d5810c58e8e8f8d080edb5fe38ae8e39937cb0e4",
-      "message": "Write scores to normalized scores table on alert creation"
-    },
-    "swizzley-trader": {
-      "sha": "07eec7ae0c2daddab7e1aacd3a34dc4b3e6250b2",
-      "message": "Add service version tracking to orders"
+      "sha": "e1c282cc2512b790ef0e665ea30643ae6ef83f1b",
+      "message": "Regenerate trade files missing version data"
     },
     "massive-market": {
-      "sha": "0866ff12579d080551d3a77689c5908cf7bb816f",
-      "message": "Add version tracking for massive-market and gotrade"
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
     }
   }
 }
