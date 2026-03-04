@@ -1,0 +1,165 @@
+{
+  "id": "6124",
+  "trade_id": "6125",
+  "symbol": "AUD_CHF",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.55225,
+  "stop_loss": 0.55132,
+  "take_profit": 0.55462,
+  "quantity": 25,
+  "profit": null,
+  "created": "2026-03-04T16:47:11.71528325Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 5531,
+  "risk_reward": 2.5483870967742126,
+  "candles": [
+    {
+      "t": "2026-03-04T16:38:00Z",
+      "o": 0.551421,
+      "h": 0.551586,
+      "l": 0.5508,
+      "c": 0.551484
+    },
+    {
+      "t": "2026-03-04T16:39:00Z",
+      "o": 0.55148,
+      "h": 0.551712,
+      "l": 0.551,
+      "c": 0.551383
+    },
+    {
+      "t": "2026-03-04T16:40:00Z",
+      "o": 0.551383,
+      "h": 0.551704,
+      "l": 0.5509,
+      "c": 0.551633
+    },
+    {
+      "t": "2026-03-04T16:41:00Z",
+      "o": 0.55154,
+      "h": 0.551758,
+      "l": 0.5509,
+      "c": 0.55162
+    },
+    {
+      "t": "2026-03-04T16:42:00Z",
+      "o": 0.55162,
+      "h": 0.551742,
+      "l": 0.5508,
+      "c": 0.5509
+    },
+    {
+      "t": "2026-03-04T16:43:00Z",
+      "o": 0.55157,
+      "h": 0.551835,
+      "l": 0.5509,
+      "c": 0.551629
+    },
+    {
+      "t": "2026-03-04T16:44:00Z",
+      "o": 0.5512,
+      "h": 0.551898,
+      "l": 0.5509,
+      "c": 0.55157
+    },
+    {
+      "t": "2026-03-04T16:45:00Z",
+      "o": 0.551742,
+      "h": 0.551899,
+      "l": 0.551,
+      "c": 0.55167
+    },
+    {
+      "t": "2026-03-04T16:46:00Z",
+      "o": 0.551685,
+      "h": 0.55189,
+      "l": 0.551,
+      "c": 0.55177
+    },
+    {
+      "t": "2026-03-04T16:47:00Z",
+      "o": 0.55177,
+      "h": 0.551905,
+      "l": 0.5511,
+      "c": 0.551635
+    },
+    {
+      "t": "2026-03-04T16:48:00Z",
+      "o": 0.551682,
+      "h": 0.55182,
+      "l": 0.551,
+      "c": 0.55169
+    },
+    {
+      "t": "2026-03-04T16:49:00Z",
+      "o": 0.551744,
+      "h": 0.551867,
+      "l": 0.551,
+      "c": 0.55161
+    },
+    {
+      "t": "2026-03-04T16:50:00Z",
+      "o": 0.551668,
+      "h": 0.551773,
+      "l": 0.5511,
+      "c": 0.5516
+    },
+    {
+      "t": "2026-03-04T16:51:00Z",
+      "o": 0.551584,
+      "h": 0.551687,
+      "l": 0.551,
+      "c": 0.551403
+    },
+    {
+      "t": "2026-03-04T16:52:00Z",
+      "o": 0.55132,
+      "h": 0.55164,
+      "l": 0.550919,
+      "c": 0.55142
+    }
+  ],
+  "score": {
+    "Symbol": "AUDCHF",
+    "T": 1772642700000,
+    "Time": "",
+    "trend_score": 16,
+    "ma_score": 115,
+    "crossover_score": 14,
+    "oscillator_score": 1,
+    "volatility_score": 6,
+    "volume_score": 4,
+    "fib_stack_score": 60,
+    "momentum_projection_score": -5,
+    "structure_score": 6,
+    "cycle_score": -2,
+    "pattern_score": -2,
+    "final_score": 34.14,
+    "confidence": 0.7279,
+    "entry_price": 0.55136,
+    "stop_price": 0.55115,
+    "tp_price": 0.55373,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "e1c282cc2512b790ef0e665ea30643ae6ef83f1b",
+      "message": "Regenerate trade files missing version data"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2309e3b38277ac1954bc340d77cdadceed090500",
+      "message": "Replace ScoreData JSON with scores table JOIN"
+    }
+  }
+}
