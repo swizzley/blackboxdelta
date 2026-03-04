@@ -1,0 +1,193 @@
+{
+  "id": "4804",
+  "trade_id": "4805",
+  "symbol": "NZD_CAD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.8099,
+  "stop_loss": 0.80728,
+  "take_profit": 0.82754,
+  "quantity": 20,
+  "profit": null,
+  "created": "2026-03-04T11:26:11.929407924Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 4853,
+  "risk_reward": 6.732824427481068,
+  "candles": [
+    {
+      "t": "2026-03-04T11:17:00Z",
+      "o": 0.80838,
+      "h": 0.808587,
+      "l": 0.8079,
+      "c": 0.808
+    },
+    {
+      "t": "2026-03-04T11:18:00Z",
+      "o": 0.80855,
+      "h": 0.808653,
+      "l": 0.808,
+      "c": 0.808
+    },
+    {
+      "t": "2026-03-04T11:19:00Z",
+      "o": 0.808513,
+      "h": 0.808637,
+      "l": 0.808,
+      "c": 0.808622
+    },
+    {
+      "t": "2026-03-04T11:20:00Z",
+      "o": 0.8082,
+      "h": 0.808755,
+      "l": 0.808,
+      "c": 0.80861
+    },
+    {
+      "t": "2026-03-04T11:22:00Z",
+      "o": 0.808728,
+      "h": 0.808856,
+      "l": 0.808,
+      "c": 0.808734
+    },
+    {
+      "t": "2026-03-04T11:23:00Z",
+      "o": 0.80872,
+      "h": 0.808748,
+      "l": 0.8081,
+      "c": 0.80856
+    },
+    {
+      "t": "2026-03-04T11:24:00Z",
+      "o": 0.80858,
+      "h": 0.808877,
+      "l": 0.8081,
+      "c": 0.80868
+    },
+    {
+      "t": "2026-03-04T11:25:00Z",
+      "o": 0.80866,
+      "h": 0.808942,
+      "l": 0.8082,
+      "c": 0.80861
+    },
+    {
+      "t": "2026-03-04T11:26:00Z",
+      "o": 0.80862,
+      "h": 0.808701,
+      "l": 0.8081,
+      "c": 0.80849
+    },
+    {
+      "t": "2026-03-04T11:27:00Z",
+      "o": 0.8085,
+      "h": 0.80858,
+      "l": 0.8081,
+      "c": 0.80834
+    },
+    {
+      "t": "2026-03-04T11:28:00Z",
+      "o": 0.80835,
+      "h": 0.808432,
+      "l": 0.8081,
+      "c": 0.808403
+    },
+    {
+      "t": "2026-03-04T11:29:00Z",
+      "o": 0.80834,
+      "h": 0.808466,
+      "l": 0.8082,
+      "c": 0.80839
+    },
+    {
+      "t": "2026-03-04T11:30:00Z",
+      "o": 0.8084,
+      "h": 0.808591,
+      "l": 0.808,
+      "c": 0.80854
+    },
+    {
+      "t": "2026-03-04T11:31:00Z",
+      "o": 0.80849,
+      "h": 0.808867,
+      "l": 0.808,
+      "c": 0.808783
+    },
+    {
+      "t": "2026-03-04T11:32:00Z",
+      "o": 0.80872,
+      "h": 0.808778,
+      "l": 0.8079,
+      "c": 0.80863
+    },
+    {
+      "t": "2026-03-04T11:33:00Z",
+      "o": 0.80866,
+      "h": 0.808695,
+      "l": 0.808,
+      "c": 0.80843
+    },
+    {
+      "t": "2026-03-04T11:34:00Z",
+      "o": 0.8079,
+      "h": 0.808665,
+      "l": 0.8079,
+      "c": 0.80859
+    },
+    {
+      "t": "2026-03-04T11:35:00Z",
+      "o": 0.80861,
+      "h": 0.808844,
+      "l": 0.808,
+      "c": 0.80852
+    },
+    {
+      "t": "2026-03-04T11:36:00Z",
+      "o": 0.808596,
+      "h": 0.808666,
+      "l": 0.8081,
+      "c": 0.80847
+    }
+  ],
+  "score": {
+    "Symbol": "NZDCAD",
+    "T": 1772623440000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 23,
+    "crossover_score": -1,
+    "oscillator_score": 4,
+    "volatility_score": 7,
+    "volume_score": 0,
+    "fib_stack_score": 24,
+    "momentum_projection_score": 12,
+    "structure_score": 5,
+    "cycle_score": 2,
+    "pattern_score": 1,
+    "final_score": 29.69,
+    "confidence": 0.6772,
+    "entry_price": 0.80838,
+    "stop_price": 0.8082,
+    "tp_price": 0.80964,
+    "risk_reward": 7,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "ecfd28607c8ec937d7fcedcaaf7ac681d98efa2b",
+      "message": "Fix collectVersions by reading versions from DB instead of filesystem"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2dbf714572cfd4fb4787cf3bf6b603ca8196598a",
+      "message": "Use single autoclose.scalp setting (Enabled=toggle, Value=min pips)"
+    }
+  }
+}

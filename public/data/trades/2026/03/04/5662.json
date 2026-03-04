@@ -1,0 +1,138 @@
+{
+  "id": "5662",
+  "trade_id": "5663",
+  "symbol": "GBP_JPY",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 210.497,
+  "exit": 210.4959391304348,
+  "stop_loss": 210.354,
+  "take_profit": 212.048,
+  "quantity": 23,
+  "profit": -0.0244,
+  "created": "2026-03-04T14:34:07.545474573Z",
+  "closed": "2026-03-04T14:35:40Z",
+  "duration_mins": 1,
+  "alert_id": 5322,
+  "risk_reward": 10.846153846153708,
+  "candles": [
+    {
+      "t": "2026-03-04T14:25:00Z",
+      "o": 210.319,
+      "h": 210.38,
+      "l": 210.319,
+      "c": 210.342
+    },
+    {
+      "t": "2026-03-04T14:26:00Z",
+      "o": 210.342,
+      "h": 210.38,
+      "l": 210.339,
+      "c": 210.354
+    },
+    {
+      "t": "2026-03-04T14:27:00Z",
+      "o": 210.355,
+      "h": 210.375,
+      "l": 210.32,
+      "c": 210.348
+    },
+    {
+      "t": "2026-03-04T14:28:00Z",
+      "o": 210.347,
+      "h": 210.372,
+      "l": 210.32,
+      "c": 210.365
+    },
+    {
+      "t": "2026-03-04T14:29:00Z",
+      "o": 210.364,
+      "h": 210.383,
+      "l": 210.31,
+      "c": 210.348
+    },
+    {
+      "t": "2026-03-04T14:30:00Z",
+      "o": 210.348,
+      "h": 210.405,
+      "l": 210.29,
+      "c": 210.392
+    },
+    {
+      "t": "2026-03-04T14:31:00Z",
+      "o": 210.384,
+      "h": 210.4,
+      "l": 210.326,
+      "c": 210.39
+    },
+    {
+      "t": "2026-03-04T14:32:00Z",
+      "o": 210.386,
+      "h": 210.416,
+      "l": 210.33,
+      "c": 210.377
+    },
+    {
+      "t": "2026-03-04T14:33:00Z",
+      "o": 210.381,
+      "h": 210.439,
+      "l": 210.34,
+      "c": 210.431
+    },
+    {
+      "t": "2026-03-04T14:34:00Z",
+      "o": 210.425,
+      "h": 210.444,
+      "l": 210.34,
+      "c": 210.416
+    },
+    {
+      "t": "2026-03-04T14:35:00Z",
+      "o": 210.42,
+      "h": 210.452,
+      "l": 210.252,
+      "c": 210.274
+    }
+  ],
+  "score": {
+    "Symbol": "GBPJPY",
+    "T": 1772634720000,
+    "Time": "",
+    "trend_score": 7,
+    "ma_score": 45,
+    "crossover_score": 5,
+    "oscillator_score": -1,
+    "volatility_score": 6,
+    "volume_score": 4,
+    "fib_stack_score": 14,
+    "momentum_projection_score": 10,
+    "structure_score": 6,
+    "cycle_score": 4,
+    "pattern_score": -3,
+    "final_score": 29.74,
+    "confidence": 0.7714,
+    "entry_price": 210.3584,
+    "stop_price": 210.33955,
+    "tp_price": 210.56572,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "ecfd28607c8ec937d7fcedcaaf7ac681d98efa2b",
+      "message": "Fix collectVersions by reading versions from DB instead of filesystem"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2dbf714572cfd4fb4787cf3bf6b603ca8196598a",
+      "message": "Use single autoclose.scalp setting (Enabled=toggle, Value=min pips)"
+    }
+  }
+}

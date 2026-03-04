@@ -1,0 +1,145 @@
+{
+  "id": "5520",
+  "trade_id": "5521",
+  "symbol": "CAD_HKD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 5.71686,
+  "exit": 5.716755238095238,
+  "stop_loss": 5.717969999999999,
+  "take_profit": 5.71193,
+  "quantity": -21,
+  "profit": 0.0022,
+  "created": "2026-03-04T13:54:12.255764742Z",
+  "closed": "2026-03-04T13:56:27Z",
+  "duration_mins": 2,
+  "alert_id": 5223,
+  "risk_reward": 4.441441441442444,
+  "candles": [
+    {
+      "t": "2026-03-04T13:45:00Z",
+      "o": 5.71845,
+      "h": 5.71896,
+      "l": 5.71677,
+      "c": 5.71793
+    },
+    {
+      "t": "2026-03-04T13:46:00Z",
+      "o": 5.71752,
+      "h": 5.71838,
+      "l": 5.71634,
+      "c": 5.71751
+    },
+    {
+      "t": "2026-03-04T13:47:00Z",
+      "o": 5.71759,
+      "h": 5.71878,
+      "l": 5.71686,
+      "c": 5.71761
+    },
+    {
+      "t": "2026-03-04T13:48:00Z",
+      "o": 5.71839,
+      "h": 5.71863,
+      "l": 5.71622,
+      "c": 5.718
+    },
+    {
+      "t": "2026-03-04T13:49:00Z",
+      "o": 5.71802,
+      "h": 5.71826,
+      "l": 5.71624,
+      "c": 5.71808
+    },
+    {
+      "t": "2026-03-04T13:50:00Z",
+      "o": 5.71812,
+      "h": 5.71872,
+      "l": 5.71652,
+      "c": 5.71792
+    },
+    {
+      "t": "2026-03-04T13:51:00Z",
+      "o": 5.71829,
+      "h": 5.71829,
+      "l": 5.71544,
+      "c": 5.71686
+    },
+    {
+      "t": "2026-03-04T13:52:00Z",
+      "o": 5.71703,
+      "h": 5.71771,
+      "l": 5.7144,
+      "c": 5.71584
+    },
+    {
+      "t": "2026-03-04T13:53:00Z",
+      "o": 5.71542,
+      "h": 5.71762,
+      "l": 5.7148,
+      "c": 5.71762
+    },
+    {
+      "t": "2026-03-04T13:54:00Z",
+      "o": 5.7176,
+      "h": 5.71799,
+      "l": 5.71519,
+      "c": 5.71607
+    },
+    {
+      "t": "2026-03-04T13:55:00Z",
+      "o": 5.71606,
+      "h": 5.71606,
+      "l": 5.71355,
+      "c": 5.7141
+    },
+    {
+      "t": "2026-03-04T13:56:00Z",
+      "o": 5.71417,
+      "h": 5.71712,
+      "l": 5.71293,
+      "c": 5.71594
+    }
+  ],
+  "score": {
+    "Symbol": "CADHKD",
+    "T": 1772632320000,
+    "Time": "",
+    "trend_score": -15,
+    "ma_score": -136,
+    "crossover_score": -5,
+    "oscillator_score": -8,
+    "volatility_score": -2,
+    "volume_score": 4,
+    "fib_stack_score": -65,
+    "momentum_projection_score": -5,
+    "structure_score": 1,
+    "cycle_score": 1,
+    "pattern_score": -1,
+    "final_score": -32.63,
+    "confidence": 0.657,
+    "entry_price": 5.71688,
+    "stop_price": 5.71751,
+    "tp_price": 5.71195,
+    "risk_reward": 7.8,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "ecfd28607c8ec937d7fcedcaaf7ac681d98efa2b",
+      "message": "Fix collectVersions by reading versions from DB instead of filesystem"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2dbf714572cfd4fb4787cf3bf6b603ca8196598a",
+      "message": "Use single autoclose.scalp setting (Enabled=toggle, Value=min pips)"
+    }
+  }
+}

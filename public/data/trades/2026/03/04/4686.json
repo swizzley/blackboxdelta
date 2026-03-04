@@ -1,0 +1,152 @@
+{
+  "id": "4686",
+  "trade_id": "4687",
+  "symbol": "NZD_HKD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 4.62024,
+  "exit": 4.620601111111111,
+  "stop_loss": 4.62242,
+  "take_profit": 4.60736,
+  "quantity": -18,
+  "profit": -0.0065,
+  "created": "2026-03-04T10:41:13.527763846Z",
+  "closed": "2026-03-04T10:44:20Z",
+  "duration_mins": 3,
+  "alert_id": 4774,
+  "risk_reward": 5.908256880733754,
+  "candles": [
+    {
+      "t": "2026-03-04T10:32:00Z",
+      "o": 4.62277,
+      "h": 4.62325,
+      "l": 4.6206,
+      "c": 4.62205
+    },
+    {
+      "t": "2026-03-04T10:33:00Z",
+      "o": 4.62209,
+      "h": 4.62284,
+      "l": 4.619,
+      "c": 4.61996
+    },
+    {
+      "t": "2026-03-04T10:34:00Z",
+      "o": 4.62041,
+      "h": 4.62298,
+      "l": 4.6197,
+      "c": 4.62029
+    },
+    {
+      "t": "2026-03-04T10:35:00Z",
+      "o": 4.62111,
+      "h": 4.62327,
+      "l": 4.6197,
+      "c": 4.62229
+    },
+    {
+      "t": "2026-03-04T10:36:00Z",
+      "o": 4.62228,
+      "h": 4.62365,
+      "l": 4.6197,
+      "c": 4.6214
+    },
+    {
+      "t": "2026-03-04T10:37:00Z",
+      "o": 4.62296,
+      "h": 4.62334,
+      "l": 4.6182,
+      "c": 4.6222
+    },
+    {
+      "t": "2026-03-04T10:38:00Z",
+      "o": 4.62189,
+      "h": 4.62312,
+      "l": 4.6182,
+      "c": 4.62167
+    },
+    {
+      "t": "2026-03-04T10:39:00Z",
+      "o": 4.62111,
+      "h": 4.62233,
+      "l": 4.6182,
+      "c": 4.62154
+    },
+    {
+      "t": "2026-03-04T10:40:00Z",
+      "o": 4.62198,
+      "h": 4.62215,
+      "l": 4.6181,
+      "c": 4.62014
+    },
+    {
+      "t": "2026-03-04T10:41:00Z",
+      "o": 4.62072,
+      "h": 4.62253,
+      "l": 4.6188,
+      "c": 4.6205
+    },
+    {
+      "t": "2026-03-04T10:42:00Z",
+      "o": 4.62066,
+      "h": 4.62202,
+      "l": 4.6188,
+      "c": 4.62099
+    },
+    {
+      "t": "2026-03-04T10:43:00Z",
+      "o": 4.6206,
+      "h": 4.62215,
+      "l": 4.6182,
+      "c": 4.62115
+    },
+    {
+      "t": "2026-03-04T10:44:00Z",
+      "o": 4.62181,
+      "h": 4.62322,
+      "l": 4.6189,
+      "c": 4.62269
+    }
+  ],
+  "score": {
+    "Symbol": "NZDHKD",
+    "T": 1772620740000,
+    "Time": "",
+    "trend_score": -13,
+    "ma_score": -45,
+    "crossover_score": -5,
+    "oscillator_score": -9,
+    "volatility_score": -5,
+    "volume_score": 4,
+    "fib_stack_score": -4,
+    "momentum_projection_score": -11,
+    "structure_score": -1,
+    "cycle_score": 1,
+    "pattern_score": 2,
+    "final_score": -22.93,
+    "confidence": 0.7945,
+    "entry_price": 4.62197,
+    "stop_price": 4.62314,
+    "tp_price": 4.60909,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "ecfd28607c8ec937d7fcedcaaf7ac681d98efa2b",
+      "message": "Fix collectVersions by reading versions from DB instead of filesystem"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2dbf714572cfd4fb4787cf3bf6b603ca8196598a",
+      "message": "Use single autoclose.scalp setting (Enabled=toggle, Value=min pips)"
+    }
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "id": "5274",
+  "trade_id": "5275",
+  "symbol": "USD_CAD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.36769,
+  "exit": 1.3669042857142857,
+  "stop_loss": 1.3667,
+  "take_profit": 1.37706,
+  "quantity": 28,
+  "profit": -0.022,
+  "created": "2026-03-04T12:59:06.556539561Z",
+  "closed": "2026-03-04T13:03:14Z",
+  "duration_mins": 4,
+  "alert_id": 5099,
+  "risk_reward": 9.464646464645899,
+  "candles": [
+    {
+      "t": "2026-03-04T12:50:00Z",
+      "o": 1.36614,
+      "h": 1.3664,
+      "l": 1.3659,
+      "c": 1.36634
+    },
+    {
+      "t": "2026-03-04T12:51:00Z",
+      "o": 1.36631,
+      "h": 1.36645,
+      "l": 1.366,
+      "c": 1.36638
+    },
+    {
+      "t": "2026-03-04T12:52:00Z",
+      "o": 1.36638,
+      "h": 1.36693,
+      "l": 1.3662,
+      "c": 1.36693
+    },
+    {
+      "t": "2026-03-04T12:53:00Z",
+      "o": 1.3669,
+      "h": 1.36692,
+      "l": 1.3662,
+      "c": 1.36687
+    },
+    {
+      "t": "2026-03-04T12:54:00Z",
+      "o": 1.36687,
+      "h": 1.3669,
+      "l": 1.3662,
+      "c": 1.3664
+    },
+    {
+      "t": "2026-03-04T12:55:00Z",
+      "o": 1.36683,
+      "h": 1.36735,
+      "l": 1.3664,
+      "c": 1.36729
+    },
+    {
+      "t": "2026-03-04T12:56:00Z",
+      "o": 1.36725,
+      "h": 1.36745,
+      "l": 1.3667,
+      "c": 1.36742
+    },
+    {
+      "t": "2026-03-04T12:57:00Z",
+      "o": 1.36739,
+      "h": 1.36755,
+      "l": 1.367,
+      "c": 1.3675
+    },
+    {
+      "t": "2026-03-04T12:58:00Z",
+      "o": 1.36754,
+      "h": 1.36755,
+      "l": 1.3669,
+      "c": 1.36732
+    },
+    {
+      "t": "2026-03-04T12:59:00Z",
+      "o": 1.3673,
+      "h": 1.36735,
+      "l": 1.3669,
+      "c": 1.36735
+    },
+    {
+      "t": "2026-03-04T13:00:00Z",
+      "o": 1.36732,
+      "h": 1.36732,
+      "l": 1.36661,
+      "c": 1.36661
+    },
+    {
+      "t": "2026-03-04T13:01:00Z",
+      "o": 1.3666,
+      "h": 1.3669,
+      "l": 1.3664,
+      "c": 1.36655
+    },
+    {
+      "t": "2026-03-04T13:02:00Z",
+      "o": 1.36655,
+      "h": 1.367,
+      "l": 1.36636,
+      "c": 1.36636
+    },
+    {
+      "t": "2026-03-04T13:03:00Z",
+      "o": 1.36643,
+      "h": 1.3668,
+      "l": 1.36617,
+      "c": 1.3663
+    }
+  ],
+  "score": {
+    "Symbol": "USDCAD",
+    "T": 1772629020000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 95,
+    "crossover_score": 7,
+    "oscillator_score": -3,
+    "volatility_score": 8,
+    "volume_score": 0,
+    "fib_stack_score": 40,
+    "momentum_projection_score": 13,
+    "structure_score": 5,
+    "cycle_score": 1,
+    "pattern_score": 1,
+    "final_score": 33.32,
+    "confidence": 0.8264,
+    "entry_price": 1.36722,
+    "stop_price": 1.36707,
+    "tp_price": 1.3688,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "ecfd28607c8ec937d7fcedcaaf7ac681d98efa2b",
+      "message": "Fix collectVersions by reading versions from DB instead of filesystem"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2dbf714572cfd4fb4787cf3bf6b603ca8196598a",
+      "message": "Use single autoclose.scalp setting (Enabled=toggle, Value=min pips)"
+    }
+  }
+}

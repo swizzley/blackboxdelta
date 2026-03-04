@@ -1,0 +1,131 @@
+{
+  "id": "4690",
+  "trade_id": "4691",
+  "symbol": "GBP_HKD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 10.4553,
+  "exit": 10.455764705882352,
+  "stop_loss": 10.45782,
+  "take_profit": 10.4392,
+  "quantity": -17,
+  "profit": -0.0079,
+  "created": "2026-03-04T10:41:13.748570422Z",
+  "closed": "2026-03-04T10:41:26Z",
+  "duration_mins": 0,
+  "alert_id": 4775,
+  "risk_reward": 6.388888888887479,
+  "candles": [
+    {
+      "t": "2026-03-04T10:32:00Z",
+      "o": 10.4613,
+      "h": 10.4637,
+      "l": 10.4583,
+      "c": 10.4586
+    },
+    {
+      "t": "2026-03-04T10:33:00Z",
+      "o": 10.4587,
+      "h": 10.4612,
+      "l": 10.4559,
+      "c": 10.4563
+    },
+    {
+      "t": "2026-03-04T10:34:00Z",
+      "o": 10.4565,
+      "h": 10.4586,
+      "l": 10.4537,
+      "c": 10.4541
+    },
+    {
+      "t": "2026-03-04T10:35:00Z",
+      "o": 10.4547,
+      "h": 10.4617,
+      "l": 10.4541,
+      "c": 10.4577
+    },
+    {
+      "t": "2026-03-04T10:36:00Z",
+      "o": 10.4584,
+      "h": 10.4617,
+      "l": 10.4569,
+      "c": 10.4584
+    },
+    {
+      "t": "2026-03-04T10:37:00Z",
+      "o": 10.4603,
+      "h": 10.4603,
+      "l": 10.4541,
+      "c": 10.458
+    },
+    {
+      "t": "2026-03-04T10:38:00Z",
+      "o": 10.4561,
+      "h": 10.4587,
+      "l": 10.4555,
+      "c": 10.4568
+    },
+    {
+      "t": "2026-03-04T10:39:00Z",
+      "o": 10.4569,
+      "h": 10.4578,
+      "l": 10.4538,
+      "c": 10.4572
+    },
+    {
+      "t": "2026-03-04T10:40:00Z",
+      "o": 10.4572,
+      "h": 10.4577,
+      "l": 10.4536,
+      "c": 10.456
+    },
+    {
+      "t": "2026-03-04T10:41:00Z",
+      "o": 10.456,
+      "h": 10.4592,
+      "l": 10.4557,
+      "c": 10.4574
+    }
+  ],
+  "score": {
+    "Symbol": "GBPHKD",
+    "T": 1772620740000,
+    "Time": "",
+    "trend_score": -11,
+    "ma_score": -57,
+    "crossover_score": -5,
+    "oscillator_score": -9,
+    "volatility_score": 1,
+    "volume_score": 0,
+    "fib_stack_score": -9,
+    "momentum_projection_score": -12,
+    "structure_score": -1,
+    "cycle_score": 1,
+    "pattern_score": 2,
+    "final_score": -24.68,
+    "confidence": 0.7077,
+    "entry_price": 10.45789,
+    "stop_price": 10.45934,
+    "tp_price": 10.44184,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "ecfd28607c8ec937d7fcedcaaf7ac681d98efa2b",
+      "message": "Fix collectVersions by reading versions from DB instead of filesystem"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2dbf714572cfd4fb4787cf3bf6b603ca8196598a",
+      "message": "Use single autoclose.scalp setting (Enabled=toggle, Value=min pips)"
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "id": "4500",
+  "trade_id": "4501",
+  "symbol": "AUD_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 5.49842,
+  "exit": 5.498341739130435,
+  "stop_loss": 5.49708,
+  "take_profit": 5.51048,
+  "quantity": 46,
+  "profit": -0.0036,
+  "created": "2026-03-04T09:28:12.114333757Z",
+  "closed": "2026-03-04T09:30:01Z",
+  "duration_mins": 1,
+  "alert_id": 4674,
+  "risk_reward": 9.000000000000663,
+  "candles": [
+    {
+      "t": "2026-03-04T09:19:00Z",
+      "o": 5.49536,
+      "h": 5.49572,
+      "l": 5.4893,
+      "c": 5.49321
+    },
+    {
+      "t": "2026-03-04T09:20:00Z",
+      "o": 5.49322,
+      "h": 5.4955,
+      "l": 5.4909,
+      "c": 5.49406
+    },
+    {
+      "t": "2026-03-04T09:21:00Z",
+      "o": 5.49361,
+      "h": 5.4958,
+      "l": 5.4916,
+      "c": 5.49435
+    },
+    {
+      "t": "2026-03-04T09:22:00Z",
+      "o": 5.49526,
+      "h": 5.49741,
+      "l": 5.4931,
+      "c": 5.49626
+    },
+    {
+      "t": "2026-03-04T09:23:00Z",
+      "o": 5.49633,
+      "h": 5.49795,
+      "l": 5.4933,
+      "c": 5.4933
+    },
+    {
+      "t": "2026-03-04T09:24:00Z",
+      "o": 5.4977,
+      "h": 5.50003,
+      "l": 5.4934,
+      "c": 5.4979
+    },
+    {
+      "t": "2026-03-04T09:25:00Z",
+      "o": 5.49999,
+      "h": 5.5,
+      "l": 5.4941,
+      "c": 5.49815
+    },
+    {
+      "t": "2026-03-04T09:26:00Z",
+      "o": 5.4983,
+      "h": 5.49888,
+      "l": 5.4942,
+      "c": 5.49691
+    },
+    {
+      "t": "2026-03-04T09:27:00Z",
+      "o": 5.49657,
+      "h": 5.49844,
+      "l": 5.4949,
+      "c": 5.49739
+    },
+    {
+      "t": "2026-03-04T09:28:00Z",
+      "o": 5.49756,
+      "h": 5.4991,
+      "l": 5.4951,
+      "c": 5.49876
+    },
+    {
+      "t": "2026-03-04T09:29:00Z",
+      "o": 5.4985,
+      "h": 5.49907,
+      "l": 5.4958,
+      "c": 5.4979
+    },
+    {
+      "t": "2026-03-04T09:30:00Z",
+      "o": 5.49816,
+      "h": 5.49914,
+      "l": 5.495,
+      "c": 5.49894
+    }
+  ],
+  "score": {
+    "Symbol": "AUDHKD",
+    "T": 1772616360000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 4,
+    "crossover_score": 3,
+    "oscillator_score": 5,
+    "volatility_score": 8,
+    "volume_score": 4,
+    "fib_stack_score": 11,
+    "momentum_projection_score": 11,
+    "structure_score": 6,
+    "cycle_score": 4,
+    "pattern_score": -1,
+    "final_score": 31.84,
+    "confidence": 0.7207,
+    "entry_price": 5.49573,
+    "stop_price": 5.49439,
+    "tp_price": 5.50779,
+    "risk_reward": 9,
+    "unit_size": 46,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "cbbacdf5b8c85c39fb3bbb6bac45566f03025a4c",
+      "message": "Add multi-repo version collection for trade metadata"
+    },
+    "swizzley-trader": {
+      "sha": "07eec7ae0c2daddab7e1aacd3a34dc4b3e6250b2",
+      "message": "Add service version tracking to orders"
+    }
+  }
+}

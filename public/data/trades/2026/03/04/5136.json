@@ -1,0 +1,145 @@
+{
+  "id": "5136",
+  "trade_id": "5137",
+  "symbol": "USD_NOK",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 9.6602,
+  "exit": 9.660437037037036,
+  "stop_loss": 9.65645,
+  "take_profit": 9.6755,
+  "quantity": 27,
+  "profit": 0.0064,
+  "created": "2026-03-04T12:29:06.038671887Z",
+  "closed": "2026-03-04T12:31:59Z",
+  "duration_mins": 2,
+  "alert_id": 5010,
+  "risk_reward": 4.079999999999811,
+  "candles": [
+    {
+      "t": "2026-03-04T12:20:00Z",
+      "o": 9.6419,
+      "h": 9.64821,
+      "l": 9.64,
+      "c": 9.64676
+    },
+    {
+      "t": "2026-03-04T12:21:00Z",
+      "o": 9.64692,
+      "h": 9.64921,
+      "l": 9.6441,
+      "c": 9.64639
+    },
+    {
+      "t": "2026-03-04T12:22:00Z",
+      "o": 9.64639,
+      "h": 9.65295,
+      "l": 9.6443,
+      "c": 9.65194
+    },
+    {
+      "t": "2026-03-04T12:23:00Z",
+      "o": 9.65224,
+      "h": 9.65327,
+      "l": 9.6455,
+      "c": 9.65111
+    },
+    {
+      "t": "2026-03-04T12:24:00Z",
+      "o": 9.65133,
+      "h": 9.65576,
+      "l": 9.646,
+      "c": 9.65545
+    },
+    {
+      "t": "2026-03-04T12:25:00Z",
+      "o": 9.65445,
+      "h": 9.65834,
+      "l": 9.6503,
+      "c": 9.65763
+    },
+    {
+      "t": "2026-03-04T12:26:00Z",
+      "o": 9.65778,
+      "h": 9.65912,
+      "l": 9.6513,
+      "c": 9.65803
+    },
+    {
+      "t": "2026-03-04T12:27:00Z",
+      "o": 9.6586,
+      "h": 9.6586,
+      "l": 9.6515,
+      "c": 9.65575
+    },
+    {
+      "t": "2026-03-04T12:28:00Z",
+      "o": 9.65605,
+      "h": 9.6574,
+      "l": 9.6533,
+      "c": 9.65673
+    },
+    {
+      "t": "2026-03-04T12:29:00Z",
+      "o": 9.65693,
+      "h": 9.65862,
+      "l": 9.6542,
+      "c": 9.65851
+    },
+    {
+      "t": "2026-03-04T12:30:00Z",
+      "o": 9.65806,
+      "h": 9.65847,
+      "l": 9.6544,
+      "c": 9.6579
+    },
+    {
+      "t": "2026-03-04T12:31:00Z",
+      "o": 9.65725,
+      "h": 9.66312,
+      "l": 9.6554,
+      "c": 9.66176
+    }
+  ],
+  "score": {
+    "Symbol": "USDNOK",
+    "T": 1772627220000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 83,
+    "crossover_score": 10,
+    "oscillator_score": -3,
+    "volatility_score": 8,
+    "volume_score": 0,
+    "fib_stack_score": 28,
+    "momentum_projection_score": 15,
+    "structure_score": 6,
+    "cycle_score": 2,
+    "pattern_score": -7,
+    "final_score": 38.53,
+    "confidence": 0.712,
+    "entry_price": 9.65441,
+    "stop_price": 9.65271,
+    "tp_price": 9.66971,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "ecfd28607c8ec937d7fcedcaaf7ac681d98efa2b",
+      "message": "Fix collectVersions by reading versions from DB instead of filesystem"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2dbf714572cfd4fb4787cf3bf6b603ca8196598a",
+      "message": "Use single autoclose.scalp setting (Enabled=toggle, Value=min pips)"
+    }
+  }
+}

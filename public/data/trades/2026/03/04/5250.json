@@ -1,0 +1,152 @@
+{
+  "id": "5250",
+  "trade_id": "5251",
+  "symbol": "GBP_USD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.33551,
+  "exit": 1.3350507407407408,
+  "stop_loss": 1.33629,
+  "take_profit": 1.32937,
+  "quantity": -27,
+  "profit": 0.0124,
+  "created": "2026-03-04T12:54:10.170147509Z",
+  "closed": "2026-03-04T12:57:47Z",
+  "duration_mins": 3,
+  "alert_id": 5083,
+  "risk_reward": 7.8717948717948865,
+  "candles": [
+    {
+      "t": "2026-03-04T12:45:00Z",
+      "o": 1.33675,
+      "h": 1.33675,
+      "l": 1.33611,
+      "c": 1.33632
+    },
+    {
+      "t": "2026-03-04T12:46:00Z",
+      "o": 1.33617,
+      "h": 1.33661,
+      "l": 1.33617,
+      "c": 1.3364
+    },
+    {
+      "t": "2026-03-04T12:47:00Z",
+      "o": 1.33637,
+      "h": 1.3366,
+      "l": 1.33587,
+      "c": 1.33607
+    },
+    {
+      "t": "2026-03-04T12:48:00Z",
+      "o": 1.33594,
+      "h": 1.3365,
+      "l": 1.33593,
+      "c": 1.33639
+    },
+    {
+      "t": "2026-03-04T12:49:00Z",
+      "o": 1.33641,
+      "h": 1.3366,
+      "l": 1.3361,
+      "c": 1.33627
+    },
+    {
+      "t": "2026-03-04T12:50:00Z",
+      "o": 1.33634,
+      "h": 1.3365,
+      "l": 1.33613,
+      "c": 1.33618
+    },
+    {
+      "t": "2026-03-04T12:51:00Z",
+      "o": 1.33611,
+      "h": 1.33647,
+      "l": 1.33601,
+      "c": 1.3361
+    },
+    {
+      "t": "2026-03-04T12:52:00Z",
+      "o": 1.3361,
+      "h": 1.33617,
+      "l": 1.33572,
+      "c": 1.33575
+    },
+    {
+      "t": "2026-03-04T12:53:00Z",
+      "o": 1.33568,
+      "h": 1.3359,
+      "l": 1.33535,
+      "c": 1.33547
+    },
+    {
+      "t": "2026-03-04T12:54:00Z",
+      "o": 1.33544,
+      "h": 1.3359,
+      "l": 1.33544,
+      "c": 1.33547
+    },
+    {
+      "t": "2026-03-04T12:55:00Z",
+      "o": 1.33547,
+      "h": 1.3357,
+      "l": 1.33466,
+      "c": 1.33486
+    },
+    {
+      "t": "2026-03-04T12:56:00Z",
+      "o": 1.3349,
+      "h": 1.3357,
+      "l": 1.33477,
+      "c": 1.33514
+    },
+    {
+      "t": "2026-03-04T12:57:00Z",
+      "o": 1.3352,
+      "h": 1.3357,
+      "l": 1.33487,
+      "c": 1.33492
+    }
+  ],
+  "score": {
+    "Symbol": "GBPUSD",
+    "T": 1772628720000,
+    "Time": "",
+    "trend_score": -13,
+    "ma_score": -97,
+    "crossover_score": -9,
+    "oscillator_score": -6,
+    "volatility_score": -8,
+    "volume_score": -2,
+    "fib_stack_score": -57,
+    "momentum_projection_score": -5,
+    "structure_score": -1,
+    "cycle_score": 1,
+    "pattern_score": -2,
+    "final_score": -34.6,
+    "confidence": 0.7757,
+    "entry_price": 1.33606,
+    "stop_price": 1.33618,
+    "tp_price": 1.33496,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "ecfd28607c8ec937d7fcedcaaf7ac681d98efa2b",
+      "message": "Fix collectVersions by reading versions from DB instead of filesystem"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2dbf714572cfd4fb4787cf3bf6b603ca8196598a",
+      "message": "Use single autoclose.scalp setting (Enabled=toggle, Value=min pips)"
+    }
+  }
+}

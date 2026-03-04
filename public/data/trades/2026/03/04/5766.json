@@ -1,0 +1,130 @@
+{
+  "id": "5766",
+  "trade_id": "5767",
+  "symbol": "AUD_JPY",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 111.24,
+  "stop_loss": 111.05799999999999,
+  "take_profit": 112.581,
+  "quantity": 23,
+  "profit": null,
+  "created": "2026-03-04T15:30:11.481023118Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 5380,
+  "risk_reward": 7.368131868131826,
+  "candles": [
+    {
+      "t": "2026-03-04T15:21:00Z",
+      "o": 111.016,
+      "h": 111.039,
+      "l": 110.94,
+      "c": 111.022
+    },
+    {
+      "t": "2026-03-04T15:22:00Z",
+      "o": 111.027,
+      "h": 111.038,
+      "l": 110.94,
+      "c": 110.993
+    },
+    {
+      "t": "2026-03-04T15:23:00Z",
+      "o": 111.005,
+      "h": 111.032,
+      "l": 110.94,
+      "c": 111.021
+    },
+    {
+      "t": "2026-03-04T15:24:00Z",
+      "o": 111.025,
+      "h": 111.045,
+      "l": 110.97,
+      "c": 111.035
+    },
+    {
+      "t": "2026-03-04T15:25:00Z",
+      "o": 111.033,
+      "h": 111.043,
+      "l": 111,
+      "c": 111.01
+    },
+    {
+      "t": "2026-03-04T15:26:00Z",
+      "o": 111.028,
+      "h": 111.084,
+      "l": 111.012,
+      "c": 111.064
+    },
+    {
+      "t": "2026-03-04T15:27:00Z",
+      "o": 111.061,
+      "h": 111.102,
+      "l": 111.03,
+      "c": 111.077
+    },
+    {
+      "t": "2026-03-04T15:28:00Z",
+      "o": 111.079,
+      "h": 111.095,
+      "l": 111.03,
+      "c": 111.089
+    },
+    {
+      "t": "2026-03-04T15:29:00Z",
+      "o": 111.098,
+      "h": 111.158,
+      "l": 111.09,
+      "c": 111.154
+    },
+    {
+      "t": "2026-03-04T15:30:00Z",
+      "o": 111.152,
+      "h": 111.164,
+      "l": 111.06,
+      "c": 111.137
+    }
+  ],
+  "score": {
+    "Symbol": "AUDJPY",
+    "T": 1772638080000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 83,
+    "crossover_score": 8,
+    "oscillator_score": -4,
+    "volatility_score": 9,
+    "volume_score": 4,
+    "fib_stack_score": 42,
+    "momentum_projection_score": 5,
+    "structure_score": 6,
+    "cycle_score": -1,
+    "pattern_score": 1,
+    "final_score": 31.36,
+    "confidence": 0.7439,
+    "entry_price": 111.05537,
+    "stop_price": 111.03748,
+    "tp_price": 111.19486,
+    "risk_reward": 7.8,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    }
+  }
+}
