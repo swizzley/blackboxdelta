@@ -1,0 +1,173 @@
+{
+  "id": "6164",
+  "trade_id": "6165",
+  "symbol": "EUR_USD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.16409,
+  "exit": 1.1633490909090909,
+  "stop_loss": 1.16352,
+  "take_profit": 1.16822,
+  "quantity": 22,
+  "profit": -0.0163,
+  "created": "2026-03-04T17:08:09.107315897Z",
+  "closed": "2026-03-04T17:14:53Z",
+  "duration_mins": 6,
+  "alert_id": 5562,
+  "risk_reward": 7.2456140350881775,
+  "candles": [
+    {
+      "t": "2026-03-04T16:59:00Z",
+      "o": 1.16362,
+      "h": 1.16373,
+      "l": 1.1635,
+      "c": 1.1637
+    },
+    {
+      "t": "2026-03-04T17:00:00Z",
+      "o": 1.16369,
+      "h": 1.16376,
+      "l": 1.1635,
+      "c": 1.16371
+    },
+    {
+      "t": "2026-03-04T17:01:00Z",
+      "o": 1.16369,
+      "h": 1.16383,
+      "l": 1.1635,
+      "c": 1.16373
+    },
+    {
+      "t": "2026-03-04T17:02:00Z",
+      "o": 1.16375,
+      "h": 1.16396,
+      "l": 1.1636,
+      "c": 1.16394
+    },
+    {
+      "t": "2026-03-04T17:03:00Z",
+      "o": 1.16396,
+      "h": 1.16419,
+      "l": 1.1638,
+      "c": 1.16416
+    },
+    {
+      "t": "2026-03-04T17:04:00Z",
+      "o": 1.16417,
+      "h": 1.16421,
+      "l": 1.1638,
+      "c": 1.16416
+    },
+    {
+      "t": "2026-03-04T17:05:00Z",
+      "o": 1.16414,
+      "h": 1.16436,
+      "l": 1.16394,
+      "c": 1.16402
+    },
+    {
+      "t": "2026-03-04T17:06:00Z",
+      "o": 1.1638,
+      "h": 1.1641,
+      "l": 1.1638,
+      "c": 1.16397
+    },
+    {
+      "t": "2026-03-04T17:07:00Z",
+      "o": 1.16396,
+      "h": 1.164,
+      "l": 1.16375,
+      "c": 1.1639
+    },
+    {
+      "t": "2026-03-04T17:08:00Z",
+      "o": 1.1639,
+      "h": 1.1639,
+      "l": 1.1636,
+      "c": 1.16373
+    },
+    {
+      "t": "2026-03-04T17:09:00Z",
+      "o": 1.16377,
+      "h": 1.1638,
+      "l": 1.1636,
+      "c": 1.16372
+    },
+    {
+      "t": "2026-03-04T17:10:00Z",
+      "o": 1.1637,
+      "h": 1.16383,
+      "l": 1.1635,
+      "c": 1.16367
+    },
+    {
+      "t": "2026-03-04T17:11:00Z",
+      "o": 1.16368,
+      "h": 1.1638,
+      "l": 1.1635,
+      "c": 1.16368
+    },
+    {
+      "t": "2026-03-04T17:12:00Z",
+      "o": 1.16367,
+      "h": 1.1637,
+      "l": 1.1635,
+      "c": 1.16361
+    },
+    {
+      "t": "2026-03-04T17:13:00Z",
+      "o": 1.16366,
+      "h": 1.1637,
+      "l": 1.1635,
+      "c": 1.16359
+    },
+    {
+      "t": "2026-03-04T17:14:00Z",
+      "o": 1.1635,
+      "h": 1.16362,
+      "l": 1.16325,
+      "c": 1.1634
+    }
+  ],
+  "score": {
+    "Symbol": "EURUSD",
+    "T": 1772643960000,
+    "Time": "",
+    "trend_score": 12,
+    "ma_score": 31,
+    "crossover_score": -6,
+    "oscillator_score": 9,
+    "volatility_score": 7,
+    "volume_score": 4,
+    "fib_stack_score": 18,
+    "momentum_projection_score": 14,
+    "structure_score": 7,
+    "cycle_score": 4,
+    "pattern_score": 2,
+    "final_score": 30.65,
+    "confidence": 0.7207,
+    "entry_price": 1.16383,
+    "stop_price": 1.16374,
+    "tp_price": 1.16462,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "e1c282cc2512b790ef0e665ea30643ae6ef83f1b",
+      "message": "Regenerate trade files missing version data"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "2309e3b38277ac1954bc340d77cdadceed090500",
+      "message": "Replace ScoreData JSON with scores table JOIN"
+    }
+  }
+}
