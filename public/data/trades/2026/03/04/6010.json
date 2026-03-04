@@ -158,6 +158,31 @@
       "c": 123.143
     }
   ],
+  "score": {
+    "Symbol": "SGDJPY",
+    "T": 1772641020000,
+    "Time": "",
+    "trend_score": -11,
+    "ma_score": -92,
+    "crossover_score": -5,
+    "oscillator_score": -8,
+    "volatility_score": -8,
+    "volume_score": -2,
+    "fib_stack_score": -19,
+    "momentum_projection_score": -15,
+    "structure_score": 0,
+    "cycle_score": 2,
+    "pattern_score": 4,
+    "final_score": -29.65,
+    "confidence": 0.657,
+    "entry_price": 123.128,
+    "stop_price": 123.138,
+    "tp_price": 123.037,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

@@ -135,8 +135,47 @@
       "h": 1.36717,
       "l": 1.3666,
       "c": 1.36695
+    },
+    {
+      "t": "2026-03-04T16:34:00Z",
+      "o": 1.36684,
+      "h": 1.36693,
+      "l": 1.3665,
+      "c": 1.36662
+    },
+    {
+      "t": "2026-03-04T16:35:00Z",
+      "o": 1.36657,
+      "h": 1.3667,
+      "l": 1.36634,
+      "c": 1.36667
     }
   ],
+  "score": {
+    "Symbol": "USDCAD",
+    "T": 1772641440000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 39,
+    "crossover_score": 5,
+    "oscillator_score": -6,
+    "volatility_score": 9,
+    "volume_score": 0,
+    "fib_stack_score": 20,
+    "momentum_projection_score": 13,
+    "structure_score": 6,
+    "cycle_score": 0,
+    "pattern_score": -3,
+    "final_score": 28.84,
+    "confidence": 0.6802,
+    "entry_price": 1.36682,
+    "stop_price": 1.36668,
+    "tp_price": 1.368,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

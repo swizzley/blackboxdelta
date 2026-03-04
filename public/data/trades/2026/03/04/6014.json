@@ -158,6 +158,31 @@
       "c": 110.94
     }
   ],
+  "score": {
+    "Symbol": "AUDJPY",
+    "T": 1772641080000,
+    "Time": "",
+    "trend_score": -11,
+    "ma_score": -28,
+    "crossover_score": -5,
+    "oscillator_score": -9,
+    "volatility_score": -6,
+    "volume_score": -2,
+    "fib_stack_score": -8,
+    "momentum_projection_score": -15,
+    "structure_score": 1,
+    "cycle_score": 1,
+    "pattern_score": -1,
+    "final_score": -27.98,
+    "confidence": 0.6889,
+    "entry_price": 110.977,
+    "stop_price": 110.992,
+    "tp_price": 110.837,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

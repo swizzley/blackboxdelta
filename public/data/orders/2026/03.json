@@ -4,10 +4,10 @@
     "symbol": "USD_JPY",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0074,
     "created": "2026-03-04T16:33:10.466827553Z",
-    "closed": null
+    "closed": "2026-03-04T16:35:09Z"
   },
   {
     "id": "6070",

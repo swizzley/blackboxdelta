@@ -107,8 +107,40 @@
       "h": 0.57101,
       "l": 0.5704,
       "c": 0.5704
+    },
+    {
+      "t": "2026-03-04T16:35:00Z",
+      "o": 0.57092,
+      "h": 0.57104,
+      "l": 0.5703,
+      "c": 0.5704
     }
   ],
+  "score": {
+    "Symbol": "CADCHF",
+    "T": 1772641740000,
+    "Time": "",
+    "trend_score": 7,
+    "ma_score": 65,
+    "crossover_score": 16,
+    "oscillator_score": 3,
+    "volatility_score": 2,
+    "volume_score": 4,
+    "fib_stack_score": 22,
+    "momentum_projection_score": 12,
+    "structure_score": 5,
+    "cycle_score": 3,
+    "pattern_score": -1,
+    "final_score": 28.51,
+    "confidence": 0.6598,
+    "entry_price": 0.57062,
+    "stop_price": 0.57044,
+    "tp_price": 0.57151,
+    "risk_reward": 5.03,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",
