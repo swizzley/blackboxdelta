@@ -33,6 +33,8 @@ export interface TimeframeStats {
     avg_win: number | null;
     avg_loss: number | null;
     avg_time_in_trade_mins: number | null;
+    long_pl: number;
+    short_pl: number;
 }
 
 export interface TimeframeRow extends TimeframeStats {
