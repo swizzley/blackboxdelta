@@ -1,5 +1,15 @@
 [
   {
+    "id": "6150",
+    "symbol": "CHF_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.009,
+    "created": "2026-03-04T16:55:07.167799376Z",
+    "closed": "2026-03-04T16:56:28Z"
+  },
+  {
     "id": "6144",
     "symbol": "AUD_HKD",
     "direction": "Long",
@@ -104,10 +114,10 @@
     "symbol": "USD_CHF",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0211,
     "created": "2026-03-04T16:32:07.084183254Z",
-    "closed": null
+    "closed": "2026-03-04T16:55:17Z"
   },
   {
     "id": "6066",
