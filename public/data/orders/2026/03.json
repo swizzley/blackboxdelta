@@ -1,13 +1,43 @@
 [
   {
+    "id": "5790",
+    "symbol": "SGD_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-04T15:34:13.005216435Z",
+    "closed": null
+  },
+  {
+    "id": "5782",
+    "symbol": "NZD_SGD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-04T15:32:20.254682289Z",
+    "closed": null
+  },
+  {
+    "id": "5778",
+    "symbol": "NZD_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-04T15:32:15.045748373Z",
+    "closed": null
+  },
+  {
     "id": "5772",
     "symbol": "CAD_HKD",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "PENDING",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": 0.0009,
     "created": "2026-03-04T15:31:08.209203934Z",
-    "closed": null
+    "closed": "2026-03-04T15:33:49Z"
   },
   {
     "id": "5766",

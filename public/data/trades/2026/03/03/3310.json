@@ -160,8 +160,8 @@
   ],
   "versions": {
     "finmon": {
-      "sha": "d579254c3209f61a27738e5d7666da0be847595f",
-      "message": "Fix publish: fetch+reset instead of pull to avoid merge conflicts"
+      "sha": "e78ce123755f6e334c629c2af7c55cec227f022d",
+      "message": "Diff against disk on startup to skip already-written trade files"
     },
     "massive-market": {
       "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",

@@ -1,16 +1,16 @@
 {
-  "generated": "2026-03-04T15:31:34Z",
+  "generated": "2026-03-04T15:35:18Z",
   "all_time": {
-    "total_orders": 498,
-    "pending": 1,
-    "open_positions": 6,
-    "closed_orders": 491,
-    "total_pl": -10.81,
-    "winners": 114,
+    "total_orders": 501,
+    "pending": 0,
+    "open_positions": 9,
+    "closed_orders": 492,
+    "total_pl": -10.8,
+    "winners": 115,
     "losers": 325,
     "breakeven": 52,
     "win_loss_ratio": 0.35,
-    "win_rate_pct": 23.2,
+    "win_rate_pct": 23.4,
     "avg_win": 0.05,
     "avg_loss": -0.05,
     "avg_time_in_trade_mins": 50
@@ -50,16 +50,16 @@
     },
     {
       "timeframe": "scalp",
-      "total_orders": 467,
-      "pending": 1,
-      "open_positions": 6,
-      "closed_orders": 460,
+      "total_orders": 470,
+      "pending": 0,
+      "open_positions": 9,
+      "closed_orders": 461,
       "total_pl": -8.94,
-      "winners": 111,
+      "winners": 112,
       "losers": 318,
       "breakeven": 31,
       "win_loss_ratio": 0.35,
-      "win_rate_pct": 24.1,
+      "win_rate_pct": 24.3,
       "avg_win": 0.03,
       "avg_loss": -0.04,
       "avg_time_in_trade_mins": 34
@@ -95,26 +95,26 @@
   "score_series": [
     {
       "date": "2026-03-04",
-      "avg_final_score": 6.64,
+      "avg_final_score": 6.81,
       "avg_confidence": 0.74,
-      "avg_trend": 1.4,
-      "avg_ma": 5.39,
+      "avg_trend": 1.45,
+      "avg_ma": 5.6,
       "avg_crossover": 0.18,
       "avg_oscillator": -1.06,
-      "avg_volatility": 1.55,
-      "avg_volume": 1.89,
-      "avg_fib_stack": 4.02,
-      "avg_momentum_projection": 1.54,
-      "avg_structure": 3.44,
-      "avg_cycle": 1.16,
-      "avg_pattern": -0.37,
-      "count": 1007
+      "avg_volatility": 1.6,
+      "avg_volume": 1.9,
+      "avg_fib_stack": 4.17,
+      "avg_momentum_projection": 1.62,
+      "avg_structure": 3.46,
+      "avg_cycle": 1.17,
+      "avg_pattern": -0.39,
+      "count": 1017
     }
   ],
   "recommendation_counts": {
-    "Buy": 169,
-    "Moderate Buy": 430,
-    "Moderate Sell": 336,
+    "Buy": 171,
+    "Moderate Buy": 437,
+    "Moderate Sell": 337,
     "Sell": 72
   }
 }

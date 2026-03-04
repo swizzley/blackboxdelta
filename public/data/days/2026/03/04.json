@@ -1,16 +1,16 @@
 {
   "date": "2026-03-04",
   "summary": {
-    "total_orders": 329,
-    "pending": 1,
-    "open_positions": 4,
-    "closed_orders": 324,
+    "total_orders": 332,
+    "pending": 0,
+    "open_positions": 7,
+    "closed_orders": 325,
     "total_pl": -2.26,
-    "winners": 96,
+    "winners": 97,
     "losers": 227,
     "breakeven": 1,
-    "win_loss_ratio": 0.42,
-    "win_rate_pct": 29.6,
+    "win_loss_ratio": 0.43,
+    "win_rate_pct": 29.8,
     "avg_win": 0.02,
     "avg_loss": -0.02,
     "avg_time_in_trade_mins": 30,
@@ -33,16 +33,16 @@
       },
       {
         "timeframe": "scalp",
-        "total_orders": 328,
-        "pending": 1,
-        "open_positions": 4,
-        "closed_orders": 323,
+        "total_orders": 331,
+        "pending": 0,
+        "open_positions": 7,
+        "closed_orders": 324,
         "total_pl": -2.26,
-        "winners": 96,
+        "winners": 97,
         "losers": 227,
         "breakeven": 0,
-        "win_loss_ratio": 0.42,
-        "win_rate_pct": 29.7,
+        "win_loss_ratio": 0.43,
+        "win_rate_pct": 29.9,
         "avg_win": 0.02,
         "avg_loss": -0.02,
         "avg_time_in_trade_mins": 30
@@ -9376,36 +9376,137 @@
     {
       "hour": 15,
       "summary": {
-        "total_orders": 5,
-        "pending": 1,
-        "open_positions": 1,
-        "closed_orders": 3,
+        "total_orders": 8,
+        "pending": 0,
+        "open_positions": 4,
+        "closed_orders": 4,
         "total_pl": -0.02,
-        "winners": 1,
+        "winners": 2,
         "losers": 2,
         "breakeven": 0,
-        "win_loss_ratio": 0.5,
-        "win_rate_pct": 33.3,
-        "avg_win": 0.01,
+        "win_loss_ratio": 1,
+        "win_rate_pct": 50,
+        "avg_win": 0,
         "avg_loss": -0.02,
-        "avg_time_in_trade_mins": 8
+        "avg_time_in_trade_mins": 6
       },
       "orders": [
         {
+          "id": "5790",
+          "trade_id": "5791",
+          "symbol": "SGD_JPY",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "FILLED",
+          "type": "LIMIT_ORDER",
+          "entry": 123.337,
+          "stop_loss": 123.251,
+          "take_profit": 123.869,
+          "quantity": 15,
+          "profit": null,
+          "created": "2026-03-04T15:34:13.005216435Z",
+          "closed": null,
+          "duration_mins": null,
+          "alert_id": 5392,
+          "risk_reward": 6.186046511627972,
+          "versions": {
+            "finmon": {
+              "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",
+              "message": "Update swizzley-common vendor: parseTime=true in DSN"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+              "message": "Update swizzley-common vendor: parseTime=true in DSN"
+            }
+          }
+        },
+        {
+          "id": "5782",
+          "trade_id": "5783",
+          "symbol": "NZD_SGD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "FILLED",
+          "type": "LIMIT_ORDER",
+          "entry": 0.75606,
+          "stop_loss": 0.7547699999999999,
+          "take_profit": 0.76427,
+          "quantity": 16,
+          "profit": null,
+          "created": "2026-03-04T15:32:20.254682289Z",
+          "closed": null,
+          "duration_mins": null,
+          "alert_id": 5388,
+          "risk_reward": 6.364341085271291,
+          "versions": {
+            "finmon": {
+              "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",
+              "message": "Update swizzley-common vendor: parseTime=true in DSN"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+              "message": "Update swizzley-common vendor: parseTime=true in DSN"
+            }
+          }
+        },
+        {
+          "id": "5778",
+          "trade_id": "5779",
+          "symbol": "NZD_JPY",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "FILLED",
+          "type": "LIMIT_ORDER",
+          "entry": 93.309,
+          "stop_loss": 93.05499999999999,
+          "take_profit": 95.514,
+          "quantity": 20,
+          "profit": null,
+          "created": "2026-03-04T15:32:15.045748373Z",
+          "closed": null,
+          "duration_mins": null,
+          "alert_id": 5386,
+          "risk_reward": 8.68110236220455,
+          "versions": {
+            "finmon": {
+              "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",
+              "message": "Update swizzley-common vendor: parseTime=true in DSN"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+              "message": "Update swizzley-common vendor: parseTime=true in DSN"
+            }
+          }
+        },
+        {
           "id": "5772",
+          "trade_id": "5773",
           "symbol": "CAD_HKD",
           "direction": "Long",
           "timeframe": "scalp",
-          "status": "PENDING",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 5.72214,
+          "exit": 5.722189999999999,
           "stop_loss": 5.720619999999999,
           "take_profit": 5.72861,
           "quantity": 18,
-          "profit": null,
+          "profit": 0.0009,
           "created": "2026-03-04T15:31:08.209203934Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-04T15:33:49Z",
+          "duration_mins": 2,
           "alert_id": 5383,
           "risk_reward": 4.256578947368025,
           "versions": {
