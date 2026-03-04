@@ -158,31 +158,6 @@
       "c": 0.46236
     }
   ],
-  "score": {
-    "Symbol": "NZDCHF",
-    "T": 1772638740000,
-    "Time": "",
-    "trend_score": -13,
-    "ma_score": -78,
-    "crossover_score": -10,
-    "oscillator_score": -9,
-    "volatility_score": -3,
-    "volume_score": 4,
-    "fib_stack_score": -15,
-    "momentum_projection_score": -11,
-    "structure_score": 1,
-    "cycle_score": 1,
-    "pattern_score": 1,
-    "final_score": -27.96,
-    "confidence": 0.6802,
-    "entry_price": 0.4624,
-    "stop_price": 0.46258,
-    "tp_price": 0.46076,
-    "risk_reward": 9,
-    "unit_size": 0,
-    "recommended_timeframe": "scalp",
-    "recommendation": "Moderate Sell"
-  },
   "versions": {
     "finmon": {
       "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",

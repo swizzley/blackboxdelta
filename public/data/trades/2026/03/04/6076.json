@@ -1,0 +1,105 @@
+{
+  "id": "6076",
+  "trade_id": "6077",
+  "symbol": "USD_JPY",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 157.049,
+  "stop_loss": 156.993,
+  "take_profit": 157.259,
+  "quantity": 18,
+  "profit": null,
+  "created": "2026-03-04T16:33:10.466827553Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 5510,
+  "risk_reward": 3.7499999999988582,
+  "candles": [
+    {
+      "t": "2026-03-04T16:24:00Z",
+      "o": 157.029,
+      "h": 157.043,
+      "l": 157.017,
+      "c": 157.031
+    },
+    {
+      "t": "2026-03-04T16:25:00Z",
+      "o": 157.034,
+      "h": 157.036,
+      "l": 156.99,
+      "c": 157.001
+    },
+    {
+      "t": "2026-03-04T16:26:00Z",
+      "o": 157.001,
+      "h": 157.049,
+      "l": 156.995,
+      "c": 157.038
+    },
+    {
+      "t": "2026-03-04T16:27:00Z",
+      "o": 157.031,
+      "h": 157.052,
+      "l": 157.031,
+      "c": 157.049
+    },
+    {
+      "t": "2026-03-04T16:28:00Z",
+      "o": 157.049,
+      "h": 157.062,
+      "l": 157.035,
+      "c": 157.047
+    },
+    {
+      "t": "2026-03-04T16:29:00Z",
+      "o": 157.047,
+      "h": 157.05,
+      "l": 157.017,
+      "c": 157.018
+    },
+    {
+      "t": "2026-03-04T16:30:00Z",
+      "o": 157.026,
+      "h": 157.052,
+      "l": 157.005,
+      "c": 157.052
+    },
+    {
+      "t": "2026-03-04T16:31:00Z",
+      "o": 157.054,
+      "h": 157.07,
+      "l": 157.039,
+      "c": 157.041
+    },
+    {
+      "t": "2026-03-04T16:32:00Z",
+      "o": 157.048,
+      "h": 157.051,
+      "l": 157.017,
+      "c": 157.024
+    },
+    {
+      "t": "2026-03-04T16:33:00Z",
+      "o": 157.026,
+      "h": 157.039,
+      "l": 157.012,
+      "c": 157.013
+    }
+  ],
+  "versions": {
+    "finmon": {
+      "sha": "0b4a42781d6d4fac4dfcb8271e468b9d467551ef",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "8a785c2cdca1c1040091c5936078e6d8853a75fb",
+      "message": "Update swizzley-common vendor: parseTime=true in DSN"
+    }
+  }
+}
