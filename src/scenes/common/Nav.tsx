@@ -6,6 +6,7 @@ import {useTheme} from '../../context/Theme';
 const navigation = [
     {name: 'Dashboard', href: '/'},
     {name: 'History', href: '/history'},
+    {name: 'Analysis', href: '/analysis'},
 ];
 
 function classNames(...classes: string[]) {
