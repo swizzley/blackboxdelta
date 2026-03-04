@@ -9,14 +9,55 @@ interface HourBlockProps {
     data: HourBlockType;
 }
 
+/** Tiny inline SVG donut showing W/L/BE split. */
+function MiniDonut({wins, losses, breakeven, size = 32}: {wins: number; losses: number; breakeven: number; size?: number}) {
+    const total = wins + losses + breakeven;
+    if (total === 0) return null;
+
+    const r = 12;
+    const circumference = 2 * Math.PI * r;
+
+    const winPct = wins / total;
+    const lossPct = losses / total;
+
+    const winLen = winPct * circumference;
+    const lossLen = lossPct * circumference;
+
+    return (
+        <svg width={size} height={size} viewBox="0 0 32 32">
+            <circle cx="16" cy="16" r={r} fill="none" stroke="#475569" strokeWidth="5" />
+            {/* Win arc (green) */}
+            <circle cx="16" cy="16" r={r} fill="none"
+                stroke="#10b981" strokeWidth="5"
+                strokeDasharray={`${winLen} ${circumference - winLen}`}
+                strokeDashoffset="0"
+                transform="rotate(-90 16 16)"
+            />
+            {/* Loss arc (red) */}
+            <circle cx="16" cy="16" r={r} fill="none"
+                stroke="#ef4444" strokeWidth="5"
+                strokeDasharray={`${lossLen} ${circumference - lossLen}`}
+                strokeDashoffset={`${-winLen}`}
+                transform="rotate(-90 16 16)"
+            />
+            {/* Breakeven arc uses the base gray — already visible */}
+        </svg>
+    );
+}
+
 export default function HourBlock({data}: HourBlockProps) {
     const {isDarkMode} = useTheme();
     const navigate = useNavigate();
-    const [expanded, setExpanded] = useState(true);
+    const [expanded, setExpanded] = useState(false);
 
     const s = data.summary;
     const plStr = `${s.total_pl >= 0 ? '+' : '-'}$${Math.abs(s.total_pl).toFixed(2)}`;
     const plColor = s.total_pl > 0 ? 'text-emerald-500' : s.total_pl < 0 ? 'text-red-500' : (isDarkMode ? 'text-gray-300' : 'text-gray-600');
+
+    // Find biggest winner and biggest loser
+    const closed = data.orders.filter(o => o.profit !== null && o.status === 'CLOSED');
+    const bestTrade = closed.length > 0 ? closed.reduce((a, b) => (a.profit ?? 0) > (b.profit ?? 0) ? a : b) : null;
+    const worstTrade = closed.length > 0 ? closed.reduce((a, b) => (a.profit ?? 0) < (b.profit ?? 0) ? a : b) : null;
 
     const td = `px-3 py-1.5 text-sm whitespace-nowrap`;
 
@@ -26,22 +67,37 @@ export default function HourBlock({data}: HourBlockProps) {
                 onClick={() => setExpanded(!expanded)}
                 className={`w-full flex items-center justify-between p-4 ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'} rounded-lg`}
             >
+                {/* Left side: chevron, time, donut, trade count */}
                 <div className="flex items-center gap-3">
                     {expanded
                         ? <ChevronDownIcon className="h-5 w-5 text-gray-400"/>
                         : <ChevronRightIcon className="h-5 w-5 text-gray-400"/>
                     }
-                    <span className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    <span className={`text-lg font-semibold tabular-nums ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                         {String(data.hour).padStart(2, '0')}:00
                     </span>
+                    <MiniDonut wins={s.winners} losses={s.losers} breakeven={s.breakeven} />
                     <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                         {s.total_orders} trade{s.total_orders !== 1 ? 's' : ''}
                     </span>
                 </div>
-                <div className="flex items-center gap-4">
-                    <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+
+                {/* Right side: stats chips */}
+                <div className="flex items-center gap-4 text-sm">
+                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
                         {s.winners}W / {s.losers}L
+                        {s.win_rate_pct !== null && <span className="ml-1 text-xs">({s.win_rate_pct}%)</span>}
                     </span>
+                    {bestTrade && bestTrade.profit !== null && bestTrade.profit > 0 && (
+                        <span className="hidden sm:inline text-xs text-emerald-500" title={`Best: ${bestTrade.symbol.replace('_','/')}`}>
+                            ▲ +${bestTrade.profit.toFixed(2)}
+                        </span>
+                    )}
+                    {worstTrade && worstTrade.profit !== null && worstTrade.profit < 0 && (
+                        <span className="hidden sm:inline text-xs text-red-500" title={`Worst: ${worstTrade.symbol.replace('_','/')}`}>
+                            ▼ -${Math.abs(worstTrade.profit).toFixed(2)}
+                        </span>
+                    )}
                     <span className={`font-semibold ${plColor}`}>{plStr}</span>
                 </div>
             </button>
