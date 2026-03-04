@@ -1,0 +1,109 @@
+{
+  "id": "4208",
+  "trade_id": "4209",
+  "symbol": "CHF_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 10.0278,
+  "stop_loss": 10.024439999999998,
+  "take_profit": 10.0385,
+  "quantity": 72,
+  "profit": null,
+  "created": "2026-03-04T07:35:12.446346016Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 4453,
+  "risk_reward": 3.1845238095236583,
+  "candles": [
+    {
+      "t": "2026-03-04T07:26:00Z",
+      "o": 10.0175,
+      "h": 10.0214,
+      "l": 10.0164,
+      "c": 10.0189
+    },
+    {
+      "t": "2026-03-04T07:27:00Z",
+      "o": 10.0199,
+      "h": 10.0215,
+      "l": 10.0169,
+      "c": 10.0191
+    },
+    {
+      "t": "2026-03-04T07:28:00Z",
+      "o": 10.0177,
+      "h": 10.0213,
+      "l": 10.0169,
+      "c": 10.0206
+    },
+    {
+      "t": "2026-03-04T07:29:00Z",
+      "o": 10.0197,
+      "h": 10.0212,
+      "l": 10.0187,
+      "c": 10.019
+    },
+    {
+      "t": "2026-03-04T07:30:00Z",
+      "o": 10.0198,
+      "h": 10.0254,
+      "l": 10.0187,
+      "c": 10.0229
+    },
+    {
+      "t": "2026-03-04T07:31:00Z",
+      "o": 10.0203,
+      "h": 10.0262,
+      "l": 10.0202,
+      "c": 10.0262
+    },
+    {
+      "t": "2026-03-04T07:32:00Z",
+      "o": 10.0261,
+      "h": 10.0264,
+      "l": 10.02,
+      "c": 10.0207
+    },
+    {
+      "t": "2026-03-04T07:33:00Z",
+      "o": 10.022,
+      "h": 10.0267,
+      "l": 10.0209,
+      "c": 10.025
+    },
+    {
+      "t": "2026-03-04T07:34:00Z",
+      "o": 10.0269,
+      "h": 10.0284,
+      "l": 10.0239,
+      "c": 10.0284
+    }
+  ],
+  "score": {
+    "Symbol": "CHFHKD",
+    "T": 1772609580000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 109,
+    "crossover_score": 9,
+    "oscillator_score": 3,
+    "volatility_score": 8,
+    "volume_score": -2,
+    "fib_stack_score": 51,
+    "momentum_projection_score": 14,
+    "structure_score": 7,
+    "cycle_score": 1,
+    "pattern_score": 1,
+    "final_score": 48.31,
+    "confidence": 0.7423,
+    "entry_price": 10.02248,
+    "stop_price": 10.02129,
+    "tp_price": 10.03317,
+    "risk_reward": 9,
+    "unit_size": 72,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Buy"
+  }
+}

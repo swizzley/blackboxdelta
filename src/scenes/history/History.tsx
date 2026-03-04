@@ -9,6 +9,18 @@ import dayjs from 'dayjs';
 
 const PAGE_SIZE = 50;
 
+// Candle durations in seconds per timeframe
+const CANDLE_SECS: Record<string, number> = {scalp: 60, intraday: 900, swing: 86400};
+
+function isSameCandle(o: OrderSummary): boolean {
+    if (!o.closed) return false;
+    const interval = CANDLE_SECS[o.timeframe] ?? 60;
+    const created = Math.floor(new Date(o.created).getTime() / 1000);
+    const closed = Math.floor(new Date(o.closed).getTime() / 1000);
+    // Same candle if both timestamps fall in the same interval bucket
+    return Math.floor(created / interval) === Math.floor(closed / interval);
+}
+
 type SortKey = 'created' | 'symbol' | 'timeframe' | 'status' | 'profit' | 'direction';
 type SortDir = 'asc' | 'desc';
 
@@ -152,7 +164,10 @@ export default function History() {
                                         className={`cursor-pointer ${isDarkMode ? 'hover:bg-slate-700/50 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}`}
                                     >
                                         <td className={td}>{dayjs(o.created).format('YYYY-MM-DD HH:mm')}</td>
-                                        <td className={`${td} font-medium`}>{o.symbol.replace('_', '/')}</td>
+                                        <td className={`${td} font-medium`}>
+                                            {o.symbol.replace('_', '/')}
+                                            {isSameCandle(o) && <span className="text-pink-500 ml-0.5" title="Entry and exit on same candle">*</span>}
+                                        </td>
                                         <td className={td}>
                                             <span className={o.direction === 'Long' ? 'text-emerald-500' : 'text-red-500'}>
                                                 {o.direction}

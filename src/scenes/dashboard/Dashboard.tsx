@@ -8,6 +8,8 @@ import PLChart from './PLChart';
 import TimeframeBreakdown from './TimeframeBreakdown';
 import CalendarHeatmap from './CalendarHeatmap';
 import ScoreTrendChart from './ScoreTrendChart';
+import RecommendationRadar from './RecommendationRadar';
+import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
 import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint} from '../../context/Types';
 
@@ -151,8 +153,14 @@ export default function Dashboard() {
                         <TimeframeBreakdown data={dashboard.by_timeframe}/>
                     </div>
 
-                    {/* Score Trend */}
-                    {filteredScores.length > 0 && (
+                    {/* Recommendation + Timeframe Radar */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                        {dashboard.recommendation_counts && <RecommendationRadar data={dashboard.recommendation_counts}/>}
+                        <TimeframeRadar data={dashboard.by_timeframe}/>
+                    </div>
+
+                    {/* Score Trend (needs 2+ days of data) */}
+                    {filteredScores.length > 1 && (
                         <div className="mb-6">
                             <ScoreTrendChart data={filteredScores}/>
                         </div>

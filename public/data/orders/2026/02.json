@@ -74,7 +74,7 @@
     "symbol": "GBP_ZAR",
     "direction": "Short",
     "timeframe": "swing",
-    "status": "FILLED",
+    "status": "CLOSED",
     "profit": -1.7368,
     "created": "2026-02-26T03:36:56.449279774Z",
     "closed": "2026-02-26T13:53:57Z"
@@ -84,7 +84,7 @@
     "symbol": "GBP_NZD",
     "direction": "Long",
     "timeframe": "swing",
-    "status": "FILLED",
+    "status": "CLOSED",
     "profit": -1.1526,
     "created": "2026-02-24T12:30:00Z",
     "closed": "2026-02-25T00:30:54Z"

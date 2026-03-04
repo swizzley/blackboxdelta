@@ -1,0 +1,116 @@
+{
+  "id": "4212",
+  "trade_id": "4213",
+  "symbol": "EUR_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 9.08306,
+  "stop_loss": 9.08099,
+  "take_profit": 9.09184,
+  "quantity": 64,
+  "profit": null,
+  "created": "2026-03-04T07:35:12.579178789Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 4454,
+  "risk_reward": 4.241545893720126,
+  "candles": [
+    {
+      "t": "2026-03-04T07:26:00Z",
+      "o": 9.0773,
+      "h": 9.07877,
+      "l": 9.0756,
+      "c": 9.0787
+    },
+    {
+      "t": "2026-03-04T07:27:00Z",
+      "o": 9.07868,
+      "h": 9.07868,
+      "l": 9.075,
+      "c": 9.07712
+    },
+    {
+      "t": "2026-03-04T07:28:00Z",
+      "o": 9.07681,
+      "h": 9.0809,
+      "l": 9.0757,
+      "c": 9.08018
+    },
+    {
+      "t": "2026-03-04T07:29:00Z",
+      "o": 9.08021,
+      "h": 9.0803,
+      "l": 9.0769,
+      "c": 9.07901
+    },
+    {
+      "t": "2026-03-04T07:30:00Z",
+      "o": 9.07932,
+      "h": 9.08037,
+      "l": 9.0777,
+      "c": 9.08008
+    },
+    {
+      "t": "2026-03-04T07:31:00Z",
+      "o": 9.08012,
+      "h": 9.08425,
+      "l": 9.0785,
+      "c": 9.08425
+    },
+    {
+      "t": "2026-03-04T07:32:00Z",
+      "o": 9.08437,
+      "h": 9.08437,
+      "l": 9.0778,
+      "c": 9.0795
+    },
+    {
+      "t": "2026-03-04T07:33:00Z",
+      "o": 9.07901,
+      "h": 9.08201,
+      "l": 9.0777,
+      "c": 9.08167
+    },
+    {
+      "t": "2026-03-04T07:34:00Z",
+      "o": 9.08167,
+      "h": 9.08234,
+      "l": 9.0794,
+      "c": 9.08203
+    },
+    {
+      "t": "2026-03-04T07:35:00Z",
+      "o": 9.0818,
+      "h": 9.0839,
+      "l": 9.0795,
+      "c": 9.08316
+    }
+  ],
+  "score": {
+    "Symbol": "EURHKD",
+    "T": 1772609580000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 77,
+    "crossover_score": 5,
+    "oscillator_score": 3,
+    "volatility_score": 8,
+    "volume_score": 4,
+    "fib_stack_score": 30,
+    "momentum_projection_score": 14,
+    "structure_score": 7,
+    "cycle_score": 1,
+    "pattern_score": -1,
+    "final_score": 43.07,
+    "confidence": 0.7423,
+    "entry_price": 9.07912,
+    "stop_price": 9.07815,
+    "tp_price": 9.0879,
+    "risk_reward": 9,
+    "unit_size": 64,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Buy"
+  }
+}

@@ -5,6 +5,7 @@ export interface DashboardData {
     by_timeframe: TimeframeRow[];
     pl_series: PLDataPoint[];
     score_series: ScoreDataPoint[];
+    recommendation_counts?: Record<string, number>;
 }
 
 export interface TimeframeStats {
@@ -90,6 +91,7 @@ export interface OrderDetail {
     risk_reward?: number;
     candles?: Candle[];
     score?: Score;
+    versions?: Record<string, { sha: string; message: string }>;
 }
 
 export interface Candle {
