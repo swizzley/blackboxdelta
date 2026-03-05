@@ -1,21 +1,21 @@
 {
   "date": "2026-03-05",
   "summary": {
-    "total_orders": 136,
+    "total_orders": 177,
     "pending": 1,
-    "open_positions": 22,
-    "closed_orders": 113,
-    "total_pl": -0.32,
-    "winners": 44,
-    "losers": 66,
-    "breakeven": 3,
-    "win_loss_ratio": 0.67,
-    "win_rate_pct": 38.9,
+    "open_positions": 9,
+    "closed_orders": 167,
+    "total_pl": -0.5,
+    "winners": 63,
+    "losers": 100,
+    "breakeven": 4,
+    "win_loss_ratio": 0.63,
+    "win_rate_pct": 37.7,
     "avg_win": 0,
     "avg_loss": -0.01,
-    "avg_time_in_trade_mins": 24,
-    "long_pl": -0.15,
-    "short_pl": -0.17,
+    "avg_time_in_trade_mins": 27,
+    "long_pl": -0.23,
+    "short_pl": -0.28,
     "by_timeframe": [
       {
         "timeframe": "swing",
@@ -55,21 +55,21 @@
       },
       {
         "timeframe": "scalp",
-        "total_orders": 132,
+        "total_orders": 173,
         "pending": 0,
-        "open_positions": 21,
-        "closed_orders": 111,
-        "total_pl": -0.3,
-        "winners": 44,
-        "losers": 65,
-        "breakeven": 2,
-        "win_loss_ratio": 0.68,
-        "win_rate_pct": 39.6,
+        "open_positions": 8,
+        "closed_orders": 165,
+        "total_pl": -0.48,
+        "winners": 63,
+        "losers": 99,
+        "breakeven": 3,
+        "win_loss_ratio": 0.64,
+        "win_rate_pct": 38.2,
         "avg_win": 0,
         "avg_loss": -0.01,
-        "avg_time_in_trade_mins": 24,
-        "long_pl": -0.15,
-        "short_pl": -0.15
+        "avg_time_in_trade_mins": 27,
+        "long_pl": -0.23,
+        "short_pl": -0.25
       }
     ]
   },
@@ -2179,19 +2179,19 @@
       "summary": {
         "total_orders": 39,
         "pending": 0,
-        "open_positions": 4,
-        "closed_orders": 35,
-        "total_pl": -0.04,
-        "winners": 15,
-        "losers": 19,
+        "open_positions": 1,
+        "closed_orders": 38,
+        "total_pl": -0.03,
+        "winners": 17,
+        "losers": 20,
         "breakeven": 1,
-        "win_loss_ratio": 0.79,
-        "win_rate_pct": 42.9,
+        "win_loss_ratio": 0.85,
+        "win_rate_pct": 44.7,
         "avg_win": 0,
         "avg_loss": -0.01,
-        "avg_time_in_trade_mins": 23,
+        "avg_time_in_trade_mins": 35,
         "long_pl": -0.02,
-        "short_pl": -0.02
+        "short_pl": -0
       },
       "orders": [
         {
@@ -2877,16 +2877,17 @@
           "symbol": "AUD_CAD",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 0.96181,
+          "exit": 0.9611711111111112,
           "stop_loss": 0.9638500000000001,
           "take_profit": 0.93976,
           "quantity": -18,
-          "profit": null,
+          "profit": 0.0115,
           "created": "2026-03-05T03:34:10.656092923Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:06:00Z",
+          "duration_mins": 151,
           "alert_id": 6417,
           "risk_reward": 10.80882352941155,
           "versions": {
@@ -3046,16 +3047,17 @@
           "symbol": "NZD_JPY",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 92.994,
+          "exit": 92.9933,
           "stop_loss": 93.248,
           "take_profit": 91.102,
           "quantity": -10,
-          "profit": null,
+          "profit": 0.007,
           "created": "2026-03-05T03:30:12.390622999Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:04:12Z",
+          "duration_mins": 153,
           "alert_id": 6404,
           "risk_reward": 7.4488188976376355,
           "versions": {
@@ -3453,16 +3455,17 @@
           "symbol": "CAD_JPY",
           "direction": "Long",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 115.144,
+          "exit": 115.14314444444445,
           "stop_loss": 114.961,
           "take_profit": 117.134,
           "quantity": 9,
-          "profit": null,
+          "profit": -0.0077,
           "created": "2026-03-05T03:08:09.248856707Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:45:15Z",
+          "duration_mins": 217,
           "alert_id": 6360,
           "risk_reward": 10.87431693989027,
           "versions": {
@@ -3521,19 +3524,19 @@
       "summary": {
         "total_orders": 16,
         "pending": 0,
-        "open_positions": 5,
-        "closed_orders": 11,
-        "total_pl": -0.08,
+        "open_positions": 0,
+        "closed_orders": 16,
+        "total_pl": -0.12,
         "winners": 2,
-        "losers": 9,
+        "losers": 14,
         "breakeven": 0,
-        "win_loss_ratio": 0.22,
-        "win_rate_pct": 18.2,
+        "win_loss_ratio": 0.14,
+        "win_rate_pct": 12.5,
         "avg_win": 0,
         "avg_loss": -0.01,
-        "avg_time_in_trade_mins": 23,
-        "long_pl": -0,
-        "short_pl": -0.08
+        "avg_time_in_trade_mins": 55,
+        "long_pl": -0.02,
+        "short_pl": -0.1
       },
       "orders": [
         {
@@ -3678,16 +3681,17 @@
           "symbol": "CAD_SGD",
           "direction": "Long",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 0.93553,
+          "exit": 0.9349633333333333,
           "stop_loss": 0.93487,
           "take_profit": 0.93686,
           "quantity": 15,
-          "profit": null,
+          "profit": -0.0085,
           "created": "2026-03-05T04:21:11.032857493Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:51:14Z",
+          "duration_mins": 150,
           "alert_id": 6549,
           "risk_reward": 2.0151515151516146,
           "versions": {
@@ -3711,16 +3715,17 @@
           "symbol": "EUR_NOK",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 11.1889,
+          "exit": 11.190061538461539,
           "stop_loss": 11.196,
           "take_profit": 11.1746,
           "quantity": -13,
-          "profit": null,
+          "profit": -0.0151,
           "created": "2026-03-05T04:21:11.260643989Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:15:45Z",
+          "duration_mins": 114,
           "alert_id": 6550,
           "risk_reward": 2.014084507042472,
           "versions": {
@@ -3778,16 +3783,17 @@
           "symbol": "AUD_NZD",
           "direction": "Long",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 1.19017,
+          "exit": 1.1894449999999999,
           "stop_loss": 1.18866,
           "take_profit": 1.19331,
           "quantity": 8,
-          "profit": null,
+          "profit": -0.0058,
           "created": "2026-03-05T04:23:12.631819954Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:29:59Z",
+          "duration_mins": 126,
           "alert_id": 6554,
           "risk_reward": 2.0794701986757285,
           "versions": {
@@ -3845,16 +3851,17 @@
           "symbol": "EUR_GBP",
           "direction": "Long",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 0.87082,
+          "exit": 0.87055,
           "stop_loss": 0.87014,
           "take_profit": 0.87418,
           "quantity": 10,
-          "profit": null,
+          "profit": -0.0027,
           "created": "2026-03-05T04:26:12.462406744Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:57:30Z",
+          "duration_mins": 151,
           "alert_id": 6562,
           "risk_reward": 4.941176470588014,
           "versions": {
@@ -3878,16 +3885,17 @@
           "symbol": "GBP_AUD",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 1.88926,
+          "exit": 1.89071,
           "stop_loss": 1.8916,
           "take_profit": 1.86865,
           "quantity": -10,
-          "profit": null,
+          "profit": -0.0145,
           "created": "2026-03-05T04:29:10.916891431Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:05:51Z",
+          "duration_mins": 96,
           "alert_id": 6565,
           "risk_reward": 8.807692307692282,
           "versions": {
@@ -4082,19 +4090,19 @@
       "summary": {
         "total_orders": 21,
         "pending": 0,
-        "open_positions": 11,
-        "closed_orders": 10,
-        "total_pl": -0.04,
-        "winners": 3,
-        "losers": 7,
-        "breakeven": 0,
-        "win_loss_ratio": 0.43,
-        "win_rate_pct": 30,
+        "open_positions": 2,
+        "closed_orders": 19,
+        "total_pl": -0.03,
+        "winners": 9,
+        "losers": 9,
+        "breakeven": 1,
+        "win_loss_ratio": 1,
+        "win_rate_pct": 47.4,
         "avg_win": 0,
         "avg_loss": -0.01,
-        "avg_time_in_trade_mins": 6,
-        "long_pl": -0.03,
-        "short_pl": -0.01
+        "avg_time_in_trade_mins": 18,
+        "long_pl": -0.04,
+        "short_pl": 0.01
       },
       "orders": [
         {
@@ -4307,16 +4315,17 @@
           "symbol": "AUD_JPY",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 110.671,
+          "exit": 110.67041818181819,
           "stop_loss": 110.85400000000001,
           "take_profit": 109.24,
           "quantity": -11,
-          "profit": null,
+          "profit": 0.0064,
           "created": "2026-03-05T05:23:07.998855276Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:04:12Z",
+          "duration_mins": 41,
           "alert_id": 6615,
           "risk_reward": 7.819672131147308,
           "versions": {
@@ -4440,16 +4449,17 @@
           "symbol": "USD_CAD",
           "direction": "Long",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 1.36608,
+          "exit": 1.366537142857143,
           "stop_loss": 1.36508,
           "take_profit": 1.37378,
           "quantity": 21,
-          "profit": null,
+          "profit": 0.0096,
           "created": "2026-03-05T05:44:09.384089826Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:01:53Z",
+          "duration_mins": 17,
           "alert_id": 6651,
           "risk_reward": 7.700000000000888,
           "versions": {
@@ -4507,16 +4517,17 @@
           "symbol": "GBP_JPY",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 209.309,
+          "exit": 209.30853076923077,
           "stop_loss": 209.468,
           "take_profit": 208.495,
           "quantity": -13,
-          "profit": null,
+          "profit": 0.0061,
           "created": "2026-03-05T05:46:06.973276597Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:04:12Z",
+          "duration_mins": 18,
           "alert_id": 6660,
           "risk_reward": 5.1194968553461315,
           "versions": {
@@ -4540,16 +4551,17 @@
           "symbol": "EUR_JPY",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 182.236,
+          "exit": 182.23574545454545,
           "stop_loss": 182.321,
           "take_profit": 181.529,
           "quantity": -11,
-          "profit": null,
+          "profit": 0.0028,
           "created": "2026-03-05T05:46:12.119008554Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:13:17Z",
+          "duration_mins": 27,
           "alert_id": 6661,
           "risk_reward": 8.317647058822676,
           "versions": {
@@ -4573,16 +4585,17 @@
           "symbol": "SGD_JPY",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 122.951,
+          "exit": 122.95079999999999,
           "stop_loss": 123.038,
           "take_profit": 122.726,
           "quantity": -12,
-          "profit": null,
+          "profit": 0.0024,
           "created": "2026-03-05T05:47:13.452516043Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:49:50Z",
+          "duration_mins": 62,
           "alert_id": 6665,
           "risk_reward": 2.5862068965515608,
           "versions": {
@@ -4674,16 +4687,17 @@
           "symbol": "USD_SGD",
           "direction": "Long",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 1.27787,
+          "exit": 1.27821,
           "stop_loss": 1.27704,
           "take_profit": 1.28066,
           "quantity": 10,
-          "profit": null,
+          "profit": 0.0034,
           "created": "2026-03-05T05:52:17.750778042Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:08:52Z",
+          "duration_mins": 16,
           "alert_id": 6686,
           "risk_reward": 3.361445783131908,
           "versions": {
@@ -4707,16 +4721,17 @@
           "symbol": "EUR_SGD",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 1.48131,
+          "exit": 1.48197,
           "stop_loss": 1.48227,
           "take_profit": 1.47859,
           "quantity": -10,
-          "profit": null,
+          "profit": -0.0066,
           "created": "2026-03-05T05:55:13.23894305Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:49:40Z",
+          "duration_mins": 54,
           "alert_id": 6692,
           "risk_reward": 2.833333333332948,
           "versions": {
@@ -4740,16 +4755,16 @@
           "symbol": "CAD_HKD",
           "direction": "Short",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 5.72321,
           "stop_loss": 5.72577,
           "take_profit": 5.71723,
           "quantity": -14,
-          "profit": null,
+          "profit": 0,
           "created": "2026-03-05T05:58:06.665719345Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:00:21Z",
+          "duration_mins": 2,
           "alert_id": 6699,
           "risk_reward": 2.335937500000133,
           "versions": {
@@ -4773,18 +4788,1431 @@
           "symbol": "USD_CHF",
           "direction": "Long",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 0.78186,
+          "exit": 0.7810494736842105,
           "stop_loss": 0.78099,
           "take_profit": 0.78456,
           "quantity": 19,
-          "profit": null,
+          "profit": -0.0154,
           "created": "2026-03-05T05:59:10.305311532Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-05T06:38:32Z",
+          "duration_mins": 39,
           "alert_id": 6703,
           "risk_reward": 3.1034482758619766,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "hour": 6,
+      "summary": {
+        "total_orders": 41,
+        "pending": 0,
+        "open_positions": 4,
+        "closed_orders": 37,
+        "total_pl": -0.15,
+        "winners": 11,
+        "losers": 26,
+        "breakeven": 0,
+        "win_loss_ratio": 0.42,
+        "win_rate_pct": 29.7,
+        "avg_win": 0,
+        "avg_loss": -0.01,
+        "avg_time_in_trade_mins": 13,
+        "long_pl": -0.05,
+        "short_pl": -0.1
+      },
+      "orders": [
+        {
+          "id": "8222",
+          "trade_id": "8223",
+          "symbol": "NZD_SGD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 0.75543,
+          "exit": 0.7563500000000001,
+          "stop_loss": 0.7567200000000001,
+          "take_profit": 0.75209,
+          "quantity": -15,
+          "profit": -0.0138,
+          "created": "2026-03-05T06:01:08.413300875Z",
+          "closed": "2026-03-05T06:50:18Z",
+          "duration_mins": 49,
+          "alert_id": 6708,
+          "risk_reward": 2.589147286821686,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8230",
+          "trade_id": "8231",
+          "symbol": "USD_CAD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.36684,
+          "exit": 1.3662266666666667,
+          "stop_loss": 1.3658400000000002,
+          "take_profit": 1.37424,
+          "quantity": 15,
+          "profit": -0.0092,
+          "created": "2026-03-05T06:02:06.71529202Z",
+          "closed": "2026-03-05T06:49:53Z",
+          "duration_mins": 47,
+          "alert_id": 6711,
+          "risk_reward": 7.4000000000006665,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8234",
+          "trade_id": "8235",
+          "symbol": "NZD_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 4.62329,
+          "exit": 4.6232685714285715,
+          "stop_loss": 4.62542,
+          "take_profit": 4.61358,
+          "quantity": -14,
+          "profit": 0.0003,
+          "created": "2026-03-05T06:02:11.861927302Z",
+          "closed": "2026-03-05T06:07:50Z",
+          "duration_mins": 5,
+          "alert_id": 6713,
+          "risk_reward": 4.558685446009039,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8238",
+          "trade_id": "8239",
+          "symbol": "AUD_SGD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 0.89924,
+          "exit": 0.899163076923077,
+          "stop_loss": 0.90027,
+          "take_profit": 0.89692,
+          "quantity": -13,
+          "profit": 0.001,
+          "created": "2026-03-05T06:02:12.072999707Z",
+          "closed": "2026-03-05T06:10:42Z",
+          "duration_mins": 8,
+          "alert_id": 6715,
+          "risk_reward": 2.2524271844660624,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8260",
+          "trade_id": "8261",
+          "symbol": "USD_DKK",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 6.44547,
+          "exit": 6.445555714285715,
+          "stop_loss": 6.443350000000001,
+          "take_profit": 6.45038,
+          "quantity": 14,
+          "profit": 0.0012,
+          "created": "2026-03-05T06:04:14.579789672Z",
+          "closed": "2026-03-05T06:10:42Z",
+          "duration_mins": 6,
+          "alert_id": 6731,
+          "risk_reward": 2.3160377358492896,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8264",
+          "trade_id": "8265",
+          "symbol": "CHF_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 10.0009,
+          "exit": 10.000869230769231,
+          "stop_loss": 10.004199999999999,
+          "take_profit": 9.99127,
+          "quantity": -13,
+          "profit": 0.0004,
+          "created": "2026-03-05T06:04:14.808825885Z",
+          "closed": "2026-03-05T06:13:48Z",
+          "duration_mins": 9,
+          "alert_id": 6732,
+          "risk_reward": 2.9181818181822097,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8268",
+          "trade_id": "8269",
+          "symbol": "AUD_USD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 0.70347,
+          "exit": 0.7036116666666667,
+          "stop_loss": 0.7046100000000001,
+          "take_profit": 0.69255,
+          "quantity": -12,
+          "profit": -0.0017,
+          "created": "2026-03-05T06:04:19.895496123Z",
+          "closed": "2026-03-05T06:49:51Z",
+          "duration_mins": 45,
+          "alert_id": 6734,
+          "risk_reward": 9.578947368420838,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8272",
+          "trade_id": "8273",
+          "symbol": "AUD_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 5.50263,
+          "exit": 5.5025390909090905,
+          "stop_loss": 5.5044699999999995,
+          "take_profit": 5.49541,
+          "quantity": -11,
+          "profit": 0.001,
+          "created": "2026-03-05T06:04:20.057934821Z",
+          "closed": "2026-03-05T06:06:32Z",
+          "duration_mins": 2,
+          "alert_id": 6736,
+          "risk_reward": 3.9239130434791947,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8282",
+          "trade_id": "8283",
+          "symbol": "GBP_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 209.216,
+          "exit": 209.21668666666667,
+          "stop_loss": 209.372,
+          "take_profit": 208.877,
+          "quantity": -15,
+          "profit": -0.0103,
+          "created": "2026-03-05T06:05:14.031216063Z",
+          "closed": "2026-03-05T06:18:33Z",
+          "duration_mins": 13,
+          "alert_id": 6743,
+          "risk_reward": 2.173076923076832,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8286",
+          "trade_id": "8287",
+          "symbol": "NZD_USD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 0.59071,
+          "exit": 0.5923176923076923,
+          "stop_loss": 0.59236,
+          "take_profit": 0.57298,
+          "quantity": -13,
+          "profit": -0.0209,
+          "created": "2026-03-05T06:05:16.115911796Z",
+          "closed": "2026-03-05T06:50:19Z",
+          "duration_mins": 45,
+          "alert_id": 6745,
+          "risk_reward": 10.74545454545423,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8290",
+          "trade_id": "8291",
+          "symbol": "GBP_CAD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.81797,
+          "exit": 1.8194783333333333,
+          "stop_loss": 1.81989,
+          "take_profit": 1.79704,
+          "quantity": -12,
+          "profit": -0.0181,
+          "created": "2026-03-05T06:05:16.270043383Z",
+          "closed": "2026-03-05T06:43:15Z",
+          "duration_mins": 37,
+          "alert_id": 6749,
+          "risk_reward": 10.90104166666717,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8300",
+          "trade_id": "8301",
+          "symbol": "AUD_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 110.592,
+          "exit": 110.59205833333333,
+          "stop_loss": 110.642,
+          "take_profit": 110.28,
+          "quantity": -12,
+          "profit": -0.0007,
+          "created": "2026-03-05T06:06:12.644196196Z",
+          "closed": "2026-03-05T06:11:41Z",
+          "duration_mins": 5,
+          "alert_id": 6757,
+          "risk_reward": 6.240000000000307,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8304",
+          "trade_id": "8305",
+          "symbol": "NZD_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "FILLED",
+          "type": "LIMIT_ORDER",
+          "entry": 92.941,
+          "stop_loss": 93.186,
+          "take_profit": 90.253,
+          "quantity": -10,
+          "profit": null,
+          "created": "2026-03-05T06:06:12.950207685Z",
+          "closed": null,
+          "duration_mins": null,
+          "alert_id": 6760,
+          "risk_reward": 10.971428571428378,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8312",
+          "trade_id": "8313",
+          "symbol": "EUR_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 9.06169,
+          "exit": 9.0618025,
+          "stop_loss": 9.06391,
+          "take_profit": 9.05365,
+          "quantity": -8,
+          "profit": -0.0009,
+          "created": "2026-03-05T06:07:13.169543889Z",
+          "closed": "2026-03-05T06:14:05Z",
+          "duration_mins": 6,
+          "alert_id": 6765,
+          "risk_reward": 3.621621621623049,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8316",
+          "trade_id": "8317",
+          "symbol": "EUR_USD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.15898,
+          "exit": 1.1593425,
+          "stop_loss": 1.15956,
+          "take_profit": 1.15363,
+          "quantity": -8,
+          "profit": -0.0029,
+          "created": "2026-03-05T06:07:13.249107184Z",
+          "closed": "2026-03-05T06:19:42Z",
+          "duration_mins": 12,
+          "alert_id": 6766,
+          "risk_reward": 9.224137931034027,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8324",
+          "trade_id": "8325",
+          "symbol": "NZD_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 4.6224,
+          "exit": 4.622628571428571,
+          "stop_loss": 4.62462,
+          "take_profit": 4.61242,
+          "quantity": -14,
+          "profit": -0.0032,
+          "created": "2026-03-05T06:08:14.496089778Z",
+          "closed": "2026-03-05T06:14:01Z",
+          "duration_mins": 5,
+          "alert_id": 6771,
+          "risk_reward": 4.495495495494667,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8342",
+          "trade_id": "8343",
+          "symbol": "USD_SGD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.27853,
+          "exit": 1.2777744444444443,
+          "stop_loss": 1.27771,
+          "take_profit": 1.28611,
+          "quantity": 18,
+          "profit": -0.0136,
+          "created": "2026-03-05T06:11:08.16676459Z",
+          "closed": "2026-03-05T06:24:46Z",
+          "duration_mins": 13,
+          "alert_id": 6794,
+          "risk_reward": 9.24390243902408,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8348",
+          "trade_id": "8349",
+          "symbol": "USD_DKK",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 6.44746,
+          "exit": 6.447045714285714,
+          "stop_loss": 6.445810000000001,
+          "take_profit": 6.45267,
+          "quantity": 21,
+          "profit": -0.0087,
+          "created": "2026-03-05T06:11:10.459087801Z",
+          "closed": "2026-03-05T06:14:12Z",
+          "duration_mins": 3,
+          "alert_id": 6793,
+          "risk_reward": 3.1575757575762795,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8352",
+          "trade_id": "8353",
+          "symbol": "CAD_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 5.72042,
+          "exit": 5.720373846153846,
+          "stop_loss": 5.7223999999999995,
+          "take_profit": 5.71414,
+          "quantity": -13,
+          "profit": 0.0006,
+          "created": "2026-03-05T06:11:18.775548598Z",
+          "closed": "2026-03-05T06:16:05Z",
+          "duration_mins": 4,
+          "alert_id": 6801,
+          "risk_reward": 3.17171717171743,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8370",
+          "trade_id": "8371",
+          "symbol": "CHF_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 10.0001,
+          "exit": 10.00004,
+          "stop_loss": 10.00348,
+          "take_profit": 9.99031,
+          "quantity": -15,
+          "profit": 0.0009,
+          "created": "2026-03-05T06:14:07.447846179Z",
+          "closed": "2026-03-05T06:18:42Z",
+          "duration_mins": 4,
+          "alert_id": 6815,
+          "risk_reward": 2.8964497041422512,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8376",
+          "trade_id": "8377",
+          "symbol": "AUD_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 110.495,
+          "exit": 110.49566923076924,
+          "stop_loss": 110.67800000000001,
+          "take_profit": 108.569,
+          "quantity": -13,
+          "profit": -0.0087,
+          "created": "2026-03-05T06:15:13.837116852Z",
+          "closed": "2026-03-05T06:50:27Z",
+          "duration_mins": 35,
+          "alert_id": 6821,
+          "risk_reward": 10.524590163934038,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8386",
+          "trade_id": "8387",
+          "symbol": "CAD_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 5.71881,
+          "exit": 5.719326666666667,
+          "stop_loss": 5.72112,
+          "take_profit": 5.71249,
+          "quantity": -12,
+          "profit": -0.0062,
+          "created": "2026-03-05T06:17:11.202840386Z",
+          "closed": "2026-03-05T06:30:25Z",
+          "duration_mins": 13,
+          "alert_id": 6826,
+          "risk_reward": 2.735930735931458,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8396",
+          "trade_id": "8397",
+          "symbol": "CHF_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 9.99746,
+          "exit": 9.997902857142858,
+          "stop_loss": 10.00076,
+          "take_profit": 9.98749,
+          "quantity": -14,
+          "profit": -0.0062,
+          "created": "2026-03-05T06:19:13.592096973Z",
+          "closed": "2026-03-05T06:28:42Z",
+          "duration_mins": 9,
+          "alert_id": 6832,
+          "risk_reward": 3.021212121212937,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8402",
+          "trade_id": "8403",
+          "symbol": "GBP_AUD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.89386,
+          "exit": 1.8944100000000001,
+          "stop_loss": 1.8915700000000002,
+          "take_profit": 1.91353,
+          "quantity": 14,
+          "profit": 0.0077,
+          "created": "2026-03-05T06:21:15.829225299Z",
+          "closed": "2026-03-05T06:43:26Z",
+          "duration_mins": 22,
+          "alert_id": 6836,
+          "risk_reward": 8.58951965065532,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8406",
+          "trade_id": "8407",
+          "symbol": "EUR_HKD",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 9.0585,
+          "exit": 9.0588,
+          "stop_loss": 9.060130000000001,
+          "take_profit": 9.04956,
+          "quantity": -8,
+          "profit": -0.0024,
+          "created": "2026-03-05T06:22:07.118836892Z",
+          "closed": "2026-03-05T06:24:41Z",
+          "duration_mins": 2,
+          "alert_id": 6838,
+          "risk_reward": 5.484662576686067,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8410",
+          "trade_id": "8411",
+          "symbol": "GBP_JPY",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 209.456,
+          "exit": 209.45486153846153,
+          "stop_loss": 209.30499999999998,
+          "take_profit": 210.716,
+          "quantity": 13,
+          "profit": -0.0148,
+          "created": "2026-03-05T06:23:08.047437292Z",
+          "closed": "2026-03-05T06:39:52Z",
+          "duration_mins": 16,
+          "alert_id": 6840,
+          "risk_reward": 8.344370860926702,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8418",
+          "trade_id": "8419",
+          "symbol": "GBP_USD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.3324,
+          "exit": 1.3320100000000001,
+          "stop_loss": 1.33165,
+          "take_profit": 1.33955,
+          "quantity": 10,
+          "profit": -0.0039,
+          "created": "2026-03-05T06:25:10.285410376Z",
+          "closed": "2026-03-05T06:48:48Z",
+          "duration_mins": 23,
+          "alert_id": 6847,
+          "risk_reward": 9.533333333332958,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8428",
+          "trade_id": "8429",
+          "symbol": "EUR_HKD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 9.06697,
+          "exit": 9.067039999999999,
+          "stop_loss": 9.064729999999999,
+          "take_profit": 9.07409,
+          "quantity": 10,
+          "profit": 0.0007,
+          "created": "2026-03-05T06:36:09.210877595Z",
+          "closed": "2026-03-05T06:40:52Z",
+          "duration_mins": 4,
+          "alert_id": 6857,
+          "risk_reward": 3.1785714285709754,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8432",
+          "trade_id": "8433",
+          "symbol": "EUR_USD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.15999,
+          "exit": 1.1610042857142857,
+          "stop_loss": 1.1594300000000002,
+          "take_profit": 1.16393,
+          "quantity": 7,
+          "profit": 0.0071,
+          "created": "2026-03-05T06:36:14.295602082Z",
+          "closed": "2026-03-05T06:50:05Z",
+          "duration_mins": 13,
+          "alert_id": 6858,
+          "risk_reward": 7.035714285715319,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8444",
+          "trade_id": "8445",
+          "symbol": "CHF_HKD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 10.0107,
+          "exit": 10.01024,
+          "stop_loss": 10.00737,
+          "take_profit": 10.0206,
+          "quantity": 10,
+          "profit": -0.0046,
+          "created": "2026-03-05T06:41:10.972304807Z",
+          "closed": "2026-03-05T06:47:05Z",
+          "duration_mins": 5,
+          "alert_id": 6868,
+          "risk_reward": 2.9729729729729297,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8448",
+          "trade_id": "8449",
+          "symbol": "EUR_HKD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 9.06908,
+          "exit": 9.068702222222221,
+          "stop_loss": 9.066849999999999,
+          "take_profit": 9.07601,
+          "quantity": 9,
+          "profit": -0.0034,
+          "created": "2026-03-05T06:41:11.135128833Z",
+          "closed": "2026-03-05T06:44:24Z",
+          "duration_mins": 3,
+          "alert_id": 6869,
+          "risk_reward": 3.1076233183847215,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8452",
+          "trade_id": "8453",
+          "symbol": "USD_CHF",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "FILLED",
+          "type": "LIMIT_ORDER",
+          "entry": 0.7807,
+          "stop_loss": 0.7816,
+          "take_profit": 0.77174,
+          "quantity": -14,
+          "profit": null,
+          "created": "2026-03-05T06:42:07.286093594Z",
+          "closed": null,
+          "duration_mins": null,
+          "alert_id": 6870,
+          "risk_reward": 9.955555555555389,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8456",
+          "trade_id": "8457",
+          "symbol": "USD_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 157.066,
+          "exit": 157.0662181818182,
+          "stop_loss": 157.116,
+          "take_profit": 156.829,
+          "quantity": -11,
+          "profit": -0.0024,
+          "created": "2026-03-05T06:42:12.452778208Z",
+          "closed": "2026-03-05T06:48:50Z",
+          "duration_mins": 6,
+          "alert_id": 6871,
+          "risk_reward": 4.739999999998818,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8468",
+          "trade_id": "8469",
+          "symbol": "GBP_HKD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 10.4162,
+          "exit": 10.415658333333333,
+          "stop_loss": 10.41359,
+          "take_profit": 10.4218,
+          "quantity": 12,
+          "profit": -0.0065,
+          "created": "2026-03-05T06:45:10.822732879Z",
+          "closed": "2026-03-05T06:48:00Z",
+          "duration_mins": 2,
+          "alert_id": 6880,
+          "risk_reward": 2.145593869731016,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8472",
+          "trade_id": "8473",
+          "symbol": "EUR_HKD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 9.06807,
+          "exit": 9.06769,
+          "stop_loss": 9.06647,
+          "take_profit": 9.07496,
+          "quantity": 10,
+          "profit": -0.0038,
+          "created": "2026-03-05T06:45:11.05830195Z",
+          "closed": "2026-03-05T06:48:46Z",
+          "duration_mins": 3,
+          "alert_id": 6883,
+          "risk_reward": 4.306250000000652,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8484",
+          "trade_id": "8485",
+          "symbol": "USD_DKK",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 6.44025,
+          "exit": 6.4407125,
+          "stop_loss": 6.44189,
+          "take_profit": 6.43629,
+          "quantity": -8,
+          "profit": -0.0037,
+          "created": "2026-03-05T06:46:10.731124949Z",
+          "closed": "2026-03-05T06:48:58Z",
+          "duration_mins": 2,
+          "alert_id": 6886,
+          "risk_reward": 2.41463414634145,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8500",
+          "trade_id": "8501",
+          "symbol": "CAD_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "FILLED",
+          "type": "LIMIT_ORDER",
+          "entry": 114.931,
+          "stop_loss": 115.105,
+          "take_profit": 113.642,
+          "quantity": -11,
+          "profit": null,
+          "created": "2026-03-05T06:49:11.197812097Z",
+          "closed": null,
+          "duration_mins": null,
+          "alert_id": 6893,
+          "risk_reward": 7.408045977011222,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8504",
+          "trade_id": "8505",
+          "symbol": "GBP_USD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 1.33213,
+          "exit": 1.333255,
+          "stop_loss": 1.33134,
+          "take_profit": 1.33826,
+          "quantity": 8,
+          "profit": 0.009,
+          "created": "2026-03-05T06:49:11.270635076Z",
+          "closed": "2026-03-05T06:53:52Z",
+          "duration_mins": 4,
+          "alert_id": 6894,
+          "risk_reward": 7.759493670885364,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8522",
+          "trade_id": "8523",
+          "symbol": "SGD_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "FILLED",
+          "type": "LIMIT_ORDER",
+          "entry": 122.906,
+          "stop_loss": 122.99600000000001,
+          "take_profit": 122.213,
+          "quantity": -14,
+          "profit": null,
+          "created": "2026-03-05T06:50:06.548022182Z",
+          "closed": null,
+          "duration_mins": null,
+          "alert_id": 6895,
+          "risk_reward": 7.699999999999842,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8534",
+          "trade_id": "8535",
+          "symbol": "CHF_HKD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 10.0143,
+          "exit": 10.013992857142858,
+          "stop_loss": 10.010900000000001,
+          "take_profit": 10.0256,
+          "quantity": 14,
+          "profit": -0.0043,
+          "created": "2026-03-05T06:53:11.002346835Z",
+          "closed": "2026-03-05T06:54:09Z",
+          "duration_mins": 0,
+          "alert_id": 6899,
+          "risk_reward": 3.3235294117655974,
+          "versions": {
+            "finmon": {
+              "sha": "1db0d63724c194771287138397e6b107cab95958",
+              "message": "Compute long/short P\u0026L in by-timeframe stats"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "8542",
+          "trade_id": "8543",
+          "symbol": "USD_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 156.974,
+          "exit": 156.97450909090907,
+          "stop_loss": 157.035,
+          "take_profit": 156.511,
+          "quantity": -11,
+          "profit": -0.0056,
+          "created": "2026-03-05T06:54:06.138172776Z",
+          "closed": "2026-03-05T06:56:46Z",
+          "duration_mins": 2,
+          "alert_id": 6900,
+          "risk_reward": 7.590163934425251,
           "versions": {
             "finmon": {
               "sha": "1db0d63724c194771287138397e6b107cab95958",

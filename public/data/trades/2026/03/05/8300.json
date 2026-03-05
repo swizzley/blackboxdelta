@@ -1,0 +1,166 @@
+{
+  "id": "8300",
+  "trade_id": "8301",
+  "symbol": "AUD_JPY",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 110.592,
+  "exit": 110.59205833333333,
+  "stop_loss": 110.642,
+  "take_profit": 110.28,
+  "quantity": -12,
+  "profit": -0.0007,
+  "created": "2026-03-05T06:06:12.644196196Z",
+  "closed": "2026-03-05T06:11:41Z",
+  "duration_mins": 5,
+  "alert_id": 6757,
+  "risk_reward": 6.240000000000307,
+  "candles": [
+    {
+      "t": "2026-03-05T05:57:00Z",
+      "o": 110.69,
+      "h": 110.692,
+      "l": 110.65,
+      "c": 110.673
+    },
+    {
+      "t": "2026-03-05T05:58:00Z",
+      "o": 110.673,
+      "h": 110.684,
+      "l": 110.64,
+      "c": 110.651
+    },
+    {
+      "t": "2026-03-05T05:59:00Z",
+      "o": 110.656,
+      "h": 110.673,
+      "l": 110.63,
+      "c": 110.649
+    },
+    {
+      "t": "2026-03-05T06:00:00Z",
+      "o": 110.655,
+      "h": 110.658,
+      "l": 110.64,
+      "c": 110.652
+    },
+    {
+      "t": "2026-03-05T06:01:00Z",
+      "o": 110.651,
+      "h": 110.658,
+      "l": 110.618,
+      "c": 110.627
+    },
+    {
+      "t": "2026-03-05T06:02:00Z",
+      "o": 110.625,
+      "h": 110.666,
+      "l": 110.625,
+      "c": 110.655
+    },
+    {
+      "t": "2026-03-05T06:03:00Z",
+      "o": 110.657,
+      "h": 110.663,
+      "l": 110.62,
+      "c": 110.65
+    },
+    {
+      "t": "2026-03-05T06:04:00Z",
+      "o": 110.651,
+      "h": 110.658,
+      "l": 110.62,
+      "c": 110.654
+    },
+    {
+      "t": "2026-03-05T06:05:00Z",
+      "o": 110.654,
+      "h": 110.656,
+      "l": 110.61,
+      "c": 110.615
+    },
+    {
+      "t": "2026-03-05T06:06:00Z",
+      "o": 110.615,
+      "h": 110.618,
+      "l": 110.566,
+      "c": 110.577
+    },
+    {
+      "t": "2026-03-05T06:07:00Z",
+      "o": 110.578,
+      "h": 110.589,
+      "l": 110.56,
+      "c": 110.564
+    },
+    {
+      "t": "2026-03-05T06:08:00Z",
+      "o": 110.563,
+      "h": 110.572,
+      "l": 110.537,
+      "c": 110.551
+    },
+    {
+      "t": "2026-03-05T06:09:00Z",
+      "o": 110.549,
+      "h": 110.557,
+      "l": 110.52,
+      "c": 110.544
+    },
+    {
+      "t": "2026-03-05T06:10:00Z",
+      "o": 110.545,
+      "h": 110.572,
+      "l": 110.53,
+      "c": 110.558
+    },
+    {
+      "t": "2026-03-05T06:11:00Z",
+      "o": 110.562,
+      "h": 110.603,
+      "l": 110.54,
+      "c": 110.592
+    }
+  ],
+  "score": {
+    "Symbol": "AUDJPY",
+    "T": 1772690640000,
+    "Time": "",
+    "trend_score": -13,
+    "ma_score": -89,
+    "crossover_score": -9,
+    "oscillator_score": -8,
+    "volatility_score": -8,
+    "volume_score": 0,
+    "fib_stack_score": -5,
+    "momentum_projection_score": -15,
+    "structure_score": 0,
+    "cycle_score": 1,
+    "pattern_score": 3,
+    "final_score": -32.57,
+    "confidence": 0.7077,
+    "entry_price": 110.655,
+    "stop_price": 110.665,
+    "tp_price": 110.551,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

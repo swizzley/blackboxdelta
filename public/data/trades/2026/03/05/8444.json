@@ -1,0 +1,173 @@
+{
+  "id": "8444",
+  "trade_id": "8445",
+  "symbol": "CHF_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 10.0107,
+  "exit": 10.01024,
+  "stop_loss": 10.00737,
+  "take_profit": 10.0206,
+  "quantity": 10,
+  "profit": -0.0046,
+  "created": "2026-03-05T06:41:10.972304807Z",
+  "closed": "2026-03-05T06:47:05Z",
+  "duration_mins": 5,
+  "alert_id": 6868,
+  "risk_reward": 2.9729729729729297,
+  "candles": [
+    {
+      "t": "2026-03-05T06:32:00Z",
+      "o": 10.0016,
+      "h": 10.0041,
+      "l": 9.99983,
+      "c": 10.0041
+    },
+    {
+      "t": "2026-03-05T06:33:00Z",
+      "o": 10.0028,
+      "h": 10.0045,
+      "l": 10.0008,
+      "c": 10.0038
+    },
+    {
+      "t": "2026-03-05T06:34:00Z",
+      "o": 10.0037,
+      "h": 10.0062,
+      "l": 10.002,
+      "c": 10.0056
+    },
+    {
+      "t": "2026-03-05T06:35:00Z",
+      "o": 10.0044,
+      "h": 10.0071,
+      "l": 10.0036,
+      "c": 10.006
+    },
+    {
+      "t": "2026-03-05T06:36:00Z",
+      "o": 10.0061,
+      "h": 10.0085,
+      "l": 10.003,
+      "c": 10.0047
+    },
+    {
+      "t": "2026-03-05T06:37:00Z",
+      "o": 10.0049,
+      "h": 10.0083,
+      "l": 10.003,
+      "c": 10.0066
+    },
+    {
+      "t": "2026-03-05T06:38:00Z",
+      "o": 10.0053,
+      "h": 10.009,
+      "l": 10.0045,
+      "c": 10.009
+    },
+    {
+      "t": "2026-03-05T06:39:00Z",
+      "o": 10.0089,
+      "h": 10.009,
+      "l": 10.0058,
+      "c": 10.0078
+    },
+    {
+      "t": "2026-03-05T06:40:00Z",
+      "o": 10.0076,
+      "h": 10.0093,
+      "l": 10.0061,
+      "c": 10.0088
+    },
+    {
+      "t": "2026-03-05T06:41:00Z",
+      "o": 10.0076,
+      "h": 10.0105,
+      "l": 10.0068,
+      "c": 10.008
+    },
+    {
+      "t": "2026-03-05T06:42:00Z",
+      "o": 10.0075,
+      "h": 10.0117,
+      "l": 10.0071,
+      "c": 10.0087
+    },
+    {
+      "t": "2026-03-05T06:43:00Z",
+      "o": 10.0099,
+      "h": 10.0117,
+      "l": 10.0077,
+      "c": 10.0084
+    },
+    {
+      "t": "2026-03-05T06:44:00Z",
+      "o": 10.0093,
+      "h": 10.0104,
+      "l": 10.0067,
+      "c": 10.0074
+    },
+    {
+      "t": "2026-03-05T06:45:00Z",
+      "o": 10.0085,
+      "h": 10.0113,
+      "l": 10.0073,
+      "c": 10.0081
+    },
+    {
+      "t": "2026-03-05T06:46:00Z",
+      "o": 10.008,
+      "h": 10.0107,
+      "l": 10.0066,
+      "c": 10.0074
+    },
+    {
+      "t": "2026-03-05T06:47:00Z",
+      "o": 10.0068,
+      "h": 10.0094,
+      "l": 10.0055,
+      "c": 10.0091
+    }
+  ],
+  "score": {
+    "Symbol": "CHFHKD",
+    "T": 1772692740000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 49,
+    "crossover_score": -3,
+    "oscillator_score": -6,
+    "volatility_score": 8,
+    "volume_score": -2,
+    "fib_stack_score": 16,
+    "momentum_projection_score": 14,
+    "structure_score": 7,
+    "cycle_score": 2,
+    "pattern_score": -4,
+    "final_score": 29.85,
+    "confidence": 0.6802,
+    "entry_price": 10.0068,
+    "stop_price": 10.0057,
+    "tp_price": 10.0167,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
