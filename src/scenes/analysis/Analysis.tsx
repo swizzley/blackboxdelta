@@ -9,6 +9,21 @@ import {AnalysisData, AnalysisTodo} from '../../context/Types';
 
 dayjs.extend(relativeTime);
 
+interface RunDetail {
+    generated: string;
+    run_id: string;
+    provider: string;
+    model: string;
+    data_range: [string, string];
+    order_count: number;
+    phases: { phase: number; name: string; content: string }[];
+    todos: AnalysisTodo[];
+    synthesis: string;
+}
+
+const PROVIDERS = ['anthropic', 'ollama'] as const;
+type Provider = typeof PROVIDERS[number];
+
 const priorityLabels: Record<number, { label: string; color: string; bg: string }> = {
     1: {label: 'P1 Critical', color: 'text-red-400', bg: 'bg-red-500/20'},
     2: {label: 'P2 High', color: 'text-orange-400', bg: 'bg-orange-500/20'},
@@ -41,18 +56,56 @@ const categoryLabels: Record<string, string> = {
 
 export default function Analysis() {
     const {isDarkMode} = useTheme();
-    const [data, setData] = useState<AnalysisData | null>(null);
+    const [providerData, setProviderData] = useState<Record<Provider, AnalysisData | null>>({anthropic: null, ollama: null});
+    const [activeProvider, setActiveProvider] = useState<Provider>('anthropic');
     const [loading, setLoading] = useState(true);
     const [expandedTodo, setExpandedTodo] = useState<number | null>(null);
     const [filterPriority, setFilterPriority] = useState<number | null>(null);
     const [filterStatus, setFilterStatus] = useState<string | null>(null);
+    const [runDetail, setRunDetail] = useState<RunDetail | null>(null);
+    const [loadingDetail, setLoadingDetail] = useState(false);
 
     useEffect(() => {
-        axios.get('/data/analysis.json')
-            .then(r => setData(r.data))
-            .catch(console.error)
-            .finally(() => setLoading(false));
+        let loaded = 0;
+        const results: Record<Provider, AnalysisData | null> = {anthropic: null, ollama: null};
+
+        PROVIDERS.forEach(p => {
+            axios.get(`/data/analysis/${p}.json`)
+                .then(r => { results[p] = r.data; })
+                .catch(() => { /* provider may not have data yet */ })
+                .finally(() => {
+                    loaded++;
+                    if (loaded === PROVIDERS.length) {
+                        setProviderData(results);
+                        // Default to whichever provider has data (prefer anthropic)
+                        if (!results.anthropic && results.ollama) {
+                            setActiveProvider('ollama');
+                        }
+                        setLoading(false);
+                    }
+                });
+        });
     }, []);
+
+    const fetchRunDetail = (run: { run_id: string; created_at: string }, provider: Provider) => {
+        // Derive the analysis date from the run's created_at (the previous market day relative to the run)
+        const runDate = dayjs(run.created_at);
+        let analysisDate = runDate.subtract(1, 'day');
+        while (analysisDate.day() === 0 || analysisDate.day() === 6) {
+            analysisDate = analysisDate.subtract(1, 'day');
+        }
+        const yyyy = analysisDate.format('YYYY');
+        const mm = analysisDate.format('MM');
+        const dd = analysisDate.format('DD');
+
+        setLoadingDetail(true);
+        axios.get(`/data/analysis/${provider}/${yyyy}/${mm}/${dd}.json`)
+            .then(r => setRunDetail(r.data))
+            .catch(() => setRunDetail(null))
+            .finally(() => setLoadingDetail(false));
+    };
+
+    const data = providerData[activeProvider];
 
     if (loading) {
         return (
@@ -70,7 +123,8 @@ export default function Analysis() {
         );
     }
 
-    if (!data || data.runs.length === 0) {
+    const anyData = providerData.anthropic || providerData.ollama;
+    if (!anyData) {
         return (
             <div className={`min-h-screen ${isDarkMode ? 'bg-slate-900' : 'bg-gray-100'}`}>
                 <Nav/>
@@ -86,8 +140,8 @@ export default function Analysis() {
         );
     }
 
-    const latestRun = data.runs[0];
-    const todos = data.todos || [];
+    const latestRun = data?.runs?.[0];
+    const todos = data?.todos || [];
 
     // Compute stats
     const totalOpen = todos.filter(t => t.status === 'open').length;
@@ -122,227 +176,323 @@ export default function Analysis() {
                     {/* Header */}
                     <div className="mb-6">
                         <h1 className={`text-2xl font-bold ${textPrimary}`}>AI Trade Analysis</h1>
-                        <p className={`mt-1 text-sm ${textMuted}`}>
-                            Last run: {dayjs(latestRun.created_at).fromNow()} ({latestRun.model}) &middot; {latestRun.order_count} orders analyzed &middot; {latestRun.todo_count} recommendations
-                        </p>
+                        {latestRun && (
+                            <p className={`mt-1 text-sm ${textMuted}`}>
+                                Last run: {dayjs(latestRun.created_at).fromNow()} ({latestRun.model}) &middot; {latestRun.order_count} orders analyzed &middot; {latestRun.todo_count} recommendations
+                            </p>
+                        )}
                     </div>
 
-                    {/* Stat Cards */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div className={cardClass}>
-                            <p className={`text-sm font-medium ${textMuted}`}>Open</p>
-                            <p className="mt-1 text-2xl font-semibold text-yellow-400">{totalOpen}</p>
-                        </div>
-                        <div className={cardClass}>
-                            <p className={`text-sm font-medium ${textMuted}`}>In Progress</p>
-                            <p className="mt-1 text-2xl font-semibold text-blue-400">{totalInProgress}</p>
-                        </div>
-                        <div className={cardClass}>
-                            <p className={`text-sm font-medium ${textMuted}`}>Implemented</p>
-                            <p className="mt-1 text-2xl font-semibold text-emerald-400">{totalImplemented}</p>
-                        </div>
-                        <div className={cardClass}>
-                            <p className={`text-sm font-medium ${textMuted}`}>Critical (P1)</p>
-                            <p className="mt-1 text-2xl font-semibold text-red-400">{totalP1}</p>
-                        </div>
-                    </div>
-
-                    {/* Filters */}
-                    <div className={`${cardClass} mb-6`}>
-                        <div className="flex flex-wrap gap-2 items-center">
-                            <span className={`text-sm font-medium ${textMuted} mr-2`}>Filter:</span>
-
-                            {/* Priority filters */}
-                            {[1, 2, 3, 4, 5].map(p => {
-                                const pl = priorityLabels[p];
-                                const active = filterPriority === p;
-                                return (
-                                    <button
-                                        key={p}
-                                        onClick={() => setFilterPriority(active ? null : p)}
-                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors
-                                            ${active ? `${pl.bg} ${pl.color} ring-1 ring-current` : `${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-600'} hover:opacity-80`}`}
-                                    >
-                                        {pl.label}
-                                    </button>
-                                );
-                            })}
-
-                            <span className={`${textMuted} mx-1`}>|</span>
-
-                            {/* Status filters */}
-                            {['open', 'in_progress', 'implemented', 'wont_fix'].map(s => {
-                                const sc = statusColors[s];
-                                const active = filterStatus === s;
-                                return (
-                                    <button
-                                        key={s}
-                                        onClick={() => setFilterStatus(active ? null : s)}
-                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-colors
-                                            ${active ? `${sc.bg} ${sc.text} ring-1 ring-current` : `${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-600'} hover:opacity-80`}`}
-                                    >
-                                        {sc.label}
-                                    </button>
-                                );
-                            })}
-
-                            {(filterPriority !== null || filterStatus !== null) && (
+                    {/* Provider Tab Bar */}
+                    <div className="flex gap-1 mb-6">
+                        {PROVIDERS.map(p => {
+                            const hasData = !!providerData[p];
+                            const isActive = activeProvider === p;
+                            return (
                                 <button
+                                    key={p}
                                     onClick={() => {
-                                        setFilterPriority(null);
-                                        setFilterStatus(null);
+                                        setActiveProvider(p);
+                                        setRunDetail(null);
+                                        setExpandedTodo(null);
                                     }}
-                                    className="px-3 py-1 rounded-full text-xs font-medium text-gray-400 hover:text-white"
+                                    disabled={!hasData}
+                                    className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
+                                        ${isActive
+                                            ? `${isDarkMode ? 'bg-slate-800 text-cyan-400' : 'bg-white text-cyan-600'} border-b-2 border-cyan-400`
+                                            : hasData
+                                                ? `${isDarkMode ? 'bg-slate-700/50 text-gray-400 hover:text-gray-200' : 'bg-gray-200 text-gray-600 hover:text-gray-800'}`
+                                                : `${isDarkMode ? 'bg-slate-800/30 text-gray-600' : 'bg-gray-100 text-gray-400'} cursor-not-allowed`
+                                        }`}
                                 >
-                                    Clear
+                                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                                    {!hasData && <span className="ml-1 text-xs">(no data)</span>}
                                 </button>
-                            )}
-                        </div>
+                            );
+                        })}
                     </div>
 
-                    {/* TODO List grouped by priority */}
-                    {Object.keys(groupedByPriority).sort((a, b) => Number(a) - Number(b)).map(pStr => {
-                        const p = Number(pStr);
-                        const items = groupedByPriority[p];
-                        const pl = priorityLabels[p] || {label: `P${p}`, color: 'text-gray-400', bg: 'bg-gray-500/20'};
-
-                        return (
-                            <div key={p} className="mb-6">
-                                <h2 className={`text-lg font-semibold mb-3 ${pl.color}`}>
-                                    {pl.label}
-                                    <span className={`ml-2 text-sm font-normal ${textMuted}`}>({items.length})</span>
+                    {/* Run Detail View */}
+                    {runDetail && (
+                        <div className={`${cardClass} mb-6`}>
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className={`text-lg font-semibold ${textPrimary}`}>
+                                    Run Detail: {runDetail.run_id}
                                 </h2>
-
-                                <div className="space-y-2">
-                                    {items.map(todo => {
-                                        const sc = statusColors[todo.status] || statusColors.open;
-                                        const isExpanded = expandedTodo === todo.id;
-
-                                        return (
-                                            <div key={todo.id}
-                                                 className={`${cardClass} cursor-pointer hover:ring-1 hover:ring-cyan-500/30 transition-all`}
-                                                 onClick={() => setExpandedTodo(isExpanded ? null : todo.id)}
-                                            >
-                                                {/* Header row */}
-                                                <div className="flex items-start justify-between gap-3">
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text}`}>
-                                                                {sc.label}
-                                                            </span>
-                                                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-                                                                {categoryLabels[todo.category] || todo.category}
-                                                            </span>
-                                                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
-                                                                {todo.complexity}
-                                                            </span>
-                                                        </div>
-                                                        <p className={`mt-1.5 font-medium ${textPrimary}`}>{todo.title}</p>
-                                                        {!isExpanded && (
-                                                            <p className={`mt-0.5 text-sm ${textMuted} truncate`}>
-                                                                {todo.expected_impact}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                    <svg className={`w-5 h-5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''} ${textMuted}`}
-                                                         fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                                                    </svg>
-                                                </div>
-
-                                                {/* Expanded detail */}
-                                                {isExpanded && (
-                                                    <div className={`mt-4 pt-4 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                                                        <div className="space-y-3 text-sm">
-                                                            <div>
-                                                                <p className={`font-medium ${textMuted}`}>Description</p>
-                                                                <p className={textPrimary}>{todo.description}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className={`font-medium ${textMuted}`}>Expected Impact</p>
-                                                                <p className="text-emerald-400">{todo.expected_impact}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className={`font-medium ${textMuted}`}>Evidence</p>
-                                                                <p className={textPrimary}>{todo.evidence}</p>
-                                                            </div>
-                                                            {todo.affected_files.length > 0 && (
-                                                                <div>
-                                                                    <p className={`font-medium ${textMuted}`}>Affected Files</p>
-                                                                    <div className="flex flex-wrap gap-1 mt-1">
-                                                                        {todo.affected_files.map((f, i) => (
-                                                                            <code key={i}
-                                                                                  className={`text-xs px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-700 text-cyan-300' : 'bg-gray-100 text-cyan-700'}`}>
-                                                                                {f}
-                                                                            </code>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                            {todo.status === 'implemented' && (
-                                                                <div className={`p-3 rounded ${isDarkMode ? 'bg-emerald-500/10' : 'bg-emerald-50'}`}>
-                                                                    <p className="font-medium text-emerald-400">Implemented</p>
-                                                                    {todo.implemented_at && (
-                                                                        <p className={`text-xs ${textMuted}`}>
-                                                                            {dayjs(todo.implemented_at).format('MMM D, YYYY h:mm A')}
-                                                                            {todo.implemented_by && ` by ${todo.implemented_by}`}
-                                                                        </p>
-                                                                    )}
-                                                                    {todo.implemented_sha && (
-                                                                        <code className="text-xs text-cyan-400 mt-1 block">{todo.implemented_sha}</code>
-                                                                    )}
-                                                                    {todo.notes && (
-                                                                        <p className={`text-xs mt-1 ${textMuted}`}>{todo.notes}</p>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                <button
+                                    onClick={() => setRunDetail(null)}
+                                    className={`px-3 py-1 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                >
+                                    Close
+                                </button>
                             </div>
-                        );
-                    })}
+                            <div className={`text-sm ${textMuted} mb-4`}>
+                                <span>{runDetail.provider} / {runDetail.model}</span>
+                                <span className="mx-2">&middot;</span>
+                                <span>{runDetail.order_count} orders</span>
+                                <span className="mx-2">&middot;</span>
+                                <span>{runDetail.data_range[0]} to {runDetail.data_range[1]}</span>
+                            </div>
 
-                    {filteredTodos.length === 0 && (
-                        <p className={`text-center py-12 ${textMuted}`}>
-                            No TODO items match the current filters.
-                        </p>
+                            {/* Synthesis */}
+                            {runDetail.synthesis && (
+                                <div className="mb-4">
+                                    <h3 className={`text-sm font-semibold mb-2 ${textMuted}`}>Executive Summary</h3>
+                                    <div className={`text-sm ${textPrimary} whitespace-pre-wrap`}>{runDetail.synthesis}</div>
+                                </div>
+                            )}
+
+                            {/* Phases */}
+                            {runDetail.phases?.map(phase => (
+                                <details key={phase.phase} className={`mb-2 border rounded ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                    <summary className={`px-3 py-2 cursor-pointer text-sm font-medium ${textPrimary} ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-50'}`}>
+                                        Phase {phase.phase}: {phase.name}
+                                    </summary>
+                                    <div className={`px-3 py-2 text-sm ${textPrimary} whitespace-pre-wrap border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                        {phase.content}
+                                    </div>
+                                </details>
+                            ))}
+                        </div>
                     )}
 
-                    {/* Run History */}
-                    {data.runs.length > 1 && (
-                        <div className={`${cardClass} mt-8`}>
-                            <h2 className={`text-lg font-semibold mb-3 ${textPrimary}`}>Run History</h2>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead>
-                                    <tr className={textMuted}>
-                                        <th className="text-left py-2 pr-4">Run ID</th>
-                                        <th className="text-left py-2 pr-4">Date</th>
-                                        <th className="text-left py-2 pr-4">Model</th>
-                                        <th className="text-right py-2 pr-4">Orders</th>
-                                        <th className="text-right py-2">TODOs</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {data.runs.map((run, i) => (
-                                        <tr key={run.run_id}
-                                            className={`${i === 0 ? 'text-cyan-400' : textPrimary} border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                                            <td className="py-2 pr-4 font-mono text-xs">{run.run_id}</td>
-                                            <td className="py-2 pr-4">{dayjs(run.created_at).format('MMM D, YYYY h:mm A')}</td>
-                                            <td className="py-2 pr-4">{run.model.replace('claude-', '').replace(/-\d+$/, '')}</td>
-                                            <td className="py-2 pr-4 text-right">{run.order_count}</td>
-                                            <td className="py-2 text-right">{run.todo_count}</td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                    {loadingDetail && (
+                        <div className={`${cardClass} mb-6 text-center`}>
+                            <p className={textMuted}>Loading run detail...</p>
                         </div>
+                    )}
+
+                    {!data || !latestRun ? (
+                        <p className={`text-center py-12 ${textMuted}`}>
+                            No analysis data for {activeProvider}. Run <code className="font-mono text-cyan-400">swizzley-analyzer --provider {activeProvider}</code> to generate.
+                        </p>
+                    ) : (
+                        <>
+                            {/* Stat Cards */}
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                <div className={cardClass}>
+                                    <p className={`text-sm font-medium ${textMuted}`}>Open</p>
+                                    <p className="mt-1 text-2xl font-semibold text-yellow-400">{totalOpen}</p>
+                                </div>
+                                <div className={cardClass}>
+                                    <p className={`text-sm font-medium ${textMuted}`}>In Progress</p>
+                                    <p className="mt-1 text-2xl font-semibold text-blue-400">{totalInProgress}</p>
+                                </div>
+                                <div className={cardClass}>
+                                    <p className={`text-sm font-medium ${textMuted}`}>Implemented</p>
+                                    <p className="mt-1 text-2xl font-semibold text-emerald-400">{totalImplemented}</p>
+                                </div>
+                                <div className={cardClass}>
+                                    <p className={`text-sm font-medium ${textMuted}`}>Critical (P1)</p>
+                                    <p className="mt-1 text-2xl font-semibold text-red-400">{totalP1}</p>
+                                </div>
+                            </div>
+
+                            {/* Filters */}
+                            <div className={`${cardClass} mb-6`}>
+                                <div className="flex flex-wrap gap-2 items-center">
+                                    <span className={`text-sm font-medium ${textMuted} mr-2`}>Filter:</span>
+
+                                    {/* Priority filters */}
+                                    {[1, 2, 3, 4, 5].map(p => {
+                                        const pl = priorityLabels[p];
+                                        const active = filterPriority === p;
+                                        return (
+                                            <button
+                                                key={p}
+                                                onClick={() => setFilterPriority(active ? null : p)}
+                                                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors
+                                                    ${active ? `${pl.bg} ${pl.color} ring-1 ring-current` : `${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-600'} hover:opacity-80`}`}
+                                            >
+                                                {pl.label}
+                                            </button>
+                                        );
+                                    })}
+
+                                    <span className={`${textMuted} mx-1`}>|</span>
+
+                                    {/* Status filters */}
+                                    {['open', 'in_progress', 'implemented', 'wont_fix'].map(s => {
+                                        const sc = statusColors[s];
+                                        const active = filterStatus === s;
+                                        return (
+                                            <button
+                                                key={s}
+                                                onClick={() => setFilterStatus(active ? null : s)}
+                                                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors
+                                                    ${active ? `${sc.bg} ${sc.text} ring-1 ring-current` : `${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-600'} hover:opacity-80`}`}
+                                            >
+                                                {sc.label}
+                                            </button>
+                                        );
+                                    })}
+
+                                    {(filterPriority !== null || filterStatus !== null) && (
+                                        <button
+                                            onClick={() => {
+                                                setFilterPriority(null);
+                                                setFilterStatus(null);
+                                            }}
+                                            className="px-3 py-1 rounded-full text-xs font-medium text-gray-400 hover:text-white"
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* TODO List grouped by priority */}
+                            {Object.keys(groupedByPriority).sort((a, b) => Number(a) - Number(b)).map(pStr => {
+                                const p = Number(pStr);
+                                const items = groupedByPriority[p];
+                                const pl = priorityLabels[p] || {label: `P${p}`, color: 'text-gray-400', bg: 'bg-gray-500/20'};
+
+                                return (
+                                    <div key={p} className="mb-6">
+                                        <h2 className={`text-lg font-semibold mb-3 ${pl.color}`}>
+                                            {pl.label}
+                                            <span className={`ml-2 text-sm font-normal ${textMuted}`}>({items.length})</span>
+                                        </h2>
+
+                                        <div className="space-y-2">
+                                            {items.map(todo => {
+                                                const sc = statusColors[todo.status] || statusColors.open;
+                                                const isExpanded = expandedTodo === todo.id;
+
+                                                return (
+                                                    <div key={todo.id}
+                                                         className={`${cardClass} cursor-pointer hover:ring-1 hover:ring-cyan-500/30 transition-all`}
+                                                         onClick={() => setExpandedTodo(isExpanded ? null : todo.id)}
+                                                    >
+                                                        {/* Header row */}
+                                                        <div className="flex items-start justify-between gap-3">
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 flex-wrap">
+                                                                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text}`}>
+                                                                        {sc.label}
+                                                                    </span>
+                                                                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                                                                        {categoryLabels[todo.category] || todo.category}
+                                                                    </span>
+                                                                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+                                                                        {todo.complexity}
+                                                                    </span>
+                                                                </div>
+                                                                <p className={`mt-1.5 font-medium ${textPrimary}`}>{todo.title}</p>
+                                                                {!isExpanded && (
+                                                                    <p className={`mt-0.5 text-sm ${textMuted} truncate`}>
+                                                                        {todo.expected_impact}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            <svg className={`w-5 h-5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''} ${textMuted}`}
+                                                                 fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                                                            </svg>
+                                                        </div>
+
+                                                        {/* Expanded detail */}
+                                                        {isExpanded && (
+                                                            <div className={`mt-4 pt-4 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                                <div className="space-y-3 text-sm">
+                                                                    <div>
+                                                                        <p className={`font-medium ${textMuted}`}>Description</p>
+                                                                        <p className={textPrimary}>{todo.description}</p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className={`font-medium ${textMuted}`}>Expected Impact</p>
+                                                                        <p className="text-emerald-400">{todo.expected_impact}</p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className={`font-medium ${textMuted}`}>Evidence</p>
+                                                                        <p className={textPrimary}>{todo.evidence}</p>
+                                                                    </div>
+                                                                    {todo.affected_files.length > 0 && (
+                                                                        <div>
+                                                                            <p className={`font-medium ${textMuted}`}>Affected Files</p>
+                                                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                                                {todo.affected_files.map((f, i) => (
+                                                                                    <code key={i}
+                                                                                          className={`text-xs px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-700 text-cyan-300' : 'bg-gray-100 text-cyan-700'}`}>
+                                                                                        {f}
+                                                                                    </code>
+                                                                                ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                    {todo.status === 'implemented' && (
+                                                                        <div className={`p-3 rounded ${isDarkMode ? 'bg-emerald-500/10' : 'bg-emerald-50'}`}>
+                                                                            <p className="font-medium text-emerald-400">Implemented</p>
+                                                                            {todo.implemented_at && (
+                                                                                <p className={`text-xs ${textMuted}`}>
+                                                                                    {dayjs(todo.implemented_at).format('MMM D, YYYY h:mm A')}
+                                                                                    {todo.implemented_by && ` by ${todo.implemented_by}`}
+                                                                                </p>
+                                                                            )}
+                                                                            {todo.implemented_sha && (
+                                                                                <code className="text-xs text-cyan-400 mt-1 block">{todo.implemented_sha}</code>
+                                                                            )}
+                                                                            {todo.notes && (
+                                                                                <p className={`text-xs mt-1 ${textMuted}`}>{todo.notes}</p>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                            {filteredTodos.length === 0 && (
+                                <p className={`text-center py-12 ${textMuted}`}>
+                                    No TODO items match the current filters.
+                                </p>
+                            )}
+
+                            {/* Run History */}
+                            {data.runs.length > 0 && (
+                                <div className={`${cardClass} mt-8`}>
+                                    <h2 className={`text-lg font-semibold mb-3 ${textPrimary}`}>Run History</h2>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm">
+                                            <thead>
+                                            <tr className={textMuted}>
+                                                <th className="text-left py-2 pr-4">Run ID</th>
+                                                <th className="text-left py-2 pr-4">Date</th>
+                                                <th className="text-left py-2 pr-4">Provider</th>
+                                                <th className="text-left py-2 pr-4">Model</th>
+                                                <th className="text-right py-2 pr-4">Orders</th>
+                                                <th className="text-right py-2">TODOs</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {data.runs.map((run, i) => (
+                                                <tr key={run.run_id}
+                                                    onClick={() => fetchRunDetail(run, activeProvider)}
+                                                    className={`cursor-pointer ${i === 0 ? 'text-cyan-400' : textPrimary} border-t ${isDarkMode ? 'border-slate-700 hover:bg-slate-700/50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                                                    <td className="py-2 pr-4 font-mono text-xs">{run.run_id}</td>
+                                                    <td className="py-2 pr-4">{dayjs(run.created_at).format('MMM D, YYYY h:mm A')}</td>
+                                                    <td className="py-2 pr-4">
+                                                        <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                                                            {run.provider || activeProvider}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-2 pr-4">{run.model.replace('claude-', '').replace(/-\d+$/, '')}</td>
+                                                    <td className="py-2 pr-4 text-right">{run.order_count}</td>
+                                                    <td className="py-2 text-right">{run.todo_count}</td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
 
                 </div>

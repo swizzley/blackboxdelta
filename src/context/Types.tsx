@@ -146,6 +146,7 @@ export interface AnalysisData {
 export interface AnalysisRun {
     run_id: string;
     created_at: string;
+    provider: string;
     model: string;
     order_count: number;
     todo_count: number;
