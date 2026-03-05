@@ -178,6 +178,32 @@ export interface ApiHealth {
     versions: Record<string, string>;
 }
 
+export interface ApiSystem {
+    status: string;
+    uptime: string;
+    services: ApiServiceVersion[];
+    database: ApiDatabaseStats;
+    markets: { total: number; enabled: number };
+}
+
+export interface ApiServiceVersion {
+    service: string;
+    sha: string;
+    message: string;
+    updated_at: string;
+}
+
+export interface ApiDatabaseStats {
+    orders: number;
+    alerts: number;
+    prices: number;
+    prices_15m: number;
+    prices_1m: number;
+    signals: number;
+    signals_15m: number;
+    signals_1m: number;
+}
+
 export interface ApiDashboard {
     all_time: TimeframeStats;
     by_timeframe: TimeframeRow[];
@@ -224,7 +250,7 @@ export interface ApiAlert {
 }
 
 export interface ApiMarket {
-    id: number;
+    id: string;
     name: string;
     enabled: boolean;
 }

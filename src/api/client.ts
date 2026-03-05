@@ -1,6 +1,6 @@
 import {getApiBase} from './config';
 import type {
-    ApiHealth, ApiDashboard, ApiCalendarDay, ApiOrder,
+    ApiHealth, ApiSystem, ApiDashboard, ApiCalendarDay, ApiOrder,
     ApiAlert, ApiMarket, ApiSetting,
 } from '../context/Types';
 
@@ -79,4 +79,8 @@ export function fetchSettings(): Promise<ApiSetting[] | null> {
 
 export function fetchVersions(): Promise<Record<string, string> | null> {
     return apiFetch('/api/versions');
+}
+
+export function fetchSystem(): Promise<ApiSystem | null> {
+    return apiFetch('/api/system');
 }

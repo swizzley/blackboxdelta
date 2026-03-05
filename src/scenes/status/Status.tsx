@@ -145,7 +145,7 @@ export default function Status() {
                                                 }`}
                                             >
                                                 <span className={`w-1.5 h-1.5 rounded-full ${m.enabled ? 'bg-emerald-400' : 'bg-gray-400'}`}/>
-                                                {m.name.replace('_', '/')}
+                                                {m.id.replace('_', '/')}
                                             </span>
                                         ))}
                                     </div>

@@ -192,7 +192,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Win Rate Chart — full width, most prominent */}
-                    {filteredCalendar && Object.keys(filteredCalendar).length > 1 && (
+                    {filteredCalendar && Object.keys(filteredCalendar).length > 0 && (
                         <WinRateChart data={filteredCalendar} direction={filteredDirection}/>
                     )}
 
