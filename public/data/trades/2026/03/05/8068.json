@@ -1,0 +1,145 @@
+{
+  "id": "8068",
+  "trade_id": "8069",
+  "symbol": "EUR_JPY",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 182.49,
+  "exit": 182.48930000000001,
+  "stop_loss": 182.40200000000002,
+  "take_profit": 183.225,
+  "quantity": 12,
+  "profit": -0.0084,
+  "created": "2026-03-05T05:11:09.07864686Z",
+  "closed": "2026-03-05T05:13:33Z",
+  "duration_mins": 2,
+  "alert_id": 6603,
+  "risk_reward": 8.352272727273142,
+  "candles": [
+    {
+      "t": "2026-03-05T05:02:00Z",
+      "o": 182.407,
+      "h": 182.458,
+      "l": 182.4,
+      "c": 182.434
+    },
+    {
+      "t": "2026-03-05T05:03:00Z",
+      "o": 182.438,
+      "h": 182.438,
+      "l": 182.38,
+      "c": 182.413
+    },
+    {
+      "t": "2026-03-05T05:04:00Z",
+      "o": 182.421,
+      "h": 182.441,
+      "l": 182.39,
+      "c": 182.441
+    },
+    {
+      "t": "2026-03-05T05:05:00Z",
+      "o": 182.44,
+      "h": 182.474,
+      "l": 182.42,
+      "c": 182.472
+    },
+    {
+      "t": "2026-03-05T05:06:00Z",
+      "o": 182.465,
+      "h": 182.473,
+      "l": 182.43,
+      "c": 182.44
+    },
+    {
+      "t": "2026-03-05T05:07:00Z",
+      "o": 182.452,
+      "h": 182.47,
+      "l": 182.43,
+      "c": 182.462
+    },
+    {
+      "t": "2026-03-05T05:08:00Z",
+      "o": 182.467,
+      "h": 182.482,
+      "l": 182.44,
+      "c": 182.469
+    },
+    {
+      "t": "2026-03-05T05:09:00Z",
+      "o": 182.47,
+      "h": 182.478,
+      "l": 182.44,
+      "c": 182.453
+    },
+    {
+      "t": "2026-03-05T05:10:00Z",
+      "o": 182.453,
+      "h": 182.465,
+      "l": 182.42,
+      "c": 182.452
+    },
+    {
+      "t": "2026-03-05T05:11:00Z",
+      "o": 182.45,
+      "h": 182.467,
+      "l": 182.41,
+      "c": 182.42
+    },
+    {
+      "t": "2026-03-05T05:12:00Z",
+      "o": 182.453,
+      "h": 182.457,
+      "l": 182.42,
+      "c": 182.444
+    },
+    {
+      "t": "2026-03-05T05:13:00Z",
+      "o": 182.452,
+      "h": 182.452,
+      "l": 182.28,
+      "c": 182.328
+    }
+  ],
+  "score": {
+    "Symbol": "EURJPY",
+    "T": 1772687340000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 63,
+    "crossover_score": 1,
+    "oscillator_score": 0,
+    "volatility_score": 7,
+    "volume_score": 4,
+    "fib_stack_score": 24,
+    "momentum_projection_score": 14,
+    "structure_score": 7,
+    "cycle_score": 2,
+    "pattern_score": -6,
+    "final_score": 32.06,
+    "confidence": 0.7439,
+    "entry_price": 182.449,
+    "stop_price": 182.438,
+    "tp_price": 182.55,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

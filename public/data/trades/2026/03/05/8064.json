@@ -1,0 +1,159 @@
+{
+  "id": "8064",
+  "trade_id": "8065",
+  "symbol": "GBP_JPY",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 209.676,
+  "exit": 209.6747111111111,
+  "stop_loss": 209.521,
+  "take_profit": 211.072,
+  "quantity": 9,
+  "profit": -0.0116,
+  "created": "2026-03-05T05:09:05.778473439Z",
+  "closed": "2026-03-05T05:13:34Z",
+  "duration_mins": 4,
+  "alert_id": 6602,
+  "risk_reward": 9.006451612903257,
+  "candles": [
+    {
+      "t": "2026-03-05T05:00:00Z",
+      "o": 209.527,
+      "h": 209.557,
+      "l": 209.51,
+      "c": 209.539
+    },
+    {
+      "t": "2026-03-05T05:01:00Z",
+      "o": 209.541,
+      "h": 209.557,
+      "l": 209.5,
+      "c": 209.538
+    },
+    {
+      "t": "2026-03-05T05:02:00Z",
+      "o": 209.539,
+      "h": 209.583,
+      "l": 209.498,
+      "c": 209.563
+    },
+    {
+      "t": "2026-03-05T05:03:00Z",
+      "o": 209.563,
+      "h": 209.563,
+      "l": 209.52,
+      "c": 209.554
+    },
+    {
+      "t": "2026-03-05T05:04:00Z",
+      "o": 209.553,
+      "h": 209.569,
+      "l": 209.53,
+      "c": 209.564
+    },
+    {
+      "t": "2026-03-05T05:05:00Z",
+      "o": 209.563,
+      "h": 209.602,
+      "l": 209.54,
+      "c": 209.594
+    },
+    {
+      "t": "2026-03-05T05:06:00Z",
+      "o": 209.594,
+      "h": 209.596,
+      "l": 209.55,
+      "c": 209.57
+    },
+    {
+      "t": "2026-03-05T05:07:00Z",
+      "o": 209.569,
+      "h": 209.584,
+      "l": 209.54,
+      "c": 209.579
+    },
+    {
+      "t": "2026-03-05T05:08:00Z",
+      "o": 209.56,
+      "h": 209.607,
+      "l": 209.56,
+      "c": 209.592
+    },
+    {
+      "t": "2026-03-05T05:09:00Z",
+      "o": 209.605,
+      "h": 209.605,
+      "l": 209.56,
+      "c": 209.582
+    },
+    {
+      "t": "2026-03-05T05:10:00Z",
+      "o": 209.582,
+      "h": 209.592,
+      "l": 209.54,
+      "c": 209.563
+    },
+    {
+      "t": "2026-03-05T05:11:00Z",
+      "o": 209.569,
+      "h": 209.575,
+      "l": 209.53,
+      "c": 209.565
+    },
+    {
+      "t": "2026-03-05T05:12:00Z",
+      "o": 209.564,
+      "h": 209.566,
+      "l": 209.52,
+      "c": 209.557
+    },
+    {
+      "t": "2026-03-05T05:13:00Z",
+      "o": 209.558,
+      "h": 209.566,
+      "l": 209.35,
+      "c": 209.42
+    }
+  ],
+  "score": {
+    "Symbol": "GBPJPY",
+    "T": 1772687220000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 60,
+    "crossover_score": -6,
+    "oscillator_score": 2,
+    "volatility_score": 1,
+    "volume_score": 0,
+    "fib_stack_score": 24,
+    "momentum_projection_score": 14,
+    "structure_score": 6,
+    "cycle_score": 0,
+    "pattern_score": 0,
+    "final_score": 25.91,
+    "confidence": 0.6802,
+    "entry_price": 209.555,
+    "stop_price": 209.543,
+    "tp_price": 209.669,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

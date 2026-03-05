@@ -1,0 +1,151 @@
+{
+  "id": "8186",
+  "trade_id": "8187",
+  "symbol": "EUR_SGD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.48131,
+  "stop_loss": 1.48227,
+  "take_profit": 1.47859,
+  "quantity": -10,
+  "profit": null,
+  "created": "2026-03-05T05:55:13.23894305Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 6692,
+  "risk_reward": 2.833333333332948,
+  "candles": [
+    {
+      "t": "2026-03-05T05:46:00Z",
+      "o": 1.48207,
+      "h": 1.48209,
+      "l": 1.4812,
+      "c": 1.48196
+    },
+    {
+      "t": "2026-03-05T05:47:00Z",
+      "o": 1.48177,
+      "h": 1.48209,
+      "l": 1.4811,
+      "c": 1.4811
+    },
+    {
+      "t": "2026-03-05T05:48:00Z",
+      "o": 1.48206,
+      "h": 1.4821,
+      "l": 1.4811,
+      "c": 1.48206
+    },
+    {
+      "t": "2026-03-05T05:49:00Z",
+      "o": 1.48182,
+      "h": 1.48218,
+      "l": 1.4811,
+      "c": 1.48216
+    },
+    {
+      "t": "2026-03-05T05:50:00Z",
+      "o": 1.48195,
+      "h": 1.48217,
+      "l": 1.4813,
+      "c": 1.48207
+    },
+    {
+      "t": "2026-03-05T05:51:00Z",
+      "o": 1.48207,
+      "h": 1.48208,
+      "l": 1.4812,
+      "c": 1.4818
+    },
+    {
+      "t": "2026-03-05T05:52:00Z",
+      "o": 1.48193,
+      "h": 1.48205,
+      "l": 1.481,
+      "c": 1.48186
+    },
+    {
+      "t": "2026-03-05T05:53:00Z",
+      "o": 1.48161,
+      "h": 1.48195,
+      "l": 1.4809,
+      "c": 1.48162
+    },
+    {
+      "t": "2026-03-05T05:54:00Z",
+      "o": 1.4814,
+      "h": 1.48184,
+      "l": 1.4809,
+      "c": 1.48162
+    },
+    {
+      "t": "2026-03-05T05:55:00Z",
+      "o": 1.48149,
+      "h": 1.48174,
+      "l": 1.4807,
+      "c": 1.48162
+    },
+    {
+      "t": "2026-03-05T05:56:00Z",
+      "o": 1.48173,
+      "h": 1.48173,
+      "l": 1.4807,
+      "c": 1.4816
+    },
+    {
+      "t": "2026-03-05T05:57:00Z",
+      "o": 1.48152,
+      "h": 1.48166,
+      "l": 1.4807,
+      "c": 1.4808
+    },
+    {
+      "t": "2026-03-05T05:58:00Z",
+      "o": 1.48149,
+      "h": 1.48164,
+      "l": 1.4806,
+      "c": 1.48127
+    }
+  ],
+  "score": {
+    "Symbol": "EURSGD",
+    "T": 1772689980000,
+    "Time": "",
+    "trend_score": -15,
+    "ma_score": -88,
+    "crossover_score": -9,
+    "oscillator_score": -5,
+    "volatility_score": -4,
+    "volume_score": 0,
+    "fib_stack_score": -51,
+    "momentum_projection_score": 4,
+    "structure_score": -2,
+    "cycle_score": 2,
+    "pattern_score": 4,
+    "final_score": -29.67,
+    "confidence": 0.6961,
+    "entry_price": 1.48177,
+    "stop_price": 1.48273,
+    "tp_price": 1.47905,
+    "risk_reward": 2.81,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

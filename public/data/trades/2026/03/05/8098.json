@@ -1,0 +1,152 @@
+{
+  "id": "8098",
+  "trade_id": "8099",
+  "symbol": "USD_JPY",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 157.107,
+  "exit": 157.10674,
+  "stop_loss": 157.168,
+  "take_profit": 156.575,
+  "quantity": -10,
+  "profit": 0.0026,
+  "created": "2026-03-05T05:18:07.435915273Z",
+  "closed": "2026-03-05T05:21:34Z",
+  "duration_mins": 3,
+  "alert_id": 6613,
+  "risk_reward": 8.721311475409003,
+  "candles": [
+    {
+      "t": "2026-03-05T05:09:00Z",
+      "o": 157.182,
+      "h": 157.183,
+      "l": 157.151,
+      "c": 157.153
+    },
+    {
+      "t": "2026-03-05T05:10:00Z",
+      "o": 157.153,
+      "h": 157.171,
+      "l": 157.144,
+      "c": 157.165
+    },
+    {
+      "t": "2026-03-05T05:11:00Z",
+      "o": 157.169,
+      "h": 157.17,
+      "l": 157.145,
+      "c": 157.157
+    },
+    {
+      "t": "2026-03-05T05:12:00Z",
+      "o": 157.156,
+      "h": 157.157,
+      "l": 157.142,
+      "c": 157.142
+    },
+    {
+      "t": "2026-03-05T05:13:00Z",
+      "o": 157.143,
+      "h": 157.16,
+      "l": 156.966,
+      "c": 157.012
+    },
+    {
+      "t": "2026-03-05T05:14:00Z",
+      "o": 157.006,
+      "h": 157.1,
+      "l": 157.006,
+      "c": 157.084
+    },
+    {
+      "t": "2026-03-05T05:15:00Z",
+      "o": 157.081,
+      "h": 157.117,
+      "l": 157.07,
+      "c": 157.083
+    },
+    {
+      "t": "2026-03-05T05:16:00Z",
+      "o": 157.091,
+      "h": 157.099,
+      "l": 157.057,
+      "c": 157.094
+    },
+    {
+      "t": "2026-03-05T05:17:00Z",
+      "o": 157.09,
+      "h": 157.124,
+      "l": 157.087,
+      "c": 157.108
+    },
+    {
+      "t": "2026-03-05T05:18:00Z",
+      "o": 157.114,
+      "h": 157.139,
+      "l": 157.108,
+      "c": 157.123
+    },
+    {
+      "t": "2026-03-05T05:19:00Z",
+      "o": 157.117,
+      "h": 157.137,
+      "l": 157.117,
+      "c": 157.126
+    },
+    {
+      "t": "2026-03-05T05:20:00Z",
+      "o": 157.117,
+      "h": 157.136,
+      "l": 157.097,
+      "c": 157.111
+    },
+    {
+      "t": "2026-03-05T05:21:00Z",
+      "o": 157.1,
+      "h": 157.112,
+      "l": 157.05,
+      "c": 157.065
+    }
+  ],
+  "score": {
+    "Symbol": "USDJPY",
+    "T": 1772687760000,
+    "Time": "",
+    "trend_score": -10,
+    "ma_score": -54,
+    "crossover_score": 8,
+    "oscillator_score": -1,
+    "volatility_score": -9,
+    "volume_score": 2,
+    "fib_stack_score": -14,
+    "momentum_projection_score": -15,
+    "structure_score": 3,
+    "cycle_score": -2,
+    "pattern_score": 2,
+    "final_score": -27.33,
+    "confidence": 0.7294,
+    "entry_price": 157.096,
+    "stop_price": 157.107,
+    "tp_price": 156.979,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
