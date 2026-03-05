@@ -1,0 +1,130 @@
+{
+  "id": "9215",
+  "trade_id": "9216",
+  "symbol": "AUD_USD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.70335,
+  "stop_loss": 0.7022,
+  "take_profit": 0.71149,
+  "quantity": 8,
+  "profit": null,
+  "created": "2026-03-05T08:58:12.348167118Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 7234,
+  "risk_reward": 7.0782608695652485,
+  "candles": [
+    {
+      "t": "2026-03-05T08:49:00Z",
+      "o": 0.70234,
+      "h": 0.70247,
+      "l": 0.702,
+      "c": 0.70227
+    },
+    {
+      "t": "2026-03-05T08:50:00Z",
+      "o": 0.70228,
+      "h": 0.70235,
+      "l": 0.7021,
+      "c": 0.70234
+    },
+    {
+      "t": "2026-03-05T08:51:00Z",
+      "o": 0.70233,
+      "h": 0.70247,
+      "l": 0.7021,
+      "c": 0.70242
+    },
+    {
+      "t": "2026-03-05T08:52:00Z",
+      "o": 0.70242,
+      "h": 0.70252,
+      "l": 0.7021,
+      "c": 0.7023
+    },
+    {
+      "t": "2026-03-05T08:53:00Z",
+      "o": 0.70244,
+      "h": 0.70244,
+      "l": 0.702,
+      "c": 0.70204
+    },
+    {
+      "t": "2026-03-05T08:54:00Z",
+      "o": 0.7021,
+      "h": 0.7022,
+      "l": 0.7019,
+      "c": 0.70215
+    },
+    {
+      "t": "2026-03-05T08:55:00Z",
+      "o": 0.70226,
+      "h": 0.70255,
+      "l": 0.702,
+      "c": 0.70255
+    },
+    {
+      "t": "2026-03-05T08:56:00Z",
+      "o": 0.70247,
+      "h": 0.7029,
+      "l": 0.7024,
+      "c": 0.70283
+    },
+    {
+      "t": "2026-03-05T08:57:00Z",
+      "o": 0.70285,
+      "h": 0.70286,
+      "l": 0.7023,
+      "c": 0.70283
+    },
+    {
+      "t": "2026-03-05T08:58:00Z",
+      "o": 0.70283,
+      "h": 0.70296,
+      "l": 0.7025,
+      "c": 0.7027
+    }
+  ],
+  "score": {
+    "Symbol": "AUDUSD",
+    "T": 1772700960000,
+    "Time": "",
+    "trend_score": 15,
+    "ma_score": 35,
+    "crossover_score": -3,
+    "oscillator_score": 4,
+    "volatility_score": 7,
+    "volume_score": 0,
+    "fib_stack_score": 32,
+    "momentum_projection_score": -5,
+    "structure_score": 7,
+    "cycle_score": 2,
+    "pattern_score": 2,
+    "final_score": 21.88,
+    "confidence": 0.712,
+    "entry_price": 0.70253,
+    "stop_price": 0.70241,
+    "tp_price": 0.70346,
+    "risk_reward": 7.8,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
