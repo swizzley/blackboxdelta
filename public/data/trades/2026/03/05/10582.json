@@ -1,0 +1,131 @@
+{
+  "id": "10582",
+  "trade_id": "10583",
+  "symbol": "CAD_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 5.72977,
+  "exit": 5.7293776923076924,
+  "stop_loss": 5.72796,
+  "take_profit": 5.73547,
+  "quantity": 13,
+  "profit": -0.0051,
+  "created": "2026-03-05T15:16:07.402470108Z",
+  "closed": "2026-03-05T15:16:46Z",
+  "duration_mins": 0,
+  "alert_id": 8024,
+  "risk_reward": 3.149171270718484,
+  "candles": [
+    {
+      "t": "2026-03-05T15:07:00Z",
+      "o": 5.73071,
+      "h": 5.73163,
+      "l": 5.72757,
+      "c": 5.72904
+    },
+    {
+      "t": "2026-03-05T15:08:00Z",
+      "o": 5.72911,
+      "h": 5.73036,
+      "l": 5.72622,
+      "c": 5.72976
+    },
+    {
+      "t": "2026-03-05T15:09:00Z",
+      "o": 5.7265,
+      "h": 5.73034,
+      "l": 5.72649,
+      "c": 5.72839
+    },
+    {
+      "t": "2026-03-05T15:10:00Z",
+      "o": 5.72834,
+      "h": 5.72983,
+      "l": 5.727,
+      "c": 5.72837
+    },
+    {
+      "t": "2026-03-05T15:11:00Z",
+      "o": 5.72846,
+      "h": 5.72989,
+      "l": 5.72709,
+      "c": 5.7273
+    },
+    {
+      "t": "2026-03-05T15:12:00Z",
+      "o": 5.72712,
+      "h": 5.72946,
+      "l": 5.7265,
+      "c": 5.72833
+    },
+    {
+      "t": "2026-03-05T15:13:00Z",
+      "o": 5.72813,
+      "h": 5.72961,
+      "l": 5.72679,
+      "c": 5.7294
+    },
+    {
+      "t": "2026-03-05T15:14:00Z",
+      "o": 5.72851,
+      "h": 5.7301,
+      "l": 5.72647,
+      "c": 5.7286
+    },
+    {
+      "t": "2026-03-05T15:15:00Z",
+      "o": 5.72981,
+      "h": 5.7302,
+      "l": 5.72664,
+      "c": 5.72859
+    },
+    {
+      "t": "2026-03-05T15:16:00Z",
+      "o": 5.72769,
+      "h": 5.72925,
+      "l": 5.72569,
+      "c": 5.72705
+    }
+  ],
+  "score": {
+    "Symbol": "CADHKD",
+    "T": 1772723640000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 92,
+    "crossover_score": 6,
+    "oscillator_score": 2,
+    "volatility_score": 7,
+    "volume_score": 2,
+    "fib_stack_score": 25,
+    "momentum_projection_score": 15,
+    "structure_score": 6,
+    "cycle_score": 0,
+    "pattern_score": -4,
+    "final_score": 36.89,
+    "confidence": 0.7105,
+    "entry_price": 5.72779,
+    "stop_price": 5.72715,
+    "tp_price": 5.73349,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
