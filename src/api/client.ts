@@ -7,10 +7,11 @@ import type {
 const TIMEOUT = 5000;
 
 async function apiFetch<T>(path: string): Promise<T | null> {
+    const base = getApiBase();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT);
     try {
-        const res = await fetch(`${getApiBase()}${path}`, {signal: controller.signal});
+        const res = await fetch(`${base}${path}`, {signal: controller.signal});
         if (!res.ok) return null;
         return await res.json() as T;
     } catch {

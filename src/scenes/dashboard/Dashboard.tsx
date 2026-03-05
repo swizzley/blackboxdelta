@@ -58,7 +58,7 @@ export default function Dashboard() {
             apiFetchDashboard().then(apiData => {
                 if (apiData) {
                     setDashboard(prev => prev
-                        ? {...prev, all_time: apiData.all_time, by_timeframe: apiData.by_timeframe}
+                        ? {...prev, all_time: {...prev.all_time, ...apiData.all_time}, by_timeframe: apiData.by_timeframe}
                         : prev
                     );
                     setLiveStats(true);
@@ -236,21 +236,21 @@ export default function Dashboard() {
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <StatCard
                             label="Avg Win"
-                            value={stats.avg_win !== null ? `+$${stats.avg_win.toFixed(2)}` : 'N/A'}
+                            value={stats.avg_win != null ? `+$${stats.avg_win.toFixed(2)}` : 'N/A'}
                             color="green"
                         />
                         <StatCard
                             label="Avg Loss"
-                            value={stats.avg_loss !== null ? `-$${Math.abs(stats.avg_loss).toFixed(2)}` : 'N/A'}
+                            value={stats.avg_loss != null ? `-$${Math.abs(stats.avg_loss).toFixed(2)}` : 'N/A'}
                             color="red"
                         />
                         <StatCard
                             label="W/L Ratio"
-                            value={stats.win_loss_ratio !== null ? stats.win_loss_ratio.toFixed(2) : 'N/A'}
+                            value={stats.win_loss_ratio != null ? stats.win_loss_ratio.toFixed(2) : 'N/A'}
                         />
                         <StatCard
                             label="Avg Trade Duration"
-                            value={stats.avg_time_in_trade_mins !== null ? formatDuration(stats.avg_time_in_trade_mins) : 'N/A'}
+                            value={stats.avg_time_in_trade_mins != null ? formatDuration(stats.avg_time_in_trade_mins) : 'N/A'}
                         />
                     </div>
 
