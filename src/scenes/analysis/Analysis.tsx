@@ -369,11 +369,11 @@ export default function Analysis() {
 
                                                 return (
                                                     <div key={todo.id}
-                                                         className={`${cardClass} cursor-pointer hover:ring-1 hover:ring-cyan-500/30 transition-all`}
-                                                         onClick={() => setExpandedTodo(isExpanded ? null : todo.id)}
+                                                         className={`${cardClass} transition-all`}
                                                     >
                                                         {/* Header row */}
-                                                        <div className="flex items-start justify-between gap-3">
+                                                        <div className="flex items-start justify-between gap-3 cursor-pointer hover:opacity-80"
+                                                             onClick={() => setExpandedTodo(isExpanded ? null : todo.id)}>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center gap-2 flex-wrap">
                                                                     <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text}`}>
