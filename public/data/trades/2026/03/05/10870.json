@@ -1,0 +1,159 @@
+{
+  "id": "10870",
+  "trade_id": "10871",
+  "symbol": "EUR_NZD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.96592,
+  "exit": 1.9663276923076922,
+  "stop_loss": 1.96678,
+  "take_profit": 1.9629,
+  "quantity": -13,
+  "profit": -0.0053,
+  "created": "2026-03-05T16:37:11.686631681Z",
+  "closed": "2026-03-05T16:41:44Z",
+  "duration_mins": 4,
+  "alert_id": 8225,
+  "risk_reward": 3.5116279069761736,
+  "candles": [
+    {
+      "t": "2026-03-05T16:28:00Z",
+      "o": 1.96715,
+      "h": 1.96768,
+      "l": 1.9666,
+      "c": 1.96741
+    },
+    {
+      "t": "2026-03-05T16:29:00Z",
+      "o": 1.9671,
+      "h": 1.96765,
+      "l": 1.9664,
+      "c": 1.96716
+    },
+    {
+      "t": "2026-03-05T16:30:00Z",
+      "o": 1.96717,
+      "h": 1.96754,
+      "l": 1.9662,
+      "c": 1.96726
+    },
+    {
+      "t": "2026-03-05T16:31:00Z",
+      "o": 1.96727,
+      "h": 1.96727,
+      "l": 1.966,
+      "c": 1.96655
+    },
+    {
+      "t": "2026-03-05T16:32:00Z",
+      "o": 1.96656,
+      "h": 1.96668,
+      "l": 1.9656,
+      "c": 1.96617
+    },
+    {
+      "t": "2026-03-05T16:33:00Z",
+      "o": 1.9665,
+      "h": 1.96664,
+      "l": 1.9657,
+      "c": 1.96605
+    },
+    {
+      "t": "2026-03-05T16:34:00Z",
+      "o": 1.96636,
+      "h": 1.96688,
+      "l": 1.9658,
+      "c": 1.96634
+    },
+    {
+      "t": "2026-03-05T16:35:00Z",
+      "o": 1.96617,
+      "h": 1.96672,
+      "l": 1.9657,
+      "c": 1.9657
+    },
+    {
+      "t": "2026-03-05T16:36:00Z",
+      "o": 1.96639,
+      "h": 1.96647,
+      "l": 1.9654,
+      "c": 1.96588
+    },
+    {
+      "t": "2026-03-05T16:37:00Z",
+      "o": 1.96594,
+      "h": 1.96634,
+      "l": 1.9652,
+      "c": 1.96604
+    },
+    {
+      "t": "2026-03-05T16:38:00Z",
+      "o": 1.96602,
+      "h": 1.96623,
+      "l": 1.9652,
+      "c": 1.96596
+    },
+    {
+      "t": "2026-03-05T16:39:00Z",
+      "o": 1.96594,
+      "h": 1.96595,
+      "l": 1.9651,
+      "c": 1.96574
+    },
+    {
+      "t": "2026-03-05T16:40:00Z",
+      "o": 1.9654,
+      "h": 1.96615,
+      "l": 1.965,
+      "c": 1.96596
+    },
+    {
+      "t": "2026-03-05T16:41:00Z",
+      "o": 1.96602,
+      "h": 1.96674,
+      "l": 1.9649,
+      "c": 1.96672
+    }
+  ],
+  "score": {
+    "Symbol": "EURNZD",
+    "T": 1772728500000,
+    "Time": "",
+    "trend_score": -12,
+    "ma_score": -78,
+    "crossover_score": -16,
+    "oscillator_score": -2,
+    "volatility_score": -7,
+    "volume_score": 0,
+    "fib_stack_score": -26,
+    "momentum_projection_score": -12,
+    "structure_score": -4,
+    "cycle_score": -1,
+    "pattern_score": -2,
+    "final_score": -34.26,
+    "confidence": 0.7757,
+    "entry_price": 1.96641,
+    "stop_price": 1.96674,
+    "tp_price": 1.96339,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
