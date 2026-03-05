@@ -1,0 +1,172 @@
+{
+  "id": "11325",
+  "trade_id": "11326",
+  "symbol": "NZD_SGD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.75456,
+  "stop_loss": 0.7540600000000001,
+  "take_profit": 0.7563,
+  "quantity": 13,
+  "profit": null,
+  "created": "2026-03-05T19:52:10.842231968Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 8616,
+  "risk_reward": 3.480000000000311,
+  "candles": [
+    {
+      "t": "2026-03-05T19:43:00Z",
+      "o": 0.754372,
+      "h": 0.754435,
+      "l": 0.7538,
+      "c": 0.754296
+    },
+    {
+      "t": "2026-03-05T19:44:00Z",
+      "o": 0.7538,
+      "h": 0.754384,
+      "l": 0.7537,
+      "c": 0.754302
+    },
+    {
+      "t": "2026-03-05T19:45:00Z",
+      "o": 0.75398,
+      "h": 0.754408,
+      "l": 0.7537,
+      "c": 0.754408
+    },
+    {
+      "t": "2026-03-05T19:46:00Z",
+      "o": 0.754223,
+      "h": 0.754438,
+      "l": 0.753808,
+      "c": 0.75441
+    },
+    {
+      "t": "2026-03-05T19:47:00Z",
+      "o": 0.75432,
+      "h": 0.754482,
+      "l": 0.7538,
+      "c": 0.754359
+    },
+    {
+      "t": "2026-03-05T19:48:00Z",
+      "o": 0.754299,
+      "h": 0.754483,
+      "l": 0.7539,
+      "c": 0.754467
+    },
+    {
+      "t": "2026-03-05T19:49:00Z",
+      "o": 0.753971,
+      "h": 0.754571,
+      "l": 0.753971,
+      "c": 0.754515
+    },
+    {
+      "t": "2026-03-05T19:50:00Z",
+      "o": 0.754531,
+      "h": 0.754709,
+      "l": 0.754087,
+      "c": 0.754625
+    },
+    {
+      "t": "2026-03-05T19:51:00Z",
+      "o": 0.75463,
+      "h": 0.754714,
+      "l": 0.7539,
+      "c": 0.754413
+    },
+    {
+      "t": "2026-03-05T19:52:00Z",
+      "o": 0.754436,
+      "h": 0.754467,
+      "l": 0.7538,
+      "c": 0.754404
+    },
+    {
+      "t": "2026-03-05T19:53:00Z",
+      "o": 0.75433,
+      "h": 0.75448,
+      "l": 0.753881,
+      "c": 0.754418
+    },
+    {
+      "t": "2026-03-05T19:54:00Z",
+      "o": 0.754485,
+      "h": 0.754551,
+      "l": 0.75389,
+      "c": 0.7543
+    },
+    {
+      "t": "2026-03-05T19:55:00Z",
+      "o": 0.75407,
+      "h": 0.754442,
+      "l": 0.7538,
+      "c": 0.754369
+    },
+    {
+      "t": "2026-03-05T19:56:00Z",
+      "o": 0.754121,
+      "h": 0.754428,
+      "l": 0.7538,
+      "c": 0.754362
+    },
+    {
+      "t": "2026-03-05T19:57:00Z",
+      "o": 0.754358,
+      "h": 0.754489,
+      "l": 0.7538,
+      "c": 0.75436
+    },
+    {
+      "t": "2026-03-05T19:58:00Z",
+      "o": 0.75433,
+      "h": 0.754454,
+      "l": 0.7538,
+      "c": 0.754287
+    }
+  ],
+  "score": {
+    "Symbol": "NZDSGD",
+    "T": 1772740200000,
+    "Time": "",
+    "trend_score": 10,
+    "ma_score": 102,
+    "crossover_score": 14,
+    "oscillator_score": -4,
+    "volatility_score": 8,
+    "volume_score": 4,
+    "fib_stack_score": 39,
+    "momentum_projection_score": 12,
+    "structure_score": 6,
+    "cycle_score": 0,
+    "pattern_score": 1,
+    "final_score": 39.92,
+    "confidence": 0.6614,
+    "entry_price": 0.75433,
+    "stop_price": 0.75417,
+    "tp_price": 0.75526,
+    "risk_reward": 5.8,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
