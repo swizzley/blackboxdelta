@@ -1,0 +1,145 @@
+{
+  "id": "10097",
+  "trade_id": "10098",
+  "symbol": "USD_DKK",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 6.43675,
+  "exit": 6.4368375,
+  "stop_loss": 6.43476,
+  "take_profit": 6.44121,
+  "quantity": 16,
+  "profit": 0.0014,
+  "created": "2026-03-05T13:35:12.631657711Z",
+  "closed": "2026-03-05T13:37:33Z",
+  "duration_mins": 2,
+  "alert_id": 7792,
+  "risk_reward": 2.2412060301505297,
+  "candles": [
+    {
+      "t": "2026-03-05T13:26:00Z",
+      "o": 6.43388,
+      "h": 6.43416,
+      "l": 6.43196,
+      "c": 6.43225
+    },
+    {
+      "t": "2026-03-05T13:27:00Z",
+      "o": 6.43259,
+      "h": 6.43307,
+      "l": 6.43181,
+      "c": 6.4328
+    },
+    {
+      "t": "2026-03-05T13:28:00Z",
+      "o": 6.43276,
+      "h": 6.4334,
+      "l": 6.4321,
+      "c": 6.43276
+    },
+    {
+      "t": "2026-03-05T13:29:00Z",
+      "o": 6.43333,
+      "h": 6.4337,
+      "l": 6.43249,
+      "c": 6.43262
+    },
+    {
+      "t": "2026-03-05T13:30:00Z",
+      "o": 6.43319,
+      "h": 6.4359,
+      "l": 6.43233,
+      "c": 6.43454
+    },
+    {
+      "t": "2026-03-05T13:31:00Z",
+      "o": 6.4346,
+      "h": 6.43677,
+      "l": 6.4343,
+      "c": 6.43516
+    },
+    {
+      "t": "2026-03-05T13:32:00Z",
+      "o": 6.43517,
+      "h": 6.43657,
+      "l": 6.4349,
+      "c": 6.43619
+    },
+    {
+      "t": "2026-03-05T13:33:00Z",
+      "o": 6.4367,
+      "h": 6.4367,
+      "l": 6.43406,
+      "c": 6.4353
+    },
+    {
+      "t": "2026-03-05T13:34:00Z",
+      "o": 6.43509,
+      "h": 6.4362,
+      "l": 6.43356,
+      "c": 6.43375
+    },
+    {
+      "t": "2026-03-05T13:35:00Z",
+      "o": 6.43374,
+      "h": 6.43644,
+      "l": 6.43362,
+      "c": 6.43533
+    },
+    {
+      "t": "2026-03-05T13:36:00Z",
+      "o": 6.43495,
+      "h": 6.43753,
+      "l": 6.43493,
+      "c": 6.43688
+    },
+    {
+      "t": "2026-03-05T13:37:00Z",
+      "o": 6.43695,
+      "h": 6.43755,
+      "l": 6.4352,
+      "c": 6.43703
+    }
+  ],
+  "score": {
+    "Symbol": "USDDKK",
+    "T": 1772717580000,
+    "Time": "",
+    "trend_score": 15,
+    "ma_score": 62,
+    "crossover_score": 13,
+    "oscillator_score": -1,
+    "volatility_score": 8,
+    "volume_score": 2,
+    "fib_stack_score": 23,
+    "momentum_projection_score": 13,
+    "structure_score": 6,
+    "cycle_score": 4,
+    "pattern_score": -1,
+    "final_score": 42.87,
+    "confidence": 0.7439,
+    "entry_price": 6.43519,
+    "stop_price": 6.4347,
+    "tp_price": 6.43965,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

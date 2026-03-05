@@ -1,0 +1,165 @@
+{
+  "id": "10269",
+  "trade_id": "10270",
+  "symbol": "USD_CHF",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.7819,
+  "stop_loss": 0.78102,
+  "take_profit": 0.79064,
+  "quantity": 11,
+  "profit": null,
+  "created": "2026-03-05T13:53:10.847240924Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 7866,
+  "risk_reward": 9.931818181818239,
+  "candles": [
+    {
+      "t": "2026-03-05T13:44:00Z",
+      "o": 0.78119,
+      "h": 0.78145,
+      "l": 0.7808,
+      "c": 0.78136
+    },
+    {
+      "t": "2026-03-05T13:45:00Z",
+      "o": 0.781,
+      "h": 0.78153,
+      "l": 0.78085,
+      "c": 0.78133
+    },
+    {
+      "t": "2026-03-05T13:46:00Z",
+      "o": 0.78136,
+      "h": 0.78155,
+      "l": 0.781,
+      "c": 0.78145
+    },
+    {
+      "t": "2026-03-05T13:47:00Z",
+      "o": 0.7812,
+      "h": 0.78171,
+      "l": 0.781,
+      "c": 0.78171
+    },
+    {
+      "t": "2026-03-05T13:48:00Z",
+      "o": 0.78171,
+      "h": 0.78194,
+      "l": 0.7812,
+      "c": 0.78194
+    },
+    {
+      "t": "2026-03-05T13:49:00Z",
+      "o": 0.78194,
+      "h": 0.78209,
+      "l": 0.7813,
+      "c": 0.78195
+    },
+    {
+      "t": "2026-03-05T13:50:00Z",
+      "o": 0.78194,
+      "h": 0.78197,
+      "l": 0.7813,
+      "c": 0.7818
+    },
+    {
+      "t": "2026-03-05T13:51:00Z",
+      "o": 0.7814,
+      "h": 0.781835,
+      "l": 0.7811,
+      "c": 0.7812
+    },
+    {
+      "t": "2026-03-05T13:52:00Z",
+      "o": 0.78142,
+      "h": 0.781965,
+      "l": 0.78109,
+      "c": 0.78139
+    },
+    {
+      "t": "2026-03-05T13:53:00Z",
+      "o": 0.7812,
+      "h": 0.782005,
+      "l": 0.7812,
+      "c": 0.78144
+    },
+    {
+      "t": "2026-03-05T13:54:00Z",
+      "o": 0.7815,
+      "h": 0.78189,
+      "l": 0.78128,
+      "c": 0.78132
+    },
+    {
+      "t": "2026-03-05T13:55:00Z",
+      "o": 0.78137,
+      "h": 0.7816,
+      "l": 0.7812,
+      "c": 0.78154
+    },
+    {
+      "t": "2026-03-05T13:56:00Z",
+      "o": 0.78153,
+      "h": 0.78161,
+      "l": 0.7811,
+      "c": 0.7816
+    },
+    {
+      "t": "2026-03-05T13:57:00Z",
+      "o": 0.78164,
+      "h": 0.78166,
+      "l": 0.7811,
+      "c": 0.7815
+    },
+    {
+      "t": "2026-03-05T13:58:00Z",
+      "o": 0.78147,
+      "h": 0.78152,
+      "l": 0.7811,
+      "c": 0.7815
+    }
+  ],
+  "score": {
+    "Symbol": "USDCHF",
+    "T": 1772718660000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 66,
+    "crossover_score": 9,
+    "oscillator_score": 1,
+    "volatility_score": 0,
+    "volume_score": 4,
+    "fib_stack_score": -11,
+    "momentum_projection_score": 14,
+    "structure_score": 6,
+    "cycle_score": 2,
+    "pattern_score": -1,
+    "final_score": 26.96,
+    "confidence": 0.7945,
+    "entry_price": 0.78123,
+    "stop_price": 0.78108,
+    "tp_price": 0.78289,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
