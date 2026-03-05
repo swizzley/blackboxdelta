@@ -1,0 +1,166 @@
+{
+  "id": "9669",
+  "trade_id": "9670",
+  "symbol": "CHF_JPY",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 201.733,
+  "exit": 201.73236923076922,
+  "stop_loss": 201.672,
+  "take_profit": 201.915,
+  "quantity": 13,
+  "profit": -0.0082,
+  "created": "2026-03-05T11:14:15.480386882Z",
+  "closed": "2026-03-05T11:19:16Z",
+  "duration_mins": 5,
+  "alert_id": 7525,
+  "risk_reward": 2.9836065573765067,
+  "candles": [
+    {
+      "t": "2026-03-05T11:05:00Z",
+      "o": 201.65,
+      "h": 201.667,
+      "l": 201.578,
+      "c": 201.648
+    },
+    {
+      "t": "2026-03-05T11:06:00Z",
+      "o": 201.635,
+      "h": 201.676,
+      "l": 201.56,
+      "c": 201.648
+    },
+    {
+      "t": "2026-03-05T11:07:00Z",
+      "o": 201.627,
+      "h": 201.687,
+      "l": 201.583,
+      "c": 201.668
+    },
+    {
+      "t": "2026-03-05T11:08:00Z",
+      "o": 201.648,
+      "h": 201.701,
+      "l": 201.624,
+      "c": 201.675
+    },
+    {
+      "t": "2026-03-05T11:09:00Z",
+      "o": 201.682,
+      "h": 201.715,
+      "l": 201.63,
+      "c": 201.688
+    },
+    {
+      "t": "2026-03-05T11:10:00Z",
+      "o": 201.706,
+      "h": 201.719,
+      "l": 201.641,
+      "c": 201.69
+    },
+    {
+      "t": "2026-03-05T11:11:00Z",
+      "o": 201.715,
+      "h": 201.74,
+      "l": 201.66,
+      "c": 201.726
+    },
+    {
+      "t": "2026-03-05T11:12:00Z",
+      "o": 201.716,
+      "h": 201.742,
+      "l": 201.639,
+      "c": 201.692
+    },
+    {
+      "t": "2026-03-05T11:13:00Z",
+      "o": 201.674,
+      "h": 201.725,
+      "l": 201.67,
+      "c": 201.692
+    },
+    {
+      "t": "2026-03-05T11:14:00Z",
+      "o": 201.691,
+      "h": 201.731,
+      "l": 201.646,
+      "c": 201.709
+    },
+    {
+      "t": "2026-03-05T11:15:00Z",
+      "o": 201.685,
+      "h": 201.718,
+      "l": 201.613,
+      "c": 201.686
+    },
+    {
+      "t": "2026-03-05T11:16:00Z",
+      "o": 201.689,
+      "h": 201.703,
+      "l": 201.61,
+      "c": 201.687
+    },
+    {
+      "t": "2026-03-05T11:17:00Z",
+      "o": 201.698,
+      "h": 201.71,
+      "l": 201.61,
+      "c": 201.69
+    },
+    {
+      "t": "2026-03-05T11:18:00Z",
+      "o": 201.688,
+      "h": 201.699,
+      "l": 201.602,
+      "c": 201.67
+    },
+    {
+      "t": "2026-03-05T11:19:00Z",
+      "o": 201.672,
+      "h": 201.698,
+      "l": 201.575,
+      "c": 201.65
+    }
+  ],
+  "score": {
+    "Symbol": "CHFJPY",
+    "T": 1772709120000,
+    "Time": "",
+    "trend_score": 7,
+    "ma_score": 81,
+    "crossover_score": 9,
+    "oscillator_score": 3,
+    "volatility_score": 8,
+    "volume_score": 4,
+    "fib_stack_score": 24,
+    "momentum_projection_score": 11,
+    "structure_score": 7,
+    "cycle_score": 0,
+    "pattern_score": -2,
+    "final_score": 33.91,
+    "confidence": 0.7439,
+    "entry_price": 201.672,
+    "stop_price": 201.648,
+    "tp_price": 201.854,
+    "risk_reward": 7.27,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

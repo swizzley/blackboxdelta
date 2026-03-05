@@ -1,0 +1,144 @@
+{
+  "id": "9807",
+  "trade_id": "9808",
+  "symbol": "GBP_USD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.3361,
+  "stop_loss": 1.33534,
+  "take_profit": 1.34252,
+  "quantity": 11,
+  "profit": null,
+  "created": "2026-03-05T11:56:14.09095175Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 7623,
+  "risk_reward": 8.447368421051417,
+  "candles": [
+    {
+      "t": "2026-03-05T11:47:00Z",
+      "o": 1.33541,
+      "h": 1.33559,
+      "l": 1.3352,
+      "c": 1.33554
+    },
+    {
+      "t": "2026-03-05T11:48:00Z",
+      "o": 1.33555,
+      "h": 1.3358,
+      "l": 1.33537,
+      "c": 1.33554
+    },
+    {
+      "t": "2026-03-05T11:49:00Z",
+      "o": 1.3355,
+      "h": 1.33587,
+      "l": 1.33538,
+      "c": 1.33581
+    },
+    {
+      "t": "2026-03-05T11:50:00Z",
+      "o": 1.33581,
+      "h": 1.3365,
+      "l": 1.33577,
+      "c": 1.3365
+    },
+    {
+      "t": "2026-03-05T11:51:00Z",
+      "o": 1.33653,
+      "h": 1.33654,
+      "l": 1.33599,
+      "c": 1.33606
+    },
+    {
+      "t": "2026-03-05T11:52:00Z",
+      "o": 1.33602,
+      "h": 1.33647,
+      "l": 1.33579,
+      "c": 1.33593
+    },
+    {
+      "t": "2026-03-05T11:53:00Z",
+      "o": 1.33595,
+      "h": 1.33644,
+      "l": 1.33567,
+      "c": 1.3362
+    },
+    {
+      "t": "2026-03-05T11:54:00Z",
+      "o": 1.33604,
+      "h": 1.33621,
+      "l": 1.3358,
+      "c": 1.3358
+    },
+    {
+      "t": "2026-03-05T11:55:00Z",
+      "o": 1.33602,
+      "h": 1.33609,
+      "l": 1.3355,
+      "c": 1.33576
+    },
+    {
+      "t": "2026-03-05T11:56:00Z",
+      "o": 1.33571,
+      "h": 1.33584,
+      "l": 1.3353,
+      "c": 1.3357
+    },
+    {
+      "t": "2026-03-05T11:57:00Z",
+      "o": 1.3356,
+      "h": 1.33582,
+      "l": 1.3354,
+      "c": 1.3356
+    },
+    {
+      "t": "2026-03-05T11:58:00Z",
+      "o": 1.3356,
+      "h": 1.33599,
+      "l": 1.33547,
+      "c": 1.33592
+    }
+  ],
+  "score": {
+    "Symbol": "GBPUSD",
+    "T": 1772711640000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 63,
+    "crossover_score": 11,
+    "oscillator_score": 5,
+    "volatility_score": 7,
+    "volume_score": 0,
+    "fib_stack_score": 10,
+    "momentum_projection_score": 15,
+    "structure_score": 7,
+    "cycle_score": 2,
+    "pattern_score": -1,
+    "final_score": 31.52,
+    "confidence": 0.6889,
+    "entry_price": 1.33584,
+    "stop_price": 1.33573,
+    "tp_price": 1.33691,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "1db0d63724c194771287138397e6b107cab95958",
+      "message": "Compute long/short P\u0026L in by-timeframe stats"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
