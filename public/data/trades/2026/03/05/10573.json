@@ -1,0 +1,122 @@
+{
+  "id": "10573",
+  "symbol": "AUD_NZD",
+  "direction": "Long",
+  "timeframe": "swing",
+  "status": "PENDING",
+  "type": "LIMIT_ORDER",
+  "entry": 1.1887,
+  "stop_loss": 1.17811,
+  "take_profit": 1.23318,
+  "quantity": 88,
+  "profit": null,
+  "created": "2026-03-05T15:12:32.416681389Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 6117,
+  "risk_reward": 4.2001888574126,
+  "candles": [
+    {
+      "t": "2026-02-23T23:59:59Z",
+      "o": 1.1845,
+      "h": 1.18531,
+      "l": 1.18,
+      "c": 1.1837
+    },
+    {
+      "t": "2026-02-24T23:59:59Z",
+      "o": 1.1836,
+      "h": 1.18564,
+      "l": 1.17791,
+      "c": 1.18339
+    },
+    {
+      "t": "2026-02-25T23:59:59Z",
+      "o": 1.18338,
+      "h": 1.18918,
+      "l": 1.17712,
+      "c": 1.18612
+    },
+    {
+      "t": "2026-02-26T23:59:59Z",
+      "o": 1.18612,
+      "h": 1.18919,
+      "l": 1.18222,
+      "c": 1.1875
+    },
+    {
+      "t": "2026-02-27T23:59:59Z",
+      "o": 1.18764,
+      "h": 1.18993,
+      "l": 1.18459,
+      "c": 1.1854
+    },
+    {
+      "t": "2026-03-01T23:59:59Z",
+      "o": 1.18113,
+      "h": 1.18591,
+      "l": 1.17766,
+      "c": 1.1845
+    },
+    {
+      "t": "2026-03-02T23:59:59Z",
+      "o": 1.18438,
+      "h": 1.19537,
+      "l": 1.18435,
+      "c": 1.19437
+    },
+    {
+      "t": "2026-03-03T23:59:59Z",
+      "o": 1.19428,
+      "h": 1.19803,
+      "l": 1.188,
+      "c": 1.19548
+    },
+    {
+      "t": "2026-03-04T23:59:59Z",
+      "o": 1.19531,
+      "h": 1.19547,
+      "l": 1.1853,
+      "c": 1.19167
+    }
+  ],
+  "score": {
+    "Symbol": "AUDNZD",
+    "T": 1772668799999,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 73,
+    "crossover_score": 12,
+    "oscillator_score": 6,
+    "volatility_score": 8,
+    "volume_score": 2,
+    "fib_stack_score": 19,
+    "momentum_projection_score": 15,
+    "structure_score": 6,
+    "cycle_score": 4,
+    "pattern_score": -2,
+    "final_score": 34.41,
+    "confidence": 0.8527,
+    "entry_price": 1.18982,
+    "stop_price": 1.17923,
+    "tp_price": 1.2343,
+    "risk_reward": 4.2,
+    "unit_size": 0,
+    "recommended_timeframe": "swing",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
