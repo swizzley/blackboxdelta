@@ -7,20 +7,23 @@ import Analysis from './scenes/analysis/Analysis';
 import Status from './scenes/status/Status';
 import System from './scenes/system/System';
 import Error404 from './scenes/common/404';
+import ErrorBoundary from './scenes/common/ErrorBoundary';
 
 export default function App() {
     return (
-        <Router>
-            <Routes>
-                <Route path="/" element={<Dashboard/>}/>
-                <Route path="/history" element={<History/>}/>
-                <Route path="/analysis" element={<Analysis/>}/>
-                <Route path="/status" element={<Status/>}/>
-                <Route path="/system" element={<System/>}/>
-                <Route path="/day/:year/:month/:day" element={<DayDetail/>}/>
-                <Route path="/trade/:year/:month/:day/:id" element={<TradeDetail/>}/>
-                <Route path="*" element={<Error404/>}/>
-            </Routes>
-        </Router>
+        <ErrorBoundary>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<Dashboard/>}/>
+                    <Route path="/history" element={<History/>}/>
+                    <Route path="/analysis" element={<Analysis/>}/>
+                    <Route path="/status" element={<Status/>}/>
+                    <Route path="/system" element={<System/>}/>
+                    <Route path="/day/:year/:month/:day" element={<DayDetail/>}/>
+                    <Route path="/trade/:year/:month/:day/:id" element={<TradeDetail/>}/>
+                    <Route path="*" element={<Error404/>}/>
+                </Routes>
+            </Router>
+        </ErrorBoundary>
     );
 }

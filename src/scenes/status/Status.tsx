@@ -209,9 +209,9 @@ export default function Status() {
                                                         o.status === 'FILLED' ? 'bg-blue-900/30 text-blue-400' :
                                                         'bg-cyan-900/30 text-cyan-400'
                                                     }`}>{o.status}</span>
-                                                    {o.profit !== null && (
-                                                        <span className={o.profit >= 0 ? 'text-emerald-500' : 'text-red-500'}>
-                                                            {o.profit >= 0 ? '+' : ''}${o.profit.toFixed(2)}
+                                                    {o.profit != null && (
+                                                        <span className={Number(o.profit) >= 0 ? 'text-emerald-500' : 'text-red-500'}>
+                                                            {Number(o.profit) >= 0 ? '+' : ''}${Number(o.profit).toFixed(2)}
                                                         </span>
                                                     )}
                                                 </div>
@@ -242,9 +242,9 @@ export default function Status() {
                                                 <div className="flex items-center gap-2">
                                                     <span className={muted}>{a.strategy}</span>
                                                     <span className={`font-medium ${
-                                                        a.score >= 70 ? 'text-emerald-500' :
-                                                        a.score >= 50 ? 'text-yellow-500' : 'text-red-500'
-                                                    }`}>{a.score.toFixed(1)}</span>
+                                                        Number(a.score) >= 70 ? 'text-emerald-500' :
+                                                        Number(a.score) >= 50 ? 'text-yellow-500' : 'text-red-500'
+                                                    }`}>{Number(a.score).toFixed(1)}</span>
                                                 </div>
                                             </div>
                                         ))}
