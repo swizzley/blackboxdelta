@@ -142,7 +142,10 @@ export default function Analysis() {
 
     const latestRun = data?.runs?.[0];
     const viewingHistorical = runDetail !== null;
-    const todos = viewingHistorical ? (runDetail.todos || []) : (data?.todos || []);
+    // Run detail todos lack id/status — synthesize them so rendering works
+    const todos: AnalysisTodo[] = viewingHistorical
+        ? (runDetail.todos || []).map((t, i) => ({...t, id: t.id ?? i + 1, status: t.status ?? 'open'} as AnalysisTodo))
+        : (data?.todos || []);
 
     // Compute stats from whichever todos list is active
     const totalOpen = todos.filter(t => t.status === 'open').length;
