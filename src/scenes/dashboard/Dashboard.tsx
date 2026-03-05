@@ -12,7 +12,9 @@ import ScoreTrendChart from './ScoreTrendChart';
 import RecommendationRadar from './RecommendationRadar';
 import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
-import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint} from '../../context/Types';
+import {useApi} from '../../context/Api';
+import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar} from '../../api/client';
+import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, ApiCalendarDay} from '../../context/Types';
 
 type Period = '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'All';
 
@@ -38,14 +40,44 @@ function filterByDate<T extends { date: string }>(data: T[], cutoff: string | nu
 
 export default function Dashboard() {
     const {isDarkMode} = useTheme();
+    const {apiAvailable} = useApi();
     const [dashboard, setDashboard] = useState<DashboardData | null>(null);
     const [calendar, setCalendar] = useState<CalendarData | null>(null);
     const [period, setPeriod] = useState<Period>('All');
+    const [liveStats, setLiveStats] = useState(false);
 
     useEffect(() => {
+        // Always load static dashboard (has chart series the API doesn't serve)
         axios.get('/data/dashboard.json').then(r => setDashboard(r.data)).catch(console.error);
-        axios.get('/data/calendar.json').then(r => setCalendar(r.data)).catch(console.error);
-    }, []);
+
+        if (apiAvailable) {
+            // API for live stats overlay
+            apiFetchDashboard().then(apiData => {
+                if (apiData) {
+                    setDashboard(prev => prev
+                        ? {...prev, all_time: apiData.all_time, by_timeframe: apiData.by_timeframe}
+                        : prev
+                    );
+                    setLiveStats(true);
+                }
+            });
+            // API for calendar
+            apiFetchCalendar(365).then(apiCal => {
+                if (apiCal) {
+                    const record: CalendarData = {};
+                    for (const day of apiCal as ApiCalendarDay[]) {
+                        record[day.date] = {pl: day.pl, winners: day.winners, losers: day.losers, total: day.total};
+                    }
+                    setCalendar(record);
+                } else {
+                    axios.get('/data/calendar.json').then(r => setCalendar(r.data)).catch(console.error);
+                }
+            });
+        } else {
+            setLiveStats(false);
+            axios.get('/data/calendar.json').then(r => setCalendar(r.data)).catch(console.error);
+        }
+    }, [apiAvailable]);
 
     const cutoff = useMemo(() => periodCutoff(period), [period]);
 
@@ -163,16 +195,18 @@ export default function Dashboard() {
 
                     {/* Stat Cards */}
                     <div className="grid grid-cols-3 gap-4 mb-6">
-                        <StatCard label="Total P&L" value={plDisplay} color={plColor}/>
+                        <StatCard label="Total P&L" value={plDisplay} color={plColor} live={liveStats}/>
                         <StatCard
                             label="Win Rate"
                             value={stats.win_rate_pct !== null ? `${stats.win_rate_pct}%` : 'N/A'}
                             subtitle={`${stats.winners}W / ${stats.losers}L / ${stats.breakeven}BE`}
+                            live={liveStats}
                         />
                         <StatCard
                             label="Total Trades"
                             value={stats.total_orders}
                             subtitle={`${stats.closed_orders} closed`}
+                            live={liveStats}
                         />
                     </div>
 

@@ -2,11 +2,13 @@ import {Bars3Icon, XMarkIcon} from "@heroicons/react/24/outline";
 import {Popover, Transition} from "@headlessui/react";
 import {Fragment, useState} from "react";
 import {useTheme} from '../../context/Theme';
+import {useApi} from '../../context/Api';
 
 const navigation = [
     {name: 'Dashboard', href: '/'},
     {name: 'History', href: '/history'},
     {name: 'Analysis', href: '/analysis'},
+    {name: 'Status', href: '/status'},
 ];
 
 function classNames(...classes: string[]) {
@@ -15,6 +17,7 @@ function classNames(...classes: string[]) {
 
 export default function Nav() {
     const {isDarkMode, toggleDarkMode} = useTheme();
+    const {apiAvailable, checking} = useApi();
     const [currentPath] = useState(location.pathname);
 
     return (
@@ -35,7 +38,13 @@ export default function Nav() {
                                 </a>
                             </div>
 
-                            <div className="hidden lg:ml-4 lg:flex lg:items-center lg:pr-0.5">
+                            <div className="hidden lg:ml-4 lg:flex lg:items-center lg:pr-0.5 gap-2">
+                                <span
+                                    title={checking ? 'Checking API...' : apiAvailable ? 'API connected' : 'API unavailable'}
+                                    className={`inline-block w-2.5 h-2.5 rounded-full ${
+                                        checking ? 'bg-yellow-400 animate-pulse' : apiAvailable ? 'bg-emerald-400' : 'bg-gray-500'
+                                    }`}
+                                />
                                 <button
                                     onClick={toggleDarkMode}
                                     className="rounded-full p-2 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"

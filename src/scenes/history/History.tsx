@@ -1,10 +1,13 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useCallback, useRef} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
-import {OrderSummary} from '../../context/Types';
+import {useApi} from '../../context/Api';
+import {fetchOrders as apiFetchOrders} from '../../api/client';
+import {connectOrders} from '../../api/sse';
+import {OrderSummary, ApiOrder} from '../../context/Types';
 import dayjs from 'dayjs';
 
 const PAGE_SIZE = 50;
@@ -17,8 +20,20 @@ function isSameCandle(o: OrderSummary): boolean {
     const interval = CANDLE_SECS[o.timeframe] ?? 60;
     const created = Math.floor(new Date(o.created).getTime() / 1000);
     const closed = Math.floor(new Date(o.closed).getTime() / 1000);
-    // Same candle if both timestamps fall in the same interval bucket
     return Math.floor(created / interval) === Math.floor(closed / interval);
+}
+
+function apiOrderToSummary(o: ApiOrder): OrderSummary {
+    return {
+        id: o.id,
+        symbol: o.symbol,
+        direction: o.direction,
+        timeframe: o.timeframe,
+        status: o.status,
+        profit: o.profit,
+        created: o.created,
+        closed: o.closed,
+    };
 }
 
 type SortKey = 'created' | 'symbol' | 'timeframe' | 'status' | 'profit' | 'direction';
@@ -26,6 +41,7 @@ type SortDir = 'asc' | 'desc';
 
 export default function History() {
     const {isDarkMode} = useTheme();
+    const {apiAvailable, apiBase} = useApi();
     const navigate = useNavigate();
     const [months, setMonths] = useState<string[]>([]);
     const [selectedMonth, setSelectedMonth] = useState('');
@@ -35,26 +51,60 @@ export default function History() {
     const [sortDir, setSortDir] = useState<SortDir>('desc');
     const [filterTimeframe, setFilterTimeframe] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [apiMode, setApiMode] = useState(false);
+    const [totalApiOrders, setTotalApiOrders] = useState(0);
+    const sseCleanupRef = useRef<(() => void) | null>(null);
 
-    // Load month index
-    useEffect(() => {
-        axios.get('/data/orders/index.json')
-            .then(r => {
-                const m: string[] = r.data;
-                setMonths(m);
-                if (m.length > 0) setSelectedMonth(m[m.length - 1]); // default to latest
-            })
-            .catch(console.error);
-    }, []);
+    // API mode: fetch from API with server-side filtering
+    const loadApiOrders = useCallback(async () => {
+        const result = await apiFetchOrders({
+            status: filterStatus !== 'all' ? filterStatus : undefined,
+            timeframe: filterTimeframe !== 'all' ? filterTimeframe : undefined,
+            limit: PAGE_SIZE,
+            offset: page * PAGE_SIZE,
+        });
+        if (result) {
+            setOrders(result.map(apiOrderToSummary));
+            setTotalApiOrders(result.length === PAGE_SIZE ? (page + 2) * PAGE_SIZE : page * PAGE_SIZE + result.length);
+            setApiMode(true);
+        }
+        return result;
+    }, [filterStatus, filterTimeframe, page]);
 
-    // Load orders for selected month
+    // Choose data source based on API availability
     useEffect(() => {
-        if (!selectedMonth) return;
+        if (apiAvailable) {
+            loadApiOrders();
+        } else {
+            setApiMode(false);
+            // Fallback: load static month index
+            axios.get('/data/orders/index.json')
+                .then(r => {
+                    const m: string[] = r.data;
+                    setMonths(m);
+                    if (m.length > 0 && !selectedMonth) setSelectedMonth(m[m.length - 1]);
+                })
+                .catch(console.error);
+        }
+    }, [apiAvailable, loadApiOrders]);
+
+    // Static mode: load orders for selected month
+    useEffect(() => {
+        if (apiMode || !selectedMonth) return;
         const [y, m] = selectedMonth.split('-');
         axios.get(`/data/orders/${y}/${m}.json`)
             .then(r => { setOrders(r.data); setPage(0); })
             .catch(() => setOrders([]));
-    }, [selectedMonth]);
+    }, [selectedMonth, apiMode]);
+
+    // SSE: prepend new orders at top in API mode
+    useEffect(() => {
+        if (!apiAvailable || !apiMode) return;
+        sseCleanupRef.current = connectOrders(apiBase, (order) => {
+            setOrders(prev => [apiOrderToSummary(order), ...prev].slice(0, PAGE_SIZE));
+        });
+        return () => { sseCleanupRef.current?.(); };
+    }, [apiAvailable, apiMode, apiBase]);
 
     function handleSort(key: SortKey) {
         if (sortKey === key) {
@@ -66,7 +116,8 @@ export default function History() {
         setPage(0);
     }
 
-    const filtered = orders.filter(o => {
+    // In API mode, filtering is server-side; in static mode, filter client-side
+    const filtered = apiMode ? orders : orders.filter(o => {
         if (filterTimeframe !== 'all' && o.timeframe !== filterTimeframe) return false;
         if (filterStatus !== 'all' && o.status !== filterStatus) return false;
         return true;
@@ -97,8 +148,9 @@ export default function History() {
         return sortDir === 'asc' ? cmp : -cmp;
     });
 
-    const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
-    const paged = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+    // In API mode, data is already paged server-side; in static mode, page client-side
+    const totalPages = apiMode ? Math.ceil(totalApiOrders / PAGE_SIZE) : Math.ceil(sorted.length / PAGE_SIZE);
+    const paged = apiMode ? sorted : sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
     const th = `px-3 py-2 text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none`;
     const td = `px-3 py-2 text-sm whitespace-nowrap`;
@@ -120,13 +172,16 @@ export default function History() {
                         <div className="flex flex-wrap items-center gap-4 p-4 border-b border-gray-200 dark:border-slate-700">
                             <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                 Order History
+                                {apiMode && <span className="ml-1.5 inline-flex items-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none align-middle">LIVE</span>}
                             </h2>
                             <div className="flex gap-2 ml-auto">
-                                <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} className={selectClass}>
-                                    {months.map(m => (
-                                        <option key={m} value={m}>{dayjs(m + '-01').format('MMMM YYYY')}</option>
-                                    ))}
-                                </select>
+                                {!apiMode && (
+                                    <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} className={selectClass}>
+                                        {months.map(m => (
+                                            <option key={m} value={m}>{dayjs(m + '-01').format('MMMM YYYY')}</option>
+                                        ))}
+                                    </select>
+                                )}
                                 <select value={filterTimeframe} onChange={e => { setFilterTimeframe(e.target.value); setPage(0); }} className={selectClass}>
                                     <option value="all">All Timeframes</option>
                                     <option value="scalp">Scalp</option>
