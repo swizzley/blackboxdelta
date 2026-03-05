@@ -1,248 +1,258 @@
 {
   "runs": [
     {
+      "run_id": "20260305-193231",
+      "created_at": "2026-03-05T19:32:31Z",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514",
+      "order_count": 1029,
+      "todo_count": 15,
+      "synthesis": "# PHASE 6: SYNTHESIS \u0026 TODO LIST\n\n## PART 1: Executive Summary\n\nThe comprehensive analysis of the Swizzley FX trading system during March 4-5, 2026 reveals **critical systemic failures** requiring immediate intervention. With 1,029 trades analyzed, the system demonstrates a concerning 31.10% win rate and -$5.53 total P\u0026L, indicating negative expectancy that makes continued operation unsustainable.\n\n**The core issue is a massive risk:reward calculation failure** - the system predicts 8.6:1 R:R ratios but delivers only 0.006:1 actual ratios, representing a 99.93% overestimation error. This fundamental pricing model breakdown, combined with disabled critical risk checks (spread monitoring for scalps), creates a perfect storm of poor performance. The system is heavily scalp-dependent (99.8% of trades) with symmetric pricing that ignores market structure, while JPY pairs suffer 50x higher slippage due to pip size handling errors.\n\n**Version analysis reveals significant deployment instability** with win rates swinging from 36.64% to 15.38% across different code versions. The most damaging change was increasing scalp MA score weights from 0.14 to 0.24, which reduced win rates by 9.36%. Conversely, the Printf format fix in swizzley-trader (version 9bd6121f) consistently delivered 34%+ win rates across multiple finmon versions, highlighting execution engine stability as crucial.\n\n**The scoring pipeline shows fundamental component effectiveness issues** with most traditional indicators providing minimal predictive value. Only volatility measures (Bollinger Band Width) show meaningful correlation with winning trades (36% higher volatility in winners), while RSI, Stochastic, and MA alignment show essentially random performance. The current component weighting heavily favors weak predictors (FibStackScore, PatternScore) while underweighting the strongest signal (TrendScore).\n\n**Risk management is critically compromised** with three essential checks disabled, including scalp spread monitoring. The system's symmetric SL/TP distances (~0.00012-0.00013) ignore market dynamics, while premature exits on losing trades (26 minutes average) versus winners (43 minutes) suggest trailing stop logic needs refinement. Position sizing analysis shows optimal performance at 11-20 units, yet the system allows up to 41+ units with degraded results.\n\n## PART 2: TODO List"
+    },
+    {
       "run_id": "20260304-203543",
       "created_at": "2026-03-04T20:35:43Z",
+      "provider": "anthropic",
       "model": "claude-sonnet-4-20250514",
       "order_count": 551,
       "todo_count": 15,
-      "synthesis": "# PHASE 6: SYNTHESIS & PRIORITIZED TODO LIST\n\n## PART 1: EXECUTIVE SUMMARY\n\nThe Swizzley FX system is in **critical condition** with a devastating 25.68% win rate and -$11.70 total P&L across 553 trades. The analysis reveals a system that is fundamentally broken across multiple dimensions, but with clear pathways to recovery.\n\n**Key Findings**: The scalp timeframe dominates trading volume (98% of trades) but is hemorrhaging money with a -$9.84 loss. However, the recent version deployment (finmon b5698030 + trader 9bd6121f) showed a remarkable **19.23 percentage point improvement** to 35.90% win rate, proving the system can be profitable. Critical risk guardrails are disabled, allowing poor-quality trades to execute unchecked.\n\n**Root Causes**: The scoring system fails to predict profitable trades, with higher scores showing no correlation with better performance. Risk management is severely compromised with spread checks, pip distance limits, and position limits all disabled. The system trades too frequently (15-minute cooldowns) with inadequate R:R requirements (1.5x minimum) for the current win rate.\n\n**Immediate Opportunity**: The latest code version demonstrates the system's potential, but protective measures must be implemented immediately to prevent further losses while optimization continues. The intraday timeframe shows promise (37.50% win rate, +$1.03 P&L) but needs larger sample sizes.\n\n**Strategic Direction**: Focus on protecting and understanding the recent performance improvement while implementing critical risk controls. The system needs immediate defensive measures followed by systematic optimization of the scoring pipeline and risk management framework.\n\n## PART 2: PRIORITIZED TODO LIST"
+      "synthesis": "# PHASE 6: SYNTHESIS \u0026 PRIORITIZED TODO LIST\n\n## PART 1: EXECUTIVE SUMMARY\n\nThe Swizzley FX system is in **critical condition** with a devastating 25.68% win rate and -$11.70 total P\u0026L across 553 trades. The analysis reveals a system that is fundamentally broken across multiple dimensions, but with clear pathways to recovery.\n\n**Key Findings**: The scalp timeframe dominates trading volume (98% of trades) but is hemorrhaging money with a -$9.84 loss. However, the recent version deployment (finmon b5698030 + trader 9bd6121f) showed a remarkable **19.23 percentage point improvement** to 35.90% win rate, proving the system can be profitable. Critical risk guardrails are disabled, allowing poor-quality trades to execute unchecked.\n\n**Root Causes**: The scoring system fails to predict profitable trades, with higher scores showing no correlation with better performance. Risk management is severely compromised with spread checks, pip distance limits, and position limits all disabled. The system trades too frequently (15-minute cooldowns) with inadequate R:R requirements (1.5x minimum) for the current win rate.\n\n**Immediate Opportunity**: The latest code version demonstrates the system's potential, but protective measures must be implemented immediately to prevent further losses while optimization continues. The intraday timeframe shows promise (37.50% win rate, +$1.03 P\u0026L) but needs larger sample sizes.\n\n**Strategic Direction**: Focus on protecting and understanding the recent performance improvement while implementing critical risk controls. The system needs immediate defensive measures followed by systematic optimization of the scoring pipeline and risk management framework.\n\n## PART 2: PRIORITIZED TODO LIST"
     }
   ],
   "todos": [
     {
-      "id": 1,
-      "run_id": "20260304-203543",
+      "id": 36,
+      "run_id": "20260305-193231",
+      "priority": 1,
+      "category": "risk_guardrails",
+      "title": "Fix Critical R:R Calculation Model",
+      "description": "The system predicts 8.6:1 R:R but delivers 0.006:1 actual ratios (99.93% error). This fundamental pricing model failure is the primary cause of poor performance despite reasonable win rates.",
+      "expected_impact": "5-10% win rate improvement by fixing position sizing and SL/TP calculations",
+      "evidence": "Phase 4: Predicted R:R 8.59 vs actual 0.006 for scalps, representing 1,400x overestimation",
+      "affected_files": [
+        "finmon/views/scalp/v_scalp_final.sql",
+        "swizzley-trader/validate.go",
+        "swizzley-trader/scalps.go"
+      ],
+      "complexity": "high",
+      "status": "open"
+    },
+    {
+      "id": 37,
+      "run_id": "20260305-193231",
       "priority": 1,
       "category": "settings",
-      "title": "Enable Critical Risk Guardrails Immediately",
-      "description": "Enable spread protection (check.spread.scalp), pip distance limits (check.max_pip_dist.scalp), and position limits (check.max_orders.scalp) to stop hemorrhaging money on poor-quality trades",
-      "expected_impact": "Reduce trade volume by 60%, improve win rate by 5-10%, reduce average loss by 20%",
-      "evidence": "Phase 4 shows 74.4% loss rate with disabled guardrails. Spread protection and pip distance checks are fundamental risk controls",
+      "title": "Enable Disabled Critical Risk Checks",
+      "description": "Three critical risk checks are disabled: scalp spread monitoring, intraday confirmation, and swing confirmation. This creates massive risk exposure.",
+      "expected_impact": "2-5% win rate improvement by filtering poor setups",
+      "evidence": "Phase 4: check.spread.scalp, check.confirm.intraday, check.confirm.swing all disabled in settings analysis",
       "affected_files": [
-        "swizzley-trader/validate.go",
+        "swizzley-trader/settings.go",
+        "swizzley-trader/validate.go"
+      ],
+      "complexity": "low",
+      "status": "open"
+    },
+    {
+      "id": 38,
+      "run_id": "20260305-193231",
+      "priority": 1,
+      "category": "scoring_logic",
+      "title": "Fix JPY Pair Slippage Handling",
+      "description": "JPY pairs show 50x higher slippage (0.051 vs 0.001) due to pip size calculation errors. This severely impacts trade profitability.",
+      "expected_impact": "3-5% improvement in JPY pair performance",
+      "evidence": "Phase 4: NZD_JPY 0.0513 slippage vs EUR_USD 0.001 slippage, indicating pip size mishandling",
+      "affected_files": [
+        "swizzley-trader/pips.go",
+        "swizzley-trader/scalps.go"
+      ],
+      "complexity": "medium",
+      "status": "open"
+    },
+    {
+      "id": 39,
+      "run_id": "20260305-193231",
+      "priority": 1,
+      "category": "scoring_weights",
+      "title": "Revert MA Score Weight Increase",
+      "description": "Finmon version 489ac7a0 increased scalp MA score weight from 0.14 to 0.24, causing 9.36% win rate drop. This change should be immediately reverted.",
+      "expected_impact": "9% win rate recovery based on version analysis",
+      "evidence": "Phase 2: Version 489ac7a0 showed 25.58% win rate vs 34.94% in previous version 1db0d637",
+      "affected_files": [
+        "finmon/views/scalp/v_scalp_normalised.sql"
+      ],
+      "complexity": "low",
+      "status": "open"
+    },
+    {
+      "id": 40,
+      "run_id": "20260305-193231",
+      "priority": 2,
+      "category": "scoring_thresholds",
+      "title": "Raise FinalScore and Confidence Thresholds",
+      "description": "Current thresholds allow trading at FinalScore 0+. Analysis shows optimal performance at FinalScore \u003e30 AND Confidence \u003e0.7 (34.2% win rate vs 31.1% overall).",
+      "expected_impact": "3% win rate improvement with 79% trade volume reduction",
+      "evidence": "Phase 3: FinalScore \u003e30 AND Confidence \u003e0.7 shows 34.2% win rate (199 trades) vs 31.1% overall",
+      "affected_files": [
+        "finmon/alerts.go",
+        "swizzley-trader/validate.go"
+      ],
+      "complexity": "medium",
+      "status": "open"
+    },
+    {
+      "id": 41,
+      "run_id": "20260305-193231",
+      "priority": 2,
+      "category": "scoring_weights",
+      "title": "Reweight Components Based on Effectiveness",
+      "description": "Increase weights for effective components (TrendScore, MaScore, CrossoverScore) and decrease weights for ineffective ones (FibStackScore, PatternScore, VolumeScore).",
+      "expected_impact": "2-4% win rate improvement by emphasizing predictive components",
+      "evidence": "Phase 3: TrendScore r=0.074 (strongest), VolumeScore r=0.020 (weakest), yet current weights don't reflect effectiveness",
+      "affected_files": [
+        "finmon/views/scalp/v_scalp_normalised.sql",
+        "finmon/views/intraday/v4_signals_15m_normalised.sql"
+      ],
+      "complexity": "medium",
+      "status": "open"
+    },
+    {
+      "id": 42,
+      "run_id": "20260305-193231",
+      "priority": 2,
+      "category": "position_sizing",
+      "title": "Optimize Position Sizing to 11-20 Units",
+      "description": "Analysis shows optimal performance at 11-20 units (30.4% win rate) vs 26.7% for 41+ units. Reduce maximum position size and default to optimal range.",
+      "expected_impact": "1-2% win rate improvement by avoiding oversized positions",
+      "evidence": "Phase 4: 11-20 units show 30.4% win rate vs 26.7% for 41+ units, with r=-0.029 correlation",
+      "affected_files": [
         "swizzley-trader/settings.go"
       ],
       "complexity": "low",
       "status": "open"
     },
     {
-      "id": 2,
-      "run_id": "20260304-203543",
-      "priority": 1,
-      "category": "settings",
-      "title": "Increase Minimum R:R Requirement for Scalps",
-      "description": "Raise check.rr.scalp from 1.5 to 2.0 to achieve breakeven at 33.3% win rate instead of current 25.68%",
-      "expected_impact": "Reduce unprofitable trades by 30%, improve expected value per trade from -$0.021 to near breakeven",
-      "evidence": "Current 25.68% win rate with 1.5 R:R creates negative expected value. Mathematical requirement for profitability",
-      "affected_files": [
-        "swizzley-trader/validate.go"
-      ],
-      "complexity": "low",
-      "status": "open"
-    },
-    {
-      "id": 3,
-      "run_id": "20260304-203543",
-      "priority": 1,
-      "category": "settings",
-      "title": "Reduce Scalp Position Size by 50%",
-      "description": "Cut order.quantity.scalp from 100 to 50 units to limit losses while system is being optimized",
-      "expected_impact": "Reduce maximum single trade loss by 50%, limit daily drawdown exposure",
-      "evidence": "System is losing money consistently. Risk reduction is critical until performance improves",
-      "affected_files": [
-        "swizzley-trader/orders.go"
-      ],
-      "complexity": "low",
-      "status": "open"
-    },
-    {
-      "id": 4,
-      "run_id": "20260304-203543",
-      "priority": 1,
-      "category": "information_gap",
-      "title": "Investigate Direction Series Performance Improvement",
-      "description": "Analyze why finmon commit b5698030 'Add direction series to dashboard JSON' improved win rate by 19.23 percentage points to understand the mechanism",
-      "expected_impact": "Understand and potentially amplify the most significant performance improvement observed",
-      "evidence": "Phase 2 shows statistically significant improvement (p=0.0402) from 16.67% to 35.90% win rate with this change",
-      "affected_files": [
-        "finmon/alerts.go",
-        "finmon/signals.go"
-      ],
-      "complexity": "medium",
-      "status": "open"
-    },
-    {
-      "id": 5,
-      "run_id": "20260304-203543",
+      "id": 43,
+      "run_id": "20260305-193231",
       "priority": 2,
-      "category": "settings",
-      "title": "Extend Scalp Cooldown Period",
-      "description": "Increase cooldown.minutes.scalp from 15 to 30 minutes to reduce overtrading and improve trade quality",
-      "expected_impact": "Reduce trade frequency by 40%, improve trade selection quality, reduce transaction costs",
-      "evidence": "Current 15-minute cooldown allows 96 potential trades per day. System shows overtrading symptoms",
-      "affected_files": [
-        "swizzley-trader/main.go"
-      ],
-      "complexity": "low",
-      "status": "open"
-    },
-    {
-      "id": 6,
-      "run_id": "20260304-203543",
-      "priority": 2,
-      "category": "scoring_thresholds",
-      "title": "Implement Hour-Based Trading Restrictions",
-      "description": "Restrict scalp trading to profitable hours (4, 6, 15 UTC) and disable trading during worst-performing hours (3, 22 UTC)",
-      "expected_impact": "Eliminate -$3.87 losses from worst hours, concentrate trading in +$0.92 profitable hours",
-      "evidence": "Phase 1 shows Hour 15 (+$0.81 P&L), Hours 4&6 (50%+ win rates) vs Hours 3&22 (0% win rates, -$3.87 total)",
-      "affected_files": [
-        "swizzley-trader/validate.go",
-        "finmon/alerts.go"
-      ],
-      "complexity": "medium",
-      "status": "open"
-    },
-    {
-      "id": 7,
-      "run_id": "20260304-203543",
-      "priority": 2,
-      "category": "forex_insight",
-      "title": "Focus Trading on CAD_HKD and Top Performers",
-      "description": "Prioritize or exclusively trade CAD_HKD (only profitable symbol +$0.04) and disable worst performers (AUD_CAD, USD_DKK, NZD_USD)",
-      "expected_impact": "Eliminate -$1.33 losses from worst 3 symbols, concentrate on proven profitable pairs",
-      "evidence": "Phase 1 shows CAD_HKD is only profitable symbol. AUD_CAD (0% win rate), USD_DKK (9.09%), NZD_USD (10%) are consistent losers",
-      "affected_files": [
-        "swizzley-trader/validate.go",
-        "finmon/alerts.go"
-      ],
-      "complexity": "medium",
-      "status": "open"
-    },
-    {
-      "id": 8,
-      "run_id": "20260304-203543",
-      "priority": 2,
-      "category": "risk_guardrails",
-      "title": "Fix R:R Prediction vs Reality Disconnect",
-      "description": "Investigate why predicted R:R (avg 11.0) has negligible correlation (-0.064) with actual R:R achieved in trades",
-      "expected_impact": "Improve trade selection accuracy, align expectations with reality, reduce false confidence",
-      "evidence": "Phase 4 shows predicted R:R 11.0 achieving actual R:R 0.0007. Complete disconnect between scoring and execution",
-      "affected_files": [
-        "finmon/views/scalp/v_scalp_final.sql",
-        "swizzley-trader/scalps.go"
-      ],
-      "complexity": "high",
-      "status": "open"
-    },
-    {
-      "id": 9,
-      "run_id": "20260304-203543",
-      "priority": 3,
-      "category": "scoring_weights",
-      "title": "Rebalance Scalp Scoring Component Weights",
-      "description": "Reduce pattern weight from 12% to 0% (like swing), increase trend and MA weights to match swing timeframe proven weights",
-      "expected_impact": "Improve scoring accuracy by 2-5%, reduce noise from unreliable pattern recognition",
-      "evidence": "Swing timeframe (0% pattern weight) shows better performance trends. Pattern scoring may be adding noise rather than signal",
-      "affected_files": [
-        "finmon/views/scalp/v_scalp_normalised.sql"
-      ],
-      "complexity": "medium",
-      "status": "open"
-    },
-    {
-      "id": 10,
-      "run_id": "20260304-203543",
-      "priority": 3,
-      "category": "settings",
-      "title": "Tighten Slippage Tolerance",
-      "description": "Reduce check.slippage from 10.0 to 5.0 pips (still 60x the average observed slippage of 0.083 pips)",
-      "expected_impact": "Prevent execution in extreme market conditions, improve trade quality by 1-2%",
-      "evidence": "Phase 4 shows average slippage is only 0.083 pips. Current 10-pip tolerance is unnecessarily generous",
-      "affected_files": [
-        "swizzley-trader/validate.go"
-      ],
-      "complexity": "low",
-      "status": "open"
-    },
-    {
-      "id": 11,
-      "run_id": "20260304-203543",
-      "priority": 3,
-      "category": "information_gap",
-      "title": "Analyze Intraday Timeframe Scaling Potential",
-      "description": "Investigate why intraday shows 37.50% win rate and +$1.03 P&L with only 8 trades. Determine if this can be scaled up safely",
-      "expected_impact": "Potentially shift focus to more profitable timeframe, improve overall system performance by 10-15%",
-      "evidence": "Phase 1 shows intraday outperforming scalp significantly (37.50% vs 25.60% win rate, positive vs negative P&L)",
-      "affected_files": [
-        "finmon/views/intraday/",
-        "swizzley-trader/main.go"
-      ],
-      "complexity": "medium",
-      "status": "open"
-    },
-    {
-      "id": 12,
-      "run_id": "20260304-203543",
-      "priority": 4,
-      "category": "information_gap",
-      "title": "Complete Scoring Pipeline Effectiveness Analysis",
-      "description": "Finish the incomplete Phase 3 analysis to understand why higher FinalScores don't correlate with better performance",
-      "expected_impact": "Identify specific scoring components that are counterproductive, guide weight rebalancing",
-      "evidence": "Phase 1 shows 40-60 FinalScore range has best win rate but still loses money. Scoring system is fundamentally flawed",
-      "affected_files": [
-        "finmon/views/scalp/v_scalp_scored.sql",
-        "finmon/views/scalp/v_scalp_final.sql"
-      ],
-      "complexity": "high",
-      "status": "open"
-    },
-    {
-      "id": 13,
-      "run_id": "20260304-203543",
-      "priority": 4,
-      "category": "information_gap",
-      "title": "Complete Indicator & Signal Analysis",
-      "description": "Finish the incomplete Phase 5 analysis to identify which of the 140+ indicators are actually predictive of profitable trades",
-      "expected_impact": "Optimize indicator selection, reduce computational overhead, improve signal quality",
-      "evidence": "System computes 140+ indicators but performance is poor. Many indicators may be adding noise rather than signal",
-      "affected_files": [
-        "massive-market/indicators.go",
-        "finmon/views/scalp/v_scalp_scored.sql"
-      ],
-      "complexity": "high",
-      "status": "open"
-    },
-    {
-      "id": 14,
-      "run_id": "20260304-203543",
-      "priority": 4,
-      "category": "code_quality",
-      "title": "Implement Version Performance Monitoring",
-      "description": "Add real-time alerts when win rate drops >5 percentage points after deployments to prevent future regressions",
-      "expected_impact": "Prevent future performance regressions, enable faster rollbacks, protect profitable versions",
-      "evidence": "Phase 2 shows massive performance swings between versions (19.23pp improvement, 9.94pp regression)",
-      "affected_files": [
-        "swizzley-trader/main.go",
-        "finmon/alerts.go"
-      ],
-      "complexity": "medium",
-      "status": "open"
-    },
-    {
-      "id": 15,
-      "run_id": "20260304-203543",
-      "priority": 5,
       "category": "pips_table",
-      "title": "Align Execution with Pips Table Ranges",
-      "description": "Ensure actual TP/SL distances match the pips table session-based ranges (5-20 pip TP, 5-12 pip SL)",
-      "expected_impact": "Improve R:R consistency, reduce extreme outliers in SL distances (currently 0.61-209.67 pips)",
-      "evidence": "Phase 4 shows extreme variance in SL distances. Pips table has reasonable ranges that aren't being respected",
+      "title": "Implement Asymmetric SL/TP Pricing",
+      "description": "Replace symmetric 0.00012-0.00013 SL/TP distances with market-adaptive levels. Winners held 43min vs losers 26min suggests better TP placement needed.",
+      "expected_impact": "2-3% win rate improvement through better risk:reward ratios",
+      "evidence": "Phase 4: Symmetric pricing ignores market structure, winners held 43.4min vs losers 25.8min",
       "affected_files": [
         "swizzley-trader/pips.go",
         "swizzley-trader/scalps.go"
       ],
+      "complexity": "high",
+      "status": "open"
+    },
+    {
+      "id": 44,
+      "run_id": "20260305-193231",
+      "priority": 2,
+      "category": "indicator_tuning",
+      "title": "Increase VolatilityScore Weighting",
+      "description": "Bollinger Band Width shows strongest predictive value (36% higher in winners). Increase VolatilityScore weight from 8 to 12-15.",
+      "expected_impact": "1-2% win rate improvement by emphasizing most predictive indicator",
+      "evidence": "Phase 5: Bollinger Width 0.0638 in winners vs 0.0468 in losers (36% difference, strongest signal)",
+      "affected_files": [
+        "finmon/views/scalp/v_scalp_normalised.sql"
+      ],
+      "complexity": "low",
+      "status": "open"
+    },
+    {
+      "id": 45,
+      "run_id": "20260305-193231",
+      "priority": 3,
+      "category": "forex_insight",
+      "title": "Implement Session-Based Trading Filters",
+      "description": "London morning hours (6-8 UTC) show 35-40% win rates vs 25-30% during NY afternoon (14-16 UTC). Implement session-based trading restrictions.",
+      "expected_impact": "1-2% win rate improvement by avoiding poor trading hours",
+      "evidence": "Phase 5: Best hours 6-8 UTC (35-40% win rate), worst hours 14-16 UTC (25-30% win rate)",
+      "affected_files": [
+        "swizzley-trader/main.go",
+        "swizzley-trader/validate.go"
+      ],
       "complexity": "medium",
+      "status": "open"
+    },
+    {
+      "id": 46,
+      "run_id": "20260305-193231",
+      "priority": 3,
+      "category": "scoring_logic",
+      "title": "Investigate Intraday/Swing Confirmation Failure",
+      "description": "Only 2 intraday trades (0.2%) and 0 swing trades suggest confirmation requirements are too restrictive, preventing higher timeframe diversification.",
+      "expected_impact": "0.5-1% win rate improvement through better timeframe distribution",
+      "evidence": "Phase 1: 1,027 scalp (99.8%) vs 2 intraday (0.2%) vs 0 swing trades shows extreme concentration",
+      "affected_files": [
+        "swizzley-trader/validate.go",
+        "finmon/alerts.go"
+      ],
+      "complexity": "medium",
+      "status": "open"
+    },
+    {
+      "id": 47,
+      "run_id": "20260305-193231",
+      "priority": 3,
+      "category": "scoring_logic",
+      "title": "Review PatternScore Calculation Logic",
+      "description": "Pattern trades show 30.5% win rate with negative average scores for both winners (-0.19) and losers (-0.40), suggesting pattern recognition adds noise rather than signal.",
+      "expected_impact": "0.5-1% win rate improvement by fixing or removing noisy patterns",
+      "evidence": "Phase 5: 771 pattern trades (75%) with 30.5% win rate, both winners and losers have negative PatternScores",
+      "affected_files": [
+        "finmon/views/scalp/v_scalp_scored.sql",
+        "massive-market/indicators.go"
+      ],
+      "complexity": "high",
+      "status": "open"
+    },
+    {
+      "id": 48,
+      "run_id": "20260305-193231",
+      "priority": 4,
+      "category": "information_gap",
+      "title": "Analyze Symbol-Specific Performance Drivers",
+      "description": "CHF pairs outperform (GBP_CHF 42.86% win rate) while major USD pairs underperform (EUR_USD 24.49%). Need deeper analysis of currency-specific factors.",
+      "expected_impact": "Research insight for future optimizations",
+      "evidence": "Phase 1: GBP_CHF +$0.05 P\u0026L vs EUR_GBP -$0.29 P\u0026L, CHF pairs consistently top performers",
+      "affected_files": [
+        "analysis/symbol_performance.sql"
+      ],
+      "complexity": "low",
+      "status": "open"
+    },
+    {
+      "id": 49,
+      "run_id": "20260305-193231",
+      "priority": 4,
+      "category": "code_quality",
+      "title": "Implement Version Stability Monitoring",
+      "description": "Version transitions show extreme performance swings (36.64% to 15.38% win rates). Need automated performance monitoring for deployments.",
+      "expected_impact": "Prevent future performance regressions",
+      "evidence": "Phase 2: 9 version combinations with win rates ranging from 15.38% to 36.64%",
+      "affected_files": [
+        "monitoring/performance_alerts.go"
+      ],
+      "complexity": "medium",
+      "status": "open"
+    },
+    {
+      "id": 50,
+      "run_id": "20260305-193231",
+      "priority": 5,
+      "category": "indicator_tuning",
+      "title": "Reduce OscillatorScore Weighting",
+      "description": "RSI and Stochastic RSI show no predictive value (0.13 and 0.5 point differences between wins/losses). Reduce OscillatorScore weight from 10 to 6-8.",
+      "expected_impact": "Marginal improvement by reducing noise",
+      "evidence": "Phase 5: RSI winners 50.30 vs losers 50.17 (0.13 difference), Stochastic RSI 48.03 vs 47.52 (0.5 difference)",
+      "affected_files": [
+        "finmon/views/scalp/v_scalp_normalised.sql"
+      ],
+      "complexity": "low",
       "status": "open"
     }
   ]

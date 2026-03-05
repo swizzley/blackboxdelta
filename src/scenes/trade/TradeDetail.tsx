@@ -6,20 +6,75 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import StatCard from '../common/StatCard';
 import {useTheme} from '../../context/Theme';
+import {useApi} from '../../context/Api';
+import {fetchOrder as apiFetchOrder} from '../../api/client';
 import {OrderDetail, Score} from '../../context/Types';
 import dayjs from 'dayjs';
 
 export default function TradeDetail() {
     const {isDarkMode} = useTheme();
+    const {apiAvailable} = useApi();
     const {year, month, day, id} = useParams();
     const [trade, setTrade] = useState<OrderDetail | null>(null);
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        axios.get(`/data/trades/${year}/${month}/${day}/${id}.json`)
-            .then(r => setTrade(r.data))
-            .catch(() => setError(true));
-    }, [year, month, day, id]);
+        if (!id) return;
+        const staticUrl = `/data/trades/${year}/${month}/${day}/${id}.json`;
+
+        // Try static first (has full detail + candles), then supplement with API
+        axios.get(staticUrl)
+            .then(r => {
+                setTrade(r.data);
+                // If API available, overlay with fresher data for non-candle fields
+                if (apiAvailable) {
+                    apiFetchOrder(id).then(apiOrder => {
+                        if (apiOrder) {
+                            setTrade(prev => prev ? {
+                                ...prev,
+                                status: apiOrder.status,
+                                profit: apiOrder.profit,
+                                stop_loss: apiOrder.stop_loss,
+                                take_profit: apiOrder.take_profit,
+                                closed: apiOrder.closed ?? prev.closed,
+                            } : prev);
+                        }
+                    });
+                }
+            })
+            .catch(() => {
+                // Static failed — try API as sole source
+                if (apiAvailable) {
+                    apiFetchOrder(id).then(apiOrder => {
+                        if (apiOrder) {
+                            setTrade({
+                                id: apiOrder.id,
+                                trade_id: apiOrder.trade_id,
+                                symbol: apiOrder.symbol,
+                                direction: apiOrder.direction,
+                                timeframe: apiOrder.timeframe,
+                                status: apiOrder.status,
+                                type: apiOrder.type,
+                                entry: apiOrder.price,
+                                stop_loss: apiOrder.stop_loss,
+                                take_profit: apiOrder.take_profit,
+                                quantity: apiOrder.quantity,
+                                profit: apiOrder.profit,
+                                created: apiOrder.created,
+                                closed: apiOrder.closed,
+                                duration_mins: null,
+                                alert_id: apiOrder.alert_id,
+                                risk_reward: apiOrder.risk_reward,
+                            });
+                        } else {
+                            setError(true);
+                        }
+                    });
+                } else {
+                    setError(true);
+                }
+            });
+    }, [year, month, day, id, apiAvailable]);
 
     return (
         <>

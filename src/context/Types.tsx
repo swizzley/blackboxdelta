@@ -171,6 +171,70 @@ export interface AnalysisTodo {
     notes?: string;
 }
 
+// API response types (from swizzley-api on genesis:8080)
+export interface ApiHealth {
+    status: string;
+    uptime: string;
+    versions: Record<string, string>;
+}
+
+export interface ApiDashboard {
+    all_time: TimeframeStats;
+    by_timeframe: TimeframeRow[];
+    updated_at?: string;
+}
+
+export interface ApiCalendarDay {
+    date: string;
+    pl: number;
+    winners: number;
+    losers: number;
+    total: number;
+}
+
+export interface ApiOrder {
+    id: string;
+    trade_id?: string;
+    symbol: string;
+    direction: string;
+    timeframe: string;
+    status: string;
+    type: string;
+    price: number;
+    stop_loss: number;
+    take_profit: number;
+    quantity: number;
+    profit: number | null;
+    score: number | null;
+    created: string;
+    closed: string | null;
+    alert_id?: number;
+    risk_reward?: number;
+}
+
+export interface ApiAlert {
+    id: number;
+    time: string;
+    date: string;
+    symbol: string;
+    strategy: string;
+    timeframe: string;
+    direction: string;
+    score: number;
+}
+
+export interface ApiMarket {
+    id: number;
+    name: string;
+    enabled: boolean;
+}
+
+export interface ApiSetting {
+    key: string;
+    value: string;
+    enabled: boolean;
+}
+
 // Daily-aggregated score averages for dashboard chart
 export interface ScoreDataPoint {
     date: string;
