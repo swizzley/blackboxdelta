@@ -1,0 +1,130 @@
+{
+  "date": "2026-03-05",
+  "summary": {
+    "total_orders": 2,
+    "pending": 0,
+    "open_positions": 2,
+    "closed_orders": 0,
+    "total_pl": 0,
+    "winners": 0,
+    "losers": 0,
+    "breakeven": 0,
+    "win_loss_ratio": null,
+    "win_rate_pct": null,
+    "avg_win": null,
+    "avg_loss": null,
+    "avg_time_in_trade_mins": null,
+    "long_pl": 0,
+    "short_pl": 0,
+    "by_timeframe": [
+      {
+        "timeframe": "scalp",
+        "total_orders": 2,
+        "pending": 0,
+        "open_positions": 2,
+        "closed_orders": 0,
+        "total_pl": 0,
+        "winners": 0,
+        "losers": 0,
+        "breakeven": 0,
+        "win_loss_ratio": null,
+        "win_rate_pct": null,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": null,
+        "long_pl": 0,
+        "short_pl": 0
+      }
+    ]
+  },
+  "hours": [
+    {
+      "hour": 0,
+      "summary": {
+        "total_orders": 2,
+        "pending": 0,
+        "open_positions": 2,
+        "closed_orders": 0,
+        "total_pl": 0,
+        "winners": 0,
+        "losers": 0,
+        "breakeven": 0,
+        "win_loss_ratio": null,
+        "win_rate_pct": null,
+        "avg_win": null,
+        "avg_loss": null,
+        "avg_time_in_trade_mins": null,
+        "long_pl": 0,
+        "short_pl": 0
+      },
+      "orders": [
+        {
+          "id": "7239",
+          "trade_id": "7240",
+          "symbol": "GBP_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "FILLED",
+          "type": "LIMIT_ORDER",
+          "entry": 209.794,
+          "stop_loss": 209.95100000000002,
+          "take_profit": 208.796,
+          "quantity": -15,
+          "profit": null,
+          "created": "2026-03-05T00:00:10.907951303Z",
+          "closed": null,
+          "duration_mins": null,
+          "alert_id": 6099,
+          "risk_reward": 6.356687898088859,
+          "versions": {
+            "finmon": {
+              "sha": "b5698030945152420da89f449ba732558c5c2a57",
+              "message": "Add direction series to dashboard JSON"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        },
+        {
+          "id": "7243",
+          "trade_id": "7244",
+          "symbol": "CAD_JPY",
+          "direction": "Short",
+          "timeframe": "scalp",
+          "status": "FILLED",
+          "type": "LIMIT_ORDER",
+          "entry": 114.986,
+          "stop_loss": 115.16000000000001,
+          "take_profit": 113.284,
+          "quantity": -12,
+          "profit": null,
+          "created": "2026-03-05T00:00:11.162894318Z",
+          "closed": null,
+          "duration_mins": null,
+          "alert_id": 6101,
+          "risk_reward": 9.781609195401918,
+          "versions": {
+            "finmon": {
+              "sha": "b5698030945152420da89f449ba732558c5c2a57",
+              "message": "Add direction series to dashboard JSON"
+            },
+            "massive-market": {
+              "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+              "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+            },
+            "swizzley-trader": {
+              "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+              "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
