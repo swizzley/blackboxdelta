@@ -16,13 +16,16 @@ import {useApi} from '../../context/Api';
 import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar} from '../../api/client';
 import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, ApiCalendarDay} from '../../context/Types';
 
-type Period = '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'All';
+type Period = '1H' | '4H' | '12H' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'All';
 
-const PERIODS: Period[] = ['1D', '1W', '1M', '3M', 'YTD', '1Y', 'All'];
+const PERIODS: Period[] = ['1H', '4H', '12H', '1D', '1W', '1M', '3M', 'YTD', '1Y', 'All'];
 
 function periodCutoff(period: Period): string | null {
     const now = dayjs();
     switch (period) {
+        case '1H':  return now.subtract(1, 'hour').format('YYYY-MM-DD');
+        case '4H':  return now.subtract(4, 'hour').format('YYYY-MM-DD');
+        case '12H': return now.subtract(12, 'hour').format('YYYY-MM-DD');
         case '1D':  return now.subtract(1, 'day').format('YYYY-MM-DD');
         case '1W':  return now.subtract(7, 'day').format('YYYY-MM-DD');
         case '1M':  return now.subtract(1, 'month').format('YYYY-MM-DD');
