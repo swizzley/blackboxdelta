@@ -1,0 +1,130 @@
+{
+  "id": "7570",
+  "trade_id": "7571",
+  "symbol": "NZD_HKD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 4.63814,
+  "stop_loss": 4.63964,
+  "take_profit": 4.62831,
+  "quantity": -9,
+  "profit": null,
+  "created": "2026-03-05T01:58:10.905308584Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 6283,
+  "risk_reward": 6.5533333333330885,
+  "candles": [
+    {
+      "t": "2026-03-05T01:49:00Z",
+      "o": 4.64047,
+      "h": 4.64224,
+      "l": 4.6382,
+      "c": 4.64138
+    },
+    {
+      "t": "2026-03-05T01:50:00Z",
+      "o": 4.64111,
+      "h": 4.6418,
+      "l": 4.6366,
+      "c": 4.6383
+    },
+    {
+      "t": "2026-03-05T01:51:00Z",
+      "o": 4.63946,
+      "h": 4.64095,
+      "l": 4.6374,
+      "c": 4.63985
+    },
+    {
+      "t": "2026-03-05T01:52:00Z",
+      "o": 4.6399,
+      "h": 4.64062,
+      "l": 4.63902,
+      "c": 4.63927
+    },
+    {
+      "t": "2026-03-05T01:53:00Z",
+      "o": 4.63963,
+      "h": 4.64128,
+      "l": 4.63936,
+      "c": 4.64072
+    },
+    {
+      "t": "2026-03-05T01:54:00Z",
+      "o": 4.64119,
+      "h": 4.64149,
+      "l": 4.6381,
+      "c": 4.63988
+    },
+    {
+      "t": "2026-03-05T01:55:00Z",
+      "o": 4.63989,
+      "h": 4.64051,
+      "l": 4.6373,
+      "c": 4.63903
+    },
+    {
+      "t": "2026-03-05T01:56:00Z",
+      "o": 4.6391,
+      "h": 4.63963,
+      "l": 4.636,
+      "c": 4.63811
+    },
+    {
+      "t": "2026-03-05T01:57:00Z",
+      "o": 4.63816,
+      "h": 4.63858,
+      "l": 4.6362,
+      "c": 4.63805
+    },
+    {
+      "t": "2026-03-05T01:58:00Z",
+      "o": 4.63836,
+      "h": 4.6394,
+      "l": 4.6361,
+      "c": 4.63869
+    }
+  ],
+  "score": {
+    "Symbol": "NZDHKD",
+    "T": 1772675760000,
+    "Time": "",
+    "trend_score": -15,
+    "ma_score": -61,
+    "crossover_score": -3,
+    "oscillator_score": -8,
+    "volatility_score": -5,
+    "volume_score": 4,
+    "fib_stack_score": -31,
+    "momentum_projection_score": -5,
+    "structure_score": 0,
+    "cycle_score": 1,
+    "pattern_score": -5,
+    "final_score": -22.69,
+    "confidence": 0.7945,
+    "entry_price": 4.63913,
+    "stop_price": 4.64005,
+    "tp_price": 4.6293,
+    "risk_reward": 10.7,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "b5698030945152420da89f449ba732558c5c2a57",
+      "message": "Add direction series to dashboard JSON"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

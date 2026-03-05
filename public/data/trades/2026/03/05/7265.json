@@ -1,0 +1,122 @@
+{
+  "id": "7265",
+  "symbol": "AUD_CHF",
+  "direction": "Long",
+  "timeframe": "swing",
+  "status": "PENDING",
+  "type": "LIMIT_ORDER",
+  "entry": 0.54839,
+  "stop_loss": 0.53957,
+  "take_profit": 0.58541,
+  "quantity": 111,
+  "profit": null,
+  "created": "2026-03-05T01:00:39.089992751Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 6116,
+  "risk_reward": 4.197278911564595,
+  "candles": [
+    {
+      "t": "2026-02-23T23:59:59Z",
+      "o": 0.54881,
+      "h": 0.549093,
+      "l": 0.544864,
+      "c": 0.54657
+    },
+    {
+      "t": "2026-02-24T23:59:59Z",
+      "o": 0.54655,
+      "h": 0.548613,
+      "l": 0.5437,
+      "c": 0.54621
+    },
+    {
+      "t": "2026-02-25T23:59:59Z",
+      "o": 0.54616,
+      "h": 0.550866,
+      "l": 0.5455,
+      "c": 0.54977
+    },
+    {
+      "t": "2026-02-26T23:59:59Z",
+      "o": 0.54977,
+      "h": 0.551823,
+      "l": 0.5471,
+      "c": 0.54907
+    },
+    {
+      "t": "2026-02-27T23:59:59Z",
+      "o": 0.549173,
+      "h": 0.551219,
+      "l": 0.5455,
+      "c": 0.5471
+    },
+    {
+      "t": "2026-03-01T23:59:59Z",
+      "o": 0.539921,
+      "h": 0.544327,
+      "l": 0.53835,
+      "c": 0.542975
+    },
+    {
+      "t": "2026-03-02T23:59:59Z",
+      "o": 0.54293,
+      "h": 0.553588,
+      "l": 0.5426,
+      "c": 0.55323
+    },
+    {
+      "t": "2026-03-03T23:59:59Z",
+      "o": 0.553105,
+      "h": 0.55545,
+      "l": 0.5452,
+      "c": 0.55047
+    },
+    {
+      "t": "2026-03-04T23:59:59Z",
+      "o": 0.550469,
+      "h": 0.553056,
+      "l": 0.5454,
+      "c": 0.551318
+    }
+  ],
+  "score": {
+    "Symbol": "AUDCHF",
+    "T": 1772668799999,
+    "Time": "",
+    "trend_score": 12,
+    "ma_score": 94,
+    "crossover_score": 17,
+    "oscillator_score": 7,
+    "volatility_score": 8,
+    "volume_score": 2,
+    "fib_stack_score": 33,
+    "momentum_projection_score": 13,
+    "structure_score": 6,
+    "cycle_score": 0,
+    "pattern_score": 0,
+    "final_score": 47.09,
+    "confidence": 0.7875,
+    "entry_price": 0.5483,
+    "stop_price": 0.53948,
+    "tp_price": 0.58532,
+    "risk_reward": 4.2,
+    "unit_size": 0,
+    "recommended_timeframe": "swing",
+    "recommendation": "Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "b5698030945152420da89f449ba732558c5c2a57",
+      "message": "Add direction series to dashboard JSON"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
