@@ -79,17 +79,40 @@ export default function Dashboard() {
         return filtered;
     }, [calendar, cutoff]);
 
-    // Recompute stats from filtered P&L series
+    // Recompute stats from filtered data
     const filteredStats = useMemo(() => {
         if (!dashboard) return null;
         if (period === 'All') return dashboard.all_time;
-        // Use all_time as base but override P&L from filtered series
+
+        // Recompute from filtered calendar data (per-day wins/losses/totals)
+        if (filteredCalendar && Object.keys(filteredCalendar).length > 0) {
+            let winners = 0, losers = 0, total = 0;
+            for (const day of Object.values(filteredCalendar)) {
+                winners += day.winners;
+                losers += day.losers;
+                total += day.total;
+            }
+            const breakeven = total - winners - losers;
+            const totalPL = filteredPL.reduce((sum, d) => sum + d.daily_pl, 0);
+            const winRate = total > 0 ? Math.round((winners / total) * 10000) / 100 : null;
+            return {
+                ...dashboard.all_time,
+                total_pl: Math.round(totalPL * 100) / 100,
+                total_orders: total,
+                closed_orders: total,
+                winners,
+                losers,
+                breakeven,
+                win_rate_pct: winRate,
+            };
+        }
+
         const totalPL = filteredPL.reduce((sum, d) => sum + d.daily_pl, 0);
         return {
             ...dashboard.all_time,
             total_pl: Math.round(totalPL * 100) / 100,
         };
-    }, [dashboard, period, filteredPL]);
+    }, [dashboard, period, filteredPL, filteredCalendar]);
 
     if (!dashboard || !filteredStats) {
         return (
@@ -139,17 +162,12 @@ export default function Dashboard() {
                     )}
 
                     {/* Stat Cards */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="grid grid-cols-3 gap-4 mb-6">
                         <StatCard label="Total P&L" value={plDisplay} color={plColor}/>
                         <StatCard
                             label="Win Rate"
                             value={stats.win_rate_pct !== null ? `${stats.win_rate_pct}%` : 'N/A'}
                             subtitle={`${stats.winners}W / ${stats.losers}L / ${stats.breakeven}BE`}
-                        />
-                        <StatCard
-                            label="Open Positions"
-                            value={stats.open_positions}
-                            subtitle={`${stats.pending} pending`}
                         />
                         <StatCard
                             label="Total Trades"
