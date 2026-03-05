@@ -66,6 +66,7 @@ export default function Analysis() {
     const [loadingDetail, setLoadingDetail] = useState(false);
 
     useEffect(() => {
+        setLoading(true);
         let loaded = 0;
         const results: Record<Provider, AnalysisData | null> = {anthropic: null, ollama: null};
 
@@ -94,6 +95,7 @@ export default function Analysis() {
         const dd = run.run_id.substring(6, 8);
 
         setLoadingDetail(true);
+        setExpandedTodo(null);
         axios.get(`/data/analysis/${provider}/${yyyy}/${mm}/${dd}.json`)
             .then(r => setRunDetail(r.data))
             .catch(() => {
@@ -139,9 +141,10 @@ export default function Analysis() {
     }
 
     const latestRun = data?.runs?.[0];
-    const todos = data?.todos || [];
+    const viewingHistorical = runDetail !== null;
+    const todos = viewingHistorical ? (runDetail.todos || []) : (data?.todos || []);
 
-    // Compute stats
+    // Compute stats from whichever todos list is active
     const totalOpen = todos.filter(t => t.status === 'open').length;
     const totalInProgress = todos.filter(t => t.status === 'in_progress').length;
     const totalImplemented = todos.filter(t => t.status === 'implemented').length;
@@ -174,11 +177,15 @@ export default function Analysis() {
                     {/* Header */}
                     <div className="mb-6">
                         <h1 className={`text-2xl font-bold ${textPrimary}`}>AI Trade Analysis</h1>
-                        {latestRun && (
+                        {viewingHistorical ? (
+                            <p className={`mt-1 text-sm ${textMuted}`}>
+                                <span className="text-cyan-400 font-medium">Viewing run {runDetail.run_id}</span> &middot; {runDetail.provider} / {runDetail.model} &middot; {runDetail.order_count} orders &middot; {runDetail.todos?.length || 0} recommendations
+                            </p>
+                        ) : latestRun ? (
                             <p className={`mt-1 text-sm ${textMuted}`}>
                                 Last run: {dayjs(latestRun.created_at).fromNow()} ({latestRun.model}) &middot; {latestRun.order_count} orders analyzed &middot; {latestRun.todo_count} recommendations
                             </p>
-                        )}
+                        ) : null}
                     </div>
 
                     {/* Provider Tab Bar */}
@@ -218,10 +225,10 @@ export default function Analysis() {
                                     Run Detail: {runDetail.run_id}
                                 </h2>
                                 <button
-                                    onClick={() => setRunDetail(null)}
+                                    onClick={() => { setRunDetail(null); setExpandedTodo(null); }}
                                     className={`px-3 py-1 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                                 >
-                                    Close
+                                    Back to Latest
                                 </button>
                             </div>
                             <div className={`text-sm ${textMuted} mb-4`}>
