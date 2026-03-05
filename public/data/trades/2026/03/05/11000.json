@@ -1,0 +1,145 @@
+{
+  "id": "11000",
+  "trade_id": "11001",
+  "symbol": "GBP_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 10.4148,
+  "exit": 10.414425,
+  "stop_loss": 10.41221,
+  "take_profit": 10.4241,
+  "quantity": 8,
+  "profit": -0.003,
+  "created": "2026-03-05T17:08:31.725647201Z",
+  "closed": "2026-03-05T17:10:02Z",
+  "duration_mins": 1,
+  "alert_id": 8307,
+  "risk_reward": 3.59073359073394,
+  "candles": [
+    {
+      "t": "2026-03-05T16:59:00Z",
+      "o": 10.4105,
+      "h": 10.4117,
+      "l": 10.4079,
+      "c": 10.4109
+    },
+    {
+      "t": "2026-03-05T17:00:00Z",
+      "o": 10.4108,
+      "h": 10.4125,
+      "l": 10.4092,
+      "c": 10.412
+    },
+    {
+      "t": "2026-03-05T17:01:00Z",
+      "o": 10.4118,
+      "h": 10.413,
+      "l": 10.4092,
+      "c": 10.4122
+    },
+    {
+      "t": "2026-03-05T17:02:00Z",
+      "o": 10.413,
+      "h": 10.4164,
+      "l": 10.4108,
+      "c": 10.4148
+    },
+    {
+      "t": "2026-03-05T17:03:00Z",
+      "o": 10.415,
+      "h": 10.417,
+      "l": 10.4126,
+      "c": 10.4167
+    },
+    {
+      "t": "2026-03-05T17:04:00Z",
+      "o": 10.4158,
+      "h": 10.4183,
+      "l": 10.4136,
+      "c": 10.417
+    },
+    {
+      "t": "2026-03-05T17:05:00Z",
+      "o": 10.4165,
+      "h": 10.417,
+      "l": 10.413,
+      "c": 10.4169
+    },
+    {
+      "t": "2026-03-05T17:06:00Z",
+      "o": 10.4169,
+      "h": 10.4177,
+      "l": 10.4145,
+      "c": 10.4156
+    },
+    {
+      "t": "2026-03-05T17:07:00Z",
+      "o": 10.4152,
+      "h": 10.4172,
+      "l": 10.4128,
+      "c": 10.4129
+    },
+    {
+      "t": "2026-03-05T17:08:00Z",
+      "o": 10.413,
+      "h": 10.4162,
+      "l": 10.4123,
+      "c": 10.4142
+    },
+    {
+      "t": "2026-03-05T17:09:00Z",
+      "o": 10.4153,
+      "h": 10.4164,
+      "l": 10.4125,
+      "c": 10.4134
+    },
+    {
+      "t": "2026-03-05T17:10:00Z",
+      "o": 10.413,
+      "h": 10.4155,
+      "l": 10.4099,
+      "c": 10.4101
+    }
+  ],
+  "score": {
+    "Symbol": "GBPHKD",
+    "T": 1772730360000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 43,
+    "crossover_score": -8,
+    "oscillator_score": -5,
+    "volatility_score": 8,
+    "volume_score": -2,
+    "fib_stack_score": 17,
+    "momentum_projection_score": 15,
+    "structure_score": 6,
+    "cycle_score": 2,
+    "pattern_score": -2,
+    "final_score": 22.24,
+    "confidence": 0.6802,
+    "entry_price": 10.4151,
+    "stop_price": 10.4141,
+    "tp_price": 10.4244,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
