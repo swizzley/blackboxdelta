@@ -88,20 +88,18 @@ export default function Analysis() {
     }, []);
 
     const fetchRunDetail = (run: { run_id: string; created_at: string }, provider: Provider) => {
-        // Derive the analysis date from the run's created_at (the previous market day relative to the run)
-        const runDate = dayjs(run.created_at);
-        let analysisDate = runDate.subtract(1, 'day');
-        while (analysisDate.day() === 0 || analysisDate.day() === 6) {
-            analysisDate = analysisDate.subtract(1, 'day');
-        }
-        const yyyy = analysisDate.format('YYYY');
-        const mm = analysisDate.format('MM');
-        const dd = analysisDate.format('DD');
+        // run_id format: YYYYMMDD-HHMMSS — extract date components directly
+        const yyyy = run.run_id.substring(0, 4);
+        const mm = run.run_id.substring(4, 6);
+        const dd = run.run_id.substring(6, 8);
 
         setLoadingDetail(true);
         axios.get(`/data/analysis/${provider}/${yyyy}/${mm}/${dd}.json`)
             .then(r => setRunDetail(r.data))
-            .catch(() => setRunDetail(null))
+            .catch(() => {
+                // Historical file not available for this run
+                setRunDetail(null);
+            })
             .finally(() => setLoadingDetail(false));
     };
 
