@@ -1,0 +1,159 @@
+{
+  "id": "11511",
+  "trade_id": "11512",
+  "symbol": "AUD_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 5.47676,
+  "exit": 5.477085,
+  "stop_loss": 5.474889999999999,
+  "take_profit": 5.48927,
+  "quantity": 12,
+  "profit": 0.0039,
+  "created": "2026-03-05T20:23:10.926933314Z",
+  "closed": "2026-03-05T20:27:25Z",
+  "duration_mins": 4,
+  "alert_id": 8717,
+  "risk_reward": 6.68983957219195,
+  "candles": [
+    {
+      "t": "2026-03-05T20:14:00Z",
+      "o": 5.47029,
+      "h": 5.47245,
+      "l": 5.46917,
+      "c": 5.47239
+    },
+    {
+      "t": "2026-03-05T20:15:00Z",
+      "o": 5.47237,
+      "h": 5.47573,
+      "l": 5.4695,
+      "c": 5.47101
+    },
+    {
+      "t": "2026-03-05T20:16:00Z",
+      "o": 5.47087,
+      "h": 5.47388,
+      "l": 5.4694,
+      "c": 5.47328
+    },
+    {
+      "t": "2026-03-05T20:17:00Z",
+      "o": 5.47317,
+      "h": 5.47407,
+      "l": 5.47039,
+      "c": 5.47082
+    },
+    {
+      "t": "2026-03-05T20:18:00Z",
+      "o": 5.47093,
+      "h": 5.47341,
+      "l": 5.47,
+      "c": 5.47337
+    },
+    {
+      "t": "2026-03-05T20:19:00Z",
+      "o": 5.47332,
+      "h": 5.47405,
+      "l": 5.47,
+      "c": 5.47132
+    },
+    {
+      "t": "2026-03-05T20:20:00Z",
+      "o": 5.47116,
+      "h": 5.47257,
+      "l": 5.4693,
+      "c": 5.4709
+    },
+    {
+      "t": "2026-03-05T20:21:00Z",
+      "o": 5.47076,
+      "h": 5.47529,
+      "l": 5.4685,
+      "c": 5.47525
+    },
+    {
+      "t": "2026-03-05T20:22:00Z",
+      "o": 5.4725,
+      "h": 5.47565,
+      "l": 5.4717,
+      "c": 5.47441
+    },
+    {
+      "t": "2026-03-05T20:23:00Z",
+      "o": 5.47458,
+      "h": 5.47649,
+      "l": 5.4708,
+      "c": 5.4762
+    },
+    {
+      "t": "2026-03-05T20:24:00Z",
+      "o": 5.47611,
+      "h": 5.47686,
+      "l": 5.4716,
+      "c": 5.47686
+    },
+    {
+      "t": "2026-03-05T20:25:00Z",
+      "o": 5.47692,
+      "h": 5.48101,
+      "l": 5.4756,
+      "c": 5.48078
+    },
+    {
+      "t": "2026-03-05T20:26:00Z",
+      "o": 5.48056,
+      "h": 5.48113,
+      "l": 5.4755,
+      "c": 5.48048
+    },
+    {
+      "t": "2026-03-05T20:27:00Z",
+      "o": 5.48032,
+      "h": 5.48089,
+      "l": 5.4755,
+      "c": 5.48005
+    }
+  ],
+  "score": {
+    "Symbol": "AUDHKD",
+    "T": 1772742060000,
+    "Time": "",
+    "trend_score": 14,
+    "ma_score": 67,
+    "crossover_score": 9,
+    "oscillator_score": 6,
+    "volatility_score": 1,
+    "volume_score": 2,
+    "fib_stack_score": 19,
+    "momentum_projection_score": 5,
+    "structure_score": 6,
+    "cycle_score": 0,
+    "pattern_score": 2,
+    "final_score": 28.75,
+    "confidence": 0.8032,
+    "entry_price": 5.47131,
+    "stop_price": 5.47017,
+    "tp_price": 5.48382,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

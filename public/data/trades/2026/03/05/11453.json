@@ -1,0 +1,152 @@
+{
+  "id": "11453",
+  "trade_id": "11454",
+  "symbol": "EUR_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 9.06773,
+  "exit": 9.067917499999998,
+  "stop_loss": 9.065259999999999,
+  "take_profit": 9.08131,
+  "quantity": 16,
+  "profit": 0.003,
+  "created": "2026-03-05T20:20:16.912047976Z",
+  "closed": "2026-03-05T20:23:21Z",
+  "duration_mins": 3,
+  "alert_id": 8687,
+  "risk_reward": 5.497975708501023,
+  "candles": [
+    {
+      "t": "2026-03-05T20:11:00Z",
+      "o": 9.06473,
+      "h": 9.06843,
+      "l": 9.0617,
+      "c": 9.06772
+    },
+    {
+      "t": "2026-03-05T20:12:00Z",
+      "o": 9.06781,
+      "h": 9.07077,
+      "l": 9.0636,
+      "c": 9.0647
+    },
+    {
+      "t": "2026-03-05T20:13:00Z",
+      "o": 9.06498,
+      "h": 9.0683,
+      "l": 9.06463,
+      "c": 9.06713
+    },
+    {
+      "t": "2026-03-05T20:14:00Z",
+      "o": 9.06711,
+      "h": 9.06999,
+      "l": 9.0651,
+      "c": 9.06999
+    },
+    {
+      "t": "2026-03-05T20:15:00Z",
+      "o": 9.07007,
+      "h": 9.0751,
+      "l": 9.0667,
+      "c": 9.06823
+    },
+    {
+      "t": "2026-03-05T20:16:00Z",
+      "o": 9.0681,
+      "h": 9.07191,
+      "l": 9.0649,
+      "c": 9.07051
+    },
+    {
+      "t": "2026-03-05T20:17:00Z",
+      "o": 9.07049,
+      "h": 9.07158,
+      "l": 9.0652,
+      "c": 9.06638
+    },
+    {
+      "t": "2026-03-05T20:18:00Z",
+      "o": 9.0664,
+      "h": 9.06902,
+      "l": 9.0663,
+      "c": 9.06899
+    },
+    {
+      "t": "2026-03-05T20:19:00Z",
+      "o": 9.06901,
+      "h": 9.06906,
+      "l": 9.06507,
+      "c": 9.06523
+    },
+    {
+      "t": "2026-03-05T20:20:00Z",
+      "o": 9.06486,
+      "h": 9.0678,
+      "l": 9.063,
+      "c": 9.06509
+    },
+    {
+      "t": "2026-03-05T20:21:00Z",
+      "o": 9.06584,
+      "h": 9.06758,
+      "l": 9.0639,
+      "c": 9.06731
+    },
+    {
+      "t": "2026-03-05T20:22:00Z",
+      "o": 9.0663,
+      "h": 9.06811,
+      "l": 9.0648,
+      "c": 9.06707
+    },
+    {
+      "t": "2026-03-05T20:23:00Z",
+      "o": 9.06716,
+      "h": 9.06998,
+      "l": 9.0654,
+      "c": 9.06974
+    }
+  ],
+  "score": {
+    "Symbol": "EURHKD",
+    "T": 1772741880000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 67,
+    "crossover_score": 2,
+    "oscillator_score": 5,
+    "volatility_score": 7,
+    "volume_score": 0,
+    "fib_stack_score": 8,
+    "momentum_projection_score": 15,
+    "structure_score": 7,
+    "cycle_score": -1,
+    "pattern_score": 3,
+    "final_score": 37.88,
+    "confidence": 0.8264,
+    "entry_price": 9.06644,
+    "stop_price": 9.06521,
+    "tp_price": 9.08002,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

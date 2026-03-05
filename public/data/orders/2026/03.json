@@ -1,5 +1,435 @@
 [
   {
+    "id": "11351",
+    "symbol": "EUR_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0056,
+    "created": "2026-03-05T20:10:08.148838525Z",
+    "closed": "2026-03-05T20:17:23Z"
+  },
+  {
+    "id": "11361",
+    "symbol": "CAD_CHF",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:12:10.723336377Z",
+    "closed": null
+  },
+  {
+    "id": "11371",
+    "symbol": "EUR_SGD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0031,
+    "created": "2026-03-05T20:14:08.079008123Z",
+    "closed": "2026-03-05T20:15:52Z"
+  },
+  {
+    "id": "11375",
+    "symbol": "CHF_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0005,
+    "created": "2026-03-05T20:14:08.431811551Z",
+    "closed": "2026-03-05T20:16:03Z"
+  },
+  {
+    "id": "11379",
+    "symbol": "AUD_USD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.001,
+    "created": "2026-03-05T20:14:13.590893059Z",
+    "closed": "2026-03-05T20:15:57Z"
+  },
+  {
+    "id": "11383",
+    "symbol": "NZD_USD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:15:09.747657412Z",
+    "closed": null
+  },
+  {
+    "id": "11387",
+    "symbol": "GBP_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0178,
+    "created": "2026-03-05T20:15:09.885523922Z",
+    "closed": "2026-03-05T20:25:10Z"
+  },
+  {
+    "id": "11397",
+    "symbol": "EUR_SGD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:16:06.122713237Z",
+    "closed": null
+  },
+  {
+    "id": "11401",
+    "symbol": "AUD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0045,
+    "created": "2026-03-05T20:17:07.65685205Z",
+    "closed": "2026-03-05T20:17:26Z"
+  },
+  {
+    "id": "11405",
+    "symbol": "NZD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0063,
+    "created": "2026-03-05T20:17:12.811442973Z",
+    "closed": "2026-03-05T20:17:57Z"
+  },
+  {
+    "id": "11409",
+    "symbol": "NZD_CAD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:17:13.03155925Z",
+    "closed": null
+  },
+  {
+    "id": "11419",
+    "symbol": "USD_CHF",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0058,
+    "created": "2026-03-05T20:19:10.341028039Z",
+    "closed": "2026-03-05T20:25:53Z"
+  },
+  {
+    "id": "11423",
+    "symbol": "USD_SGD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0022,
+    "created": "2026-03-05T20:19:10.422214563Z",
+    "closed": "2026-03-05T20:26:09Z"
+  },
+  {
+    "id": "11427",
+    "symbol": "CAD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0012,
+    "created": "2026-03-05T20:20:11.726225638Z",
+    "closed": "2026-03-05T20:22:19Z"
+  },
+  {
+    "id": "11433",
+    "symbol": "EUR_USD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0058,
+    "created": "2026-03-05T20:20:11.981041209Z",
+    "closed": "2026-03-05T20:23:36Z"
+  },
+  {
+    "id": "11437",
+    "symbol": "GBP_USD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0066,
+    "created": "2026-03-05T20:20:12.078518734Z",
+    "closed": "2026-03-05T20:29:15Z"
+  },
+  {
+    "id": "11445",
+    "symbol": "NZD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0008,
+    "created": "2026-03-05T20:20:13.582417532Z",
+    "closed": "2026-03-05T20:22:19Z"
+  },
+  {
+    "id": "11449",
+    "symbol": "AUD_USD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0065,
+    "created": "2026-03-05T20:20:14.744516759Z",
+    "closed": "2026-03-05T20:23:52Z"
+  },
+  {
+    "id": "11453",
+    "symbol": "EUR_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.003,
+    "created": "2026-03-05T20:20:16.912047976Z",
+    "closed": "2026-03-05T20:23:21Z"
+  },
+  {
+    "id": "11457",
+    "symbol": "USD_CAD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0061,
+    "created": "2026-03-05T20:20:16.997244783Z",
+    "closed": "2026-03-05T20:25:08Z"
+  },
+  {
+    "id": "11461",
+    "symbol": "AUD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0056,
+    "created": "2026-03-05T20:20:17.153340333Z",
+    "closed": "2026-03-05T20:22:51Z"
+  },
+  {
+    "id": "11465",
+    "symbol": "USD_DKK",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0014,
+    "created": "2026-03-05T20:20:17.247592514Z",
+    "closed": "2026-03-05T20:23:21Z"
+  },
+  {
+    "id": "11473",
+    "symbol": "USD_JPY",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0039,
+    "created": "2026-03-05T20:20:21.774582662Z",
+    "closed": "2026-03-05T20:23:21Z"
+  },
+  {
+    "id": "11477",
+    "symbol": "CHF_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0002,
+    "created": "2026-03-05T20:20:22.008542691Z",
+    "closed": "2026-03-05T20:22:50Z"
+  },
+  {
+    "id": "11483",
+    "symbol": "GBP_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0032,
+    "created": "2026-03-05T20:20:23.381684517Z",
+    "closed": "2026-03-05T20:23:21Z"
+  },
+  {
+    "id": "11493",
+    "symbol": "NZD_SGD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0032,
+    "created": "2026-03-05T20:21:10.506561036Z",
+    "closed": "2026-03-05T20:32:45Z"
+  },
+  {
+    "id": "11511",
+    "symbol": "AUD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0039,
+    "created": "2026-03-05T20:23:10.926933314Z",
+    "closed": "2026-03-05T20:27:25Z"
+  },
+  {
+    "id": "11515",
+    "symbol": "NZD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0009,
+    "created": "2026-03-05T20:23:11.084987728Z",
+    "closed": "2026-03-05T20:28:44Z"
+  },
+  {
+    "id": "11547",
+    "symbol": "AUD_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0123,
+    "created": "2026-03-05T20:25:08.406836004Z",
+    "closed": "2026-03-05T20:50:06Z"
+  },
+  {
+    "id": "11551",
+    "symbol": "AUD_USD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:25:08.483582315Z",
+    "closed": null
+  },
+  {
+    "id": "11557",
+    "symbol": "CAD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0033,
+    "created": "2026-03-05T20:25:13.81324514Z",
+    "closed": "2026-03-05T20:28:56Z"
+  },
+  {
+    "id": "11569",
+    "symbol": "USD_CAD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0125,
+    "created": "2026-03-05T20:26:09.972525042Z",
+    "closed": "2026-03-05T20:47:07Z"
+  },
+  {
+    "id": "11573",
+    "symbol": "USD_SGD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:26:10.060218102Z",
+    "closed": null
+  },
+  {
+    "id": "11579",
+    "symbol": "GBP_AUD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:28:12.373497506Z",
+    "closed": null
+  },
+  {
+    "id": "11587",
+    "symbol": "EUR_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0032,
+    "created": "2026-03-05T20:29:08.606365623Z",
+    "closed": "2026-03-05T20:54:26Z"
+  },
+  {
+    "id": "11593",
+    "symbol": "CAD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.003,
+    "created": "2026-03-05T20:30:11.091680966Z",
+    "closed": "2026-03-05T20:40:10Z"
+  },
+  {
+    "id": "11601",
+    "symbol": "USD_CHF",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:33:09.558562118Z",
+    "closed": null
+  },
+  {
+    "id": "11609",
+    "symbol": "CHF_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0045,
+    "created": "2026-03-05T20:41:11.486690063Z",
+    "closed": "2026-03-05T20:44:42Z"
+  },
+  {
+    "id": "11615",
+    "symbol": "NZD_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:44:10.243492453Z",
+    "closed": null
+  },
+  {
+    "id": "11623",
+    "symbol": "GBP_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:46:07.660717357Z",
+    "closed": null
+  },
+  {
+    "id": "11633",
+    "symbol": "SGD_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:52:06.548533566Z",
+    "closed": null
+  },
+  {
+    "id": "11637",
+    "symbol": "AUD_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:52:06.719607392Z",
+    "closed": null
+  },
+  {
+    "id": "11641",
+    "symbol": "GBP_USD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-05T20:54:09.966209026Z",
+    "closed": null
+  },
+  {
     "id": "11239",
     "symbol": "GBP_CHF",
     "direction": "Long",
@@ -14,10 +444,10 @@
     "symbol": "EUR_SGD",
     "direction": "Short",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0023,
     "created": "2026-03-05T19:34:10.821080636Z",
-    "closed": null
+    "closed": "2026-03-05T20:04:37Z"
   },
   {
     "id": "11251",
@@ -34,10 +464,10 @@
     "symbol": "USD_CHF",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0127,
     "created": "2026-03-05T19:36:09.200898389Z",
-    "closed": null
+    "closed": "2026-03-05T20:08:56Z"
   },
   {
     "id": "11259",
@@ -64,10 +494,10 @@
     "symbol": "GBP_AUD",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0236,
     "created": "2026-03-05T19:36:13.708590589Z",
-    "closed": null
+    "closed": "2026-03-05T20:04:51Z"
   },
   {
     "id": "11277",
@@ -94,30 +524,30 @@
     "symbol": "NZD_USD",
     "direction": "Short",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0244,
     "created": "2026-03-05T19:39:17.744058511Z",
-    "closed": null
+    "closed": "2026-03-05T20:12:15Z"
   },
   {
     "id": "11289",
     "symbol": "AUD_JPY",
     "direction": "Short",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0137,
     "created": "2026-03-05T19:39:17.907743393Z",
-    "closed": null
+    "closed": "2026-03-05T20:08:58Z"
   },
   {
     "id": "11293",
     "symbol": "AUD_USD",
     "direction": "Short",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0133,
     "created": "2026-03-05T19:39:18.064441982Z",
-    "closed": null
+    "closed": "2026-03-05T20:05:25Z"
   },
   {
     "id": "11297",
@@ -134,20 +564,20 @@
     "symbol": "CAD_CHF",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0197,
     "created": "2026-03-05T19:46:07.868620855Z",
-    "closed": null
+    "closed": "2026-03-05T20:11:42Z"
   },
   {
     "id": "11317",
     "symbol": "USD_CAD",
     "direction": "Short",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": 0.005,
     "created": "2026-03-05T19:49:11.163300521Z",
-    "closed": null
+    "closed": "2026-03-05T20:13:43Z"
   },
   {
     "id": "11321",
@@ -164,10 +594,10 @@
     "symbol": "NZD_SGD",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": 0.0017,
     "created": "2026-03-05T19:52:10.842231968Z",
-    "closed": null
+    "closed": "2026-03-05T20:10:12Z"
   },
   {
     "id": "11329",
@@ -374,20 +804,20 @@
     "symbol": "USD_SGD",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0063,
     "created": "2026-03-05T18:55:08.597238628Z",
-    "closed": null
+    "closed": "2026-03-05T20:05:24Z"
   },
   {
     "id": "11213",
     "symbol": "SGD_JPY",
     "direction": "Short",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0074,
     "created": "2026-03-05T18:55:08.857916948Z",
-    "closed": null
+    "closed": "2026-03-05T20:45:23Z"
   },
   {
     "id": "11217",
@@ -704,10 +1134,10 @@
     "symbol": "NZD_JPY",
     "direction": "Short",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0156,
     "created": "2026-03-05T16:25:10.528051277Z",
-    "closed": null
+    "closed": "2026-03-05T20:38:00Z"
   },
   {
     "id": "10812",

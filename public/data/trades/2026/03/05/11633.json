@@ -1,0 +1,172 @@
+{
+  "id": "11633",
+  "trade_id": "11634",
+  "symbol": "SGD_JPY",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 123.023,
+  "stop_loss": 122.937,
+  "take_profit": 123.73,
+  "quantity": 14,
+  "profit": null,
+  "created": "2026-03-05T20:52:06.548533566Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 8789,
+  "risk_reward": 8.220930232558372,
+  "candles": [
+    {
+      "t": "2026-03-05T20:43:00Z",
+      "o": 122.956,
+      "h": 122.961,
+      "l": 122.92,
+      "c": 122.954
+    },
+    {
+      "t": "2026-03-05T20:44:00Z",
+      "o": 122.955,
+      "h": 122.966,
+      "l": 122.926,
+      "c": 122.96
+    },
+    {
+      "t": "2026-03-05T20:45:00Z",
+      "o": 122.969,
+      "h": 122.979,
+      "l": 122.933,
+      "c": 122.97
+    },
+    {
+      "t": "2026-03-05T20:46:00Z",
+      "o": 122.968,
+      "h": 122.975,
+      "l": 122.937,
+      "c": 122.971
+    },
+    {
+      "t": "2026-03-05T20:47:00Z",
+      "o": 122.943,
+      "h": 122.978,
+      "l": 122.937,
+      "c": 122.966
+    },
+    {
+      "t": "2026-03-05T20:48:00Z",
+      "o": 122.946,
+      "h": 122.971,
+      "l": 122.935,
+      "c": 122.965
+    },
+    {
+      "t": "2026-03-05T20:49:00Z",
+      "o": 122.962,
+      "h": 122.972,
+      "l": 122.937,
+      "c": 122.963
+    },
+    {
+      "t": "2026-03-05T20:50:00Z",
+      "o": 122.973,
+      "h": 122.987,
+      "l": 122.944,
+      "c": 122.987
+    },
+    {
+      "t": "2026-03-05T20:51:00Z",
+      "o": 122.986,
+      "h": 122.988,
+      "l": 122.942,
+      "c": 122.979
+    },
+    {
+      "t": "2026-03-05T20:52:00Z",
+      "o": 122.98,
+      "h": 122.987,
+      "l": 122.95,
+      "c": 122.984
+    },
+    {
+      "t": "2026-03-05T20:53:00Z",
+      "o": 122.979,
+      "h": 122.989,
+      "l": 122.952,
+      "c": 122.978
+    },
+    {
+      "t": "2026-03-05T20:54:00Z",
+      "o": 122.981,
+      "h": 123.002,
+      "l": 122.952,
+      "c": 122.994
+    },
+    {
+      "t": "2026-03-05T20:55:00Z",
+      "o": 122.993,
+      "h": 123.01,
+      "l": 122.959,
+      "c": 123.008
+    },
+    {
+      "t": "2026-03-05T20:56:00Z",
+      "o": 123.008,
+      "h": 123.008,
+      "l": 122.969,
+      "c": 123.003
+    },
+    {
+      "t": "2026-03-05T20:57:00Z",
+      "o": 122.992,
+      "h": 123.013,
+      "l": 122.975,
+      "c": 123.011
+    },
+    {
+      "t": "2026-03-05T20:58:00Z",
+      "o": 123.016,
+      "h": 123.016,
+      "l": 122.977,
+      "c": 123.001
+    }
+  ],
+  "score": {
+    "Symbol": "SGDJPY",
+    "T": 1772743800000,
+    "Time": "",
+    "trend_score": 14,
+    "ma_score": 74,
+    "crossover_score": 10,
+    "oscillator_score": -3,
+    "volatility_score": 7,
+    "volume_score": 4,
+    "fib_stack_score": 40,
+    "momentum_projection_score": 5,
+    "structure_score": 7,
+    "cycle_score": 2,
+    "pattern_score": 2,
+    "final_score": 34.94,
+    "confidence": 0.7757,
+    "entry_price": 122.962,
+    "stop_price": 122.952,
+    "tp_price": 123.055,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
