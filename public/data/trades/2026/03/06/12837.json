@@ -1,0 +1,58 @@
+{
+  "id": "12837",
+  "trade_id": "12838",
+  "symbol": "USD_HUF",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 338.827,
+  "stop_loss": 338.596,
+  "take_profit": 339.534,
+  "quantity": 3,
+  "profit": null,
+  "created": "2026-03-06T10:57:10.028544409Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 10244,
+  "risk_reward": 3.0606060606061054,
+  "score": {
+    "Symbol": "USDHUF",
+    "T": 1772794500000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 59,
+    "crossover_score": 13,
+    "oscillator_score": 5,
+    "volatility_score": 7,
+    "volume_score": 4,
+    "fib_stack_score": 10,
+    "momentum_projection_score": 14,
+    "structure_score": 6,
+    "cycle_score": 4,
+    "pattern_score": -1,
+    "final_score": 33.59,
+    "confidence": 0.7757,
+    "entry_price": 338.451,
+    "stop_price": 338.373,
+    "tp_price": 339.158,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "4d814100b2d4193f920ef7842afd6d1f2042147c",
+      "message": "refactor publish to use common-lib publish package"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
