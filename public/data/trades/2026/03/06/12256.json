@@ -1,0 +1,81 @@
+{
+  "id": "12256",
+  "trade_id": "12257",
+  "symbol": "NZD_SGD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.75496,
+  "stop_loss": 0.7554799999999999,
+  "take_profit": 0.75325,
+  "quantity": -4,
+  "profit": null,
+  "created": "2026-03-06T03:30:08.251633311Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 9328,
+  "risk_reward": 3.2884615384617395,
+  "candles": [
+    {
+      "t": "2026-03-06T03:26:00Z",
+      "o": 0.75484,
+      "h": 0.755055,
+      "l": 0.754588,
+      "c": 0.755049
+    },
+    {
+      "t": "2026-03-06T03:27:00Z",
+      "o": 0.755049,
+      "h": 0.755106,
+      "l": 0.7545,
+      "c": 0.754822
+    },
+    {
+      "t": "2026-03-06T03:28:00Z",
+      "o": 0.754903,
+      "h": 0.755066,
+      "l": 0.7544,
+      "c": 0.754552
+    }
+  ],
+  "score": {
+    "Symbol": "NZDSGD",
+    "T": 1772767680000,
+    "Time": "",
+    "trend_score": -15,
+    "ma_score": -114,
+    "crossover_score": -10,
+    "oscillator_score": -6,
+    "volatility_score": -5,
+    "volume_score": 4,
+    "fib_stack_score": -62,
+    "momentum_projection_score": 5,
+    "structure_score": -2,
+    "cycle_score": -2,
+    "pattern_score": 0,
+    "final_score": -28.53,
+    "confidence": 0.7612,
+    "entry_price": 0.75489,
+    "stop_price": 0.75541,
+    "tp_price": 0.75318,
+    "risk_reward": 3.23,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

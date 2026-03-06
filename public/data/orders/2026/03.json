@@ -1,5 +1,25 @@
 [
   {
+    "id": "12252",
+    "symbol": "EUR_SGD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0025,
+    "created": "2026-03-06T03:26:08.718742862Z",
+    "closed": "2026-03-06T03:49:06Z"
+  },
+  {
+    "id": "12256",
+    "symbol": "NZD_SGD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-06T03:30:08.251633311Z",
+    "closed": null
+  },
+  {
     "id": "12224",
     "symbol": "EUR_GBP",
     "direction": "Long",
@@ -24,10 +44,10 @@
     "symbol": "EUR_SGD",
     "direction": "Short",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": 0.0004,
     "created": "2026-03-06T02:46:09.028105983Z",
-    "closed": null
+    "closed": "2026-03-06T03:25:22Z"
   },
   {
     "id": "12212",
