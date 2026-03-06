@@ -15,7 +15,7 @@ import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {formatDollar} from '../common/Util';
 import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar} from '../../api/client';
-import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, TimeframeStats, ApiCalendarDay, DayData} from '../../context/Types';
+import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, TimeframeStats, TimeframeRow, ApiCalendarDay, DayData} from '../../context/Types';
 
 type Period = '1H' | '4H' | '12H' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'All';
 
@@ -164,6 +164,7 @@ export default function Dashboard() {
     const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null);
     // API-computed stats for the selected period (null = not yet fetched or API unavailable)
     const [periodStats, setPeriodStats] = useState<TimeframeStats | null>(null);
+    const [periodByTimeframe, setPeriodByTimeframe] = useState<TimeframeRow[] | null>(null);
     const [periodStatsKey, setPeriodStatsKey] = useState<string>('');
 
     useEffect(() => {
@@ -205,6 +206,7 @@ export default function Dashboard() {
     useEffect(() => {
         if (period === 'All' || !apiAvailable) {
             setPeriodStats(null);
+            setPeriodByTimeframe(null);
             setPeriodStatsKey('');
             return;
         }
@@ -215,6 +217,7 @@ export default function Dashboard() {
         apiFetchDashboard(since).then(apiData => {
             if (apiData) {
                 setPeriodStats(apiData.all_time as TimeframeStats);
+                setPeriodByTimeframe(apiData.by_timeframe ?? null);
                 setPeriodStatsKey(key);
             }
         });
@@ -270,9 +273,12 @@ export default function Dashboard() {
     const filteredStats = useMemo<TimeframeStats | null>(() => {
         if (!dashboard) return null;
 
-        // Timeframe filter: use by_timeframe row (already period-correct from API)
+        // Timeframe filter: use the period-appropriate by_timeframe data
         if (selectedTimeframe) {
-            const tfRow = dashboard.by_timeframe.find(t => t.timeframe === selectedTimeframe);
+            const source = (period !== 'All' && periodByTimeframe && periodStatsKey.startsWith(period + ':'))
+                ? periodByTimeframe
+                : dashboard.by_timeframe;
+            const tfRow = source.find(t => t.timeframe === selectedTimeframe);
             if (tfRow) return tfRow;
         }
 
@@ -288,7 +294,12 @@ export default function Dashboard() {
         // This covers API-down scenarios. For sub-day periods this uses full-day
         // granularity from the day file (best available without the API).
         return computeStatsFromDayFiles(dateCutoff, period);
-    }, [dashboard, period, selectedTimeframe, periodStats, periodStatsKey, dateCutoff]);
+    }, [dashboard, period, selectedTimeframe, periodStats, periodByTimeframe, periodStatsKey, dateCutoff]);
+
+    // Active by_timeframe data: period-filtered from API when available, otherwise all-time
+    const activeByTimeframe = (period !== 'All' && periodByTimeframe && periodStatsKey.startsWith(period + ':'))
+        ? periodByTimeframe
+        : dashboard?.by_timeframe ?? [];
 
     if (!dashboard || !filteredStats) {
         return (
@@ -376,7 +387,7 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                         <PLChart data={filteredPL}/>
                         <TimeframeBreakdown
-                            data={dashboard.by_timeframe}
+                            data={activeByTimeframe}
                             selectedTimeframe={selectedTimeframe}
                             onTimeframeClick={handleTimeframeClick}
                         />
@@ -384,9 +395,9 @@ export default function Dashboard() {
 
                     {/* Recommendation + Timeframe Radar */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                        {dashboard.recommendation_counts && <RecommendationRadar data={dashboard.recommendation_counts}/>}
+                        {dashboard.recommendation_counts && period === 'All' && <RecommendationRadar data={dashboard.recommendation_counts}/>}
                         <TimeframeRadar
-                            data={dashboard.by_timeframe}
+                            data={activeByTimeframe}
                             selectedTimeframe={selectedTimeframe}
                             onTimeframeClick={handleTimeframeClick}
                         />
