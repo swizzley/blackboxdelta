@@ -1,0 +1,96 @@
+{
+  "id": "12146",
+  "trade_id": "12147",
+  "symbol": "EUR_NZD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 1.96476,
+  "exit": 1.965435,
+  "stop_loss": 1.9657,
+  "take_profit": 1.96184,
+  "quantity": -4,
+  "profit": -0.0027,
+  "created": "2026-03-06T01:11:11.052412691Z",
+  "closed": "2026-03-06T01:15:14Z",
+  "duration_mins": 4,
+  "alert_id": 9112,
+  "risk_reward": 3.1063829787236354,
+  "candles": [
+    {
+      "t": "2026-03-06T01:09:00Z",
+      "o": 1.96478,
+      "h": 1.96483,
+      "l": 1.9636,
+      "c": 1.9646
+    },
+    {
+      "t": "2026-03-06T01:10:00Z",
+      "o": 1.96465,
+      "h": 1.96489,
+      "l": 1.9638,
+      "c": 1.96478
+    },
+    {
+      "t": "2026-03-06T01:11:00Z",
+      "o": 1.96473,
+      "h": 1.96496,
+      "l": 1.9641,
+      "c": 1.9641
+    },
+    {
+      "t": "2026-03-06T01:12:00Z",
+      "o": 1.96474,
+      "h": 1.96474,
+      "l": 1.9636,
+      "c": 1.96437
+    },
+    {
+      "t": "2026-03-06T01:13:00Z",
+      "o": 1.96432,
+      "h": 1.96481,
+      "l": 1.9638,
+      "c": 1.9648
+    }
+  ],
+  "score": {
+    "Symbol": "EURNZD",
+    "T": 1772759340000,
+    "Time": "",
+    "trend_score": -13,
+    "ma_score": -85,
+    "crossover_score": -6,
+    "oscillator_score": -5,
+    "volatility_score": -6,
+    "volume_score": 0,
+    "fib_stack_score": -9,
+    "momentum_projection_score": -14,
+    "structure_score": 0,
+    "cycle_score": 2,
+    "pattern_score": -1,
+    "final_score": -27.48,
+    "confidence": 0.7612,
+    "entry_price": 1.96472,
+    "stop_price": 1.96498,
+    "tp_price": 1.9618,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
