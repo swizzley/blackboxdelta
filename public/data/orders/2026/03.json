@@ -1,5 +1,15 @@
 [
   {
+    "id": "12939",
+    "symbol": "USD_CAD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0009,
+    "created": "2026-03-06T17:17:08.222723524Z",
+    "closed": "2026-03-06T17:20:05Z"
+  },
+  {
     "id": "12923",
     "symbol": "CAD_HKD",
     "direction": "Long",
