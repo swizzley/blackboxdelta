@@ -1,0 +1,59 @@
+{
+  "id": "12857",
+  "trade_id": "12858",
+  "symbol": "CHF_JPY",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 202.12,
+  "exit": 202.11950000000002,
+  "stop_loss": 202.061,
+  "take_profit": 202.438,
+  "quantity": 3,
+  "profit": -0.0015,
+  "created": "2026-03-06T12:24:11.573298729Z",
+  "closed": "2026-03-06T12:27:04Z",
+  "duration_mins": 2,
+  "alert_id": 10431,
+  "risk_reward": 5.389830508474527,
+  "score": {
+    "Symbol": "CHFJPY",
+    "T": 1772799720000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 68,
+    "crossover_score": 9,
+    "oscillator_score": -1,
+    "volatility_score": 8,
+    "volume_score": 2,
+    "fib_stack_score": 33,
+    "momentum_projection_score": 13,
+    "structure_score": 6,
+    "cycle_score": 4,
+    "pattern_score": 2,
+    "final_score": 34.88,
+    "confidence": 0.8582,
+    "entry_price": 202.003,
+    "stop_price": 201.975,
+    "tp_price": 202.321,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "4d814100b2d4193f920ef7842afd6d1f2042147c",
+      "message": "refactor publish to use common-lib publish package"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

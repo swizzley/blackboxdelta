@@ -1,5 +1,25 @@
 [
   {
+    "id": "12857",
+    "symbol": "CHF_JPY",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0015,
+    "created": "2026-03-06T12:24:11.573298729Z",
+    "closed": "2026-03-06T12:27:04Z"
+  },
+  {
+    "id": "12869",
+    "symbol": "AUD_CHF",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-06T12:54:07.93367346Z",
+    "closed": null
+  },
+  {
     "id": "12843",
     "symbol": "EUR_GBP",
     "direction": "Short",
