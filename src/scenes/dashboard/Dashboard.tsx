@@ -165,6 +165,7 @@ export default function Dashboard() {
     // API-computed stats for the selected period (null = not yet fetched or API unavailable)
     const [periodStats, setPeriodStats] = useState<TimeframeStats | null>(null);
     const [periodByTimeframe, setPeriodByTimeframe] = useState<TimeframeRow[] | null>(null);
+    const [periodRecCounts, setPeriodRecCounts] = useState<Record<string, number> | null>(null);
     const [periodStatsKey, setPeriodStatsKey] = useState<string>('');
 
     useEffect(() => {
@@ -176,7 +177,12 @@ export default function Dashboard() {
             apiFetchDashboard().then(apiData => {
                 if (apiData) {
                     setDashboard(prev => prev
-                        ? {...prev, all_time: {...prev.all_time, ...apiData.all_time}, by_timeframe: apiData.by_timeframe}
+                        ? {
+                            ...prev,
+                            all_time: {...prev.all_time, ...apiData.all_time},
+                            by_timeframe: apiData.by_timeframe,
+                            recommendation_counts: apiData.recommendation_counts ?? prev.recommendation_counts,
+                        }
                         : prev
                     );
                     setLiveStats(true);
@@ -207,6 +213,7 @@ export default function Dashboard() {
         if (period === 'All' || !apiAvailable) {
             setPeriodStats(null);
             setPeriodByTimeframe(null);
+            setPeriodRecCounts(null);
             setPeriodStatsKey('');
             return;
         }
@@ -218,6 +225,7 @@ export default function Dashboard() {
             if (apiData) {
                 setPeriodStats(apiData.all_time as TimeframeStats);
                 setPeriodByTimeframe(apiData.by_timeframe ?? null);
+                setPeriodRecCounts(apiData.recommendation_counts ?? null);
                 setPeriodStatsKey(key);
             }
         });
@@ -297,16 +305,17 @@ export default function Dashboard() {
     }, [dashboard, period, selectedTimeframe, periodStats, periodByTimeframe, periodStatsKey, dateCutoff]);
 
     // Active by_timeframe data: period-filtered from API when available, otherwise all-time.
-    // The timeframe breakdown/radar charts exist to COMPARE timeframes. If the period only
-    // produced trades in one timeframe, showing a single bar/polygon is useless — fall back
-    // to all-time data which always has all timeframes for a meaningful comparison.
+    // Sorted in a fixed order (scalp, intraday, swing) so chart colors/positions are stable.
+    const TF_ORDER = ['scalp', 'intraday', 'swing'];
+    const sortTf = (data: TimeframeRow[]) =>
+        [...data].sort((a, b) => TF_ORDER.indexOf(a.timeframe) - TF_ORDER.indexOf(b.timeframe));
+
     const activeByTimeframe = useMemo(() => {
         const allTime = dashboard?.by_timeframe ?? [];
         if (period === 'All' || !periodByTimeframe || !periodStatsKey.startsWith(period + ':')) {
-            return allTime;
+            return sortTf(allTime);
         }
-        // Only use period data if it has multiple timeframes to compare
-        return periodByTimeframe.length > 1 ? periodByTimeframe : allTime;
+        return sortTf(periodByTimeframe);
     }, [dashboard, period, periodByTimeframe, periodStatsKey]);
 
     if (!dashboard || !filteredStats) {
@@ -403,7 +412,12 @@ export default function Dashboard() {
 
                     {/* Recommendation + Timeframe Radar */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                        {dashboard.recommendation_counts && <RecommendationRadar data={dashboard.recommendation_counts}/>}
+                        {(() => {
+                            const recData = (period !== 'All' && periodRecCounts && periodStatsKey.startsWith(period + ':'))
+                                ? periodRecCounts
+                                : dashboard.recommendation_counts;
+                            return recData ? <RecommendationRadar data={recData}/> : null;
+                        })()}
                         <TimeframeRadar
                             data={activeByTimeframe}
                             selectedTimeframe={selectedTimeframe}

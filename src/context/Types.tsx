@@ -207,6 +207,7 @@ export interface ApiDatabaseStats {
 export interface ApiDashboard {
     all_time: TimeframeStats;
     by_timeframe: TimeframeRow[];
+    recommendation_counts?: Record<string, number>;
     updated_at?: string;
 }
 
