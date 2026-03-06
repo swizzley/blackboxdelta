@@ -36,7 +36,7 @@ function formatLabel(date: string, count: number): string {
 
 export default function ScoreTrendChart({data}: ScoreTrendChartProps) {
     const {isDarkMode} = useTheme();
-    const [showComponents, setShowComponents] = useState(false);
+    const [showComponents, setShowComponents] = useState(true);
 
     if (!data || data.length === 0) return null;
 
