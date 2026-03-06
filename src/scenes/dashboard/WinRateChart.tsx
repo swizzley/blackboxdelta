@@ -11,6 +11,29 @@ export default function WinRateChart({data, direction}: WinRateChartProps) {
     const {isDarkMode} = useTheme();
 
     const dates = Object.keys(data).sort();
+    const dateCount = dates.length;
+
+    // Format x-axis labels based on date range density
+    function formatDateLabel(d: string): string {
+        if (dateCount <= 1) return d;
+        if (dateCount <= 7) {
+            // Short range: show "Mon 3/4" style
+            const dt = new Date(d + 'T00:00:00');
+            const day = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
+            return `${day} ${dt.getMonth()+1}/${dt.getDate()}`;
+        }
+        if (dateCount <= 90) {
+            // Medium range: show "3/4" style
+            const dt = new Date(d + 'T00:00:00');
+            return `${dt.getMonth()+1}/${dt.getDate()}`;
+        }
+        // Long range: show "Mar '24" style
+        const dt = new Date(d + 'T00:00:00');
+        const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getMonth()];
+        return `${mon} '${String(dt.getFullYear()).slice(2)}`;
+    }
+
+    const formattedDates = dates.map(formatDateLabel);
 
     // Index direction data by date for quick lookup
     const dirMap = new Map<string, DirectionDataPoint>();
@@ -63,7 +86,8 @@ export default function WinRateChart({data, direction}: WinRateChartProps) {
         tooltip: {
             trigger: 'axis',
             formatter: (params: any) => {
-                const date = params[0]?.axisValue ?? '';
+                const idx = params[0]?.dataIndex ?? 0;
+                const date = dates[idx] ?? params[0]?.axisValue ?? '';
                 let html = `<b>${date}</b>`;
                 for (const p of params) {
                     if (p.value === null || p.value === undefined) continue;
@@ -96,8 +120,12 @@ export default function WinRateChart({data, direction}: WinRateChartProps) {
         },
         xAxis: {
             type: 'category',
-            data: dates,
-            axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280'},
+            data: formattedDates,
+            axisLabel: {
+                color: isDarkMode ? '#9ca3af' : '#6b7280',
+                rotate: dateCount > 30 ? 45 : 0,
+                fontSize: dateCount > 60 ? 10 : 12,
+            },
             axisLine: {lineStyle: {color: isDarkMode ? '#374151' : '#d1d5db'}},
         },
         yAxis: [

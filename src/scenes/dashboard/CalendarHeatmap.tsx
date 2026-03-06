@@ -18,7 +18,8 @@ export default function CalendarHeatmap({data}: CalendarHeatmapProps) {
         months.push(today.subtract(i, 'month'));
     }
 
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekdaysFull = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekdaysShort = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
     function getCellColor(dateStr: string): string {
         const day = data[dateStr];
@@ -47,10 +48,11 @@ export default function CalendarHeatmap({data}: CalendarHeatmapProps) {
                     {month.format('MMMM YYYY')}
                 </h4>
                 <div className="grid grid-cols-7 gap-1">
-                    {weekdays.map(wd => (
+                    {weekdaysFull.map((wd, i) => (
                         <div key={wd}
                              className={`text-xs text-center ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                            {wd}
+                            <span className="hidden sm:inline">{wd}</span>
+                            <span className="sm:hidden">{weekdaysShort[i]}</span>
                         </div>
                     ))}
                     {days.map((day, i) => {
