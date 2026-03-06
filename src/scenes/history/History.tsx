@@ -5,6 +5,7 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
+import {formatDollar} from '../common/Util';
 import {fetchOrders as apiFetchOrders} from '../../api/client';
 import {connectOrders} from '../../api/sse';
 import {OrderSummary, ApiOrder} from '../../context/Types';
@@ -244,7 +245,7 @@ export default function History() {
                                                 o.profit > 0 ? 'text-emerald-500' :
                                                     o.profit < 0 ? 'text-red-500' : ''
                                         }`}>
-                                            {o.profit !== null ? `${o.profit >= 0 ? '+' : '-'}$${Math.abs(o.profit).toFixed(2)}` : '-'}
+                                            {o.profit !== null ? formatDollar(o.profit) : '-'}
                                         </td>
                                     </tr>
                                 ))}

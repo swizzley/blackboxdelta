@@ -1,6 +1,7 @@
 import ReactECharts from 'echarts-for-react';
 import {useTheme} from '../../context/Theme';
 import {PLDataPoint} from '../../context/Types';
+import {formatDollar} from '../common/Util';
 
 interface PLChartProps {
     data: PLDataPoint[];
@@ -17,8 +18,8 @@ export default function PLChart({data}: PLChartProps) {
                 const p = params[0];
                 const d = params[1];
                 return `${p.axisValue}<br/>
-                    Cumulative P&L: <b>${p.value >= 0 ? '+' : '-'}$${Math.abs(p.value).toFixed(2)}</b><br/>
-                    Daily P&L: <b>${d.value >= 0 ? '+' : '-'}$${Math.abs(d.value).toFixed(2)}</b>`;
+                    Cumulative P&L: <b>${formatDollar(p.value)}</b><br/>
+                    Daily P&L: <b>${formatDollar(d.value)}</b>`;
             },
         },
         legend: {

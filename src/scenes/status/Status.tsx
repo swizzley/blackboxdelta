@@ -2,6 +2,7 @@ import {useEffect, useState, useRef, useCallback} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
+import {formatDollar} from '../common/Util';
 import {useApi} from '../../context/Api';
 import {fetchMarkets, fetchSettings, fetchVersions} from '../../api/client';
 import {connectOrders, connectAlerts} from '../../api/sse';
@@ -211,7 +212,7 @@ export default function Status() {
                                                     }`}>{o.status}</span>
                                                     {o.profit != null && (
                                                         <span className={Number(o.profit) >= 0 ? 'text-emerald-500' : 'text-red-500'}>
-                                                            {Number(o.profit) >= 0 ? '+' : ''}${Number(o.profit).toFixed(2)}
+                                                            {formatDollar(Number(o.profit))}
                                                         </span>
                                                     )}
                                                 </div>

@@ -13,6 +13,7 @@ import RecommendationRadar from './RecommendationRadar';
 import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
+import {formatDollar} from '../common/Util';
 import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar} from '../../api/client';
 import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, TimeframeStats, ApiCalendarDay, DayData} from '../../context/Types';
 
@@ -307,7 +308,7 @@ export default function Dashboard() {
 
     const stats = filteredStats;
     const plColor = stats.total_pl >= 0 ? 'green' : 'red';
-    const plDisplay = `${stats.total_pl >= 0 ? '+' : '-'}$${Math.abs(stats.total_pl).toFixed(2)}`;
+    const plDisplay = formatDollar(stats.total_pl);
 
     return (
         <>
@@ -402,12 +403,12 @@ export default function Dashboard() {
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <StatCard
                             label="Avg Win"
-                            value={stats.avg_win != null ? `+$${stats.avg_win.toFixed(2)}` : 'N/A'}
+                            value={stats.avg_win != null ? formatDollar(stats.avg_win) : 'N/A'}
                             color="green"
                         />
                         <StatCard
                             label="Avg Loss"
-                            value={stats.avg_loss != null ? `-$${Math.abs(stats.avg_loss).toFixed(2)}` : 'N/A'}
+                            value={stats.avg_loss != null ? formatDollar(stats.avg_loss) : 'N/A'}
                             color="red"
                         />
                         <StatCard

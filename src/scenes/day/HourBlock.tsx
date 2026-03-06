@@ -3,6 +3,7 @@ import {useNavigate} from 'react-router-dom';
 import {useTheme} from '../../context/Theme';
 import {HourBlock as HourBlockType} from '../../context/Types';
 import {ChevronDownIcon, ChevronRightIcon} from '@heroicons/react/20/solid';
+import {formatDollar} from '../common/Util';
 import dayjs from 'dayjs';
 
 interface HourBlockProps {
@@ -51,7 +52,7 @@ export default function HourBlock({data}: HourBlockProps) {
     const [expanded, setExpanded] = useState(false);
 
     const s = data.summary;
-    const plStr = `${s.total_pl >= 0 ? '+' : '-'}$${Math.abs(s.total_pl).toFixed(2)}`;
+    const plStr = formatDollar(s.total_pl);
     const plColor = s.total_pl > 0 ? 'text-emerald-500' : s.total_pl < 0 ? 'text-red-500' : (isDarkMode ? 'text-gray-300' : 'text-gray-600');
 
     // Derived stats from orders
@@ -114,17 +115,17 @@ export default function HourBlock({data}: HourBlockProps) {
                     )}
                     {avgPL !== null && (
                         <span className={`hidden md:inline text-xs ${avgPL > 0 ? 'text-emerald-500' : avgPL < 0 ? 'text-red-500' : (isDarkMode ? 'text-gray-500' : 'text-gray-400')}`} title="Avg P&L per trade">
-                            avg {avgPL >= 0 ? '+' : '-'}${Math.abs(avgPL).toFixed(2)}
+                            avg {formatDollar(avgPL)}
                         </span>
                     )}
                     {bestTrade && bestTrade.profit !== null && bestTrade.profit > 0 && (
                         <span className="hidden lg:inline text-xs text-emerald-500" title={`Best: ${bestTrade.symbol.replace('_','/')}`}>
-                            ▲ +${bestTrade.profit.toFixed(2)}
+                            ▲ {formatDollar(bestTrade.profit)}
                         </span>
                     )}
                     {worstTrade && worstTrade.profit !== null && worstTrade.profit < 0 && (
                         <span className="hidden lg:inline text-xs text-red-500" title={`Worst: ${worstTrade.symbol.replace('_','/')}`}>
-                            ▼ -${Math.abs(worstTrade.profit).toFixed(2)}
+                            ▼ {formatDollar(worstTrade.profit)}
                         </span>
                     )}
                     <span className={`font-semibold ${plColor}`}>{plStr}</span>
@@ -136,8 +137,8 @@ export default function HourBlock({data}: HourBlockProps) {
                     {/* Mini stats row */}
                     <div className={`grid grid-cols-4 gap-2 p-3 text-center text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                         <div>Win Rate: <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{s.win_rate_pct !== null ? `${s.win_rate_pct}%` : 'N/A'}</span></div>
-                        <div>Avg Win: <span className="text-emerald-500">{s.avg_win !== null ? `+${s.avg_win.toFixed(2)}` : 'N/A'}</span></div>
-                        <div>Avg Loss: <span className="text-red-500">{s.avg_loss !== null ? s.avg_loss.toFixed(2) : 'N/A'}</span></div>
+                        <div>Avg Win: <span className="text-emerald-500">{s.avg_win !== null ? formatDollar(s.avg_win) : 'N/A'}</span></div>
+                        <div>Avg Loss: <span className="text-red-500">{s.avg_loss !== null ? formatDollar(s.avg_loss) : 'N/A'}</span></div>
                         <div>Duration: <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{minDur !== null ? `${minDur}/${medDur}/${maxDur}m` : 'N/A'}</span></div>
                     </div>
 
@@ -172,7 +173,7 @@ export default function HourBlock({data}: HourBlockProps) {
                                         o.profit > 0 ? 'text-emerald-500' :
                                             o.profit < 0 ? 'text-red-500' : ''
                                 }`}>
-                                    {o.profit !== null ? `${o.profit >= 0 ? '+' : '-'}$${Math.abs(o.profit).toFixed(2)}` : '-'}
+                                    {o.profit !== null ? formatDollar(o.profit) : '-'}
                                 </td>
                             </tr>
                         ))}
