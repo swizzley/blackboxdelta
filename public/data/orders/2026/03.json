@@ -1,13 +1,13 @@
 [
   {
-    "id": "12947",
-    "symbol": "EUR_HKD",
+    "id": "12959",
+    "symbol": "CAD_SGD",
     "direction": "Long",
     "timeframe": "scalp",
     "status": "CLOSED",
-    "profit": -0.0006,
-    "created": "2026-03-06T18:19:11.41914751Z",
-    "closed": "2026-03-06T18:21:06Z"
+    "profit": 0.0005,
+    "created": "2026-03-06T18:30:06.480251689Z",
+    "closed": "2026-03-06T18:39:02Z"
   },
   {
     "id": "12953",
@@ -20,14 +20,14 @@
     "closed": "2026-03-06T18:22:53Z"
   },
   {
-    "id": "12959",
-    "symbol": "CAD_SGD",
+    "id": "12947",
+    "symbol": "EUR_HKD",
     "direction": "Long",
     "timeframe": "scalp",
     "status": "CLOSED",
-    "profit": 0.0005,
-    "created": "2026-03-06T18:30:06.480251689Z",
-    "closed": "2026-03-06T18:39:02Z"
+    "profit": -0.0006,
+    "created": "2026-03-06T18:19:11.41914751Z",
+    "closed": "2026-03-06T18:21:06Z"
   },
   {
     "id": "12939",
@@ -40,16 +40,6 @@
     "closed": "2026-03-06T17:20:05Z"
   },
   {
-    "id": "12923",
-    "symbol": "CAD_HKD",
-    "direction": "Long",
-    "timeframe": "scalp",
-    "status": "CLOSED",
-    "profit": -0.0011,
-    "created": "2026-03-06T16:47:11.099292323Z",
-    "closed": "2026-03-06T16:47:49Z"
-  },
-  {
     "id": "12929",
     "symbol": "CAD_HKD",
     "direction": "Long",
@@ -58,6 +48,16 @@
     "profit": 0.0003,
     "created": "2026-03-06T16:50:13.69945386Z",
     "closed": "2026-03-06T16:52:13Z"
+  },
+  {
+    "id": "12923",
+    "symbol": "CAD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0011,
+    "created": "2026-03-06T16:47:11.099292323Z",
+    "closed": "2026-03-06T16:47:49Z"
   },
   {
     "id": "12913",
