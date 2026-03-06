@@ -6,6 +6,7 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import StatCard from '../common/StatCard';
 import {useTheme} from '../../context/Theme';
+import {formatDollar} from '../common/Util';
 import {useApi} from '../../context/Api';
 import {fetchOrder as apiFetchOrder} from '../../api/client';
 import {OrderDetail, Score} from '../../context/Types';
@@ -128,7 +129,7 @@ export default function TradeDetail() {
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                                 <StatCard
                                     label="P&L"
-                                    value={trade.profit !== null ? `${trade.profit >= 0 ? '+' : ''}$${Math.abs(trade.profit).toFixed(2)}` : 'Open'}
+                                    value={trade.profit !== null ? formatDollar(trade.profit) : 'Open'}
                                     color={trade.profit !== null ? (trade.profit >= 0 ? 'green' : 'red') : 'default'}
                                 />
                                 <StatCard label="Quantity" value={`${trade.quantity > 0 ? '+' : ''}${trade.quantity}`}/>
