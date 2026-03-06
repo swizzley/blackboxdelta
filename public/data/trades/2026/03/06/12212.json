@@ -1,0 +1,117 @@
+{
+  "id": "12212",
+  "trade_id": "12213",
+  "symbol": "CAD_SGD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.93625,
+  "exit": 0.9361,
+  "stop_loss": 0.93675,
+  "take_profit": 0.93463,
+  "quantity": -4,
+  "profit": 0.0006,
+  "created": "2026-03-06T02:01:08.409553728Z",
+  "closed": "2026-03-06T02:20:36Z",
+  "duration_mins": 19,
+  "alert_id": 9210,
+  "risk_reward": 3.2400000000004887,
+  "candles": [
+    {
+      "t": "2026-03-06T01:54:00Z",
+      "o": 0.936163,
+      "h": 0.936261,
+      "l": 0.935627,
+      "c": 0.936261
+    },
+    {
+      "t": "2026-03-06T01:55:00Z",
+      "o": 0.93623,
+      "h": 0.936307,
+      "l": 0.935651,
+      "c": 0.936146
+    },
+    {
+      "t": "2026-03-06T01:56:00Z",
+      "o": 0.93618,
+      "h": 0.936209,
+      "l": 0.93567,
+      "c": 0.935955
+    },
+    {
+      "t": "2026-03-06T01:57:00Z",
+      "o": 0.936005,
+      "h": 0.936239,
+      "l": 0.935751,
+      "c": 0.936217
+    },
+    {
+      "t": "2026-03-06T01:58:00Z",
+      "o": 0.936112,
+      "h": 0.936277,
+      "l": 0.935723,
+      "c": 0.936248
+    },
+    {
+      "t": "2026-03-06T02:10:00Z",
+      "o": 0.936272,
+      "h": 0.936384,
+      "l": 0.935804,
+      "c": 0.936214
+    },
+    {
+      "t": "2026-03-06T02:11:00Z",
+      "o": 0.93619,
+      "h": 0.93634,
+      "l": 0.935739,
+      "c": 0.93613
+    },
+    {
+      "t": "2026-03-06T02:12:00Z",
+      "o": 0.936271,
+      "h": 0.936325,
+      "l": 0.935652,
+      "c": 0.936177
+    }
+  ],
+  "score": {
+    "Symbol": "CADSGD",
+    "T": 1772762340000,
+    "Time": "",
+    "trend_score": -15,
+    "ma_score": -76,
+    "crossover_score": -5,
+    "oscillator_score": -5,
+    "volatility_score": -3,
+    "volume_score": 4,
+    "fib_stack_score": 2,
+    "momentum_projection_score": -11,
+    "structure_score": 2,
+    "cycle_score": 3,
+    "pattern_score": -1,
+    "final_score": -24.5,
+    "confidence": 0.7627,
+    "entry_price": 0.93619,
+    "stop_price": 0.93656,
+    "tp_price": 0.93457,
+    "risk_reward": 4.39,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
