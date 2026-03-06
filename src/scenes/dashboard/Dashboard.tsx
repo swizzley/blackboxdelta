@@ -296,8 +296,9 @@ export default function Dashboard() {
         return computeStatsFromDayFiles(dateCutoff, period);
     }, [dashboard, period, selectedTimeframe, periodStats, periodByTimeframe, periodStatsKey, dateCutoff]);
 
-    // Active by_timeframe data: period-filtered from API when available, otherwise all-time
-    const activeByTimeframe = (period !== 'All' && periodByTimeframe && periodStatsKey.startsWith(period + ':'))
+    // Active by_timeframe data: period-filtered from API when available, otherwise all-time.
+    // Always fall back to dashboard.by_timeframe so charts never vanish during loading.
+    const activeByTimeframe = (period !== 'All' && periodByTimeframe && periodByTimeframe.length > 0 && periodStatsKey.startsWith(period + ':'))
         ? periodByTimeframe
         : dashboard?.by_timeframe ?? [];
 
@@ -403,8 +404,8 @@ export default function Dashboard() {
                         />
                     </div>
 
-                    {/* Score Trend (needs 2+ days of data) */}
-                    {filteredScores.length > 1 && (
+                    {/* Score Trend */}
+                    {filteredScores.length > 0 && (
                         <div className="mb-6">
                             <ScoreTrendChart data={filteredScores}/>
                         </div>
