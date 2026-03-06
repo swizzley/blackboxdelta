@@ -201,7 +201,7 @@ export default function Dashboard() {
                         <StatCard label="Total P&L" value={plDisplay} color={plColor} live={liveStats}/>
                         <StatCard
                             label="Win Rate"
-                            value={stats.win_rate_pct !== null ? `${stats.win_rate_pct}%` : 'N/A'}
+                            value={stats.win_rate_pct !== null ? `${stats.win_rate_pct.toFixed(2)}%` : 'N/A'}
                             subtitle={`${stats.winners}W / ${stats.losers}L / ${stats.breakeven}BE`}
                             live={liveStats}
                         />
@@ -255,7 +255,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Calendar */}
-                    {filteredCalendar && <CalendarHeatmap data={filteredCalendar}/>}
+                    {calendar && <CalendarHeatmap data={calendar}/>}
                 </div>
             </div>
             <Foot/>
