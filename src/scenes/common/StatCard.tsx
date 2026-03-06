@@ -23,7 +23,7 @@ export default function StatCard({label, value, subtitle, color = 'default', liv
                 {label}
                 {live && <span className="ml-1.5 inline-flex items-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">LIVE</span>}
             </p>
-            <p className={`mt-1 text-2xl font-semibold ${valueColor}`}>{value}</p>
+            <p className={`mt-1 text-lg sm:text-2xl font-semibold ${valueColor}`}>{value}</p>
             {subtitle && (
                 <p className={`mt-1 text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{subtitle}</p>
             )}
