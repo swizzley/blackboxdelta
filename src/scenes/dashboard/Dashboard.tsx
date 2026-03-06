@@ -349,7 +349,7 @@ export default function Dashboard() {
             <div className={`min-h-screen pb-12 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-500`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-20">
                     {/* Period Selector + Active Filters */}
-                    <div className="flex items-center justify-between gap-2 mb-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                         <div className="flex items-center gap-2">
                             {selectedTimeframe && (
                                 <button
@@ -366,12 +366,12 @@ export default function Dashboard() {
                                 </button>
                             )}
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center gap-1">
                             {PERIODS.map(p => (
                                 <button
                                     key={p}
                                     onClick={() => setPeriod(p)}
-                                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                                    className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-md transition-colors ${
                                         period === p
                                             ? 'bg-cyan-500 text-white'
                                             : `${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`
