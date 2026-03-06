@@ -32,6 +32,7 @@ function apiOrderToSummary(o: ApiOrder): OrderSummary {
         timeframe: o.timeframe,
         status: o.status,
         profit: o.profit,
+        close_reason: o.close_reason,
         created: o.created,
         closed: o.closed,
     };
@@ -209,6 +210,7 @@ export default function History() {
                                     <th className={th} onClick={() => handleSort('direction')}>Dir<SortIndicator col="direction"/></th>
                                     <th className={th} onClick={() => handleSort('timeframe')}>Timeframe<SortIndicator col="timeframe"/></th>
                                     <th className={th} onClick={() => handleSort('status')}>Status<SortIndicator col="status"/></th>
+                                    <th className={th}>Reason</th>
                                     <th className={th} onClick={() => handleSort('profit')}>P&L<SortIndicator col="profit"/></th>
                                 </tr>
                                 </thead>
@@ -240,6 +242,7 @@ export default function History() {
                                                 {o.status}
                                             </span>
                                         </td>
+                                        <td className={`${td} text-xs`}>{o.close_reason ?? '-'}</td>
                                         <td className={`${td} font-medium ${
                                             o.profit === null ? '' :
                                                 o.profit > 0 ? 'text-emerald-500' :

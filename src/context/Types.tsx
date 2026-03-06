@@ -78,6 +78,7 @@ export interface OrderSummary {
     timeframe: string;
     status: string;
     profit: number | null;
+    close_reason?: string;
     created: string;
     closed: string | null;
 }
@@ -97,6 +98,7 @@ export interface OrderDetail {
     take_profit: number;
     quantity: number;
     profit: number | null;
+    close_reason?: string;
     created: string;
     closed: string | null;
     duration_mins: number | null;
@@ -232,6 +234,7 @@ export interface ApiOrder {
     take_profit: number;
     quantity: number;
     profit: number | null;
+    close_reason?: string;
     score: number | null;
     created: string;
     closed: string | null;
