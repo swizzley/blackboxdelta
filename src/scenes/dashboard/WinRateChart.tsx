@@ -103,9 +103,25 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
     const longTrades: number[] = [];
     const shortTrades: number[] = [];
 
-    const hasDirection = !useHourly && dirMap.size > 0;
+    const hasDirection = dirMap.size > 0;
 
-    if (!useHourly) {
+    if (useHourly) {
+        // Aggregate all direction data into a single long/short win rate for the period
+        let totalLongWins = 0, totalLongTotal = 0;
+        let totalShortWins = 0, totalShortTotal = 0;
+        for (const dir of dirMap.values()) {
+            totalLongWins += dir.long_wins;
+            totalLongTotal += dir.long_wins + dir.long_losses;
+            totalShortWins += dir.short_wins;
+            totalShortTotal += dir.short_wins + dir.short_losses;
+        }
+        const longWR = totalLongTotal > 0 ? Math.round(totalLongWins / totalLongTotal * 1000) / 10 : null;
+        const shortWR = totalShortTotal > 0 ? Math.round(totalShortWins / totalShortTotal * 1000) / 10 : null;
+        for (let i = 0; i < labels.length; i++) {
+            rollingLongWR.push(longWR);
+            rollingShortWR.push(shortWR);
+        }
+    } else {
         for (const d of rawDates) {
             const dir = dirMap.get(d);
             const dayLong = dir ? dir.long_wins + dir.long_losses : 0;
