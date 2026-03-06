@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import Nav from '../common/Nav';
@@ -48,6 +48,7 @@ export default function Dashboard() {
     const [calendar, setCalendar] = useState<CalendarData | null>(null);
     const [period, setPeriod] = useState<Period>('All');
     const [liveStats, setLiveStats] = useState(false);
+    const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null);
 
     useEffect(() => {
         // Always load static dashboard (has chart series the API doesn't serve)
@@ -83,6 +84,10 @@ export default function Dashboard() {
         }
     }, [apiAvailable]);
 
+    const handleTimeframeClick = useCallback((tf: string | null) => {
+        setSelectedTimeframe(tf);
+    }, []);
+
     const cutoff = useMemo(() => periodCutoff(period), [period]);
 
     const filteredPL = useMemo<PLDataPoint[]>(() => {
@@ -115,9 +120,16 @@ export default function Dashboard() {
         return filtered;
     }, [calendar, cutoff]);
 
-    // Recompute stats from filtered data
+    // Recompute stats from filtered data, with optional timeframe filter
     const filteredStats = useMemo(() => {
         if (!dashboard) return null;
+
+        // If a timeframe is selected, use that timeframe's stats directly
+        if (selectedTimeframe) {
+            const tfRow = dashboard.by_timeframe.find(t => t.timeframe === selectedTimeframe);
+            if (tfRow) return tfRow;
+        }
+
         if (period === 'All') return dashboard.all_time;
 
         // Recompute from filtered calendar data (per-day wins/losses/totals)
@@ -149,7 +161,7 @@ export default function Dashboard() {
             ...dashboard.all_time,
             total_pl: Math.round(totalPL * 100) / 100,
         };
-    }, [dashboard, period, filteredPL, filteredCalendar]);
+    }, [dashboard, period, filteredPL, filteredCalendar, selectedTimeframe]);
 
     if (!dashboard || !filteredStats) {
         return (
@@ -176,21 +188,39 @@ export default function Dashboard() {
             <Nav/>
             <div className={`min-h-screen pb-12 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-500`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-20">
-                    {/* Period Selector */}
-                    <div className="flex items-center justify-end gap-1 mb-4">
-                        {PERIODS.map(p => (
-                            <button
-                                key={p}
-                                onClick={() => setPeriod(p)}
-                                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                                    period === p
-                                        ? 'bg-cyan-500 text-white'
-                                        : `${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`
-                                }`}
-                            >
-                                {p}
-                            </button>
-                        ))}
+                    {/* Period Selector + Active Filters */}
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                        <div className="flex items-center gap-2">
+                            {selectedTimeframe && (
+                                <button
+                                    onClick={() => setSelectedTimeframe(null)}
+                                    className={`flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                                        isDarkMode
+                                            ? 'bg-cyan-900/60 text-cyan-300 hover:bg-cyan-800/60'
+                                            : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+                                    }`}
+                                >
+                                    <span className="w-2 h-2 rounded-full bg-cyan-400"/>
+                                    {selectedTimeframe.charAt(0).toUpperCase() + selectedTimeframe.slice(1)}
+                                    <span className="ml-1">&times;</span>
+                                </button>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                            {PERIODS.map(p => (
+                                <button
+                                    key={p}
+                                    onClick={() => setPeriod(p)}
+                                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                                        period === p
+                                            ? 'bg-cyan-500 text-white'
+                                            : `${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`
+                                    }`}
+                                >
+                                    {p}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Win Rate Chart — full width, most prominent */}
@@ -200,31 +230,39 @@ export default function Dashboard() {
 
                     {/* Stat Cards */}
                     <div className="grid grid-cols-3 gap-4 mb-6">
-                        <StatCard label="Total P&L" value={plDisplay} color={plColor} live={liveStats}/>
+                        <StatCard label="Total P&L" value={plDisplay} color={plColor} live={liveStats && !selectedTimeframe}/>
                         <StatCard
                             label="Win Rate"
                             value={stats.win_rate_pct != null ? `${Number(stats.win_rate_pct).toFixed(2)}%` : 'N/A'}
                             subtitle={`${stats.winners}W / ${stats.losers}L / ${stats.breakeven}BE`}
-                            live={liveStats}
+                            live={liveStats && !selectedTimeframe}
                         />
                         <StatCard
                             label="Total Trades"
                             value={stats.total_orders}
                             subtitle={`${stats.closed_orders} closed`}
-                            live={liveStats}
+                            live={liveStats && !selectedTimeframe}
                         />
                     </div>
 
                     {/* Charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                         <PLChart data={filteredPL}/>
-                        <TimeframeBreakdown data={dashboard.by_timeframe}/>
+                        <TimeframeBreakdown
+                            data={dashboard.by_timeframe}
+                            selectedTimeframe={selectedTimeframe}
+                            onTimeframeClick={handleTimeframeClick}
+                        />
                     </div>
 
                     {/* Recommendation + Timeframe Radar */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                         {dashboard.recommendation_counts && <RecommendationRadar data={dashboard.recommendation_counts}/>}
-                        <TimeframeRadar data={dashboard.by_timeframe}/>
+                        <TimeframeRadar
+                            data={dashboard.by_timeframe}
+                            selectedTimeframe={selectedTimeframe}
+                            onTimeframeClick={handleTimeframeClick}
+                        />
                     </div>
 
                     {/* Score Trend (needs 2+ days of data) */}
