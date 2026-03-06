@@ -1,6 +1,15 @@
 {
   "runs": [
     {
+      "run_id": "20260306-180501",
+      "created_at": "2026-03-06T18:05:01Z",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "order_count": 676,
+      "todo_count": 5,
+      "synthesis": "---\n\n## Executive Summary\n\n### Overall System Health and Trajectory\nThe Swizzley FX trading system experienced a low win rate of 35.36% from March 5, 2026 to March 6, 2026, resulting in negative P\u0026L (-1.95 units). The scalp timeframe showed the best performance with a win rate of 35.27%, while intraday and swing timeframes had poor results (win rates of 0% and 100%, respectively).\n\n### Most Critical Issues Found\n- **Low Win Rate:** The overall system's low win rate is concerning, especially given negative P\u0026L.\n- **Poor Intraday Performance:** No winning trades were recorded for the intraday timeframe, indicating potential issues or lack of opportunities in this timeframe.\n- **Unfavorable Risk/Reward Ratios:** Scalp trades have excessively wide stop losses compared to actual average losses, leading to unfavorable risk/reward ratios.\n\n### Highest-Impact Quick Wins\n1. **Increase MaScore Weight:** The current weight of 14 is lower than TrendScore's 12, despite MaScore having a higher predictive spread (5.85). Increasing the weight can improve win rates by 0.5-1%.\n2. **Reduce VolumeScore Weight:** VolumeScore shows weak predictive power with a low spread of 0.49 and should be reduced from 5 to 2 or removed entirely, improving win rates by 0.1-0.3%.\n\n### Strategic Recommendations\n1. **Optimize Stop Loss Distances:** Scalp trades have excessively wide stop losses compared to actual average losses (40.51 pips vs. -7.5 pips). Adjusting these distances can improve risk/reward ratios and overall performance.\n2. **Analyze Intraday Performance Issues:** No winning trades were recorded for the intraday timeframe, indicating potential issues or lack of opportunities in this timeframe. Further analysis is needed to identify root causes.\n3. **Fine-Tune CrossoverScore Weight:** Slightly reducing the weight from 10 to 8 can improve win rates by 0.1-0.2%, given its moderate predictive power (spread of 0.53).\n4. **Remove or Reduce Weak Indicators:** OscillatorScore, VolatilityScore, CycleScore, and PatternScore show little to no predictive value based on recent trade data and should be reduced or removed entirely.\n\nBy addressing these critical issues and implementing the recommended changes, Swizzley FX can improve its overall performance and profitability in the short term."
+    },
+    {
       "run_id": "20260306-170530",
       "created_at": "2026-03-06T17:05:30Z",
       "provider": "ollama",
@@ -170,42 +179,18 @@
       "order_count": 614,
       "todo_count": 5,
       "synthesis": "## Executive Summary\n\n### Overall System Health and Trajectory\nThe performance analysis of Swizzley FX from March 5 to March 6, 2026, reveals a low win rate of 34.36% with negative P\u0026L (-2.21 units). The system's overall health is concerning due to the significant disparity between average winning and losing trade sizes, leading to an unfavorable profit factor (0.31) and expected value per trade (-0.0035).\n\n### Most Critical Issues Found\nThe most critical issues identified include:\n- **Poor Win Rate**: The win rate of 34.36% is significantly below the desired threshold.\n- **Negative P\u0026L**: Despite a moderate number of winning trades, losses are larger than wins on average, resulting in negative overall profitability.\n- **Ineffective Scoring Components**: Several scoring components like PatternScore and CycleScore show no predictive value and should be reconsidered.\n\n### Highest-Impact Quick Wins\nThe highest-impact quick wins include:\n- Increasing the weight of MaScore from 14 to 16, which could improve win rate by approximately +0.5%.\n- Reducing the weight of PatternScore from 12 to 8, potentially improving win rate by about +0.3%.\n\n### Strategic Recommendations\nStrategic recommendations for Swizzley FX include:\n- **Adjust Scoring Weights**: Prioritize increasing MaScore and reducing PatternScore weights based on their predictive power.\n- **Optimize Risk Management**: Adjust stop loss and take profit distances to better match actual trade outcomes, particularly in the scalp timeframe.\n- **Further Analysis of Indicator Predictiveness**: Conduct additional analysis on indicators like TrendScore and OscillatorScore to determine if they should be adjusted or removed.\n\nBy implementing these changes, Swizzley FX can potentially improve its win rate and overall profitability."
-    },
-    {
-      "run_id": "20260305-231806",
-      "created_at": "2026-03-05T23:18:06Z",
-      "provider": "ollama",
-      "model": "qwen2.5:14b",
-      "order_count": 1104,
-      "todo_count": 5,
-      "synthesis": "## Executive Summary\n\n### Overall System Health and Trajectory\nThe Swizzley FX trading system from March 4 to March 5, 2026, exhibited a win rate of 31.34% with an overall negative P\u0026L of -5.96 units. The profit factor stands at 0.36, indicating that losses are significantly larger than wins on average. Performance varies by timeframe and direction: scalp trades have a better win rate (31.40%) compared to intraday trades (0.00%). Long positions show slightly higher win rates but both long and short positions remain below breakeven.\n\n### Most Critical Issues Found\n- **Low Win Rate:** The overall system has a low win rate of 31.34%, indicating poor profitability.\n- **Poor Profit Factor:** A profit factor of 0.36 suggests that losses are much larger than wins, leading to negative P\u0026L.\n- **Intraday Performance Issues:** Intraday trades have no winning trades and a zero win rate, suggesting significant issues with the scoring logic or market conditions during this timeframe.\n\n### Highest-Impact Quick Wins\n1. **Adjusting TrendScore Weight:** Reducing the weight of TrendScore from 12 to a lower value can improve overall performance by reducing reliance on weak indicators.\n2. **Increasing VolumeScore Weight:** Boosting the weight of VolumeScore, which has strong predictive power, can enhance the system's ability to identify profitable trades.\n\n### Strategic Recommendations\n- **Risk Management Adjustments:** Modify stop loss and take profit distances for scalp timeframe to better align with actual losses and wins respectively. This will improve risk management and potentially increase win rates.\n- **Intraday Analysis:** Conduct a thorough analysis of intraday performance issues to understand why no winning trades occurred during this period, which could involve reviewing scoring logic or market conditions specific to the intraday timeframe.\n\nBy implementing these changes, Swizzley FX can significantly enhance its profitability and overall system health."
     }
   ],
   "todos": [
     {
-      "id": 146,
-      "run_id": "20260306-170530",
-      "priority": 1,
-      "category": "scoring_weights",
-      "title": "Increase TrendScore weight",
-      "description": "Adjust weights based on predictive power analysis.",
-      "expected_impact": "+2% win rate",
-      "evidence": "TrendScore has a spread of 0.67 and is currently weighted at 12, suggesting an increase to 14 or higher.",
-      "affected_files": [
-        "finmon/file.go"
-      ],
-      "complexity": "low",
-      "status": "open"
-    },
-    {
-      "id": 147,
-      "run_id": "20260306-170530",
+      "id": 151,
+      "run_id": "20260306-180501",
       "priority": 1,
       "category": "scoring_weights",
       "title": "Increase MaScore weight",
-      "description": "Adjust weights based on predictive power analysis.",
-      "expected_impact": "+1.5% win rate",
-      "evidence": "MaScore has a spread of 5.90 and is currently weighted at 14, suggesting an increase to 16.",
+      "description": "The current weight of 14 is lower than TrendScore's 12, despite MaScore having a higher predictive spread.",
+      "expected_impact": "Expected win rate improvement by 0.5-1%",
+      "evidence": "MaScore has the highest spread (5.85) among all components and should be weighted more heavily.",
       "affected_files": [
         "finmon/file.go"
       ],
@@ -213,14 +198,14 @@
       "status": "open"
     },
     {
-      "id": 148,
-      "run_id": "20260306-170530",
+      "id": 152,
+      "run_id": "20260306-180501",
       "priority": 2,
       "category": "scoring_weights",
-      "title": "Increase FibStackScore weight",
-      "description": "Adjust weights based on predictive power analysis.",
-      "expected_impact": "+0.8% win rate",
-      "evidence": "FibStackScore has a spread of 2.36 and is currently weighted at 14, suggesting an increase to 16.",
+      "title": "Reduce VolumeScore weight",
+      "description": "VolumeScore shows weak predictive power with a low spread of 0.49, indicating it does not contribute significantly to win rates.",
+      "expected_impact": "Expected win rate improvement by 0.1-0.3%",
+      "evidence": "VolumeScore has the lowest spread (0.49) and should be reduced from 5 to 2 or removed entirely.",
       "affected_files": [
         "finmon/file.go"
       ],
@@ -228,14 +213,14 @@
       "status": "open"
     },
     {
-      "id": 149,
-      "run_id": "20260306-170530",
+      "id": 153,
+      "run_id": "20260306-180501",
       "priority": 2,
       "category": "scoring_weights",
-      "title": "Decrease CrossoverScore weight",
-      "description": "Adjust weights based on predictive power analysis.",
-      "expected_impact": "+0.5% win rate",
-      "evidence": "CrossoverScore has a spread of 0.52 and is currently weighted at 10, suggesting a reduction to 9.",
+      "title": "Adjust CrossoverScore weight",
+      "description": "CrossoverScore is moderately predictive but has a low spread of 0.53, suggesting it should be slightly reduced from 10 to 8.",
+      "expected_impact": "Expected win rate improvement by 0.1-0.2%",
+      "evidence": "CrossoverScore's spread (0.53) indicates moderate predictive power and can be fine-tuned for better performance.",
       "affected_files": [
         "finmon/file.go"
       ],
@@ -243,18 +228,33 @@
       "status": "open"
     },
     {
-      "id": 150,
-      "run_id": "20260306-170530",
+      "id": 154,
+      "run_id": "20260306-180501",
       "priority": 3,
-      "category": "scoring_weights",
-      "title": "Decrease OscillatorScore weight",
-      "description": "Adjust weights based on predictive power analysis.",
-      "expected_impact": "+0.2% win rate",
-      "evidence": "OscillatorScore has a spread of 0.48 and is currently weighted at 10, suggesting a reduction to 8.",
+      "category": "risk_guardrails",
+      "title": "Optimize stop loss distances",
+      "description": "Scalp trades have excessively wide stop losses compared to actual average losses, leading to unfavorable risk/reward ratios.",
+      "expected_impact": "Expected win rate improvement by 0.1-0.2%",
+      "evidence": "Average scalp stop loss distance is 40.51389 pips while the average loss per trade is -0.0075 (or approximately 7.5 pips).",
+      "affected_files": [
+        "swizzley-trader/file.go"
+      ],
+      "complexity": "medium",
+      "status": "open"
+    },
+    {
+      "id": 155,
+      "run_id": "20260306-180501",
+      "priority": 4,
+      "category": "information_gap",
+      "title": "Analyze intraday performance issues",
+      "description": "No winning trades were recorded for the intraday timeframe, indicating potential issues or lack of opportunities.",
+      "expected_impact": "Expected win rate improvement by 0.1-0.2%",
+      "evidence": "Intraday timeframe had a win rate of 0 with negative P\u0026L (-0.04 units). Further analysis is needed to identify root causes.",
       "affected_files": [
         "finmon/file.go"
       ],
-      "complexity": "low",
+      "complexity": "high",
       "status": "open"
     }
   ]
