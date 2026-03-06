@@ -297,10 +297,17 @@ export default function Dashboard() {
     }, [dashboard, period, selectedTimeframe, periodStats, periodByTimeframe, periodStatsKey, dateCutoff]);
 
     // Active by_timeframe data: period-filtered from API when available, otherwise all-time.
-    // Always fall back to dashboard.by_timeframe so charts never vanish during loading.
-    const activeByTimeframe = (period !== 'All' && periodByTimeframe && periodByTimeframe.length > 0 && periodStatsKey.startsWith(period + ':'))
-        ? periodByTimeframe
-        : dashboard?.by_timeframe ?? [];
+    // The timeframe breakdown/radar charts exist to COMPARE timeframes. If the period only
+    // produced trades in one timeframe, showing a single bar/polygon is useless — fall back
+    // to all-time data which always has all timeframes for a meaningful comparison.
+    const activeByTimeframe = useMemo(() => {
+        const allTime = dashboard?.by_timeframe ?? [];
+        if (period === 'All' || !periodByTimeframe || !periodStatsKey.startsWith(period + ':')) {
+            return allTime;
+        }
+        // Only use period data if it has multiple timeframes to compare
+        return periodByTimeframe.length > 1 ? periodByTimeframe : allTime;
+    }, [dashboard, period, periodByTimeframe, periodStatsKey]);
 
     if (!dashboard || !filteredStats) {
         return (
