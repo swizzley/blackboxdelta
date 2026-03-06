@@ -1,5 +1,35 @@
 [
   {
+    "id": "12224",
+    "symbol": "EUR_GBP",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-06T02:36:11.405219616Z",
+    "closed": null
+  },
+  {
+    "id": "12240",
+    "symbol": "CAD_SGD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-06T02:41:07.392489541Z",
+    "closed": null
+  },
+  {
+    "id": "12244",
+    "symbol": "EUR_SGD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-06T02:46:09.028105983Z",
+    "closed": null
+  },
+  {
     "id": "12212",
     "symbol": "CAD_SGD",
     "direction": "Short",

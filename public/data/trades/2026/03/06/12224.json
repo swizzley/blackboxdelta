@@ -1,0 +1,88 @@
+{
+  "id": "12224",
+  "trade_id": "12225",
+  "symbol": "EUR_GBP",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.8692,
+  "stop_loss": 0.8687,
+  "take_profit": 0.87175,
+  "quantity": 3,
+  "profit": null,
+  "created": "2026-03-06T02:36:11.405219616Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 9278,
+  "risk_reward": 5.100000000000666,
+  "candles": [
+    {
+      "t": "2026-03-06T02:27:00Z",
+      "o": 0.86908,
+      "h": 0.8692,
+      "l": 0.8689,
+      "c": 0.86908
+    },
+    {
+      "t": "2026-03-06T02:28:00Z",
+      "o": 0.86907,
+      "h": 0.8692,
+      "l": 0.8689,
+      "c": 0.86907
+    },
+    {
+      "t": "2026-03-06T02:41:00Z",
+      "o": 0.86911,
+      "h": 0.86913,
+      "l": 0.869,
+      "c": 0.86907
+    },
+    {
+      "t": "2026-03-06T02:42:00Z",
+      "o": 0.86908,
+      "h": 0.8692,
+      "l": 0.869,
+      "c": 0.8691
+    }
+  ],
+  "score": {
+    "Symbol": "EURGBP",
+    "T": 1772764440000,
+    "Time": "",
+    "trend_score": 12,
+    "ma_score": 64,
+    "crossover_score": 6,
+    "oscillator_score": 8,
+    "volatility_score": 4,
+    "volume_score": 4,
+    "fib_stack_score": 25,
+    "momentum_projection_score": 3,
+    "structure_score": 7,
+    "cycle_score": -2,
+    "pattern_score": -2,
+    "final_score": 25.76,
+    "confidence": 0.6772,
+    "entry_price": 0.86901,
+    "stop_price": 0.86895,
+    "tp_price": 0.86952,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
