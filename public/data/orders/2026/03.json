@@ -1,5 +1,15 @@
 [
   {
+    "id": "12995",
+    "symbol": "EUR_GBP",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "FILLED",
+    "profit": null,
+    "created": "2026-03-06T20:27:10.520090984Z",
+    "closed": null
+  },
+  {
     "id": "12959",
     "symbol": "CAD_SGD",
     "direction": "Long",
