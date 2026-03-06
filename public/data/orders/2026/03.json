@@ -14,10 +14,10 @@
     "symbol": "AUD_CHF",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": 0.0009,
     "created": "2026-03-06T12:54:07.93367346Z",
-    "closed": null
+    "closed": "2026-03-06T13:14:55Z"
   },
   {
     "id": "12843",
