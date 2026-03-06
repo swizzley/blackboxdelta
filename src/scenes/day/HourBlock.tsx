@@ -151,6 +151,7 @@ export default function HourBlock({data}: HourBlockProps) {
                             <th className="px-3 py-1.5 text-left">Dir</th>
                             <th className="px-3 py-1.5 text-left">TF</th>
                             <th className="px-3 py-1.5 text-left">Status</th>
+                            <th className="px-3 py-1.5 text-left">Reason</th>
                             <th className="px-3 py-1.5 text-right">P&L</th>
                         </tr>
                         </thead>
@@ -168,6 +169,7 @@ export default function HourBlock({data}: HourBlockProps) {
                                 </td>
                                 <td className={td}>{o.timeframe}</td>
                                 <td className={td}>{o.status}</td>
+                                <td className={`${td} text-xs`}>{o.close_reason ?? '-'}</td>
                                 <td className={`${td} text-right font-medium ${
                                     o.profit === null ? '' :
                                         o.profit > 0 ? 'text-emerald-500' :

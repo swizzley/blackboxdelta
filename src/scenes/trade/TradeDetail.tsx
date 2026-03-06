@@ -123,6 +123,11 @@ export default function TradeDetail() {
                                 }`}>
                                     {trade.status}
                                 </span>
+                                {trade.close_reason && (
+                                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'}`}>
+                                        {trade.close_reason}
+                                    </span>
+                                )}
                             </div>
 
                             {/* Stat Cards */}
