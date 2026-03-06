@@ -42,15 +42,15 @@
     "total": 494
   },
   "2026-03-05": {
-    "pl": -2.19,
-    "winners": 218,
+    "pl": -2.18,
+    "winners": 219,
     "losers": 403,
     "total": 629
   },
   "2026-03-06": {
     "pl": -0.01,
-    "winners": 0,
+    "winners": 1,
     "losers": 4,
-    "total": 4
+    "total": 5
   }
 }
