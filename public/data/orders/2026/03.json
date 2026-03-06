@@ -1,13 +1,23 @@
 [
   {
+    "id": "12843",
+    "symbol": "EUR_GBP",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0003,
+    "created": "2026-03-06T11:03:07.023209684Z",
+    "closed": "2026-03-06T11:15:02Z"
+  },
+  {
     "id": "12837",
     "symbol": "USD_HUF",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": 0.0065,
     "created": "2026-03-06T10:57:10.028544409Z",
-    "closed": null
+    "closed": "2026-03-06T11:02:19Z"
   },
   {
     "id": "12751",

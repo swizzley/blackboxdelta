@@ -1,0 +1,59 @@
+{
+  "id": "12843",
+  "trade_id": "12844",
+  "symbol": "EUR_GBP",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.86826,
+  "exit": 0.86811,
+  "stop_loss": 0.86876,
+  "take_profit": 0.86548,
+  "quantity": -2,
+  "profit": 0.0003,
+  "created": "2026-03-06T11:03:07.023209684Z",
+  "closed": "2026-03-06T11:15:02Z",
+  "duration_mins": 11,
+  "alert_id": 10253,
+  "risk_reward": 5.560000000000621,
+  "score": {
+    "Symbol": "EURGBP",
+    "T": 1772794860000,
+    "Time": "",
+    "trend_score": -15,
+    "ma_score": -97,
+    "crossover_score": -5,
+    "oscillator_score": -7,
+    "volatility_score": -7,
+    "volume_score": 4,
+    "fib_stack_score": -33,
+    "momentum_projection_score": -14,
+    "structure_score": -1,
+    "cycle_score": 1,
+    "pattern_score": 1,
+    "final_score": -31.71,
+    "confidence": 0.712,
+    "entry_price": 0.8679,
+    "stop_price": 0.86798,
+    "tp_price": 0.86716,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "4d814100b2d4193f920ef7842afd6d1f2042147c",
+      "message": "refactor publish to use common-lib publish package"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
