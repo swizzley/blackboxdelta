@@ -14,13 +14,38 @@ import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar} from '../../api/client';
-import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, ApiCalendarDay} from '../../context/Types';
+import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, TimeframeStats, ApiCalendarDay, DayData} from '../../context/Types';
 
 type Period = '1H' | '4H' | '12H' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'All';
 
 const PERIODS: Period[] = ['1H', '4H', '12H', '1D', '1W', '1M', '3M', 'YTD', '1Y', 'All'];
 
-function periodCutoff(period: Period): string | null {
+// ─── Period cutoff helpers ───────────────────────────────────────────────────
+//
+// periodCutoffISO returns a full ISO-8601 timestamp for the API (sub-day precision).
+// periodCutoffDate returns a YYYY-MM-DD date string for filtering daily chart series.
+//
+// These are intentionally separate: the API needs sub-day precision to correctly
+// compute stats for periods like 4H, while chart series (pl_series, calendar) are
+// daily granularity and only need date filtering.
+
+function periodCutoffISO(period: Period): string | null {
+    const now = dayjs();
+    switch (period) {
+        case '1H':  return now.subtract(1, 'hour').toISOString();
+        case '4H':  return now.subtract(4, 'hour').toISOString();
+        case '12H': return now.subtract(12, 'hour').toISOString();
+        case '1D':  return now.subtract(1, 'day').toISOString();
+        case '1W':  return now.subtract(7, 'day').toISOString();
+        case '1M':  return now.subtract(1, 'month').toISOString();
+        case '3M':  return now.subtract(3, 'month').toISOString();
+        case 'YTD': return `${now.year()}-01-01T00:00:00.000Z`;
+        case '1Y':  return now.subtract(1, 'year').toISOString();
+        case 'All': return null;
+    }
+}
+
+function periodCutoffDate(period: Period): string | null {
     const now = dayjs();
     switch (period) {
         case '1H':  return now.subtract(1, 'hour').format('YYYY-MM-DD');
@@ -41,6 +66,93 @@ function filterByDate<T extends { date: string }>(data: T[], cutoff: string | nu
     return data.filter(d => d.date >= cutoff);
 }
 
+// ─── Stats computation from order-level data ─────────────────────────────────
+//
+// STAT INTEGRITY CONTRACT (frontend side):
+//
+// Every stat card value MUST come from ONE of these sources, never a mix:
+//   1. API /api/dashboard?since=... (preferred — live, server-computed, sub-day precision)
+//   2. Static day files aggregated client-side (fallback — covers API-down scenarios)
+//   3. "All" period: dashboard.all_time (from API overlay or static dashboard.json)
+//
+// If neither source 1 nor 2 can provide a stat for the selected period, show "N/A".
+// NEVER spread all-time stats and partially override — that mixes time windows and
+// produces misleading numbers (e.g. all-time avg_win shown alongside 4H win rate).
+//
+// Win rate formula: winners / (winners + losers) — breakeven excluded.
+// This matches the API. The static dashboard.json from alerts-engine uses
+// winners / (winners + losers + breakeven) — a more conservative formula.
+// When the API is live, its values take precedence.
+//
+// Future considerations:
+// - Commissions/fees: if added, avg_win/avg_loss become net-of-fees. The API will
+//   handle this; no frontend changes needed as long as the field semantics don't change.
+// - Multi-currency: conversion must happen server-side before aggregation.
+// - New order statuses: API handles classification; frontend just displays.
+// - Partial fills: API treats each fill as a P&L event; frontend is unaffected.
+
+interface OrderForStats {
+    profit: number | null;
+    created: string;
+    closed: string | null;
+    direction: string;
+    status: string;
+}
+
+function computeStatsFromOrders(orders: OrderForStats[]): TimeframeStats {
+    let totalPL = 0, longPL = 0, shortPL = 0;
+    let winners = 0, losers = 0, breakeven = 0;
+    let winSum = 0, lossSum = 0;
+    let durSum = 0, durCount = 0;
+    let closed = 0, pending = 0, open = 0;
+
+    for (const o of orders) {
+        if (o.status === 'PENDING') { pending++; continue; }
+        if (o.status === 'FILLED') { open++; continue; }
+        if (o.status !== 'CLOSED') continue;
+        closed++;
+
+        const p = o.profit ?? 0;
+        totalPL += p;
+        if (o.direction === 'Long') longPL += p;
+        else shortPL += p;
+
+        if (o.profit !== null && o.profit > 0) { winners++; winSum += p; }
+        else if (o.profit !== null && o.profit < 0) { losers++; lossSum += p; }
+        else breakeven++;
+
+        if (o.created && o.closed) {
+            const dur = (new Date(o.closed).getTime() - new Date(o.created).getTime()) / 60000;
+            if (dur >= 0) { durSum += dur; durCount++; }
+        }
+    }
+
+    const decided = winners + losers;
+    const winRate = decided > 0 ? Math.round((winners / decided) * 10000) / 100 : null;
+    const winLossRatio = losers > 0 ? Math.round((winners / losers) * 100) / 100 : null;
+    const avgWin = winners > 0 ? Math.round((winSum / winners) * 100) / 100 : null;
+    const avgLoss = losers > 0 ? Math.round((lossSum / losers) * 100) / 100 : null;
+    const avgDur = durCount > 0 ? Math.round(durSum / durCount) : null;
+
+    return {
+        total_orders: orders.length,
+        pending,
+        open_positions: open,
+        closed_orders: closed,
+        total_pl: Math.round(totalPL * 100) / 100,
+        winners,
+        losers,
+        breakeven,
+        win_rate_pct: winRate,
+        win_loss_ratio: winLossRatio,
+        avg_win: avgWin,
+        avg_loss: avgLoss,
+        avg_time_in_trade_mins: avgDur,
+        long_pl: Math.round(longPL * 100) / 100,
+        short_pl: Math.round(shortPL * 100) / 100,
+    };
+}
+
 export default function Dashboard() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
@@ -49,13 +161,16 @@ export default function Dashboard() {
     const [period, setPeriod] = useState<Period>('All');
     const [liveStats, setLiveStats] = useState(false);
     const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null);
+    // API-computed stats for the selected period (null = not yet fetched or API unavailable)
+    const [periodStats, setPeriodStats] = useState<TimeframeStats | null>(null);
+    const [periodStatsKey, setPeriodStatsKey] = useState<string>('');
 
     useEffect(() => {
         // Always load static dashboard (has chart series the API doesn't serve)
         axios.get('/data/dashboard.json').then(r => setDashboard(r.data)).catch(console.error);
 
         if (apiAvailable) {
-            // API for live stats overlay
+            // API for live stats overlay (all-time)
             apiFetchDashboard().then(apiData => {
                 if (apiData) {
                     setDashboard(prev => prev
@@ -84,84 +199,95 @@ export default function Dashboard() {
         }
     }, [apiAvailable]);
 
+    // Fetch period-filtered stats from the API when period changes.
+    // This gives us server-computed, sub-day-accurate stats for all fields.
+    useEffect(() => {
+        if (period === 'All' || !apiAvailable) {
+            setPeriodStats(null);
+            setPeriodStatsKey('');
+            return;
+        }
+        const since = periodCutoffISO(period);
+        if (!since) return;
+
+        const key = `${period}:${since}`;
+        apiFetchDashboard(since).then(apiData => {
+            if (apiData) {
+                setPeriodStats(apiData.all_time as TimeframeStats);
+                setPeriodStatsKey(key);
+            }
+        });
+    }, [period, apiAvailable]);
+
     const handleTimeframeClick = useCallback((tf: string | null) => {
         setSelectedTimeframe(tf);
     }, []);
 
-    const cutoff = useMemo(() => periodCutoff(period), [period]);
+    const dateCutoff = useMemo(() => periodCutoffDate(period), [period]);
 
     const filteredPL = useMemo<PLDataPoint[]>(() => {
         if (!dashboard) return [];
-        const filtered = filterByDate(dashboard.pl_series, cutoff);
-        // Recalculate cumulative P&L from filtered data
+        const filtered = filterByDate(dashboard.pl_series, dateCutoff);
         let cum = 0;
         return filtered.map(d => {
             cum += d.daily_pl;
             return {...d, cumulative_pl: Math.round(cum * 100) / 100};
         });
-    }, [dashboard, cutoff]);
+    }, [dashboard, dateCutoff]);
 
     const filteredDirection = useMemo<DirectionDataPoint[]>(() => {
         if (!dashboard?.direction_series) return [];
-        return filterByDate(dashboard.direction_series, cutoff);
-    }, [dashboard, cutoff]);
+        return filterByDate(dashboard.direction_series, dateCutoff);
+    }, [dashboard, dateCutoff]);
 
     const filteredScores = useMemo<ScoreDataPoint[]>(() => {
         if (!dashboard?.score_series) return [];
-        return filterByDate(dashboard.score_series, cutoff);
-    }, [dashboard, cutoff]);
+        return filterByDate(dashboard.score_series, dateCutoff);
+    }, [dashboard, dateCutoff]);
 
     const filteredCalendar = useMemo<CalendarData | null>(() => {
-        if (!calendar || !cutoff) return calendar;
+        if (!calendar || !dateCutoff) return calendar;
         const filtered: CalendarData = {};
         for (const [date, day] of Object.entries(calendar)) {
-            if (date >= cutoff) filtered[date] = day;
+            if (date >= dateCutoff) filtered[date] = day;
         }
         return filtered;
-    }, [calendar, cutoff]);
+    }, [calendar, dateCutoff]);
 
-    // Recompute stats from filtered data, with optional timeframe filter
-    const filteredStats = useMemo(() => {
+    // ─── Stats resolution ────────────────────────────────────────────────
+    //
+    // Priority order (highest to lowest):
+    //   1. Timeframe filter selected → use that timeframe row from API/dashboard data
+    //   2. Period == 'All' → use dashboard.all_time (API-overlaid if available)
+    //   3. Period != 'All' + API available → use periodStats (API-computed for exact window)
+    //   4. Period != 'All' + API unavailable → compute from static day files
+    //
+    // Rules:
+    //   - NEVER spread all-time stats as a base and selectively override. Every stat
+    //     in the result must come from the same time window.
+    //   - If a source can't provide a field, that field must be null (shown as N/A).
+    const filteredStats = useMemo<TimeframeStats | null>(() => {
         if (!dashboard) return null;
 
-        // If a timeframe is selected, use that timeframe's stats directly
+        // Timeframe filter: use by_timeframe row (already period-correct from API)
         if (selectedTimeframe) {
             const tfRow = dashboard.by_timeframe.find(t => t.timeframe === selectedTimeframe);
             if (tfRow) return tfRow;
         }
 
+        // All-time: use the dashboard all_time stats (API-overlaid when live)
         if (period === 'All') return dashboard.all_time;
 
-        // Recompute from filtered calendar data (per-day wins/losses/totals)
-        if (filteredCalendar && Object.keys(filteredCalendar).length > 0) {
-            let winners = 0, losers = 0, total = 0;
-            for (const day of Object.values(filteredCalendar)) {
-                winners += day.winners;
-                losers += day.losers;
-                total += day.total;
-            }
-            const breakeven = total - winners - losers;
-            const totalPL = filteredPL.reduce((sum, d) => sum + d.daily_pl, 0);
-            const decided = winners + losers;
-            const winRate = decided > 0 ? Math.round((winners / decided) * 10000) / 100 : null;
-            return {
-                ...dashboard.all_time,
-                total_pl: Math.round(totalPL * 100) / 100,
-                total_orders: total,
-                closed_orders: total,
-                winners,
-                losers,
-                breakeven,
-                win_rate_pct: winRate,
-            };
+        // Period filter with API: use server-computed stats (sub-day accurate, all fields)
+        if (periodStats && periodStatsKey.startsWith(period + ':')) {
+            return periodStats;
         }
 
-        const totalPL = filteredPL.reduce((sum, d) => sum + d.daily_pl, 0);
-        return {
-            ...dashboard.all_time,
-            total_pl: Math.round(totalPL * 100) / 100,
-        };
-    }, [dashboard, period, filteredPL, filteredCalendar, selectedTimeframe]);
+        // Fallback: compute from static day files for the relevant date range.
+        // This covers API-down scenarios. For sub-day periods this uses full-day
+        // granularity from the day file (best available without the API).
+        return computeStatsFromDayFiles(dateCutoff, period);
+    }, [dashboard, period, selectedTimeframe, periodStats, periodStatsKey, dateCutoff]);
 
     if (!dashboard || !filteredStats) {
         return (
@@ -230,18 +356,18 @@ export default function Dashboard() {
 
                     {/* Stat Cards */}
                     <div className="grid grid-cols-3 gap-4 mb-6">
-                        <StatCard label="Total P&L" value={plDisplay} color={plColor} live={liveStats && !selectedTimeframe}/>
+                        <StatCard label="Total P&L" value={plDisplay} color={plColor} live={liveStats && !selectedTimeframe && period === 'All'}/>
                         <StatCard
                             label="Win Rate"
                             value={stats.win_rate_pct != null ? `${Number(stats.win_rate_pct).toFixed(2)}%` : 'N/A'}
                             subtitle={`${stats.winners}W / ${stats.losers}L / ${stats.breakeven}BE`}
-                            live={liveStats && !selectedTimeframe}
+                            live={liveStats && !selectedTimeframe && period === 'All'}
                         />
                         <StatCard
                             label="Total Trades"
                             value={stats.total_orders}
                             subtitle={`${stats.closed_orders} closed`}
-                            live={liveStats && !selectedTimeframe}
+                            live={liveStats && !selectedTimeframe && period === 'All'}
                         />
                     </div>
 
@@ -294,13 +420,80 @@ export default function Dashboard() {
                         />
                     </div>
 
-                    {/* Calendar */}
+                    {/* Calendar — always shows full unfiltered data, not affected by period */}
                     {calendar && <CalendarHeatmap data={calendar}/>}
                 </div>
             </div>
             <Foot/>
         </>
     );
+}
+
+// ─── Static day file fallback ────────────────────────────────────────────────
+//
+// When the API is unavailable, we compute period stats from the static day files
+// that alerts-engine publishes. These contain per-hour blocks with individual
+// order details, giving us enough granularity for accurate stats.
+//
+// For sub-day periods, we filter orders by their created timestamp within the
+// hourly blocks. This gives approximate sub-hour precision (hour-level bucketing).
+
+// Cache to avoid re-fetching day files on every render
+const dayFileCache = new Map<string, DayData>();
+
+async function fetchDayFile(date: string): Promise<DayData | null> {
+    if (dayFileCache.has(date)) return dayFileCache.get(date)!;
+    try {
+        const [year, month, day] = date.split('-');
+        const resp = await axios.get<DayData>(`/data/days/${year}/${month}/${day}.json`);
+        dayFileCache.set(date, resp.data);
+        return resp.data;
+    } catch {
+        return null;
+    }
+}
+
+// Synchronous version that returns cached data or null (used in useMemo).
+// The async fetch is triggered by the effect below.
+function computeStatsFromDayFiles(dateCutoff: string | null, period: string): TimeframeStats | null {
+    if (!dateCutoff) return null;
+
+    // Determine which dates to load (today and possibly yesterday for sub-day periods)
+    const today = dayjs().format('YYYY-MM-DD');
+    const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
+    const dates = dateCutoff >= today ? [today] : dateCutoff >= yesterday ? [yesterday, today] : null;
+
+    // For longer periods, we don't have a good synchronous fallback from day files
+    // (would need to load many files). Return null to show N/A.
+    if (!dates) return null;
+
+    const isoCutoff = periodCutoffISO(period as Period);
+    const orders: OrderForStats[] = [];
+
+    for (const date of dates) {
+        const dayData = dayFileCache.get(date);
+        if (!dayData) {
+            // Trigger async fetch for next render
+            fetchDayFile(date);
+            return null;
+        }
+        for (const hour of dayData.hours) {
+            for (const o of hour.orders) {
+                // For sub-day precision: filter by created timestamp
+                if (isoCutoff && o.created < isoCutoff) continue;
+                orders.push({
+                    profit: o.profit,
+                    created: o.created,
+                    closed: o.closed,
+                    direction: o.direction,
+                    status: o.status,
+                });
+            }
+        }
+    }
+
+    if (orders.length === 0) return null;
+    return computeStatsFromOrders(orders);
 }
 
 function formatDuration(mins: number): string {
