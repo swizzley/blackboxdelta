@@ -15,7 +15,7 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
     const {isDarkMode} = useTheme();
     const [hourlyData, setHourlyData] = useState<{labels: string[], entries: CalendarDay[]} | null>(null);
 
-    const isHourPeriod = period === '1H' || period === '4H' || period === '12H';
+    const isHourPeriod = period === '1H' || period === '4H' || period === '12H' || period === '1D';
 
     // Fetch today's hourly data when an hour period is selected
     useEffect(() => {
@@ -37,6 +37,7 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
             if (period === '1H') hoursBack = 1;
             else if (period === '4H') hoursBack = 4;
             else if (period === '12H') hoursBack = 12;
+            else if (period === '1D') hoursBack = 24;
             const cutoffHour = Math.max(0, now - hoursBack);
 
             const filtered = hours.filter(h => h.hour >= cutoffHour);

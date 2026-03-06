@@ -129,7 +129,8 @@ export default function Dashboard() {
             }
             const breakeven = total - winners - losers;
             const totalPL = filteredPL.reduce((sum, d) => sum + d.daily_pl, 0);
-            const winRate = total > 0 ? Math.round((winners / total) * 10000) / 100 : null;
+            const decided = winners + losers;
+            const winRate = decided > 0 ? Math.round((winners / decided) * 10000) / 100 : null;
             return {
                 ...dashboard.all_time,
                 total_pl: Math.round(totalPL * 100) / 100,
@@ -201,7 +202,7 @@ export default function Dashboard() {
                         <StatCard label="Total P&L" value={plDisplay} color={plColor} live={liveStats}/>
                         <StatCard
                             label="Win Rate"
-                            value={stats.win_rate_pct !== null ? `${stats.win_rate_pct.toFixed(2)}%` : 'N/A'}
+                            value={stats.win_rate_pct != null ? `${Number(stats.win_rate_pct).toFixed(2)}%` : 'N/A'}
                             subtitle={`${stats.winners}W / ${stats.losers}L / ${stats.breakeven}BE`}
                             live={liveStats}
                         />
