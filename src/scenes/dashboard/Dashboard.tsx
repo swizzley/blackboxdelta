@@ -403,7 +403,7 @@ export default function Dashboard() {
 
                     {/* Recommendation + Timeframe Radar */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                        {dashboard.recommendation_counts && period === 'All' && <RecommendationRadar data={dashboard.recommendation_counts}/>}
+                        {dashboard.recommendation_counts && <RecommendationRadar data={dashboard.recommendation_counts}/>}
                         <TimeframeRadar
                             data={activeByTimeframe}
                             selectedTimeframe={selectedTimeframe}
