@@ -82,13 +82,15 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
 
     const pointWinRate: (number | null)[] = [];
     const rollingWinRate: (number | null)[] = [];
-    const tradeCounts: number[] = [];
+    const winCounts: number[] = [];
+    const lossCounts: number[] = [];
 
     for (const entry of entries) {
         const closed = entry.winners + entry.losers;
         cumWins += entry.winners;
         cumTotal += closed;
-        tradeCounts.push(entry.total);
+        winCounts.push(entry.winners);
+        lossCounts.push(entry.losers);
         pointWinRate.push(closed > 0 ? Math.round(entry.winners / closed * 1000) / 10 : null);
         rollingWinRate.push(cumTotal > 0 ? Math.round(cumWins / cumTotal * 1000) / 10 : null);
     }
@@ -137,7 +139,7 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
                     const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};margin-right:4px;"></span>`;
                     if (p.seriesName === 'Long' || p.seriesName === 'Short') {
                         html += `<br/>${marker}${p.seriesName}: <b>${Math.abs(p.value)}</b>`;
-                    } else if (p.seriesName === 'Trades') {
+                    } else if (p.seriesName === 'Winners' || p.seriesName === 'Losers') {
                         html += `<br/>${marker}${p.seriesName}: <b>${p.value}</b>`;
                     } else {
                         html += `<br/>${marker}${p.seriesName}: <b>${p.value}%</b>`;
@@ -148,7 +150,7 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
         },
         legend: {
             data: [
-                pointLabel, 'Cumulative', 'Trades',
+                pointLabel, 'Cumulative', 'Winners', 'Losers',
                 ...(hasDirection ? ['Long WR', 'Short WR'] : []),
             ],
             textStyle: {color: isDarkMode ? '#9ca3af' : '#374151', fontSize: 11},
@@ -191,13 +193,25 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
             },
         ],
         series: [
-            // Total trades bar (always shown)
+            // Winners bar (stacked)
             {
-                name: 'Trades',
+                name: 'Winners',
                 type: 'bar',
+                stack: 'trades',
                 yAxisIndex: 1,
-                data: tradeCounts,
-                itemStyle: {color: isDarkMode ? 'rgba(100,116,139,0.3)' : 'rgba(148,163,184,0.3)'},
+                data: winCounts,
+                itemStyle: {color: isDarkMode ? 'rgba(16,185,129,0.4)' : 'rgba(16,185,129,0.35)'},
+                barMaxWidth: 20,
+                z: 0,
+            },
+            // Losers bar (stacked)
+            {
+                name: 'Losers',
+                type: 'bar',
+                stack: 'trades',
+                yAxisIndex: 1,
+                data: lossCounts,
+                itemStyle: {color: isDarkMode ? 'rgba(239,68,68,0.4)' : 'rgba(239,68,68,0.35)'},
                 barMaxWidth: 20,
                 z: 0,
             },
