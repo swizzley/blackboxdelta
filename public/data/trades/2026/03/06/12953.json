@@ -1,0 +1,59 @@
+{
+  "id": "12953",
+  "trade_id": "12954",
+  "symbol": "NZD_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 4.62177,
+  "exit": 4.62137,
+  "stop_loss": 4.62014,
+  "take_profit": 4.62943,
+  "quantity": 3,
+  "profit": -0.0012,
+  "created": "2026-03-06T18:22:10.532722721Z",
+  "closed": "2026-03-06T18:22:53Z",
+  "duration_mins": 0,
+  "alert_id": 11255,
+  "risk_reward": 4.699386503068979,
+  "score": {
+    "Symbol": "NZDHKD",
+    "T": 1772821200000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 87,
+    "crossover_score": 8,
+    "oscillator_score": 1,
+    "volatility_score": 8,
+    "volume_score": 0,
+    "fib_stack_score": 23,
+    "momentum_projection_score": 13,
+    "structure_score": 7,
+    "cycle_score": 0,
+    "pattern_score": 1,
+    "final_score": 41.99,
+    "confidence": 0.6889,
+    "entry_price": 4.61972,
+    "stop_price": 4.61853,
+    "tp_price": 4.62738,
+    "risk_reward": 6.43,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "4d814100b2d4193f920ef7842afd6d1f2042147c",
+      "message": "refactor publish to use common-lib publish package"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

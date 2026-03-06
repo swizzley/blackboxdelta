@@ -1,5 +1,35 @@
 [
   {
+    "id": "12947",
+    "symbol": "EUR_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0006,
+    "created": "2026-03-06T18:19:11.41914751Z",
+    "closed": "2026-03-06T18:21:06Z"
+  },
+  {
+    "id": "12953",
+    "symbol": "NZD_HKD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0012,
+    "created": "2026-03-06T18:22:10.532722721Z",
+    "closed": "2026-03-06T18:22:53Z"
+  },
+  {
+    "id": "12959",
+    "symbol": "CAD_SGD",
+    "direction": "Long",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": 0.0005,
+    "created": "2026-03-06T18:30:06.480251689Z",
+    "closed": "2026-03-06T18:39:02Z"
+  },
+  {
     "id": "12939",
     "symbol": "USD_CAD",
     "direction": "Long",
