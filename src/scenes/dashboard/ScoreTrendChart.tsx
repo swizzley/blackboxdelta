@@ -1,10 +1,13 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import ReactECharts from 'echarts-for-react';
+import axios from 'axios';
+import dayjs from 'dayjs';
 import {useTheme} from '../../context/Theme';
-import {ScoreDataPoint} from '../../context/Types';
+import {ScoreDataPoint, DayData, Score} from '../../context/Types';
 
 interface ScoreTrendChartProps {
     data: ScoreDataPoint[];
+    period?: string;
 }
 
 const COMPONENT_LINES: { key: keyof ScoreDataPoint; label: string; color: string }[] = [
@@ -21,19 +24,87 @@ const COMPONENT_LINES: { key: keyof ScoreDataPoint; label: string; color: string
     {key: 'avg_pattern', label: 'Pattern', color: '#06b6d4'},
 ];
 
-export default function ScoreTrendChart({data}: ScoreTrendChartProps) {
+// Aggregate scores from orders into an hourly ScoreDataPoint
+function aggregateScores(label: string, scores: Score[]): ScoreDataPoint {
+    const n = scores.length;
+    const sum = (fn: (s: Score) => number) => scores.reduce((a, s) => a + fn(s), 0) / n;
+    return {
+        date: label,
+        avg_final_score: sum(s => s.final_score),
+        avg_confidence: sum(s => s.confidence),
+        avg_trend: sum(s => s.trend_score),
+        avg_ma: sum(s => s.ma_score),
+        avg_crossover: sum(s => s.crossover_score),
+        avg_oscillator: sum(s => s.oscillator_score),
+        avg_volatility: sum(s => s.volatility_score),
+        avg_volume: sum(s => s.volume_score),
+        avg_fib_stack: sum(s => s.fib_stack_score),
+        avg_momentum_projection: sum(s => s.momentum_projection_score),
+        avg_structure: sum(s => s.structure_score),
+        avg_cycle: sum(s => s.cycle_score),
+        avg_pattern: sum(s => s.pattern_score),
+        count: n,
+    };
+}
+
+export default function ScoreTrendChart({data, period}: ScoreTrendChartProps) {
     const {isDarkMode} = useTheme();
     const [showComponents, setShowComponents] = useState(false);
+    const [hourlyScores, setHourlyScores] = useState<ScoreDataPoint[] | null>(null);
 
-    if (!data || data.length === 0) return null;
+    const isHourPeriod = period === '1H' || period === '4H' || period === '12H' || period === '1D';
 
-    const dates = data.map(d => d.date);
+    // For sub-day periods, compute hourly score aggregates from day files
+    useEffect(() => {
+        if (!isHourPeriod) {
+            setHourlyScores(null);
+            return;
+        }
+        const now = dayjs();
+        let hoursBack = 24;
+        if (period === '1H') hoursBack = 1;
+        else if (period === '4H') hoursBack = 4;
+        else if (period === '12H') hoursBack = 12;
+
+        const cutoff = now.subtract(hoursBack, 'hour');
+        const today = now.format('YYYY/MM/DD');
+        const yesterday = now.subtract(1, 'day').format('YYYY/MM/DD');
+        const needYesterday = cutoff.format('YYYY-MM-DD') < now.format('YYYY-MM-DD');
+
+        const fetches: Promise<DayData | null>[] = [];
+        if (needYesterday) fetches.push(axios.get<DayData>(`/data/days/${yesterday}.json`).then(r => r.data).catch(() => null));
+        fetches.push(axios.get<DayData>(`/data/days/${today}.json`).then(r => r.data).catch(() => null));
+
+        Promise.all(fetches).then(results => {
+            const points: ScoreDataPoint[] = [];
+            for (const dayData of results) {
+                if (!dayData?.hours) continue;
+                for (const h of dayData.hours) {
+                    const hourTime = dayjs(`${dayData.date}T${String(h.hour).padStart(2, '0')}:00:00`);
+                    if (hourTime.isBefore(cutoff) || hourTime.isAfter(now)) continue;
+                    const scores = h.orders.filter(o => o.score).map(o => o.score!);
+                    if (scores.length === 0) continue;
+                    const label = needYesterday
+                        ? `${dayData.date.slice(5)} ${String(h.hour).padStart(2, '0')}:00`
+                        : `${String(h.hour).padStart(2, '0')}:00`;
+                    points.push(aggregateScores(label, scores));
+                }
+            }
+            setHourlyScores(points.length > 0 ? points : null);
+        });
+    }, [isHourPeriod, period]);
+
+    const effectiveData = (isHourPeriod && hourlyScores) ? hourlyScores : data;
+
+    if (!effectiveData || effectiveData.length === 0) return null;
+
+    const dates = effectiveData.map(d => d.date);
 
     const series: any[] = [
         {
             name: 'Final Score',
             type: 'line',
-            data: data.map(d => d.avg_final_score),
+            data: effectiveData.map(d => d.avg_final_score),
             smooth: true,
             lineStyle: {width: 3},
             itemStyle: {color: '#10b981'},
@@ -43,7 +114,7 @@ export default function ScoreTrendChart({data}: ScoreTrendChartProps) {
             name: 'Confidence',
             type: 'line',
             yAxisIndex: 1,
-            data: data.map(d => d.avg_confidence),
+            data: effectiveData.map(d => d.avg_confidence),
             smooth: true,
             lineStyle: {width: 2, type: 'dashed'},
             itemStyle: {color: '#06b6d4'},
@@ -56,7 +127,7 @@ export default function ScoreTrendChart({data}: ScoreTrendChartProps) {
             series.push({
                 name: comp.label,
                 type: 'line',
-                data: data.map(d => d[comp.key] as number),
+                data: effectiveData.map(d => d[comp.key] as number),
                 smooth: true,
                 lineStyle: {width: 1, opacity: 0.7},
                 itemStyle: {color: comp.color},

@@ -428,7 +428,7 @@ export default function Dashboard() {
                     {/* Score Trend */}
                     {filteredScores.length > 0 && (
                         <div className="mb-6">
-                            <ScoreTrendChart data={filteredScores}/>
+                            <ScoreTrendChart data={filteredScores} period={period}/>
                         </div>
                     )}
 
