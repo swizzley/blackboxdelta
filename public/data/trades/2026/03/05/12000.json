@@ -1,0 +1,109 @@
+{
+  "id": "12000",
+  "trade_id": "12001",
+  "symbol": "AUD_CAD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "FILLED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.9589,
+  "stop_loss": 0.95827,
+  "take_profit": 0.96093,
+  "quantity": 5,
+  "profit": null,
+  "created": "2026-03-05T23:25:07.612607236Z",
+  "closed": null,
+  "duration_mins": null,
+  "alert_id": 9039,
+  "risk_reward": 3.222222222222085,
+  "candles": [
+    {
+      "t": "2026-03-05T23:21:00Z",
+      "o": 0.95849,
+      "h": 0.958645,
+      "l": 0.9581,
+      "c": 0.9582
+    },
+    {
+      "t": "2026-03-05T23:22:00Z",
+      "o": 0.958663,
+      "h": 0.958677,
+      "l": 0.9582,
+      "c": 0.95855
+    },
+    {
+      "t": "2026-03-05T23:23:00Z",
+      "o": 0.95845,
+      "h": 0.958698,
+      "l": 0.9581,
+      "c": 0.958698
+    },
+    {
+      "t": "2026-03-05T23:24:00Z",
+      "o": 0.95854,
+      "h": 0.959539,
+      "l": 0.9582,
+      "c": 0.958704
+    },
+    {
+      "t": "2026-03-05T23:25:00Z",
+      "o": 0.95861,
+      "h": 0.958794,
+      "l": 0.9581,
+      "c": 0.95849
+    },
+    {
+      "t": "2026-03-05T23:26:00Z",
+      "o": 0.9585,
+      "h": 0.958689,
+      "l": 0.9579,
+      "c": 0.958537
+    },
+    {
+      "t": "2026-03-05T23:27:00Z",
+      "o": 0.95846,
+      "h": 0.95875,
+      "l": 0.958,
+      "c": 0.95848
+    }
+  ],
+  "score": {
+    "Symbol": "AUDCAD",
+    "T": 1772752980000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 110,
+    "crossover_score": 12,
+    "oscillator_score": 3,
+    "volatility_score": 6,
+    "volume_score": -2,
+    "fib_stack_score": 66,
+    "momentum_projection_score": 4,
+    "structure_score": 7,
+    "cycle_score": 0,
+    "pattern_score": 3,
+    "final_score": 34.85,
+    "confidence": 0.7714,
+    "entry_price": 0.9583,
+    "stop_price": 0.95767,
+    "tp_price": 0.96033,
+    "risk_reward": 3.19,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "489ac7a02c645445d94d1c4a00e5ab5802d59139",
+      "message": "Increase scalp ma_score weight from 0.14 to 0.24"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
