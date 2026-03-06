@@ -1,6 +1,15 @@
 {
   "runs": [
     {
+      "run_id": "20260306-110505",
+      "created_at": "2026-03-06T11:05:05Z",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "order_count": 667,
+      "todo_count": 5,
+      "synthesis": "## Executive Summary\n\n### Overall System Health and Trajectory\nThe Swizzley FX trading system analyzed from March 5, 2026 to March 6, 2026 generated a total of 667 trades with an overall win rate of 35.08%, resulting in a net loss of $1.95. The profit factor was only 0.4, indicating that losses were significantly larger than profits on average. Scalp trades performed better compared to intraday and swing trades, but the system still showed negative performance across all timeframes.\n\n### Most Critical Issues Found\n- **Major Regression in Scoring Pipeline**: Significant drops in win rate were observed during version transitions of the finmon component.\n- **Poor Risk Management Parameters**: Stop loss distances for scalp timeframe are too wide compared to average losses per trade, leading to unfavorable risk-reward ratios.\n- **Weak Predictive Indicators**: OscillatorScore and VolumeScore have weak predictive power and should be weighted lower or removed from the scoring pipeline.\n\n### Highest-Impact Quick Wins\n1. Increase the weight of MaScore and FibStackScore in the scoring pipeline as they show strong predictive power with significant spreads between win and loss means.\n2. Adjust scalp stop loss distances to align more closely with average losses per trade, improving risk management parameters for this timeframe.\n\n### Strategic Recommendations\n- **Enhance Scoring Pipeline**: Focus on increasing weights of highly predictive components like MaScore and FibStackScore while reducing or eliminating weak indicators such as OscillatorScore and VolumeScore.\n- **Improve Risk Management Parameters**: Collect more data to accurately assess stop loss and take profit distances for swing and intraday timeframes, ensuring optimal risk-reward ratios across all trading strategies.\n- **Monitor Version Transitions Closely**: Ensure thorough testing and validation during version transitions of the finmon component to prevent significant drops in win rate.\n\nBy addressing these critical issues and implementing strategic recommendations, Swizzley FX can improve its overall performance and profitability."
+    },
+    {
       "run_id": "20260306-100504",
       "created_at": "2026-03-06T10:05:04Z",
       "provider": "ollama",
@@ -170,42 +179,18 @@
       "order_count": 525,
       "todo_count": 0,
       "synthesis": "===TODO_JSON_START===\n[\n    {\"priority\":1,\"category\":\"scoring_weights\",\"title\":\"Increase TrendScore weight\",\"description\":\"TrendScore has a high predictive power, increasing its weight will improve overall performance.\",\"expected_impact\":\"Win rate increase of 0.5-2%\",\"evidence\":\"TrendScore has the highest spread (85.5) and should be weighted more heavily.\",\"affected_files\":[\"finmon/file.go\"],\"complexity\":\"low\"},\n    {\"priority\":1,\"category\":\"scoring_weights\",\"title\":\"Decrease VolatilityScore weight\",\"description\":\"VolatilityScore is a weak predictor, reducing its weight will improve overall performance.\",\"expected_impact\":\"Win rate increase of 0.5-2%\",\"evidence\":\"VolatilityScore has the lowest spread (49.1) and should be weighted less heavily.\",\"affected_files\":[\"finmon/file.go\"],\"complexity\":\"low\"},\n    {\"priority:2,\"category\":\"risk_guardrails\",\"title\":\"Adjust scalp stop loss distances\",\"description\":\"Scalp timeframe stop losses are too wide, reducing them will improve risk management.\",\"expected_impact\":\"Win rate increase of 0.1-0.5%\",\"evidence\":\"Average stop loss distance is 34.19981 while average loss per trade is -0.0201.\",\"affected_files\":[\"swizzley-trader/file.go\"],\"complexity\":\"medium\"},\n    {\"priority\":2,\"category\":\"scoring_weights\",\"title\":\"Decrease PatternScore weight\",\"description\":\"PatternScore often fails to predict outcomes accurately, reducing its weight will improve overall performance.\",\"expected_impact\":\"Win rate increase of 0.1-0.5%\",\"evidence\":\"PatternScore is a weak predictor with low win rates and should be weighted less heavily.\",\"affected_files\":[\"finmon/file.go\"],\"complexity\":\"low\"},\n    {\"priority\":3,\"category\":\"information_gap\",\"title\":\"Resolve MomProjectionScore database error\",\"description\":\"Database issue prevents analysis of MomProjectionScore, resolving this will allow comprehensive scoring pipeline evaluation.\",\"expected_impact\":\"N/A (necessary for full analysis)\",\"evidence\":\"Error in accessing MomProjectionScore column.\",\"affected_files\":[\"finmon/file.go\"],\"complexity\":\"high\"}\n]\n===TODO_JSON_END===\n\n## Executive Summary\n\n### Overall System Health and Trajectory\nThe Swizzley FX system from March 3, 2026 to March 4, 2026 shows an overall win rate of 26.67% with a negative P\u0026L of -5.19 units. The scalp timeframe performs better than intraday trades, but both result in losses. Short positions outperform long ones slightly, though the sample sizes are too small to draw definitive conclusions. Key symbols like GBP_NZD and USD_CNH have perfect win rates, while CAD_CHF and AUD_CAD show no wins at all.\n\n### Most Critical Issues Found\n1. **Poor Profitability**: The profit factor of 0.34 indicates that the system loses more than it wins on average.\n2. **Inconsistent Performance Across Timeframes**: Scalp trades have a win rate of 26.77%, while intraday trades show no wins (0%).\n3. **Weak Predictive Indicators**: VolatilityScore and VolumeScore are poor predictors, contributing noise to the scoring pipeline.\n\n### Highest-Impact Quick Wins\n1. **Increase TrendScore Weight**: Enhancing the weight of TrendScore will improve overall performance due to its high predictive power.\n2. **Decrease VolatilityScore Weight**: Reducing the weight of VolatilityScore will eliminate a weak predictor and enhance system reliability.\n3. **Adjust Scalp Stop Loss Distances**: Narrowing stop loss distances for scalp trades aligns better with actual losses, improving risk management.\n\n### Strategic Recommendations\n1. **Comprehensive Indicator Analysis**: Resolve the database error preventing analysis of MomProjectionScore to ensure all indicators are evaluated comprehensively.\n2. **Optimize Risk Management Parameters**: Further refine take profit and stop loss settings based on more detailed performance data for intraday trades.\n3. **Refine Scoring Logic**: Adjust scoring weights to emphasize strong predictors like TrendScore, MaScore, and FibStackScore while reducing the influence of weak indicators.\n\nBy addressing these critical issues and implementing strategic recommendations, Swizzley FX can improve its overall profitability and consistency across different timeframes and market conditions."
-    },
-    {
-      "run_id": "20260304-233141",
-      "created_at": "2026-03-04T23:31:42Z",
-      "provider": "ollama",
-      "model": "qwen2.5:14b",
-      "order_count": 523,
-      "todo_count": 0,
-      "synthesis": "Synthesis failed: GenerateContent: model runner has unexpectedly stopped, this may be due to resource limitations or an internal error, check ollama server logs for details"
     }
   ],
   "todos": [
     {
-      "id": 111,
-      "run_id": "20260306-100504",
-      "priority": 1,
-      "category": "scoring_weights",
-      "title": "Increase TrendScore weight",
-      "description": "TrendScore has the highest predictive power with a spread of 0.66.",
-      "expected_impact": "Expected win rate improvement \u003e2%",
-      "evidence": "Component Effectiveness Ranking shows TrendScore as most effective.",
-      "affected_files": [
-        "finmon/file.go"
-      ],
-      "complexity": "low",
-      "status": "open"
-    },
-    {
-      "id": 112,
-      "run_id": "20260306-100504",
+      "id": 116,
+      "run_id": "20260306-110505",
       "priority": 1,
       "category": "scoring_weights",
       "title": "Increase MaScore weight",
-      "description": "MaScore has a strong predictive ability with a spread of 5.82.",
-      "expected_impact": "Expected win rate improvement \u003e2%",
-      "evidence": "Component Effectiveness Ranking shows MaScore as highly effective.",
+      "description": "MaScore is highly predictive with a significant spread between win and loss means.",
+      "expected_impact": "Expected to improve overall win rate by 0.5-2%",
+      "evidence": "MaScore has the highest spread (6.12) in Component Effectiveness Ranking, indicating strong predictive power.",
       "affected_files": [
         "finmon/file.go"
       ],
@@ -213,14 +198,14 @@
       "status": "open"
     },
     {
-      "id": 113,
-      "run_id": "20260306-100504",
+      "id": 117,
+      "run_id": "20260306-110505",
       "priority": 1,
       "category": "scoring_weights",
       "title": "Increase FibStackScore weight",
-      "description": "FibStackScore is also highly effective with a spread of 2.38.",
-      "expected_impact": "Expected win rate improvement \u003e2%",
-      "evidence": "Component Effectiveness Ranking shows FibStackScore as very predictive.",
+      "description": "FibStackScore is highly effective and should be weighted similarly to MaScore for optimal performance.",
+      "expected_impact": "Expected to improve overall win rate by 0.5-2%",
+      "evidence": "FibStackScore has a spread of 2.61, indicating strong predictive power similar to MaScore.",
       "affected_files": [
         "finmon/file.go"
       ],
@@ -228,14 +213,14 @@
       "status": "open"
     },
     {
-      "id": 114,
-      "run_id": "20260306-100504",
+      "id": 118,
+      "run_id": "20260306-110505",
       "priority": 2,
       "category": "scoring_weights",
-      "title": "Reduce PatternScore weight",
-      "description": "PatternScore has a weak spread of 0.08 and should be reduced in weight to 8.",
-      "expected_impact": "Expected win rate improvement 0.5-1%",
-      "evidence": "Component Effectiveness Ranking shows PatternScore as weakly predictive.",
+      "title": "Reduce OscillatorScore weight",
+      "description": "OscillatorScore shows no clear differentiation between wins and losses, introducing noise into the scoring system.",
+      "expected_impact": "Expected to improve overall win rate by 0.1-0.5%",
+      "evidence": "OscillatorScore has a spread of only 0.44, indicating weak predictive power.",
       "affected_files": [
         "finmon/file.go"
       ],
@@ -243,18 +228,33 @@
       "status": "open"
     },
     {
-      "id": 115,
-      "run_id": "20260306-100504",
+      "id": 119,
+      "run_id": "20260306-110505",
       "priority": 2,
-      "category": "scoring_weights",
-      "title": "Reduce CrossoverScore weight",
-      "description": "CrossoverScore is a weak predictor with minimal impact on trade outcomes.",
-      "expected_impact": "Expected win rate improvement 0.5-1%",
-      "evidence": "Indicator \u0026 Signal Analysis shows CrossoverScore as non-predictive.",
+      "category": "risk_guardrails",
+      "title": "Adjust scalp stop loss distances",
+      "description": "Scalp timeframe stop losses are too wide compared to average losses per trade.",
+      "expected_impact": "Expected to improve overall win rate by 0.1-0.5%",
+      "evidence": "Average stop loss distance is 40.22256, while the average loss per trade is -0.0075.",
       "affected_files": [
-        "finmon/file.go"
+        "swizzley-trader/file.go"
       ],
-      "complexity": "low",
+      "complexity": "medium",
+      "status": "open"
+    },
+    {
+      "id": 120,
+      "run_id": "20260306-110505",
+      "priority": 3,
+      "category": "information_gap",
+      "title": "Collect more data for swing and intraday timeframes",
+      "description": "Insufficient data to accurately assess stop loss and take profit distances for swing and intraday timeframes.",
+      "expected_impact": "Expected to provide better insights into risk management parameters.",
+      "evidence": "Data is missing or shows NULL for swing and intraday timeframes.",
+      "affected_files": [
+        "massive-market/file.go"
+      ],
+      "complexity": "high",
       "status": "open"
     }
   ]
