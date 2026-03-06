@@ -1,39 +1,74 @@
+import {useEffect, useState} from 'react';
 import ReactECharts from 'echarts-for-react';
+import axios from 'axios';
+import dayjs from 'dayjs';
 import {useTheme} from '../../context/Theme';
-import {CalendarData, DirectionDataPoint} from '../../context/Types';
+import {CalendarData, CalendarDay, DirectionDataPoint, DayData} from '../../context/Types';
 
 interface WinRateChartProps {
     data: CalendarData;
     direction?: DirectionDataPoint[];
+    period?: string;
 }
 
-export default function WinRateChart({data, direction}: WinRateChartProps) {
+export default function WinRateChart({data, direction, period}: WinRateChartProps) {
     const {isDarkMode} = useTheme();
+    const [hourlyData, setHourlyData] = useState<{labels: string[], entries: CalendarDay[]} | null>(null);
 
-    const dates = Object.keys(data).sort();
-    const dateCount = dates.length;
+    const isHourPeriod = period === '1H' || period === '4H' || period === '12H';
 
-    // Format x-axis labels based on date range density
-    function formatDateLabel(d: string): string {
-        if (dateCount <= 1) return d;
-        if (dateCount <= 7) {
-            // Short range: show "Mon 3/4" style
-            const dt = new Date(d + 'T00:00:00');
-            const day = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
-            return `${day} ${dt.getMonth()+1}/${dt.getDate()}`;
+    // Fetch today's hourly data when an hour period is selected
+    useEffect(() => {
+        if (!isHourPeriod) {
+            setHourlyData(null);
+            return;
         }
-        if (dateCount <= 90) {
-            // Medium range: show "3/4" style
-            const dt = new Date(d + 'T00:00:00');
-            return `${dt.getMonth()+1}/${dt.getDate()}`;
-        }
-        // Long range: show "Mar '24" style
-        const dt = new Date(d + 'T00:00:00');
-        const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getMonth()];
-        return `${mon} '${String(dt.getFullYear()).slice(2)}`;
-    }
+        const today = dayjs();
+        const path = `/data/days/${today.format('YYYY/MM/DD')}.json`;
+        axios.get<DayData>(path).then(r => {
+            const hours = r.data.hours;
+            if (!hours || hours.length === 0) {
+                setHourlyData(null);
+                return;
+            }
+            // Filter hours based on period
+            const now = today.hour();
+            let hoursBack = 24;
+            if (period === '1H') hoursBack = 1;
+            else if (period === '4H') hoursBack = 4;
+            else if (period === '12H') hoursBack = 12;
+            const cutoffHour = Math.max(0, now - hoursBack);
 
-    const formattedDates = dates.map(formatDateLabel);
+            const filtered = hours.filter(h => h.hour >= cutoffHour);
+            const labels = filtered.map(h => `${String(h.hour).padStart(2, '0')}:00`);
+            const entries: CalendarDay[] = filtered.map(h => ({
+                pl: h.summary.total_pl,
+                winners: h.summary.winners,
+                losers: h.summary.losers,
+                total: h.summary.total_orders,
+            }));
+            setHourlyData({labels, entries});
+        }).catch(() => setHourlyData(null));
+    }, [isHourPeriod, period]);
+
+    // Use hourly data for hour periods, daily data otherwise
+    const useHourly = isHourPeriod && hourlyData && hourlyData.entries.length > 0;
+
+    const labels: string[] = useHourly
+        ? hourlyData!.labels
+        : Object.keys(data).sort().map(d => {
+            const dt = dayjs(d);
+            const dateCount = Object.keys(data).length;
+            if (dateCount <= 7) return dt.format('ddd M/D');
+            if (dateCount <= 90) return dt.format('M/D');
+            return dt.format("MMM 'YY");
+        });
+
+    const entries: CalendarDay[] = useHourly
+        ? hourlyData!.entries
+        : Object.keys(data).sort().map(d => data[d]);
+
+    const rawDates = Object.keys(data).sort();
 
     // Index direction data by date for quick lookup
     const dirMap = new Map<string, DirectionDataPoint>();
@@ -41,45 +76,52 @@ export default function WinRateChart({data, direction}: WinRateChartProps) {
         for (const d of direction) dirMap.set(d.date, d);
     }
 
-    // Compute rolling win rates: overall, long, short
+    // Compute rolling win rates
     let cumWins = 0, cumTotal = 0;
+
+    const pointWinRate: (number | null)[] = [];
+    const rollingWinRate: (number | null)[] = [];
+    const tradeCounts: number[] = [];
+
+    for (const entry of entries) {
+        const closed = entry.winners + entry.losers;
+        cumWins += entry.winners;
+        cumTotal += closed;
+        tradeCounts.push(entry.total);
+        pointWinRate.push(closed > 0 ? Math.round(entry.winners / closed * 1000) / 10 : null);
+        rollingWinRate.push(cumTotal > 0 ? Math.round(cumWins / cumTotal * 1000) / 10 : null);
+    }
+
+    // Direction breakdown (only for daily mode)
     let cumLongWins = 0, cumLongTotal = 0;
     let cumShortWins = 0, cumShortTotal = 0;
-
-    const dailyWinRate: (number | null)[] = [];
-    const rollingWinRate: (number | null)[] = [];
     const rollingLongWR: (number | null)[] = [];
     const rollingShortWR: (number | null)[] = [];
     const longTrades: number[] = [];
     const shortTrades: number[] = [];
 
-    for (const d of dates) {
-        const day = data[d];
-        const closed = day.winners + day.losers;
-        cumWins += day.winners;
-        cumTotal += closed;
+    const hasDirection = !useHourly && dirMap.size > 0;
 
-        // Direction breakdown
-        const dir = dirMap.get(d);
-        const dayLong = dir ? dir.long_wins + dir.long_losses : 0;
-        const dayShort = dir ? dir.short_wins + dir.short_losses : 0;
-        longTrades.push(dayLong);
-        shortTrades.push(dayShort);
-
-        if (dir) {
-            cumLongWins += dir.long_wins;
-            cumLongTotal += dayLong;
-            cumShortWins += dir.short_wins;
-            cumShortTotal += dayShort;
+    if (!useHourly) {
+        for (const d of rawDates) {
+            const dir = dirMap.get(d);
+            const dayLong = dir ? dir.long_wins + dir.long_losses : 0;
+            const dayShort = dir ? dir.short_wins + dir.short_losses : 0;
+            longTrades.push(dayLong);
+            shortTrades.push(dayShort);
+            if (dir) {
+                cumLongWins += dir.long_wins;
+                cumLongTotal += dayLong;
+                cumShortWins += dir.short_wins;
+                cumShortTotal += dayShort;
+            }
+            rollingLongWR.push(cumLongTotal > 0 ? Math.round(cumLongWins / cumLongTotal * 1000) / 10 : null);
+            rollingShortWR.push(cumShortTotal > 0 ? Math.round(cumShortWins / cumShortTotal * 1000) / 10 : null);
         }
-
-        dailyWinRate.push(closed > 0 ? Math.round(day.winners / closed * 1000) / 10 : null);
-        rollingWinRate.push(cumTotal > 0 ? Math.round(cumWins / cumTotal * 1000) / 10 : null);
-        rollingLongWR.push(cumLongTotal > 0 ? Math.round(cumLongWins / cumLongTotal * 1000) / 10 : null);
-        rollingShortWR.push(cumShortTotal > 0 ? Math.round(cumShortWins / cumShortTotal * 1000) / 10 : null);
     }
 
-    const hasDirection = dirMap.size > 0;
+    const labelCount = labels.length;
+    const pointLabel = useHourly ? 'Hourly Win Rate' : 'Daily Win Rate';
 
     const option = {
         backgroundColor: 'transparent',
@@ -87,8 +129,8 @@ export default function WinRateChart({data, direction}: WinRateChartProps) {
             trigger: 'axis',
             formatter: (params: any) => {
                 const idx = params[0]?.dataIndex ?? 0;
-                const date = dates[idx] ?? params[0]?.axisValue ?? '';
-                let html = `<b>${date}</b>`;
+                const header = useHourly ? labels[idx] : (rawDates[idx] ?? labels[idx]);
+                let html = `<b>${header}</b>`;
                 for (const p of params) {
                     if (p.value === null || p.value === undefined) continue;
                     const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};margin-right:4px;"></span>`;
@@ -105,8 +147,8 @@ export default function WinRateChart({data, direction}: WinRateChartProps) {
         },
         legend: {
             data: [
-                'Daily Win Rate', 'Cumulative',
-                ...(hasDirection ? ['Long WR', 'Short WR', 'Long', 'Short'] : ['Trades']),
+                pointLabel, 'Cumulative', 'Trades',
+                ...(hasDirection ? ['Long WR', 'Short WR'] : []),
             ],
             textStyle: {color: isDarkMode ? '#9ca3af' : '#374151', fontSize: 11},
             top: 0,
@@ -120,11 +162,11 @@ export default function WinRateChart({data, direction}: WinRateChartProps) {
         },
         xAxis: {
             type: 'category',
-            data: formattedDates,
+            data: labels,
             axisLabel: {
                 color: isDarkMode ? '#9ca3af' : '#6b7280',
-                rotate: dateCount > 30 ? 45 : 0,
-                fontSize: dateCount > 60 ? 10 : 12,
+                rotate: labelCount > 30 ? 45 : 0,
+                fontSize: labelCount > 60 ? 10 : 12,
             },
             axisLine: {lineStyle: {color: isDarkMode ? '#374151' : '#d1d5db'}},
         },
@@ -148,44 +190,21 @@ export default function WinRateChart({data, direction}: WinRateChartProps) {
             },
         ],
         series: [
-            // Background trade bars — split into long/short if available
-            ...(hasDirection ? [
-                {
-                    name: 'Long',
-                    type: 'bar',
-                    stack: 'trades',
-                    yAxisIndex: 1,
-                    data: longTrades,
-                    itemStyle: {color: isDarkMode ? 'rgba(16,185,129,0.25)' : 'rgba(16,185,129,0.2)'},
-                    barMaxWidth: 20,
-                    z: 0,
-                },
-                {
-                    name: 'Short',
-                    type: 'bar',
-                    stack: 'trades',
-                    yAxisIndex: 1,
-                    data: shortTrades,
-                    itemStyle: {color: isDarkMode ? 'rgba(245,158,11,0.25)' : 'rgba(245,158,11,0.2)'},
-                    barMaxWidth: 20,
-                    z: 0,
-                },
-            ] : [
-                {
-                    name: 'Trades',
-                    type: 'bar',
-                    yAxisIndex: 1,
-                    data: dates.map(d => data[d].total),
-                    itemStyle: {color: isDarkMode ? 'rgba(100,116,139,0.3)' : 'rgba(148,163,184,0.3)'},
-                    barMaxWidth: 20,
-                    z: 0,
-                },
-            ]),
-            // Daily win rate scatter
+            // Total trades bar (always shown)
             {
-                name: 'Daily Win Rate',
+                name: 'Trades',
+                type: 'bar',
+                yAxisIndex: 1,
+                data: tradeCounts,
+                itemStyle: {color: isDarkMode ? 'rgba(100,116,139,0.3)' : 'rgba(148,163,184,0.3)'},
+                barMaxWidth: 20,
+                z: 0,
+            },
+            // Per-point win rate scatter
+            {
+                name: pointLabel,
                 type: 'scatter',
-                data: dailyWinRate,
+                data: pointWinRate,
                 symbolSize: 6,
                 itemStyle: {
                     color: (params: any) => {
@@ -195,7 +214,7 @@ export default function WinRateChart({data, direction}: WinRateChartProps) {
                 },
                 z: 2,
             },
-            // Cumulative win rate — overall
+            // Cumulative win rate
             {
                 name: 'Cumulative',
                 type: 'line',
