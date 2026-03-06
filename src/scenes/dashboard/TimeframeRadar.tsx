@@ -1,3 +1,4 @@
+import {useCallback} from 'react';
 import ReactECharts from 'echarts-for-react';
 import {useTheme} from '../../context/Theme';
 import {TimeframeRow} from '../../context/Types';
@@ -18,13 +19,14 @@ const AXES = [
 
 interface TimeframeRadarProps {
     data: TimeframeRow[];
+    selectedTimeframe: string | null;
+    onTimeframeClick: (tf: string | null) => void;
 }
 
-export default function TimeframeRadar({data}: TimeframeRadarProps) {
+export default function TimeframeRadar({data, selectedTimeframe, onTimeframeClick}: TimeframeRadarProps) {
     const {isDarkMode} = useTheme();
     if (data.length === 0) return null;
 
-    // Extract raw values per axis per timeframe
     const raw = data.map(tf => ({
         name: tf.timeframe.charAt(0).toUpperCase() + tf.timeframe.slice(1),
         key: tf.timeframe,
@@ -37,8 +39,18 @@ export default function TimeframeRadar({data}: TimeframeRadarProps) {
         ],
     }));
 
-    // Max per axis for normalization
     const maxPerAxis = AXES.map((_, i) => Math.max(...raw.map(r => r.values[i]), 0.01));
+
+    const onClick = useCallback((params: any) => {
+        if (params.componentType !== 'series') return;
+        const clickedTf = raw[params.dataIndex]?.key ?? data.find(d =>
+            (d.timeframe.charAt(0).toUpperCase() + d.timeframe.slice(1)) === params.name
+        )?.timeframe;
+        if (!clickedTf) return;
+        onTimeframeClick(selectedTimeframe === clickedTf ? null : clickedTf);
+    }, [raw, data, selectedTimeframe, onTimeframeClick]);
+
+    const dimOpacity = 0.15;
 
     const option = {
         backgroundColor: 'transparent',
@@ -79,28 +91,57 @@ export default function TimeframeRadar({data}: TimeframeRadarProps) {
         series: [
             {
                 type: 'radar',
-                data: raw.map(r => ({
-                    value: r.values,
-                    name: r.name,
-                    areaStyle: {color: TF_COLORS[r.key] + '20'},
-                    lineStyle: {color: TF_COLORS[r.key], width: 2},
-                    itemStyle: {color: TF_COLORS[r.key]},
-                    symbol: 'circle',
-                    symbolSize: 5,
-                })),
+                data: raw.map(r => {
+                    const isSelected = !selectedTimeframe || selectedTimeframe === r.key;
+                    return {
+                        value: r.values,
+                        name: r.name,
+                        areaStyle: {
+                            color: TF_COLORS[r.key] + (isSelected ? '20' : '08'),
+                            opacity: isSelected ? 1 : dimOpacity,
+                        },
+                        lineStyle: {
+                            color: TF_COLORS[r.key],
+                            width: isSelected ? 2 : 1,
+                            opacity: isSelected ? 1 : dimOpacity,
+                        },
+                        itemStyle: {
+                            color: TF_COLORS[r.key],
+                            opacity: isSelected ? 1 : dimOpacity,
+                        },
+                        symbol: 'circle',
+                        symbolSize: isSelected ? 5 : 3,
+                    };
+                }),
             },
         ],
     };
 
     return (
         <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`}>
-            <h3 className={`text-lg font-semibold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Timeframe Comparison
-            </h3>
+            <div className="flex items-center justify-between mb-1">
+                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    Timeframe Comparison
+                </h3>
+                {selectedTimeframe && (
+                    <button
+                        onClick={() => onTimeframeClick(null)}
+                        className={`text-xs px-2 py-0.5 rounded-full ${
+                            isDarkMode ? 'bg-cyan-900/50 text-cyan-300' : 'bg-cyan-100 text-cyan-700'
+                        }`}
+                    >
+                        {selectedTimeframe.charAt(0).toUpperCase() + selectedTimeframe.slice(1)} &times;
+                    </button>
+                )}
+            </div>
             <p className={`text-xs mb-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                 Performance profile by strategy
             </p>
-            <ReactECharts option={option} style={{height: '300px'}}/>
+            <ReactECharts
+                option={option}
+                style={{height: '300px'}}
+                onEvents={{click: onClick}}
+            />
         </div>
     );
 }
