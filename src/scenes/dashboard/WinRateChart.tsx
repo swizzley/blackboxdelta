@@ -17,39 +17,60 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
 
     const isHourPeriod = period === '1H' || period === '4H' || period === '12H' || period === '1D';
 
-    // Fetch today's hourly data when an hour period is selected
+    // Fetch hourly data from day files when an hour period is selected.
+    // For periods that span midnight (e.g. 12H at 8am), fetch yesterday too.
     useEffect(() => {
         if (!isHourPeriod) {
             setHourlyData(null);
             return;
         }
-        const today = dayjs();
-        const path = `/data/days/${today.format('YYYY/MM/DD')}.json`;
-        axios.get<DayData>(path).then(r => {
-            const hours = r.data.hours;
-            if (!hours || hours.length === 0) {
+        const now = dayjs();
+        let hoursBack = 24;
+        if (period === '1H') hoursBack = 1;
+        else if (period === '4H') hoursBack = 4;
+        else if (period === '12H') hoursBack = 12;
+
+        const cutoff = now.subtract(hoursBack, 'hour');
+        const today = now.format('YYYY/MM/DD');
+        const yesterday = now.subtract(1, 'day').format('YYYY/MM/DD');
+        const needYesterday = cutoff.format('YYYY-MM-DD') < now.format('YYYY-MM-DD');
+
+        const fetches: Promise<DayData | null>[] = [];
+        if (needYesterday) fetches.push(axios.get<DayData>(`/data/days/${yesterday}.json`).then(r => r.data).catch(() => null));
+        fetches.push(axios.get<DayData>(`/data/days/${today}.json`).then(r => r.data).catch(() => null));
+
+        Promise.all(fetches).then(results => {
+            interface HourEntry { dayLabel: string; hour: number; summary: typeof results[0] extends DayData | null ? NonNullable<typeof results[0]>['hours'][0]['summary'] : never }
+            const allHours: HourEntry[] = [];
+
+            for (const dayData of results) {
+                if (!dayData?.hours) continue;
+                for (const h of dayData.hours) {
+                    const hourTime = dayjs(`${dayData.date}T${String(h.hour).padStart(2, '0')}:00:00`);
+                    if (hourTime.isBefore(cutoff) || hourTime.isAfter(now)) continue;
+                    allHours.push({dayLabel: dayData.date, hour: h.hour, summary: h.summary});
+                }
+            }
+
+            if (allHours.length === 0) {
                 setHourlyData(null);
                 return;
             }
-            // Filter hours based on period
-            const now = today.hour();
-            let hoursBack = 24;
-            if (period === '1H') hoursBack = 1;
-            else if (period === '4H') hoursBack = 4;
-            else if (period === '12H') hoursBack = 12;
-            else if (period === '1D') hoursBack = 24;
-            const cutoffHour = Math.max(0, now - hoursBack);
 
-            const filtered = hours.filter(h => h.hour >= cutoffHour);
-            const labels = filtered.map(h => `${String(h.hour).padStart(2, '0')}:00`);
-            const entries: CalendarDay[] = filtered.map(h => ({
+            const labels = allHours.map(h => {
+                // Show date prefix if data spans multiple days
+                return needYesterday
+                    ? `${h.dayLabel.slice(5)} ${String(h.hour).padStart(2, '0')}:00`
+                    : `${String(h.hour).padStart(2, '0')}:00`;
+            });
+            const entries: CalendarDay[] = allHours.map(h => ({
                 pl: h.summary.total_pl,
                 winners: h.summary.winners,
                 losers: h.summary.losers,
                 total: h.summary.total_orders,
             }));
             setHourlyData({labels, entries});
-        }).catch(() => setHourlyData(null));
+        });
     }, [isHourPeriod, period]);
 
     // Use hourly data for hour periods, daily data otherwise
