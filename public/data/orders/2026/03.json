@@ -1,5 +1,25 @@
 [
   {
+    "id": "13007",
+    "symbol": "EUR_HKD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0005,
+    "created": "2026-03-06T20:36:12.395009752Z",
+    "closed": "2026-03-06T20:37:22Z"
+  },
+  {
+    "id": "13003",
+    "symbol": "AUD_CAD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0012,
+    "created": "2026-03-06T20:33:13.826126506Z",
+    "closed": "2026-03-06T20:40:28Z"
+  },
+  {
     "id": "12995",
     "symbol": "EUR_GBP",
     "direction": "Long",
