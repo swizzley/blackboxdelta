@@ -10,6 +10,7 @@ import CalendarHeatmap from './CalendarHeatmap';
 import WinRateChart from './WinRateChart';
 import ScoreTrendChart from './ScoreTrendChart';
 import RecommendationRadar from './RecommendationRadar';
+import CloseReasonChart from './CloseReasonChart';
 import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
@@ -166,6 +167,7 @@ export default function Dashboard() {
     const [periodStats, setPeriodStats] = useState<TimeframeStats | null>(null);
     const [periodByTimeframe, setPeriodByTimeframe] = useState<TimeframeRow[] | null>(null);
     const [periodRecCounts, setPeriodRecCounts] = useState<Record<string, number> | null>(null);
+    const [periodCloseReasonCounts, setPeriodCloseReasonCounts] = useState<Record<string, number> | null>(null);
     const [periodStatsKey, setPeriodStatsKey] = useState<string>('');
 
     useEffect(() => {
@@ -182,6 +184,7 @@ export default function Dashboard() {
                             all_time: {...prev.all_time, ...apiData.all_time},
                             by_timeframe: apiData.by_timeframe,
                             recommendation_counts: apiData.recommendation_counts ?? prev.recommendation_counts,
+                            close_reason_counts: apiData.close_reason_counts ?? prev.close_reason_counts,
                         }
                         : prev
                     );
@@ -214,6 +217,7 @@ export default function Dashboard() {
             setPeriodStats(null);
             setPeriodByTimeframe(null);
             setPeriodRecCounts(null);
+            setPeriodCloseReasonCounts(null);
             setPeriodStatsKey('');
             return;
         }
@@ -226,6 +230,7 @@ export default function Dashboard() {
                 setPeriodStats(apiData.all_time as TimeframeStats);
                 setPeriodByTimeframe(apiData.by_timeframe ?? null);
                 setPeriodRecCounts(apiData.recommendation_counts ?? null);
+                setPeriodCloseReasonCounts(apiData.close_reason_counts ?? null);
                 setPeriodStatsKey(key);
             }
         });
@@ -410,13 +415,19 @@ export default function Dashboard() {
                         />
                     </div>
 
-                    {/* Recommendation + Timeframe Radar */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    {/* Recommendation + Close Reasons + Timeframe Radar */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
                         {(() => {
                             const recData = (period !== 'All' && periodRecCounts && periodStatsKey.startsWith(period + ':'))
                                 ? periodRecCounts
                                 : dashboard.recommendation_counts;
                             return recData ? <RecommendationRadar data={recData}/> : null;
+                        })()}
+                        {(() => {
+                            const crData = (period !== 'All' && periodCloseReasonCounts && periodStatsKey.startsWith(period + ':'))
+                                ? periodCloseReasonCounts
+                                : dashboard.close_reason_counts;
+                            return crData ? <CloseReasonChart data={crData}/> : null;
                         })()}
                         <TimeframeRadar
                             data={activeByTimeframe}
