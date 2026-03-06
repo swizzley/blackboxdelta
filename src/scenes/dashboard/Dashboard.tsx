@@ -193,7 +193,7 @@ export default function Dashboard() {
 
                     {/* Win Rate Chart — full width, most prominent */}
                     {filteredCalendar && Object.keys(filteredCalendar).length > 0 && (
-                        <WinRateChart data={filteredCalendar} direction={filteredDirection}/>
+                        <WinRateChart data={filteredCalendar} direction={filteredDirection} period={period}/>
                     )}
 
                     {/* Stat Cards */}
