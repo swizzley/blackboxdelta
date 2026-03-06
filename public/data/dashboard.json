@@ -1,13 +1,13 @@
 {
-  "generated": "2026-03-06T14:00:01Z",
+  "generated": "2026-03-06T15:00:01Z",
   "all_time": {
-    "total_orders": 1335,
+    "total_orders": 1336,
     "pending": 0,
     "open_positions": 1,
-    "closed_orders": 1334,
+    "closed_orders": 1335,
     "total_pl": -14.26,
     "winners": 391,
-    "losers": 884,
+    "losers": 885,
     "breakeven": 59,
     "win_loss_ratio": 0.44,
     "win_rate_pct": 29.3,
@@ -56,13 +56,13 @@
     },
     {
       "timeframe": "scalp",
-      "total_orders": 1299,
+      "total_orders": 1300,
       "pending": 0,
       "open_positions": 1,
-      "closed_orders": 1298,
+      "closed_orders": 1299,
       "total_pl": -12.62,
       "winners": 386,
-      "losers": 875,
+      "losers": 876,
       "breakeven": 37,
       "win_loss_ratio": 0.44,
       "win_rate_pct": 29.7,
@@ -170,7 +170,7 @@
       "long_wins": 7,
       "long_losses": 8,
       "short_wins": 9,
-      "short_losses": 18,
+      "short_losses": 19,
       "long_pl": 0,
       "short_pl": -0.03
     }
@@ -212,27 +212,27 @@
     },
     {
       "date": "2026-03-06",
-      "avg_final_score": 1.49,
+      "avg_final_score": 0.64,
       "avg_confidence": 0.73,
-      "avg_trend": -1.07,
-      "avg_ma": -7.01,
-      "avg_crossover": 0.56,
-      "avg_oscillator": -1.71,
-      "avg_volatility": 0.85,
-      "avg_volume": 1.17,
-      "avg_fib_stack": -0.63,
-      "avg_momentum_projection": -0.31,
-      "avg_structure": 3.21,
-      "avg_cycle": 1.16,
-      "avg_pattern": -0.18,
-      "count": 1606
+      "avg_trend": -1.34,
+      "avg_ma": -8.74,
+      "avg_crossover": 0.36,
+      "avg_oscillator": -1.79,
+      "avg_volatility": 0.67,
+      "avg_volume": 1.12,
+      "avg_fib_stack": -1.19,
+      "avg_momentum_projection": -0.61,
+      "avg_structure": 3.11,
+      "avg_cycle": 1.17,
+      "avg_pattern": -0.19,
+      "count": 1722
     }
   ],
   "recommendation_counts": {
-    "Buy": 1339,
-    "Moderate Buy": 2216,
-    "Moderate Sell": 1979,
-    "Sell": 777,
-    "Strong Buy": 8
+    "Buy": 1351,
+    "Moderate Buy": 2240,
+    "Moderate Sell": 2030,
+    "Sell": 805,
+    "Strong Buy": 9
   }
 }
