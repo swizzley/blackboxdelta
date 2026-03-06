@@ -98,7 +98,18 @@ export default function ScoreTrendChart({data, period}: ScoreTrendChartProps) {
 
     if (!effectiveData || effectiveData.length === 0) return null;
 
-    const dates = effectiveData.map(d => d.date);
+    // Format x-axis labels based on data density and period
+    const dates = effectiveData.map(d => {
+        // Hourly data already has formatted labels (e.g. "14:00" or "03-05 20:00")
+        if (isHourPeriod && hourlyScores) return d.date;
+        // Daily data — format based on range
+        const dt = dayjs(d.date);
+        const count = effectiveData.length;
+        if (count <= 7) return dt.format('ddd M/D');
+        if (count <= 31) return dt.format('M/D');
+        if (count <= 90) return dt.format('M/D');
+        return dt.format("MMM 'YY");
+    });
 
     const series: any[] = [
         {
@@ -155,7 +166,11 @@ export default function ScoreTrendChart({data, period}: ScoreTrendChartProps) {
         xAxis: {
             type: 'category',
             data: dates,
-            axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280'},
+            axisLabel: {
+                color: isDarkMode ? '#9ca3af' : '#6b7280',
+                rotate: dates.length > 30 ? 45 : 0,
+                fontSize: dates.length > 60 ? 10 : 12,
+            },
             axisLine: {lineStyle: {color: isDarkMode ? '#374151' : '#d1d5db'}},
         },
         yAxis: [
