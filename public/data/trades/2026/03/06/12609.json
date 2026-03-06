@@ -1,0 +1,59 @@
+{
+  "id": "12609",
+  "trade_id": "12610",
+  "symbol": "CAD_SGD",
+  "direction": "Short",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.93543,
+  "exit": 0.93568,
+  "stop_loss": 0.9359299999999999,
+  "take_profit": 0.93206,
+  "quantity": -2,
+  "profit": -0.0005,
+  "created": "2026-03-06T07:26:10.412227397Z",
+  "closed": "2026-03-06T07:50:00Z",
+  "duration_mins": 23,
+  "alert_id": 9717,
+  "risk_reward": 6.740000000000711,
+  "score": {
+    "Symbol": "CADSGD",
+    "T": 1772781840000,
+    "Time": "",
+    "trend_score": -15,
+    "ma_score": -102,
+    "crossover_score": -2,
+    "oscillator_score": -1,
+    "volatility_score": -3,
+    "volume_score": 4,
+    "fib_stack_score": -26,
+    "momentum_projection_score": -11,
+    "structure_score": 3,
+    "cycle_score": 2,
+    "pattern_score": 1,
+    "final_score": -30.72,
+    "confidence": 0.6744,
+    "entry_price": 0.93548,
+    "stop_price": 0.93564,
+    "tp_price": 0.93368,
+    "risk_reward": 11,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Sell"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "4d814100b2d4193f920ef7842afd6d1f2042147c",
+      "message": "refactor publish to use common-lib publish package"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}

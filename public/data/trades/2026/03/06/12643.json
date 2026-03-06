@@ -1,0 +1,59 @@
+{
+  "id": "12643",
+  "trade_id": "12644",
+  "symbol": "AUD_CHF",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 0.54973,
+  "exit": 0.5489633333333334,
+  "stop_loss": 0.5492300000000001,
+  "take_profit": 0.55179,
+  "quantity": 3,
+  "profit": -0.0023,
+  "created": "2026-03-06T07:29:09.19242784Z",
+  "closed": "2026-03-06T07:54:49Z",
+  "duration_mins": 25,
+  "alert_id": 9728,
+  "risk_reward": 4.120000000000355,
+  "score": {
+    "Symbol": "AUDCHF",
+    "T": 1772782020000,
+    "Time": "",
+    "trend_score": 11,
+    "ma_score": 81,
+    "crossover_score": 15,
+    "oscillator_score": 5,
+    "volatility_score": 4,
+    "volume_score": 0,
+    "fib_stack_score": 20,
+    "momentum_projection_score": 12,
+    "structure_score": 7,
+    "cycle_score": 2,
+    "pattern_score": 0,
+    "final_score": 39.45,
+    "confidence": 0.6555,
+    "entry_price": 0.54943,
+    "stop_price": 0.54923,
+    "tp_price": 0.5508,
+    "risk_reward": 7,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "4d814100b2d4193f920ef7842afd6d1f2042147c",
+      "message": "refactor publish to use common-lib publish package"
+    },
+    "massive-market": {
+      "sha": "8f4fcb83fbde672285f0fd7a2c68938fbced0fef",
+      "message": "Update swizzley-common vendor (LoadAllVersionsMap)"
+    },
+    "swizzley-trader": {
+      "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
+      "message": "Fix Printf format mismatch in scalp order log line"
+    }
+  }
+}
