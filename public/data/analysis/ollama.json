@@ -1,6 +1,15 @@
 {
   "runs": [
     {
+      "run_id": "20260306-030446",
+      "created_at": "2026-03-06T03:04:46Z",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "order_count": 631,
+      "todo_count": 5,
+      "synthesis": "## Executive Summary\n\n### Overall System Health and Trajectory\nThe performance analysis of Swizzley FX from March 5 to March 6, 2026, reveals a low win rate of 34.87% with negative P\u0026L (-2.19 units). The profit factor is 0.33, indicating that losses exceed profits significantly. Scalp trades perform better than intraday trades, but overall performance remains poor.\n\n### Most Critical Issues Found\n- **Low Win Rate and Negative P\u0026L**: The system has a low win rate of 34.87% with negative profitability.\n- **Poor Performance by Timeframe**: Intraday trades have a win rate of 0%, while scalp trades have a slightly better but still poor win rate (34.98%).\n- **Negative Impact from Recent Updates**: Significant transitions in the finmon service led to drops in win rates, indicating recent updates negatively impacted performance.\n- **Weak Predictive Indicators**: Components like PatternScore and OscillatorScore show minimal predictive power.\n\n### Highest-Impact Quick Wins\n1. **Increase MaScore Weight**: Adjusting weights based on high predictiveness can improve the overall system's win rate by 0.5-2%.\n2. **Reduce PatternScore Weight**: Lowering the weight of non-predictive components will help in reducing noise and improving performance.\n3. **Adjust Stop Loss Distances**: Narrowing stop loss distances for scalp trades to align with actual losses can improve profitability.\n\n### Strategic Recommendations\n1. **Re-evaluate Indicator Weights**: Focus on increasing weights for highly predictive indicators like MaScore while reducing or eliminating weak ones such as PatternScore and OscillatorScore.\n2. **Optimize Risk Management Parameters**: Adjust stop loss and take profit distances to better match actual realized wins and losses, particularly in the scalp timeframe.\n3. **Monitor Recent Updates**: Carefully review recent changes in finmon service that negatively impacted performance and revert or refine them.\n\nBy implementing these recommendations, Swizzley FX can improve its win rate and profitability, leading to a more robust trading system."
+    },
+    {
       "run_id": "20260306-023839",
       "created_at": "2026-03-06T02:38:39Z",
       "provider": "ollama",
@@ -120,14 +129,14 @@
   ],
   "todos": [
     {
-      "id": 71,
-      "run_id": "20260306-023839",
+      "id": 76,
+      "run_id": "20260306-030446",
       "priority": 1,
       "category": "scoring_weights",
-      "title": "Increase MaScore Weight",
-      "description": "MaScore has the highest predictive power with a significant spread between win and loss means.",
+      "title": "Increase MaScore weight",
+      "description": "MaScore has a significant spread between win and loss means, indicating high predictive power.",
       "expected_impact": "Expected to improve win rate by 0.5-2%",
-      "evidence": "MaScore win mean: 6.43, loss mean: 2.82, spread: 3.61",
+      "evidence": "Component Effectiveness Ranking shows MaScore with the highest spread (3.61).",
       "affected_files": [
         "finmon/file.go"
       ],
@@ -135,14 +144,14 @@
       "status": "open"
     },
     {
-      "id": 72,
-      "run_id": "20260306-023839",
+      "id": 77,
+      "run_id": "20260306-030446",
       "priority": 1,
       "category": "scoring_weights",
-      "title": "Reduce TrendScore Weight",
-      "description": "TrendScore has a small predictive power with a low spread between win and loss means.",
+      "title": "Reduce PatternScore weight",
+      "description": "PatternScore has minimal predictive power and a low spread between win and loss means.",
       "expected_impact": "Expected to improve win rate by 0.5-2%",
-      "evidence": "TrendScore win mean: 0.81, loss mean: 0.48, spread: 0.33",
+      "evidence": "Component Predictiveness shows PatternScore with no significant spread (0.45).",
       "affected_files": [
         "finmon/file.go"
       ],
@@ -150,14 +159,14 @@
       "status": "open"
     },
     {
-      "id": 73,
-      "run_id": "20260306-023839",
-      "priority": 2,
+      "id": 78,
+      "run_id": "20260306-030446",
+      "priority": 1,
       "category": "scoring_weights",
-      "title": "Increase VolumeScore Weight",
-      "description": "VolumeScore is moderately predictive with a positive but small spread.",
-      "expected_impact": "Expected to improve win rate by 0.1-0.5%",
-      "evidence": "VolumeScore win mean: 1.43, loss mean: 1.00, spread: 0.43",
+      "title": "Adjust VolumeScore weight",
+      "description": "VolumeScore has moderate predictive power but a low spread between win and loss means.",
+      "expected_impact": "Expected to improve win rate by 0.5-2%",
+      "evidence": "Component Effectiveness Ranking shows VolumeScore with weak predictive power (1.43).",
       "affected_files": [
         "finmon/file.go"
       ],
@@ -165,29 +174,29 @@
       "status": "open"
     },
     {
-      "id": 74,
-      "run_id": "20260306-023839",
-      "priority": 2,
-      "category": "scoring_weights",
-      "title": "Reduce OscillatorScore Weight",
-      "description": "OscillatorScore is not predictive with a minimal spread.",
-      "expected_impact": "Expected to improve win rate by 0.1-0.5%",
-      "evidence": "OscillatorScore win mean: -1.18, loss mean: -1.63, spread: 0.45",
-      "affected_files": [
-        "finmon/file.go"
-      ],
-      "complexity": "low",
-      "status": "open"
-    },
-    {
-      "id": 75,
-      "run_id": "20260306-023839",
+      "id": 79,
+      "run_id": "20260306-030446",
       "priority": 2,
       "category": "risk_guardrails",
-      "title": "Adjust Stop Loss for Scalp Trades",
-      "description": "Scalp timeframe stops are too wide compared to average losses.",
+      "title": "Adjust scalp stop loss distances",
+      "description": "Scalp timeframe has wide stop losses compared to actual realized losses.",
       "expected_impact": "Expected to improve win rate by 0.1-0.5%",
-      "evidence": "Average stop loss distance: 40.44819 pips, Average loss per trade: -0.0079 pips",
+      "evidence": "Risk/Reward analysis shows average SL distance of 40.44819 pips, while average loss is -0.0079 pips.",
+      "affected_files": [
+        "swizzley-trader/file.go"
+      ],
+      "complexity": "medium",
+      "status": "open"
+    },
+    {
+      "id": 80,
+      "run_id": "20260306-030446",
+      "priority": 2,
+      "category": "risk_guardrails",
+      "title": "Adjust scalp take profit distances",
+      "description": "Scalp timeframe has wide take profits compared to actual realized wins.",
+      "expected_impact": "Expected to improve win rate by 0.1-0.5%",
+      "evidence": "Risk/Reward analysis shows average TP distance of 0.23788 pips, while average win is 0.0048 pips.",
       "affected_files": [
         "swizzley-trader/file.go"
       ],
