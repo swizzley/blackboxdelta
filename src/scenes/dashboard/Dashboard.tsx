@@ -69,7 +69,8 @@ export default function Dashboard() {
                 if (apiCal) {
                     const record: CalendarData = {};
                     for (const day of apiCal as ApiCalendarDay[]) {
-                        record[day.date] = {pl: day.pl, winners: day.winners, losers: day.losers, total: day.total};
+                        const dateKey = day.date.length > 10 ? day.date.slice(0, 10) : day.date;
+                        record[dateKey] = {pl: day.pl, winners: day.winners, losers: day.losers, total: day.total};
                     }
                     setCalendar(record);
                 } else {
