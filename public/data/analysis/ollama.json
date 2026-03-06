@@ -1,6 +1,15 @@
 {
   "runs": [
     {
+      "run_id": "20260306-200454",
+      "created_at": "2026-03-06T20:04:54Z",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "order_count": 679,
+      "todo_count": 5,
+      "synthesis": "## Executive Summary\n\n### Overall System Health and Trajectory\nThe Swizzley FX system experienced a significant decline in performance from March 5 to March 6, 2026. The overall win rate was 35.35%, with an average profit of -1.95 units. This indicates that losses outweigh wins, leading to negative profitability. Scalp trading showed the highest number of trades and a slightly better performance compared to intraday and swing trading in terms of win rates and P\u0026L.\n\n### Most Critical Issues Found\nThe most critical issues identified include:\n- **Regression in Performance**: The system experienced a significant drop in win rate after version transitions, with notable decreases from 44.64% to 32.99%. This suggests potential bugs or ineffective changes.\n- **Poor Risk Management**: Scalp trades have unfavorable risk-to-reward ratios (R:R of 0.61), indicating that stop losses are too wide and take profits are not being captured effectively.\n\n### Highest-Impact Quick Wins\nThe highest-impact quick wins include:\n- **Adjusting Scoring Weights**: Increasing the weights for highly predictive components like TrendScore, MaScore, and FibStackScore can improve win rates by up to 2%.\n- **Reducing Unpredictive Components**: Decreasing or removing weights of CycleScore and PatternScore can reduce noise and improve overall performance.\n\n### Strategic Recommendations\n1. **Optimize Scoring Weights**:\n   - Increase the weight of TrendScore, MaScore, and FibStackScore based on their high predictive power.\n   - Reduce the weight of CycleScore and PatternScore due to their low predictiveness.\n\n2. **Refine Risk Management Parameters**:\n   - Adjust stop loss distances for scalp trades to align with actual losses (reduce from 40.356 pips to 7.4 pips).\n   - Increase take profit distances to capture more profits based on average wins.\n   \n3. **Monitor and Evaluate Performance Continuously**:\n   - Regularly review performance metrics post-version transitions to identify any regressions early.\n   - Collect additional data for swing and intraday timeframes to refine risk management parameters accurately.\n\nBy implementing these recommendations, Swizzley FX can improve its win rates and profitability, leading to better overall system health."
+    },
+    {
       "run_id": "20260306-190454",
       "created_at": "2026-03-06T19:04:54Z",
       "provider": "ollama",
@@ -170,21 +179,12 @@
       "order_count": 629,
       "todo_count": 5,
       "synthesis": "## Executive Summary\n\n### Overall System Health and Trajectory\nThe performance analysis of Swizzley FX from March 5 to March 6, 2026, reveals a system with significant challenges. The overall win rate is only 34.66%, resulting in a negative P\u0026L of -2.19 units. This indicates that the losses outweigh the profits both in frequency and size. Scalp trades perform better than intraday trades but still yield negative P\u0026L, suggesting inefficiencies across multiple timeframes.\n\n### Most Critical Issues Found\n- **Low Win Rate:** The overall win rate is unacceptably low at 34.66%, with a profit factor of only 0.32.\n- **Poor Risk Management:** Scalp trades have excessively wide stop losses compared to average losses, leading to inefficient use of margin and potential overtrading.\n- **Negative Predictive Components:** Several scoring components like CycleScore, OscillatorScore, VolatilityScore, StructureScore, CycleScore, and PatternScore show low or negative predictive value.\n\n### Highest-Impact Quick Wins\n1. **Increase MaScore Weight:** The MaScore component has the highest spread among all indicators (4.39), indicating strong predictive power. Increasing its weight could significantly improve win rates.\n2. **Reduce CycleScore Weight:** CycleScore shows a negative spread, suggesting it may be detrimental to performance. Reducing or eliminating this score can enhance overall system effectiveness.\n3. **Adjust TrendScore Weight:** While TrendScore has moderate predictive ability (spread of 0.44), its current high weight suggests potential for optimization.\n\n### Strategic Recommendations\n1. **Optimize Scoring Pipeline:** Focus on increasing the weights of highly predictive components like MaScore and FibStackScore while reducing or eliminating those with low predictiveness.\n2. **Enhance Risk Management:** Implement tighter stop loss distances for scalp trades to better match observed losses, improving risk-adjusted returns.\n3. **Further Analysis Needed:** Conduct additional analysis on intraday timeframe due to insufficient data, ensuring that all timeframes are optimized for performance.\n\nBy addressing these critical issues and implementing the suggested optimizations, Swizzley FX can significantly improve its win rate and overall profitability in the short term."
-    },
-    {
-      "run_id": "20260306-010427",
-      "created_at": "2026-03-06T01:04:27Z",
-      "provider": "ollama",
-      "model": "qwen2.5:14b",
-      "order_count": 619,
-      "todo_count": 5,
-      "synthesis": "---\n\n## Executive Summary\n\n### Overall System Health and Trajectory\nThe Swizzley FX trading system experienced a low win rate of 34.41% from March 5 to March 6, 2026, resulting in negative P\u0026L (-2.23 units). The profit factor is very low at 0.31, indicating that losses are significantly larger than wins on average. Scalp trades performed better with a win rate of 34.52%, but still resulted in negative P\u0026L.\n\n### Most Critical Issues Found\n- **Poor Win Rate and Negative P\u0026L**: The overall system has a low win rate and negative P\u0026L, indicating poor performance.\n- **Weak Predictive Indicators**: Several scoring components like CrossoverScore, OscillatorScore, VolatilityScore, MomentumProjectionScore, StructureScore, CycleScore, and PatternScore show minimal to negative predictiveness.\n- **Ineffective Risk Management**: The average stop loss distances are too wide for scalp trades (41.04) compared to actual losses (-0.0079), leading to unfavorable risk-reward ratios.\n\n### Highest-Impact Quick Wins\n- **Increase MaScore Weight**: MaScore has a high predictive spread of 4.41, indicating strong performance.\n- **Reduce CrossoverScore and OscillatorScore Weights**: Both indicators have low predictive spreads (0.43 and 0.52 respectively), suggesting weak performance.\n\n### Strategic Recommendations\n- **Adjust Scoring Pipeline Weights**: Increase the weight of MaScore to better align with its high predictive power, while reducing weights for CrossoverScore, OscillatorScore, VolatilityScore, MomentumProjectionScore, StructureScore, CycleScore, and PatternScore.\n- **Optimize Risk Management Parameters**: Reduce average stop loss distances for scalp trades to approximately 0.01 to better match actual losses, and increase take profit distances accordingly.\n- **Monitor Symbol-Specific Issues**: Identify and address specific issues with symbols like USD_JPY that frequently hit stop losses despite positive scores.\n\nBy implementing these changes, the system can potentially improve its win rate and overall performance significantly."
     }
   ],
   "todos": [
     {
-      "id": 156,
-      "run_id": "20260306-190454",
+      "id": 161,
+      "run_id": "20260306-200454",
       "priority": 1,
       "category": "scoring_weights",
       "title": "Increase TrendScore weight",
@@ -198,8 +198,8 @@
       "status": "open"
     },
     {
-      "id": 157,
-      "run_id": "20260306-190454",
+      "id": 162,
+      "run_id": "20260306-200454",
       "priority": 1,
       "category": "scoring_weights",
       "title": "Increase MaScore weight",
@@ -213,8 +213,8 @@
       "status": "open"
     },
     {
-      "id": 158,
-      "run_id": "20260306-190454",
+      "id": 163,
+      "run_id": "20260306-200454",
       "priority": 1,
       "category": "scoring_weights",
       "title": "Increase FibStackScore weight",
@@ -228,8 +228,8 @@
       "status": "open"
     },
     {
-      "id": 159,
-      "run_id": "20260306-190454",
+      "id": 164,
+      "run_id": "20260306-200454",
       "priority": 2,
       "category": "scoring_weights",
       "title": "Reduce CycleScore weight",
@@ -243,8 +243,8 @@
       "status": "open"
     },
     {
-      "id": 160,
-      "run_id": "20260306-190454",
+      "id": 165,
+      "run_id": "20260306-200454",
       "priority": 2,
       "category": "scoring_weights",
       "title": "Reduce PatternScore weight",
