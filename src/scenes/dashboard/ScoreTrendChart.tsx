@@ -161,7 +161,7 @@ export default function ScoreTrendChart({data}: ScoreTrendChartProps) {
                     {showComponents ? 'Hide Components' : 'Show Components'}
                 </button>
             </div>
-            <ReactECharts option={option} style={{height: '350px'}}/>
+            <ReactECharts option={option} notMerge={true} style={{height: '350px'}}/>
         </div>
     );
 }
