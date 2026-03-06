@@ -1,16 +1,16 @@
 {
   "date": "2026-03-06",
   "summary": {
-    "total_orders": 54,
+    "total_orders": 55,
     "pending": 0,
-    "open_positions": 1,
-    "closed_orders": 53,
+    "open_positions": 0,
+    "closed_orders": 55,
     "total_pl": -0.03,
     "winners": 19,
-    "losers": 33,
-    "breakeven": 1,
-    "win_loss_ratio": 0.58,
-    "win_rate_pct": 35.8,
+    "losers": 34,
+    "breakeven": 2,
+    "win_loss_ratio": 0.56,
+    "win_rate_pct": 34.5,
     "avg_win": 0,
     "avg_loss": -0,
     "avg_time_in_trade_mins": 26,
@@ -19,16 +19,16 @@
     "by_timeframe": [
       {
         "timeframe": "scalp",
-        "total_orders": 54,
+        "total_orders": 55,
         "pending": 0,
-        "open_positions": 1,
-        "closed_orders": 53,
+        "open_positions": 0,
+        "closed_orders": 55,
         "total_pl": -0.03,
         "winners": 19,
-        "losers": 33,
-        "breakeven": 1,
-        "win_loss_ratio": 0.58,
-        "win_rate_pct": 35.8,
+        "losers": 34,
+        "breakeven": 2,
+        "win_loss_ratio": 0.56,
+        "win_rate_pct": 34.5,
         "avg_win": 0,
         "avg_loss": -0,
         "avg_time_in_trade_mins": 26,
@@ -2150,17 +2150,17 @@
       "summary": {
         "total_orders": 3,
         "pending": 0,
-        "open_positions": 1,
-        "closed_orders": 2,
+        "open_positions": 0,
+        "closed_orders": 3,
         "total_pl": -0,
         "winners": 0,
         "losers": 2,
-        "breakeven": 0,
+        "breakeven": 1,
         "win_loss_ratio": 0,
         "win_rate_pct": 0,
         "avg_win": null,
         "avg_loss": -0,
-        "avg_time_in_trade_mins": 4,
+        "avg_time_in_trade_mins": 17,
         "long_pl": 0,
         "short_pl": -0
       },
@@ -2239,16 +2239,16 @@
           "symbol": "EUR_GBP",
           "direction": "Long",
           "timeframe": "scalp",
-          "status": "FILLED",
+          "status": "CLOSED",
           "type": "LIMIT_ORDER",
           "entry": 0.86688,
           "stop_loss": 0.86638,
           "take_profit": 0.86928,
           "quantity": 3,
-          "profit": null,
+          "profit": 0,
           "created": "2026-03-06T20:27:10.520090984Z",
-          "closed": null,
-          "duration_mins": null,
+          "closed": "2026-03-06T21:11:30Z",
+          "duration_mins": 44,
           "alert_id": 11408,
           "risk_reward": 4.800000000000666,
           "versions": {
@@ -2263,6 +2263,62 @@
             "swizzley-trader": {
               "sha": "9bd6121f4e4af1ed8e5d4c48a3ca103cd486cf9c",
               "message": "Fix Printf format mismatch in scalp order log line"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "hour": 21,
+      "summary": {
+        "total_orders": 1,
+        "pending": 0,
+        "open_positions": 0,
+        "closed_orders": 1,
+        "total_pl": -0,
+        "winners": 0,
+        "losers": 1,
+        "breakeven": 0,
+        "win_loss_ratio": 0,
+        "win_rate_pct": 0,
+        "avg_win": null,
+        "avg_loss": -0,
+        "avg_time_in_trade_mins": 1,
+        "long_pl": -0,
+        "short_pl": 0
+      },
+      "orders": [
+        {
+          "id": "13045",
+          "trade_id": "13046",
+          "symbol": "CHF_HKD",
+          "direction": "Long",
+          "timeframe": "scalp",
+          "status": "CLOSED",
+          "type": "LIMIT_ORDER",
+          "entry": 10.0758,
+          "exit": 10.075399999999998,
+          "stop_loss": 10.0729,
+          "take_profit": 10.0846,
+          "quantity": 2,
+          "profit": -0.0008,
+          "created": "2026-03-06T21:43:07.568953374Z",
+          "closed": "2026-03-06T21:44:28Z",
+          "duration_mins": 1,
+          "alert_id": 11481,
+          "risk_reward": 3.034482758622464,
+          "versions": {
+            "finmon": {
+              "sha": "96b31e9118fca6099a0abaa295712cb92738ee43",
+              "message": "adjusted weights again."
+            },
+            "massive-market": {
+              "sha": "78014b5dab430382d5cda1d131342275523d45a3",
+              "message": "update collection-engine"
+            },
+            "swizzley-trader": {
+              "sha": "cefa8f4bcb9dff124b5bf66d7c86eb092c15cbcb",
+              "message": "Add CloseReason to order lifecycle"
             }
           }
         }

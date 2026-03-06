@@ -1,0 +1,59 @@
+{
+  "id": "13045",
+  "trade_id": "13046",
+  "symbol": "CHF_HKD",
+  "direction": "Long",
+  "timeframe": "scalp",
+  "status": "CLOSED",
+  "type": "LIMIT_ORDER",
+  "entry": 10.0758,
+  "exit": 10.075399999999998,
+  "stop_loss": 10.0729,
+  "take_profit": 10.0846,
+  "quantity": 2,
+  "profit": -0.0008,
+  "created": "2026-03-06T21:43:07.568953374Z",
+  "closed": "2026-03-06T21:44:28Z",
+  "duration_mins": 1,
+  "alert_id": 11481,
+  "risk_reward": 3.034482758622464,
+  "score": {
+    "Symbol": "CHFHKD",
+    "T": 1772833260000,
+    "Time": "",
+    "trend_score": 13,
+    "ma_score": 48,
+    "crossover_score": 12,
+    "oscillator_score": 6,
+    "volatility_score": 7,
+    "volume_score": -2,
+    "fib_stack_score": 23,
+    "momentum_projection_score": 15,
+    "structure_score": 6,
+    "cycle_score": 4,
+    "pattern_score": -2,
+    "final_score": 31.14,
+    "confidence": 0.6889,
+    "entry_price": 10.0719,
+    "stop_price": 10.0709,
+    "tp_price": 10.0807,
+    "risk_reward": 9,
+    "unit_size": 0,
+    "recommended_timeframe": "scalp",
+    "recommendation": "Moderate Buy"
+  },
+  "versions": {
+    "finmon": {
+      "sha": "96b31e9118fca6099a0abaa295712cb92738ee43",
+      "message": "adjusted weights again."
+    },
+    "massive-market": {
+      "sha": "78014b5dab430382d5cda1d131342275523d45a3",
+      "message": "update collection-engine"
+    },
+    "swizzley-trader": {
+      "sha": "cefa8f4bcb9dff124b5bf66d7c86eb092c15cbcb",
+      "message": "Add CloseReason to order lifecycle"
+    }
+  }
+}
