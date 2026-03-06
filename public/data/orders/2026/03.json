@@ -1,13 +1,23 @@
 [
   {
+    "id": "12474",
+    "symbol": "EUR_HKD",
+    "direction": "Short",
+    "timeframe": "scalp",
+    "status": "CLOSED",
+    "profit": -0.0014,
+    "created": "2026-03-06T06:05:16.250866624Z",
+    "closed": "2026-03-06T06:06:35Z"
+  },
+  {
     "id": "12402",
     "symbol": "USD_CAD",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": 0.0006,
     "created": "2026-03-06T05:03:13.406265948Z",
-    "closed": null
+    "closed": "2026-03-06T06:04:03Z"
   },
   {
     "id": "12412",
@@ -114,10 +124,10 @@
     "symbol": "EUR_GBP",
     "direction": "Long",
     "timeframe": "scalp",
-    "status": "FILLED",
-    "profit": null,
+    "status": "CLOSED",
+    "profit": -0.0022,
     "created": "2026-03-06T02:36:11.405219616Z",
-    "closed": null
+    "closed": "2026-03-06T06:30:50Z"
   },
   {
     "id": "12240",
