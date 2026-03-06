@@ -25,8 +25,9 @@ export function checkHealth(): Promise<ApiHealth | null> {
     return apiFetch('/api/health');
 }
 
-export function fetchDashboard(): Promise<ApiDashboard | null> {
-    return apiFetch('/api/dashboard');
+export function fetchDashboard(since?: string): Promise<ApiDashboard | null> {
+    const qs = since ? `?since=${encodeURIComponent(since)}` : '';
+    return apiFetch(`/api/dashboard${qs}`);
 }
 
 export function fetchCalendar(days = 90): Promise<ApiCalendarDay[] | null> {
