@@ -6,11 +6,12 @@ import {useApi} from '../../context/Api';
 import {
     fetchOptimizerStatus, fetchOptimizerGenerations,
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
+    fetchOptimizerBranches,
     queueRecommendation, skipRecommendation,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
-    OptimizerRecommendation, OptimizerResult,
+    OptimizerRecommendation, OptimizerResult, OptimizerBranch,
 } from '../../context/Types';
 import {
     BeakerIcon, ArrowTrendingUpIcon, ClockIcon,
@@ -148,47 +149,16 @@ export default function Optimizer() {
                                 )}
                             </div>
 
-                            {/* Generation History */}
+                            {/* Generation History with expandable branch details */}
                             <div className={`${card} mb-6`}>
                                 <h2 className={heading}><ClockIcon className={iconCl}/>Generation History</h2>
                                 {generations.length === 0 ? (
                                     <p className={`text-sm ${muted}`}>No generations recorded</p>
                                 ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead>
-                                                <tr className="border-b border-gray-700/30">
-                                                    <th className={`${thCl} pb-2 pr-4`}>ID</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Trunk</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Timeframe</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Status</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Branches</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Passed</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Failed</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Duration</th>
-                                                    <th className={`${thCl} pb-2`}>Started</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {generations.map(g => (
-                                                    <tr key={g.id} className={rowBg}>
-                                                        <td className={`${tdCl} py-2 pr-4 font-mono`}>{g.id}</td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>{g.trunk_id}</td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>
-                                                            <TimeframeBadge tf={g.timeframe} isDarkMode={isDarkMode}/>
-                                                        </td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>
-                                                            <GenStatusBadge status={g.status} isDarkMode={isDarkMode}/>
-                                                        </td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>{g.branch_count}</td>
-                                                        <td className={`${tdCl} py-2 pr-4 text-emerald-500`}>{g.passed ?? '—'}</td>
-                                                        <td className={`${tdCl} py-2 pr-4 text-red-500`}>{g.failed ?? '—'}</td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>{genDuration(g)}</td>
-                                                        <td className={`${tdCl} py-2`}>{dayjs(g.started_at).fromNow()}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                    <div className="space-y-1">
+                                        {generations.map(g => (
+                                            <GenerationRow key={g.id} gen={g} isDarkMode={isDarkMode} muted={muted} thCl={thCl} tdCl={tdCl}/>
+                                        ))}
                                     </div>
                                 )}
                             </div>
@@ -264,6 +234,117 @@ function GenerationCard({gen, isDarkMode, muted}: {gen: OptimizerGeneration; isD
                 <MiniStat label="Running" value={String(gen.running ?? 0)} isDarkMode={isDarkMode}/>
             </div>
         </div>
+    );
+}
+
+function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
+    gen: OptimizerGeneration; isDarkMode: boolean; muted: string; thCl: string; tdCl: string;
+}) {
+    const [expanded, setExpanded] = useState(false);
+    const [branches, setBranches] = useState<OptimizerBranch[] | null>(null);
+
+    const toggle = async () => {
+        if (!expanded && branches === null) {
+            const data = await fetchOptimizerBranches(gen.id);
+            setBranches(data ?? []);
+        }
+        setExpanded(!expanded);
+    };
+
+    return (
+        <div className={`rounded-lg ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+            <button onClick={toggle} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{gen.id}</span>
+                    <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
+                    <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
+                    <span className={`text-xs ${muted} hidden sm:inline`}>
+                        {gen.branch_count} branches
+                        {gen.passed ? ` · ${gen.passed} passed` : ''}
+                        {gen.failed ? ` · ${gen.failed} failed` : ''}
+                    </span>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                    <span className={`text-xs ${muted}`}>{genDuration(gen)}</span>
+                    <span className={`text-xs ${muted} hidden sm:inline`}>{dayjs(gen.started_at).fromNow()}</span>
+                    {expanded
+                        ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/>
+                        : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>
+                    }
+                </div>
+            </button>
+
+            {expanded && branches !== null && (
+                <div className="px-4 pb-3">
+                    {branches.length === 0 ? (
+                        <p className={`text-sm ${muted} py-2`}>No branches</p>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full mt-1">
+                                <thead>
+                                    <tr className="border-b border-gray-700/20">
+                                        <th className={`${thCl} pb-1.5 pr-3`}>Branch</th>
+                                        <th className={`${thCl} pb-1.5 pr-3`}>Status</th>
+                                        <th className={`${thCl} pb-1.5 pr-3`}>Trades</th>
+                                        <th className={`${thCl} pb-1.5 pr-3`}>Win%</th>
+                                        <th className={`${thCl} pb-1.5 pr-3`}>PF</th>
+                                        <th className={`${thCl} pb-1.5 pr-3`}>Sharpe</th>
+                                        <th className={`${thCl} pb-1.5 pr-3`}>DD</th>
+                                        <th className={`${thCl} pb-1.5`}>Directive</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {branches.map(b => (
+                                        <BranchRow key={b.id} branch={b} isDarkMode={isDarkMode} tdCl={tdCl} winnerId={gen.winner_branch_id}/>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function BranchRow({branch: b, isDarkMode, tdCl, winnerId}: {branch: OptimizerBranch; isDarkMode: boolean; tdCl: string; winnerId?: number}) {
+    const isWinner = winnerId === b.id;
+    const rowCls = isWinner
+        ? (isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50')
+        : (isDarkMode ? 'even:bg-slate-600/20' : 'even:bg-gray-50/50');
+
+    const statusCls = b.status === 'passed'
+        ? 'text-emerald-500'
+        : b.status === 'failed'
+            ? 'text-red-500'
+            : b.status === 'running' || b.status === 'verifying'
+                ? 'text-yellow-500'
+                : (isDarkMode ? 'text-gray-400' : 'text-gray-500');
+
+    // Show OOS result if available, fall back to denormalized fields
+    const r = b.oos_result ?? b.is_result;
+    const trades = r?.total_trades ?? b.total_trades;
+    const winRate = r?.win_rate ?? b.win_rate;
+    const pf = r?.profit_factor ?? b.profit_factor;
+    const sharpe = r?.sharpe_ratio ?? b.sharpe_ratio;
+    const dd = r?.max_drawdown ?? b.max_drawdown;
+
+    return (
+        <tr className={rowCls}>
+            <td className={`${tdCl} py-1.5 pr-3 font-mono`}>
+                {isWinner && <span className="text-emerald-500 mr-1" title="Winner">★</span>}
+                {b.id}
+            </td>
+            <td className={`text-xs font-medium py-1.5 pr-3 ${statusCls}`}>{b.status}{b.failure_reason ? `: ${b.failure_reason}` : ''}</td>
+            <td className={`${tdCl} py-1.5 pr-3`}>{trades || '—'}</td>
+            <td className={`${tdCl} py-1.5 pr-3`}>{winRate ? `${(winRate * 100).toFixed(0)}%` : '—'}</td>
+            <td className={`${tdCl} py-1.5 pr-3`}>{pf ? pf.toFixed(2) : '—'}</td>
+            <td className={`${tdCl} py-1.5 pr-3`}>{sharpe ? sharpe.toFixed(2) : '—'}</td>
+            <td className={`${tdCl} py-1.5 pr-3`}>{dd ? dd.toFixed(4) : '—'}</td>
+            <td className={`${tdCl} py-1.5 text-xs truncate max-w-[200px]`} title={b.exploration_directive}>
+                {b.exploration_directive || '—'}
+            </td>
+        </tr>
     );
 }
 

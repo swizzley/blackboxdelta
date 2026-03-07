@@ -3,6 +3,7 @@ import type {
     ApiHealth, ApiSystem, ApiDashboard, ApiCalendarDay, ApiOrder,
     ApiAlert, ApiMarket, ApiSetting,
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
+    OptimizerBranch,
 } from '../context/Types';
 
 const TIMEOUT = 5000;
@@ -97,6 +98,10 @@ export function fetchOptimizerGenerations(limit = 20): Promise<OptimizerGenerati
 
 export function fetchOptimizerTrunks(limit = 20): Promise<OptimizerTrunk[] | null> {
     return apiFetch(`/api/optimizer/trunks?limit=${limit}`);
+}
+
+export function fetchOptimizerBranches(generationId: number): Promise<OptimizerBranch[] | null> {
+    return apiFetch(`/api/optimizer/generations/${generationId}/branches`);
 }
 
 export function fetchOptimizerRecommendations(status?: string): Promise<OptimizerRecommendation[] | null> {
