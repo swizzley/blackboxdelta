@@ -318,8 +318,33 @@ export default function Dashboard() {
         // Fallback: compute from static day files for the relevant date range.
         // This covers API-down scenarios. For sub-day periods this uses full-day
         // granularity from the day file (best available without the API).
-        return computeStatsFromDayFiles(dateCutoff, period);
-    }, [dashboard, period, selectedTimeframe, periodStats, periodByTimeframe, periodStatsKey, dateCutoff]);
+        const dayFileStats = computeStatsFromDayFiles(dateCutoff, period, anchor);
+        if (dayFileStats) return dayFileStats;
+
+        // Last resort: recompute from calendar/PL data for this period
+        if (filteredCalendar && Object.keys(filteredCalendar).length > 0) {
+            let winners = 0, losers = 0, total = 0;
+            for (const day of Object.values(filteredCalendar)) {
+                winners += day.winners;
+                losers += day.losers;
+                total += day.total;
+            }
+            const be = total - winners - losers;
+            const totalPL = filteredPL.reduce((sum, d) => sum + d.daily_pl, 0);
+            const decided = winners + losers;
+            return {
+                total_orders: total, pending: 0, open_positions: 0, closed_orders: total,
+                total_pl: Math.round(totalPL * 100) / 100,
+                winners, losers, breakeven: be,
+                win_rate_pct: decided > 0 ? Math.round((winners / decided) * 10000) / 100 : null,
+                win_loss_ratio: losers > 0 ? Math.round((winners / losers) * 100) / 100 : null,
+                avg_win: null, avg_loss: null, avg_time_in_trade_mins: null,
+                long_pl: 0, short_pl: 0,
+            };
+        }
+
+        return dashboard.all_time;
+    }, [dashboard, period, selectedTimeframe, periodStats, periodByTimeframe, periodStatsKey, dateCutoff, anchor, filteredCalendar, filteredPL]);
 
     // Active by_timeframe data: period-filtered from API when available, otherwise all-time.
     // Sorted in a fixed order (scalp, intraday, swing) so chart colors/positions are stable.
@@ -512,19 +537,20 @@ async function fetchDayFile(date: string): Promise<DayData | null> {
 
 // Synchronous version that returns cached data or null (used in useMemo).
 // The async fetch is triggered by the effect below.
-function computeStatsFromDayFiles(dateCutoff: string | null, period: string): TimeframeStats | null {
+function computeStatsFromDayFiles(dateCutoff: string | null, period: string, anchor?: dayjs.Dayjs): TimeframeStats | null {
     if (!dateCutoff) return null;
 
-    // Determine which dates to load (today and possibly yesterday for sub-day periods)
-    const today = dayjs().format('YYYY-MM-DD');
-    const yesterday = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
-    const dates = dateCutoff >= today ? [today] : dateCutoff >= yesterday ? [yesterday, today] : null;
+    // Determine which dates to load relative to anchor (or now if market open)
+    const ref = anchor ?? dayjs();
+    const refDate = ref.format('YYYY-MM-DD');
+    const refYesterday = ref.subtract(1, 'day').format('YYYY-MM-DD');
+    const dates = dateCutoff >= refDate ? [refDate] : dateCutoff >= refYesterday ? [refYesterday, refDate] : null;
 
     // For longer periods, we don't have a good synchronous fallback from day files
     // (would need to load many files). Return null to show N/A.
     if (!dates) return null;
 
-    const isoCutoff = periodCutoffISO(period as Period);
+    const isoCutoff = periodCutoffISO(period as Period, anchor);
     const orders: OrderForStats[] = [];
 
     for (const date of dates) {
