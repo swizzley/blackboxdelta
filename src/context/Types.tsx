@@ -460,3 +460,21 @@ export interface OptimizerRecommendation {
     created_at: string;
     executed_at?: string;
 }
+
+export interface OptimizerBranch {
+    id: number;
+    generation_id: number;
+    trunk_id: number;
+    exploration_directive?: string;
+    status: string;
+    is_result?: OptimizerResult;
+    oos_result?: OptimizerResult;
+    total_trades: number;
+    win_rate: number;
+    profit_factor: number;
+    sharpe_ratio: number;
+    max_drawdown: number;
+    failure_reason?: string;
+    created_at: string;
+    completed_at?: string;
+}
