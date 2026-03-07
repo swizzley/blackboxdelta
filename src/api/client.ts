@@ -2,6 +2,7 @@ import {getApiBase} from './config';
 import type {
     ApiHealth, ApiSystem, ApiDashboard, ApiCalendarDay, ApiOrder,
     ApiAlert, ApiMarket, ApiSetting,
+    OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
 } from '../context/Types';
 
 const TIMEOUT = 5000;
@@ -84,4 +85,48 @@ export function fetchVersions(): Promise<Record<string, string> | null> {
 
 export function fetchSystem(): Promise<ApiSystem | null> {
     return apiFetch('/api/system');
+}
+
+export function fetchOptimizerStatus(): Promise<OptimizerStatus | null> {
+    return apiFetch('/api/optimizer/status');
+}
+
+export function fetchOptimizerGenerations(limit = 20): Promise<OptimizerGeneration[] | null> {
+    return apiFetch(`/api/optimizer/generations?limit=${limit}`);
+}
+
+export function fetchOptimizerTrunks(limit = 20): Promise<OptimizerTrunk[] | null> {
+    return apiFetch(`/api/optimizer/trunks?limit=${limit}`);
+}
+
+export function fetchOptimizerRecommendations(status?: string): Promise<OptimizerRecommendation[] | null> {
+    const qs = status ? `?status=${status}` : '';
+    return apiFetch(`/api/optimizer/recommendations${qs}`);
+}
+
+export async function apiPost(path: string, body?: any): Promise<any> {
+    const base = getApiBase();
+    try {
+        const res = await fetch(`${base}${path}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: body ? JSON.stringify(body) : undefined,
+        });
+        if (!res.ok) return null;
+        return await res.json();
+    } catch {
+        return null;
+    }
+}
+
+export function queueRecommendation(id: number): Promise<any> {
+    return apiPost(`/api/optimizer/recommendations/${id}/queue`);
+}
+
+export function skipRecommendation(id: number): Promise<any> {
+    return apiPost(`/api/optimizer/recommendations/${id}/skip`);
+}
+
+export function createRecommendation(mutations: Record<string, string>, rationale: string): Promise<any> {
+    return apiPost('/api/optimizer/recommendations', {mutations, rationale});
 }

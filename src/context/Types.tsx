@@ -405,3 +405,58 @@ export interface ScoreDataPoint {
     avg_sentiment: number;
     count: number;
 }
+
+// Optimizer types
+export interface OptimizerStatus {
+    current_trunk: OptimizerTrunk | null;
+    active_generation: OptimizerGeneration | null;
+    consecutive_failures: number;
+    total_generations: number;
+    total_trunks: number;
+}
+
+export interface OptimizerTrunk {
+    id: number;
+    generation: number;
+    param_count?: number;
+    oos_result?: OptimizerResult;
+    ai_score: number;
+    promoted_at: string;
+    promoted_from_branch_id?: number;
+}
+
+export interface OptimizerResult {
+    total_trades: number;
+    win_rate: number;
+    profit_factor: number;
+    sharpe_ratio: number;
+    max_drawdown: number;
+    total_pnl: number;
+}
+
+export interface OptimizerGeneration {
+    id: number;
+    trunk_id: number;
+    timeframe: string;
+    status: string;
+    branch_count: number;
+    started_at: string;
+    completed_at?: string;
+    winner_branch_id?: number;
+    passed?: number;
+    failed?: number;
+    running?: number;
+}
+
+export interface OptimizerRecommendation {
+    id: number;
+    source: string;
+    source_id?: string;
+    rationale?: string;
+    mutations: Record<string, string>;
+    status: string;
+    is_result?: OptimizerResult;
+    oos_result?: OptimizerResult;
+    created_at: string;
+    executed_at?: string;
+}
