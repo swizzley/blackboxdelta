@@ -21,6 +21,7 @@ const COMPONENT_LINES: { key: keyof ScoreDataPoint; label: string; color: string
     {key: 'avg_structure', label: 'Structure', color: '#ec4899'},
     {key: 'avg_cycle', label: 'Cycle', color: '#84cc16'},
     {key: 'avg_pattern', label: 'Pattern', color: '#06b6d4'},
+    {key: 'avg_sentiment', label: 'Sentiment', color: '#facc15'},
 ];
 
 // Format x-axis label based on how many data points are visible.

@@ -138,6 +138,8 @@ export interface Score {
     tp_price: number;
     risk_reward: number;
     recommendation: string;
+    sentiment_score: number;
+    sentiment_count: number;
 }
 
 // Analysis data (from swizzley-analyzer)
@@ -187,6 +189,14 @@ export interface ApiSystem {
     services: ApiServiceVersion[];
     database: ApiDatabaseStats;
     markets: { total: number; enabled: number };
+    sentiment?: ApiSentimentSummary;
+}
+
+export interface ApiSentimentSummary {
+    total_articles: number;
+    recent_articles: number;
+    avg_score: number;
+    pairs_covered: number;
 }
 
 export interface ApiServiceVersion {
@@ -279,6 +289,7 @@ export interface MonitorStatus {
     ollama: MonitorOllamaStatus;
     resources: Record<string, MonitorResourceInfo>;
     optimization: MonitorOptimizationStatus;
+    sentiment: MonitorSentimentStatus;
     alerts_firing: MonitorAlertEvent[];
 }
 
@@ -359,6 +370,15 @@ export interface MonitorOptimizationStatus {
     message?: string;
 }
 
+export interface MonitorSentimentStatus {
+    total_articles: number;
+    recent_articles: number;
+    avg_score: number;
+    pairs_covered: number;
+    status: string;
+    message?: string;
+}
+
 export interface MonitorAlertEvent {
     name: string;
     status: string;
@@ -382,5 +402,6 @@ export interface ScoreDataPoint {
     avg_structure: number;
     avg_cycle: number;
     avg_pattern: number;
+    avg_sentiment: number;
     count: number;
 }
