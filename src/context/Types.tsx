@@ -267,6 +267,94 @@ export interface ApiSetting {
     enabled: boolean;
 }
 
+// Monitoring service types (from monitoring-service on genesis:8082)
+export interface MonitorStatus {
+    timestamp: string;
+    market_open: boolean;
+    services: Record<string, MonitorServiceInfo[]>;
+    data_freshness: Record<string, MonitorDataFreshness>;
+    database: Record<string, MonitorDBHealth>;
+    replication: MonitorReplicationStatus;
+    oanda: MonitorOandaStatus;
+    resources: Record<string, MonitorResourceInfo>;
+    optimization: MonitorOptimizationStatus;
+    alerts_firing: MonitorAlertEvent[];
+}
+
+export interface MonitorServiceInfo {
+    name: string;
+    status: string;
+    uptime?: string;
+    pid?: number;
+    memory_mb?: number;
+}
+
+export interface MonitorDataFreshness {
+    last_update: string;
+    age_seconds: number;
+    threshold_seconds: number;
+    status: string;
+    message?: string;
+}
+
+export interface MonitorDBHealth {
+    connections: number;
+    max_connections: number;
+    lock_waits: number;
+    long_queries: string[];
+    disk_used_gb: number;
+    status: string;
+    message?: string;
+}
+
+export interface MonitorReplicationStatus {
+    seconds_behind_source: number;
+    io_running: boolean;
+    sql_running: boolean;
+    status: string;
+    message?: string;
+}
+
+export interface MonitorOandaStatus {
+    connected: boolean;
+    balance: number;
+    margin_used: number;
+    margin_pct: number;
+    open_trades: number;
+    status: string;
+    message?: string;
+}
+
+export interface MonitorResourceInfo {
+    cpu_load_5m: number;
+    cpu_count: number;
+    memory_pct: number;
+    disk_pct: number;
+    status?: string;
+    message?: string;
+}
+
+export interface MonitorOptimizationStatus {
+    current_timeframe: string;
+    trunk_id: number;
+    generation: number;
+    generation_started: string;
+    branches_total: number;
+    branches_complete: number;
+    branches_passed: number;
+    last_trunk_promotion: string;
+    hours_since_promotion: number;
+    status: string;
+    message?: string;
+}
+
+export interface MonitorAlertEvent {
+    name: string;
+    status: string;
+    message: string;
+    since: string;
+}
+
 // Daily-aggregated score averages for dashboard chart
 export interface ScoreDataPoint {
     date: string;
