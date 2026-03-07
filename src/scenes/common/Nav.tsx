@@ -9,6 +9,7 @@ const navigation = [
     {name: 'History', href: '/history'},
     {name: 'Analysis', href: '/analysis'},
     {name: 'System', href: '/system'},
+    {name: 'Optimizer', href: '/optimizer'},
     {name: 'Health', href: '/health'},
 ];
 
