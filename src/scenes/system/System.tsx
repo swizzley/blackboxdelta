@@ -9,7 +9,7 @@ import {
     ServerStackIcon, CircleStackIcon, SignalIcon, CpuChipIcon,
     ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon,
     ClockIcon, BoltIcon, ArrowPathIcon, ChartBarIcon,
-    GlobeAltIcon, BeakerIcon,
+    GlobeAltIcon, BeakerIcon, NewspaperIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -61,7 +61,7 @@ export default function System() {
     const iconCl = 'w-5 h-5 text-cyan-500';
 
     const allServices = monitor
-        ? [...(monitor.services?.genesis || []), ...(monitor.services?.cipher || [])]
+        ? [...(monitor.services?.genesis || []), ...(monitor.services?.cipher || []), ...(monitor.services?.sage || [])]
         : [];
     const activeCount = allServices.filter(s => s.status === 'active').length;
     const alertCount = monitor?.alerts_firing?.length ?? 0;
@@ -123,9 +123,10 @@ export default function System() {
 
                             {/* Services */}
                             {monitor && (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                                     <ServerServices title="Genesis" services={monitor.services?.genesis || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
                                     <ServerServices title="Cipher" services={monitor.services?.cipher || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
+                                    <ServerServices title="Sage" services={monitor.services?.sage || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
                                 </div>
                             )}
 
@@ -230,6 +231,25 @@ export default function System() {
                                         <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                                             {monitor.optimization.message}
                                         </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Sentiment */}
+                            {monitor?.sentiment?.message && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}><NewspaperIcon className={iconCl}/>Sentiment Pipeline</h2>
+                                    <div className={`flex items-center gap-3 rounded-lg px-4 py-3 mb-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                        <StatusBadge status={monitor.sentiment.status} isDarkMode={isDarkMode}/>
+                                        <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                            {monitor.sentiment.message}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <MiniStat label="Total Articles" value={String(monitor.sentiment.total_articles)} isDarkMode={isDarkMode}/>
+                                        <MiniStat label="Recent (24h)" value={String(monitor.sentiment.recent_articles)} isDarkMode={isDarkMode}/>
+                                        <MiniStat label="Pairs Covered" value={String(monitor.sentiment.pairs_covered)} isDarkMode={isDarkMode}/>
+                                        <MiniStat label="Avg Score" value={monitor.sentiment.avg_score?.toFixed(3) ?? '—'} isDarkMode={isDarkMode}/>
                                     </div>
                                 </div>
                             )}
@@ -532,5 +552,14 @@ function metricColor(part: string): string {
         return 'text-emerald-500';
     }
     return 'text-emerald-500';
+}
+
+function MiniStat({label, value, isDarkMode}: {label: string; value: string; isDarkMode: boolean}) {
+    return (
+        <div className={`rounded-lg px-3 py-2 text-center ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+            <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p>
+            <p className={`text-lg font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{value}</p>
+        </div>
+    );
 }
 

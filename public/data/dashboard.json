@@ -191,6 +191,7 @@
       "avg_structure": 3.52,
       "avg_cycle": 1.09,
       "avg_pattern": -0.3,
+      "avg_sentiment": -0.04,
       "count": 1740
     },
     {
@@ -208,6 +209,7 @@
       "avg_structure": 3.41,
       "avg_cycle": 1.16,
       "avg_pattern": -0.13,
+      "avg_sentiment": -0.041,
       "count": 2973
     },
     {
@@ -225,6 +227,7 @@
       "avg_structure": 3.29,
       "avg_cycle": 1.14,
       "avg_pattern": -0.16,
+      "avg_sentiment": -0.043,
       "count": 2402
     }
   ],
