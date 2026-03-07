@@ -2,11 +2,9 @@ import {useEffect, useState} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
-import {useApi} from '../../context/Api';
-import {fetchSystem} from '../../api/client';
 import {connectMonitorStatus} from '../../api/sse';
 import {getApiBase} from '../../api/config';
-import type {ApiSystem, MonitorStatus, MonitorServiceInfo, MonitorAlertEvent} from '../../context/Types';
+import type {MonitorStatus, MonitorServiceInfo, MonitorAlertEvent} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, CpuChipIcon,
     ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon,
@@ -30,17 +28,8 @@ function statusColor(status: string | undefined): StatusColor {
 
 export default function System() {
     const {isDarkMode} = useTheme();
-    const {apiAvailable} = useApi();
-    const [system, setSystem] = useState<ApiSystem | null>(null);
     const [monitor, setMonitor] = useState<MonitorStatus | null>(null);
     const [monitorConnected, setMonitorConnected] = useState(false);
-
-    useEffect(() => {
-        if (!apiAvailable) { setSystem(null); return; }
-        fetchSystem().then(setSystem);
-        const interval = setInterval(() => fetchSystem().then(setSystem), 30_000);
-        return () => clearInterval(interval);
-    }, [apiAvailable]);
 
     useEffect(() => {
         const base = getApiBase();
@@ -77,7 +66,7 @@ export default function System() {
             <div className={`min-h-screen pb-12 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-500`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-20">
                     <div className="flex items-center gap-3 mb-6">
-                        <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>System Health</h1>
+                        <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Monitor</h1>
                         {monitorConnected && (
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-900/30 px-2.5 py-0.5 text-xs font-medium text-cyan-400">
                                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"/>LIVE
@@ -85,7 +74,7 @@ export default function System() {
                         )}
                     </div>
 
-                    {!apiAvailable && !monitorConnected ? (
+                    {!monitorConnected && !monitor ? (
                         <div className={`${card} text-center py-16`}>
                             <SignalIcon className="w-12 h-12 mx-auto text-gray-400 mb-4"/>
                             <p className={`text-lg ${muted}`}>API unavailable — connect to VPN to view system health</p>
@@ -93,9 +82,7 @@ export default function System() {
                     ) : (
                         <>
                             {/* Overview KPIs */}
-                            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-                                <KPICard label="API" value={system ? 'UP' : 'DOWN'} color={system ? 'ok' : 'critical'}
-                                         icon={<GlobeAltIcon className="w-6 h-6"/>} isDarkMode={isDarkMode}/>
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                                 <KPICard label="Monitor" value={monitorConnected ? 'UP' : 'DOWN'} color={monitorConnected ? 'ok' : 'critical'}
                                          icon={<SignalIcon className="w-6 h-6"/>} isDarkMode={isDarkMode}/>
                                 <KPICard label="Market" value={monitor?.market_open ? 'OPEN' : 'CLOSED'} color={monitor?.market_open ? 'ok' : 'unknown'}
@@ -208,67 +195,11 @@ export default function System() {
                                 </div>
                             )}
 
-                            {/* Service Versions (from main API) */}
-                            {system && (
-                                <>
-                                    <div className={`${card} mb-6`}>
-                                        <h2 className={heading}><ServerStackIcon className={iconCl}/>Service Versions</h2>
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-sm">
-                                                <thead className={muted}>
-                                                <tr>
-                                                    <th className="text-left py-2 px-2 font-medium">Service</th>
-                                                    <th className="text-left py-2 px-2 font-medium">Commit</th>
-                                                    <th className="text-left py-2 px-2 font-medium">Message</th>
-                                                    <th className="text-left py-2 px-2 font-medium">Updated</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>
-                                                {system.services.map(s => (
-                                                    <tr key={s.service} className={`border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-100'}`}>
-                                                        <td className="py-2 px-2 font-medium">{s.service}</td>
-                                                        <td className="py-2 px-2 font-mono text-cyan-500 text-xs">{s.sha.slice(0, 8)}</td>
-                                                        <td className={`py-2 px-2 text-xs truncate max-w-xs ${muted}`}>{s.message}</td>
-                                                        <td className={`py-2 px-2 text-xs ${muted}`}>{dayjs(s.updated_at).fromNow()}</td>
-                                                    </tr>
-                                                ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                    <div className={`${card} mb-6`}>
-                                        <h2 className={heading}><CircleStackIcon className={iconCl}/>Database Rows</h2>
-                                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                            {([
-                                                ['Orders', system.database.orders],
-                                                ['Alerts', system.database.alerts],
-                                                ['Prices (Daily)', system.database.prices],
-                                                ['Prices (15m)', system.database.prices_15m],
-                                                ['Prices (1m)', system.database.prices_1m],
-                                                ['Signals (Daily)', system.database.signals],
-                                                ['Signals (15m)', system.database.signals_15m],
-                                                ['Signals (1m)', system.database.signals_1m],
-                                            ] as [string, number][]).map(([label, count]) => (
-                                                <div key={label} className={`rounded-lg p-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                                    <p className={`text-xs ${muted}`}>{label}</p>
-                                                    <p className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                                                        {count?.toLocaleString() ?? '—'}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-
                             {/* Footer timestamp */}
-                            {(system || monitor) && (
+                            {monitor?.timestamp && (
                                 <p className={`text-center text-xs ${muted} flex items-center justify-center gap-1.5`}>
                                     <ClockIcon className="w-3.5 h-3.5"/>
-                                    {system && <>API uptime: {formatUptime(system.uptime)}</>}
-                                    {system && monitor?.timestamp && <> &middot; </>}
-                                    {monitor?.timestamp && <>Last check: {dayjs(monitor.timestamp).fromNow()}</>}
+                                    Last check: {dayjs(monitor.timestamp).fromNow()}
                                 </p>
                             )}
                         </>
@@ -564,16 +495,3 @@ function metricColor(part: string): string {
     return 'text-emerald-500';
 }
 
-function formatUptime(s: string): string {
-    const match = s.match(/(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/);
-    if (!match) return s;
-    const h = parseInt(match[1] || '0');
-    const m = parseInt(match[2] || '0');
-    if (h >= 24) {
-        const d = Math.floor(h / 24);
-        const rh = h % 24;
-        return `${d}d ${rh}h`;
-    }
-    if (h > 0) return `${h}h ${m}m`;
-    return `${m}m`;
-}
