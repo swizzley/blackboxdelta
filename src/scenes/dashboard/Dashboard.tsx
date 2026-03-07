@@ -31,34 +31,36 @@ const PERIODS: Period[] = ['1H', '4H', '12H', '1D', '1W', '1M', '3M', 'YTD', '1Y
 // compute stats for periods like 4H, while chart series (pl_series, calendar) are
 // daily granularity and only need date filtering.
 
-function periodCutoffISO(period: Period): string | null {
-    const now = dayjs();
+// When the market is closed (latest data > 2h old), anchor periods to the last
+// data point so "1H" means "last hour of trading" instead of "1 hour ago from now".
+function periodCutoffISO(period: Period, anchor?: dayjs.Dayjs): string | null {
+    const ref = anchor ?? dayjs();
     switch (period) {
-        case '1H':  return now.subtract(1, 'hour').toISOString();
-        case '4H':  return now.subtract(4, 'hour').toISOString();
-        case '12H': return now.subtract(12, 'hour').toISOString();
-        case '1D':  return now.subtract(1, 'day').toISOString();
-        case '1W':  return now.subtract(7, 'day').toISOString();
-        case '1M':  return now.subtract(1, 'month').toISOString();
-        case '3M':  return now.subtract(3, 'month').toISOString();
-        case 'YTD': return `${now.year()}-01-01T00:00:00.000Z`;
-        case '1Y':  return now.subtract(1, 'year').toISOString();
+        case '1H':  return ref.subtract(1, 'hour').toISOString();
+        case '4H':  return ref.subtract(4, 'hour').toISOString();
+        case '12H': return ref.subtract(12, 'hour').toISOString();
+        case '1D':  return ref.subtract(1, 'day').toISOString();
+        case '1W':  return ref.subtract(7, 'day').toISOString();
+        case '1M':  return ref.subtract(1, 'month').toISOString();
+        case '3M':  return ref.subtract(3, 'month').toISOString();
+        case 'YTD': return `${ref.year()}-01-01T00:00:00.000Z`;
+        case '1Y':  return ref.subtract(1, 'year').toISOString();
         case 'All': return null;
     }
 }
 
-function periodCutoffDate(period: Period): string | null {
-    const now = dayjs();
+function periodCutoffDate(period: Period, anchor?: dayjs.Dayjs): string | null {
+    const ref = anchor ?? dayjs();
     switch (period) {
-        case '1H':  return now.subtract(1, 'hour').format('YYYY-MM-DD');
-        case '4H':  return now.subtract(4, 'hour').format('YYYY-MM-DD');
-        case '12H': return now.subtract(12, 'hour').format('YYYY-MM-DD');
-        case '1D':  return now.subtract(1, 'day').format('YYYY-MM-DD');
-        case '1W':  return now.subtract(7, 'day').format('YYYY-MM-DD');
-        case '1M':  return now.subtract(1, 'month').format('YYYY-MM-DD');
-        case '3M':  return now.subtract(3, 'month').format('YYYY-MM-DD');
-        case 'YTD': return `${now.year()}-01-01`;
-        case '1Y':  return now.subtract(1, 'year').format('YYYY-MM-DD');
+        case '1H':  return ref.subtract(1, 'hour').format('YYYY-MM-DD');
+        case '4H':  return ref.subtract(4, 'hour').format('YYYY-MM-DD');
+        case '12H': return ref.subtract(12, 'hour').format('YYYY-MM-DD');
+        case '1D':  return ref.subtract(1, 'day').format('YYYY-MM-DD');
+        case '1W':  return ref.subtract(7, 'day').format('YYYY-MM-DD');
+        case '1M':  return ref.subtract(1, 'month').format('YYYY-MM-DD');
+        case '3M':  return ref.subtract(3, 'month').format('YYYY-MM-DD');
+        case 'YTD': return `${ref.year()}-01-01`;
+        case '1Y':  return ref.subtract(1, 'year').format('YYYY-MM-DD');
         case 'All': return null;
     }
 }
@@ -210,6 +212,16 @@ export default function Dashboard() {
         }
     }, [apiAvailable]);
 
+    // Detect market closed: if latest PL data point is >2h old, anchor to it.
+    // This makes "1H" mean "last hour of trading" instead of "1 hour from now".
+    const anchor = useMemo<dayjs.Dayjs | undefined>(() => {
+        if (!dashboard?.pl_series?.length) return undefined;
+        const lastDate = dashboard.pl_series[dashboard.pl_series.length - 1].date;
+        const last = dayjs(lastDate).endOf('day');
+        if (dayjs().diff(last, 'hour') > 2) return last;
+        return undefined;
+    }, [dashboard]);
+
     // Fetch period-filtered stats from the API when period changes.
     // This gives us server-computed, sub-day-accurate stats for all fields.
     useEffect(() => {
@@ -221,7 +233,7 @@ export default function Dashboard() {
             setPeriodStatsKey('');
             return;
         }
-        const since = periodCutoffISO(period);
+        const since = periodCutoffISO(period, anchor);
         if (!since) return;
 
         const key = `${period}:${since}`;
@@ -234,13 +246,13 @@ export default function Dashboard() {
                 setPeriodStatsKey(key);
             }
         });
-    }, [period, apiAvailable]);
+    }, [period, apiAvailable, anchor]);
 
     const handleTimeframeClick = useCallback((tf: string | null) => {
         setSelectedTimeframe(tf);
     }, []);
 
-    const dateCutoff = useMemo(() => periodCutoffDate(period), [period]);
+    const dateCutoff = useMemo(() => periodCutoffDate(period, anchor), [period, anchor]);
 
     const filteredPL = useMemo<PLDataPoint[]>(() => {
         if (!dashboard) return [];
