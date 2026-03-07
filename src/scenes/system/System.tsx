@@ -72,7 +72,7 @@ export default function System() {
             <div className={`min-h-screen pb-12 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-500`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-20">
                     <div className="flex items-center gap-3 mb-6">
-                        <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Monitor</h1>
+                        <h1 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Health</h1>
                         {monitorConnected && (
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-900/30 px-2.5 py-0.5 text-xs font-medium text-cyan-400">
                                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"/>LIVE
