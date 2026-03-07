@@ -2,8 +2,8 @@ import {useEffect, useState} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
+import {useApi} from '../../context/Api';
 import {connectMonitorStatus} from '../../api/sse';
-import {getApiBase} from '../../api/config';
 import type {MonitorStatus, MonitorServiceInfo, MonitorAlertEvent} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, CpuChipIcon,
@@ -28,26 +28,32 @@ function statusColor(status: string | undefined): StatusColor {
 
 export default function System() {
     const {isDarkMode} = useTheme();
+    const {apiAvailable, apiBase} = useApi();
     const [monitor, setMonitor] = useState<MonitorStatus | null>(null);
     const [monitorConnected, setMonitorConnected] = useState(false);
 
     useEffect(() => {
-        const base = getApiBase();
+        if (!apiAvailable) {
+            setMonitorConnected(false);
+            setMonitor(null);
+            return;
+        }
+
         let cleanup: (() => void) | null = null;
         let mounted = true;
 
-        fetch(`${base}/api/monitor/status`, {signal: AbortSignal.timeout(5000)})
+        fetch(`${apiBase}/api/monitor/status`, {signal: AbortSignal.timeout(5000)})
             .then(res => {
                 if (!res.ok || !mounted) return;
                 setMonitorConnected(true);
-                cleanup = connectMonitorStatus(base, (status) => {
+                cleanup = connectMonitorStatus(apiBase, (status) => {
                     if (mounted) setMonitor(status);
                 });
             })
             .catch(() => { if (mounted) setMonitorConnected(false); });
 
         return () => { mounted = false; cleanup?.(); };
-    }, []);
+    }, [apiAvailable, apiBase]);
 
     const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
     const heading = `text-lg font-semibold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
