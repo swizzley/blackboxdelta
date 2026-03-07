@@ -211,10 +211,12 @@ export default function System() {
 
                             {/* Infrastructure */}
                             {monitor && (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                                     <ServerResources title="Genesis" res={monitor.resources?.genesis} db={monitor.database?.genesis}
                                                      isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
                                     <ServerResources title="Cipher" res={monitor.resources?.cipher} db={monitor.database?.cipher}
+                                                     isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
+                                    <ServerResources title="Sage" res={monitor.resources?.sage}
                                                      isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
                                 </div>
                             )}
