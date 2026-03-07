@@ -4,9 +4,18 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {formatDollar} from '../common/Util';
 import {useApi} from '../../context/Api';
-import {fetchMarkets, fetchSettings, fetchVersions} from '../../api/client';
+import {fetchMarkets, fetchSettings, fetchSystem} from '../../api/client';
 import {connectOrders, connectAlerts} from '../../api/sse';
-import type {ApiMarket, ApiSetting, ApiOrder, ApiAlert} from '../../context/Types';
+import type {ApiMarket, ApiSetting, ApiOrder, ApiAlert, ApiSystem} from '../../context/Types';
+import {
+    ServerStackIcon, CircleStackIcon, SignalIcon, Cog6ToothIcon,
+    GlobeAltIcon, CheckCircleIcon, ClockIcon, ArrowTrendingUpIcon,
+    ArrowTrendingDownIcon, BellAlertIcon, ChartBarSquareIcon,
+} from '@heroicons/react/24/outline';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 const MAX_FEED = 20;
 
@@ -15,7 +24,7 @@ export default function Status() {
     const {apiAvailable, apiBase, setApiBase, checking} = useApi();
     const [urlInput, setUrlInput] = useState(apiBase);
 
-    const [versions, setVersions] = useState<Record<string, string> | null>(null);
+    const [system, setSystem] = useState<ApiSystem | null>(null);
     const [markets, setMarkets] = useState<ApiMarket[] | null>(null);
     const [settings, setSettings] = useState<ApiSetting[] | null>(null);
     const [liveOrders, setLiveOrders] = useState<ApiOrder[]>([]);
@@ -26,14 +35,16 @@ export default function Status() {
     // Fetch REST data when API becomes available
     useEffect(() => {
         if (!apiAvailable) {
-            setVersions(null);
+            setSystem(null);
             setMarkets(null);
             setSettings(null);
             return;
         }
-        fetchVersions().then(setVersions);
+        fetchSystem().then(setSystem);
         fetchMarkets().then(setMarkets);
         fetchSettings().then(setSettings);
+        const interval = setInterval(() => fetchSystem().then(setSystem), 30_000);
+        return () => clearInterval(interval);
     }, [apiAvailable]);
 
     // SSE connections
@@ -56,9 +67,10 @@ export default function Status() {
         setApiBase(urlInput.trim());
     }, [urlInput, setApiBase]);
 
-    const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-4 transition-colors duration-500`;
-    const heading = `text-lg font-semibold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
+    const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
+    const heading = `text-lg font-semibold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
     const muted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
+    const iconCl = 'w-5 h-5 text-cyan-500';
 
     // Group settings by prefix
     const settingsGroups = settings ? groupSettings(settings) : {};
@@ -68,11 +80,11 @@ export default function Status() {
             <Nav/>
             <div className={`min-h-screen pb-12 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-500`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-20">
-                    <h1 className={`text-2xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>System Status</h1>
+                    <h1 className={`text-2xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Status</h1>
 
                     {/* Connection Panel */}
                     <div className={`${card} mb-6`}>
-                        <h2 className={heading}>Connection</h2>
+                        <h2 className={heading}><SignalIcon className={iconCl}/>Connection</h2>
                         <div className="flex flex-wrap items-center gap-3">
                             <input
                                 type="text"
@@ -100,6 +112,7 @@ export default function Status() {
 
                     {!apiAvailable && !checking && (
                         <div className={`${card} mb-6 text-center py-12`}>
+                            <GlobeAltIcon className="w-12 h-12 mx-auto text-gray-400 mb-4"/>
                             <p className={`text-lg ${muted}`}>API unavailable — connect to VPN to access live data</p>
                         </div>
                     )}
@@ -107,22 +120,33 @@ export default function Status() {
                     {apiAvailable && (
                         <>
                             {/* Service Versions */}
-                            {versions && (
+                            {system && (
                                 <div className={`${card} mb-6`}>
-                                    <h2 className={heading}>Service Versions</h2>
+                                    <h2 className={heading}><ServerStackIcon className={iconCl}/>Service Versions</h2>
                                     <div className="overflow-x-auto">
                                         <table className="w-full text-sm">
-                                            <thead className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
+                                            <thead className={muted}>
                                             <tr>
-                                                <th className="text-left py-1 px-2 font-medium">Service</th>
-                                                <th className="text-left py-1 px-2 font-medium">Version</th>
+                                                <th className="text-left py-2 px-2 font-medium">Service</th>
+                                                <th className="text-left py-2 px-2 font-medium">Commit</th>
+                                                <th className="text-left py-2 px-2 font-medium">Message</th>
+                                                <th className="text-left py-2 px-2 font-medium">Updated</th>
                                             </tr>
                                             </thead>
                                             <tbody className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>
-                                            {Object.entries(versions).map(([svc, sha]) => (
-                                                <tr key={svc} className={`border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-100'}`}>
-                                                    <td className="py-1.5 px-2">{svc}</td>
-                                                    <td className="py-1.5 px-2 font-mono text-cyan-500">{sha}</td>
+                                            {system.services.map(s => (
+                                                <tr key={s.service} className={`border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-100'}`}>
+                                                    <td className="py-2 px-2 font-medium flex items-center gap-2">
+                                                        <CheckCircleIcon className="w-4 h-4 text-emerald-500 flex-shrink-0"/>
+                                                        {s.service}
+                                                    </td>
+                                                    <td className="py-2 px-2 font-mono text-cyan-500 text-xs">{s.sha.slice(0, 8)}</td>
+                                                    <td className={`py-2 px-2 text-xs truncate max-w-xs ${muted}`}>{s.message}</td>
+                                                    <td className={`py-2 px-2 text-xs ${muted}`}>
+                                                        <span className="flex items-center gap-1">
+                                                            <ClockIcon className="w-3.5 h-3.5"/>{dayjs(s.updated_at).fromNow()}
+                                                        </span>
+                                                    </td>
                                                 </tr>
                                             ))}
                                             </tbody>
@@ -131,10 +155,36 @@ export default function Status() {
                                 </div>
                             )}
 
+                            {/* Database Rows */}
+                            {system && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}><CircleStackIcon className={iconCl}/>Database Rows</h2>
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                        {([
+                                            ['Orders', system.database.orders],
+                                            ['Alerts', system.database.alerts],
+                                            ['Prices (Daily)', system.database.prices],
+                                            ['Prices (15m)', system.database.prices_15m],
+                                            ['Prices (1m)', system.database.prices_1m],
+                                            ['Signals (Daily)', system.database.signals],
+                                            ['Signals (15m)', system.database.signals_15m],
+                                            ['Signals (1m)', system.database.signals_1m],
+                                        ] as [string, number][]).map(([label, count]) => (
+                                            <div key={label} className={`rounded-lg p-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                <p className={`text-xs ${muted}`}>{label}</p>
+                                                <p className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                    {count?.toLocaleString() ?? '—'}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Markets */}
                             {markets && (
                                 <div className={`${card} mb-6`}>
-                                    <h2 className={heading}>Markets ({markets.filter(m => m.enabled).length}/{markets.length} enabled)</h2>
+                                    <h2 className={heading}><GlobeAltIcon className={iconCl}/>Markets ({markets.filter(m => m.enabled).length}/{markets.length} enabled)</h2>
                                     <div className="flex flex-wrap gap-2">
                                         {markets.map(m => (
                                             <span
@@ -156,7 +206,7 @@ export default function Status() {
                             {/* Settings */}
                             {settings && (
                                 <div className={`${card} mb-6`}>
-                                    <h2 className={heading}>Settings</h2>
+                                    <h2 className={heading}><Cog6ToothIcon className={iconCl}/>Settings</h2>
                                     <div className="space-y-4">
                                         {Object.entries(settingsGroups).map(([group, items]) => (
                                             <div key={group}>
@@ -188,19 +238,24 @@ export default function Status() {
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                                 {/* Live Orders */}
                                 <div className={card}>
-                                    <h2 className={heading}>Live Orders <span className="text-xs font-normal text-cyan-500 animate-pulse">SSE</span></h2>
+                                    <h2 className={heading}>
+                                        <ChartBarSquareIcon className={iconCl}/>Live Orders
+                                        <span className="text-xs font-normal text-cyan-500 animate-pulse ml-1">SSE</span>
+                                    </h2>
                                     <div className="max-h-96 overflow-y-auto space-y-1.5">
                                         {liveOrders.length === 0 && (
                                             <p className={`text-sm ${muted}`}>Waiting for orders...</p>
                                         )}
                                         {liveOrders.map((o, i) => (
-                                            <div key={`${o.id}-${i}`} className={`flex items-center justify-between rounded px-2 py-1 text-xs ${
+                                            <div key={`${o.id}-${i}`} className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs ${
                                                 isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'
                                             }`}>
                                                 <div className="flex items-center gap-2">
-                                                    <span className={o.direction === 'Long' ? 'text-emerald-500' : 'text-red-500'}>
-                                                        {o.direction === 'Long' ? 'L' : 'S'}
-                                                    </span>
+                                                    {o.direction === 'Long' ? (
+                                                        <ArrowTrendingUpIcon className="w-4 h-4 text-emerald-500"/>
+                                                    ) : (
+                                                        <ArrowTrendingDownIcon className="w-4 h-4 text-red-500"/>
+                                                    )}
                                                     <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{o.symbol.replace('_', '/')}</span>
                                                     <span className={muted}>{o.timeframe}</span>
                                                 </div>
@@ -224,19 +279,24 @@ export default function Status() {
 
                                 {/* Live Alerts */}
                                 <div className={card}>
-                                    <h2 className={heading}>Live Alerts <span className="text-xs font-normal text-cyan-500 animate-pulse">SSE</span></h2>
+                                    <h2 className={heading}>
+                                        <BellAlertIcon className={iconCl}/>Live Alerts
+                                        <span className="text-xs font-normal text-cyan-500 animate-pulse ml-1">SSE</span>
+                                    </h2>
                                     <div className="max-h-96 overflow-y-auto space-y-1.5">
                                         {liveAlerts.length === 0 && (
                                             <p className={`text-sm ${muted}`}>Waiting for alerts...</p>
                                         )}
                                         {liveAlerts.map((a, i) => (
-                                            <div key={`${a.id}-${i}`} className={`flex items-center justify-between rounded px-2 py-1 text-xs ${
+                                            <div key={`${a.id}-${i}`} className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs ${
                                                 isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'
                                             }`}>
                                                 <div className="flex items-center gap-2">
-                                                    <span className={a.direction === 'Long' ? 'text-emerald-500' : 'text-red-500'}>
-                                                        {a.direction === 'Long' ? 'L' : 'S'}
-                                                    </span>
+                                                    {a.direction === 'Long' ? (
+                                                        <ArrowTrendingUpIcon className="w-4 h-4 text-emerald-500"/>
+                                                    ) : (
+                                                        <ArrowTrendingDownIcon className="w-4 h-4 text-red-500"/>
+                                                    )}
                                                     <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{a.symbol.replace('_', '/')}</span>
                                                     <span className={muted}>{a.timeframe}</span>
                                                 </div>
@@ -253,6 +313,14 @@ export default function Status() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Footer */}
+                            {system && (
+                                <p className={`text-center text-xs ${muted} flex items-center justify-center gap-1.5`}>
+                                    <ClockIcon className="w-3.5 h-3.5"/>
+                                    API uptime: {formatUptime(system.uptime)}
+                                </p>
+                            )}
                         </>
                     )}
                 </div>
@@ -270,4 +338,18 @@ function groupSettings(settings: ApiSetting[]): Record<string, ApiSetting[]> {
         (groups[group] ??= []).push(s);
     }
     return groups;
+}
+
+function formatUptime(s: string): string {
+    const match = s.match(/(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/);
+    if (!match) return s;
+    const h = parseInt(match[1] || '0');
+    const m = parseInt(match[2] || '0');
+    if (h >= 24) {
+        const d = Math.floor(h / 24);
+        const rh = h % 24;
+        return `${d}d ${rh}h`;
+    }
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
 }
