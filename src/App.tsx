@@ -17,8 +17,8 @@ export default function App() {
                     <Route path="/" element={<Dashboard/>}/>
                     <Route path="/history" element={<History/>}/>
                     <Route path="/analysis" element={<Analysis/>}/>
-                    <Route path="/status" element={<Status/>}/>
-                    <Route path="/monitor" element={<System/>}/>
+                    <Route path="/system" element={<Status/>}/>
+                    <Route path="/health" element={<System/>}/>
                     <Route path="/day/:year/:month/:day" element={<DayDetail/>}/>
                     <Route path="/trade/:year/:month/:day/:id" element={<TradeDetail/>}/>
                     <Route path="*" element={<Error404/>}/>
