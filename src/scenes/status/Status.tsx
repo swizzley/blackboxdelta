@@ -6,11 +6,11 @@ import {formatDollar} from '../common/Util';
 import {useApi} from '../../context/Api';
 import {fetchMarkets, fetchSettings, fetchSystem} from '../../api/client';
 import {connectOrders, connectAlerts} from '../../api/sse';
-import type {ApiMarket, ApiSetting, ApiOrder, ApiAlert, ApiSystem} from '../../context/Types';
+import type {ApiMarket, ApiSetting, ApiOrder, ApiAlert, ApiSystem, MonitorOllamaStatus} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, Cog6ToothIcon,
     GlobeAltIcon, CheckCircleIcon, ClockIcon, ArrowTrendingUpIcon,
-    ArrowTrendingDownIcon, BellAlertIcon, ChartBarSquareIcon,
+    ArrowTrendingDownIcon, BellAlertIcon, ChartBarSquareIcon, CpuChipIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -29,6 +29,7 @@ export default function Status() {
     const [settings, setSettings] = useState<ApiSetting[] | null>(null);
     const [liveOrders, setLiveOrders] = useState<ApiOrder[]>([]);
     const [liveAlerts, setLiveAlerts] = useState<ApiAlert[]>([]);
+    const [ollama, setOllama] = useState<MonitorOllamaStatus | null>(null);
     const ordersEndRef = useRef<HTMLDivElement>(null);
     const alertsEndRef = useRef<HTMLDivElement>(null);
 
@@ -43,6 +44,10 @@ export default function Status() {
         fetchSystem().then(setSystem);
         fetchMarkets().then(setMarkets);
         fetchSettings().then(setSettings);
+        fetch(`${apiBase}/api/monitor/status`, {signal: AbortSignal.timeout(5000)})
+            .then(res => res.ok ? res.json() : null)
+            .then(data => { if (data?.ollama) setOllama(data.ollama); })
+            .catch(() => {});
         const interval = setInterval(() => fetchSystem().then(setSystem), 30_000);
         return () => clearInterval(interval);
     }, [apiAvailable]);
@@ -176,6 +181,25 @@ export default function Status() {
                                                     {count?.toLocaleString() ?? '—'}
                                                 </p>
                                             </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Ollama Models */}
+                            {ollama?.models && ollama.models.length > 0 && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}><CpuChipIcon className={iconCl}/>Ollama Models</h2>
+                                    <div className="flex flex-wrap gap-2">
+                                        {ollama.models.map(m => (
+                                            <span
+                                                key={m}
+                                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                                                    isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
+                                                }`}
+                                            >
+                                                {m}
+                                            </span>
                                         ))}
                                     </div>
                                 </div>

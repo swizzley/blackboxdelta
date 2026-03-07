@@ -129,9 +129,9 @@ export default function System() {
                                 </div>
                             )}
 
-                            {/* Data Pipeline + OANDA */}
+                            {/* Data Pipeline + OANDA + Ollama */}
                             {monitor && (
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                                     {/* Data Freshness */}
                                     <div className={card}>
                                         <h2 className={heading}><BoltIcon className={iconCl}/>Data Pipeline</h2>
@@ -169,6 +169,37 @@ export default function System() {
                                                 )}
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* Ollama */}
+                                    <div className={card}>
+                                        <h2 className={heading}><CpuChipIcon className={iconCl}/>Ollama LLM</h2>
+                                        <div className={`flex items-center gap-3 rounded-lg px-4 py-3 mb-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                            {monitor.ollama?.connected ? (
+                                                <CheckCircleIcon className="w-8 h-8 text-emerald-500 flex-shrink-0"/>
+                                            ) : (
+                                                <XCircleIcon className="w-8 h-8 text-red-500 flex-shrink-0"/>
+                                            )}
+                                            <div>
+                                                <p className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                                                    {monitor.ollama?.connected ? 'Connected' : 'Disconnected'}
+                                                </p>
+                                                {monitor.ollama?.message && (
+                                                    <p className={`text-xs ${muted}`}>{monitor.ollama.message}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {monitor.ollama?.vram_total_mb > 0 && (
+                                            <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>VRAM</span>
+                                                    <span className={`text-sm font-bold ${monitor.ollama.vram_pct > 90 ? 'text-red-500' : monitor.ollama.vram_pct > 80 ? 'text-yellow-500' : 'text-emerald-500'}`}>
+                                                        {monitor.ollama.vram_used_mb}MB / {monitor.ollama.vram_total_mb}MB
+                                                    </span>
+                                                </div>
+                                                <ProgressBar pct={monitor.ollama.vram_pct} isDarkMode={isDarkMode}/>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
