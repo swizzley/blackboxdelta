@@ -1,4 +1,4 @@
-import type {ApiOrder, ApiAlert} from '../context/Types';
+import type {ApiOrder, ApiAlert, MonitorStatus} from '../context/Types';
 
 interface SSEOptions<T> {
     url: string;
@@ -52,4 +52,8 @@ export function connectOrders(baseUrl: string, onOrder: (order: ApiOrder) => voi
 
 export function connectAlerts(baseUrl: string, onAlert: (alert: ApiAlert) => void): () => void {
     return connectSSE({url: `${baseUrl}/api/stream/alerts`, onMessage: onAlert, eventName: 'alert'});
+}
+
+export function connectMonitorStatus(monitorBase: string, onStatus: (status: MonitorStatus) => void): () => void {
+    return connectSSE({url: `${monitorBase}/api/monitor/stream`, onMessage: onStatus, eventName: 'status'});
 }
