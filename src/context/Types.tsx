@@ -276,6 +276,7 @@ export interface MonitorStatus {
     database: Record<string, MonitorDBHealth>;
     replication: MonitorReplicationStatus;
     oanda: MonitorOandaStatus;
+    ollama: MonitorOllamaStatus;
     resources: Record<string, MonitorResourceInfo>;
     optimization: MonitorOptimizationStatus;
     alerts_firing: MonitorAlertEvent[];
@@ -323,6 +324,16 @@ export interface MonitorOandaStatus {
     open_trades: number;
     status: string;
     message?: string;
+}
+
+export interface MonitorOllamaStatus {
+    connected: boolean;
+    status: string;
+    message?: string;
+    models?: string[];
+    vram_used_mb: number;
+    vram_total_mb: number;
+    vram_pct: number;
 }
 
 export interface MonitorResourceInfo {
