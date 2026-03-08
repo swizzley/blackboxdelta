@@ -204,7 +204,10 @@ export default function Analysis() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
     const [runs, setRuns] = useState<Record<Provider, AnalysisRunApi[]>>({anthropic: [], ollama: [], hybrid: []});
-    const [activeProvider, setActiveProvider] = useState<Provider>('anthropic');
+    const [activeProvider, setActiveProvider] = useState<Provider>(() => {
+        const hash = window.location.hash.replace('#', '') as Provider;
+        return PROVIDERS.includes(hash as any) ? hash : 'anthropic';
+    });
     const [loading, setLoading] = useState(true);
     const [runDetail, setRunDetail] = useState<AnalysisRunDetailApi | null>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
@@ -291,17 +294,18 @@ export default function Analysis() {
                 loaded++;
                 if (loaded === PROVIDERS.length) {
                     setRuns(runResults);
-                    // Pick the provider with the most recent data
-                    const best = PROVIDERS.reduce((a, b) => {
+                    // Pick provider: use hash if set, otherwise most recent data
+                    const hash = window.location.hash.replace('#', '') as Provider;
+                    const fromHash = PROVIDERS.includes(hash as any) ? hash : null;
+                    const best = fromHash || PROVIDERS.reduce((a, b) => {
                         const aRuns = runResults[a];
                         const bRuns = runResults[b];
                         if (aRuns.length === 0) return b;
                         if (bRuns.length === 0) return a;
                         return aRuns[0].created_at > bRuns[0].created_at ? a : b;
                     });
-                    if (runResults[best].length > 0) {
-                        setActiveProvider(best);
-                    }
+                    setActiveProvider(best);
+                    window.location.hash = best;
                     // Auto-expand the most recent group and load latest run
                     for (const p of PROVIDERS) {
                         const tree = buildRunTree(runResults[p]);
@@ -638,6 +642,7 @@ export default function Analysis() {
                                     key={p}
                                     onClick={() => {
                                         setActiveProvider(p);
+                                        window.location.hash = p;
                                         setRunDetail(null);
                                         setExpandedTodo(null);
                                     }}
