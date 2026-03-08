@@ -118,9 +118,23 @@ export default function Optimizer() {
                                     <p className={`text-sm ${muted}`}>No trunks recorded</p>
                                 ) : (
                                     <div className="space-y-1">
-                                        {trunks.map(t => (
-                                            <TrunkRow key={t.id} trunk={t} isDarkMode={isDarkMode} muted={muted} onRefresh={loadData}/>
-                                        ))}
+                                        {(() => {
+                                            // Find the live trunk (most recent pushed_at)
+                                            const liveTrunk = trunks
+                                                .filter(t => t.pushed_at)
+                                                .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime())[0];
+                                            const liveId = liveTrunk?.id;
+                                            // Sort: live trunk first, then by ID descending
+                                            const sorted = [...trunks].sort((a, b) => {
+                                                if (a.id === liveId) return -1;
+                                                if (b.id === liveId) return 1;
+                                                return b.id - a.id;
+                                            });
+                                            return sorted.map(t => (
+                                                <TrunkRow key={t.id} trunk={t} isDarkMode={isDarkMode} muted={muted}
+                                                          isLive={t.id === liveId} onRefresh={loadData}/>
+                                            ));
+                                        })()}
                                     </div>
                                 )}
                             </div>
@@ -284,8 +298,8 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
     );
 }
 
-function TrunkRow({trunk: t, isDarkMode, muted, onRefresh}: {
-    trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; onRefresh: () => void;
+function TrunkRow({trunk: t, isDarkMode, muted, isLive, onRefresh}: {
+    trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; isLive: boolean; onRefresh: () => void;
 }) {
     const [expanded, setExpanded] = useState(false);
     const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
@@ -299,9 +313,13 @@ function TrunkRow({trunk: t, isDarkMode, muted, onRefresh}: {
     };
 
     const r = t.oos_result;
+    const wasPushed = !!t.pushed_at;
 
     return (
-        <div className={`rounded-lg ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+        <div className={`rounded-lg ${isLive
+            ? (isDarkMode ? 'bg-cyan-900/20 ring-1 ring-cyan-700/50' : 'bg-cyan-50 ring-1 ring-cyan-200')
+            : (isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50')
+        }`}>
             <button onClick={toggle} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{t.id}</span>
@@ -312,10 +330,15 @@ function TrunkRow({trunk: t, isDarkMode, muted, onRefresh}: {
                             Sharpe {r.sharpe_ratio?.toFixed(2)} · PF {r.profit_factor?.toFixed(2)} · {r.win_rate ? `${(r.win_rate * 100).toFixed(0)}%` : '—'}
                         </span>
                     )}
-                    {t.pushed_at && (
+                    {isLive && (
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            isDarkMode ? 'bg-emerald-900/40 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+                        }`}>LIVE</span>
+                    )}
+                    {wasPushed && !isLive && (
                         <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                            isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
-                        }`}>pushed</span>
+                            isDarkMode ? 'bg-slate-600 text-gray-400' : 'bg-gray-200 text-gray-500'
+                        }`}>previously pushed</span>
                     )}
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
@@ -353,10 +376,10 @@ function TrunkRow({trunk: t, isDarkMode, muted, onRefresh}: {
                     )}
 
                     {/* Param diffs */}
-                    {detail && detail.diffs.length > 0 && (
+                    {detail && detail.diffs && detail.diffs.length > 0 && (
                         <div>
                             <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
-                                Changes from Previous Trunk ({detail.diffs.length} params)
+                                Changes since {detail.diff_base_id ? `trunk #${detail.diff_base_id}` : 'baseline'} ({detail.diffs.length} params)
                             </p>
                             <div className="overflow-x-auto">
                                 <table className="w-full">
@@ -385,7 +408,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, onRefresh}: {
                         </div>
                     )}
 
-                    {detail && detail.diffs.length === 0 && (
+                    {detail && (!detail.diffs || detail.diffs.length === 0) && (
                         <p className={`text-sm ${muted}`}>No parameter changes (initial trunk or identical params)</p>
                     )}
 
@@ -393,24 +416,27 @@ function TrunkRow({trunk: t, isDarkMode, muted, onRefresh}: {
                     <div className="flex items-center gap-3 pt-2 border-t border-gray-700/20">
                         <button
                             onClick={async () => { await pushTrunk(t.id); onRefresh(); }}
-                            disabled={!!t.pushed_at}
+                            disabled={isLive}
                             className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                                t.pushed_at
+                                isLive
                                     ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                     : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
                             }`}>
-                            {t.pushed_at ? `Pushed ${dayjs(t.pushed_at).fromNow()}` : 'Push to Live'}
+                            {isLive ? 'Currently Live' : 'Push to Live'}
                         </button>
                         <button
                             onClick={async () => { await revertTrunk(t.id); onRefresh(); }}
+                            disabled={!wasPushed}
                             className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                                isDarkMode ? 'bg-amber-900/40 hover:bg-amber-800/60 text-amber-400' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'
+                                wasPushed
+                                    ? isDarkMode ? 'bg-amber-900/40 hover:bg-amber-800/60 text-amber-400' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'
+                                    : isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             }`}>
                             Revert to This
                         </button>
-                        {t.pushed_at && (
+                        {wasPushed && (
                             <span className={`text-xs ${muted}`}>
-                                Last pushed {dayjs(t.pushed_at).format('YYYY-MM-DD HH:mm')}
+                                {isLive ? 'Pushed' : 'Last pushed'} {dayjs(t.pushed_at).format('YYYY-MM-DD HH:mm')}
                             </span>
                         )}
                     </div>
