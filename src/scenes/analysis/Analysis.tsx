@@ -558,9 +558,10 @@ export default function Analysis() {
     const renderTodoCard = (todo: AnalysisTodoApi) => {
         const sc = statusColors[todo.status] || statusColors.open;
         const isExpanded = expandedTodo === todo.id;
+        const isTestedOrQueued = !!(todo.recommendation_status || sentTodos.has(todo.id));
 
         return (
-            <div key={todo.id} className={`${cardClass} transition-all`}>
+            <div key={todo.id} className={`${cardClass} transition-all ${isTestedOrQueued ? 'opacity-50' : ''}`}>
                 {/* Header row */}
                 <div className="flex items-start justify-between gap-3 cursor-pointer hover:opacity-80"
                      onClick={() => setExpandedTodo(isExpanded ? null : todo.id)}>
@@ -569,6 +570,21 @@ export default function Analysis() {
                             <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text}`}>
                                 {sc.label}
                             </span>
+                            {todo.recommendation_status === 'passed' && (
+                                <span className="inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/20 text-emerald-400">PASS</span>
+                            )}
+                            {todo.recommendation_status === 'failed' && (
+                                <span className="inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-red-500/20 text-red-400">FAIL</span>
+                            )}
+                            {(todo.recommendation_status === 'running' || todo.recommendation_status === 'queued') && (
+                                <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400 animate-pulse">TESTING</span>
+                            )}
+                            {(todo.recommendation_status === 'pending' || sentTodos.has(todo.id)) && !['passed','failed','running','queued'].includes(todo.recommendation_status ?? '') && (
+                                <span className="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-blue-500/20 text-blue-400">QUEUED</span>
+                            )}
+                            {todo.recommendation_status === 'applied' && (
+                                <span className="inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-cyan-500/20 text-cyan-400">APPLIED</span>
+                            )}
                             <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${priorityLabels[todo.priority]?.bg || 'bg-gray-500/20'} ${priorityLabels[todo.priority]?.color || 'text-gray-400'}`}>
                                 {priorityLabels[todo.priority]?.label || `P${todo.priority}`}
                             </span>
