@@ -200,6 +200,8 @@ export interface AnalysisJob {
     to: string;
     status: string;
     started_at: string;
+    phase: number;
+    phase_name?: string;
     error?: string;
 }
 
