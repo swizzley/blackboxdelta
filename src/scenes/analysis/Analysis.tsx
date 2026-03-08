@@ -106,7 +106,7 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
     const dayNodes: Record<string, RunGroup> = {};
     const dailyByDay: Record<string, AnalysisRunApi[]> = {};
     for (const r of (byScope['daily'] || [])) {
-        const day = r.data_start || dayjs(r.created_at).format('YYYY-MM-DD');
+        const day = dayjs(r.created_at).format('YYYY-MM-DD');
         if (!dailyByDay[day]) dailyByDay[day] = [];
         dailyByDay[day].push(r);
     }
@@ -168,7 +168,7 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
     // Build month groups
     const monthNodes: Record<string, RunGroup> = {};
     for (const r of (byScope['monthly'] || [])) {
-        const mo = r.data_start ? r.data_start.slice(0, 7) : dayjs(r.created_at).format('YYYY-MM');
+        const mo = dayjs(r.created_at).format('YYYY-MM');
         monthNodes[mo] = {
             key: mo, label: dayjs(mo + '-01').format('MMMM YYYY'),
             scope: 'monthly', run: r, children: [], hourlyRuns: [],
@@ -197,7 +197,7 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
     // Build year groups
     const yearNodes: Record<string, RunGroup> = {};
     for (const r of (byScope['yearly'] || [])) {
-        const yr = r.data_start ? r.data_start.slice(0, 4) : dayjs(r.created_at).format('YYYY');
+        const yr = dayjs(r.created_at).format('YYYY');
         yearNodes[yr] = {
             key: yr, label: yr, scope: 'yearly',
             run: r, children: [], hourlyRuns: [],
