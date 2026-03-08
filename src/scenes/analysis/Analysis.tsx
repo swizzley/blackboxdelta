@@ -6,7 +6,7 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import type {AnalysisRunApi, AnalysisTodoApi, AnalysisRunDetailApi} from '../../context/Types';
-import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer} from '../../api/client';
+import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer, squashTodos} from '../../api/client';
 
 dayjs.extend(relativeTime);
 
@@ -57,6 +57,8 @@ export default function Analysis() {
     const [loadingDetail, setLoadingDetail] = useState(false);
     const [sendingTodo, setSendingTodo] = useState<number | null>(null);
     const [sentTodos, setSentTodos] = useState<Set<number>>(new Set());
+    const [selectedForSquash, setSelectedForSquash] = useState<Set<number>>(new Set());
+    const [squashing, setSquashing] = useState(false);
 
     useEffect(() => {
         if (!apiAvailable) return;
@@ -177,7 +179,7 @@ export default function Analysis() {
     return (
         <div className={`min-h-screen ${isDarkMode ? 'bg-slate-900' : 'bg-gray-100'}`}>
             <Nav/>
-            <main className="-mt-24 pb-16">
+            <main className={`-mt-24 ${selectedForSquash.size >= 2 ? 'pb-28' : 'pb-16'}`}>
                 <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8 pt-8">
 
                     {/* Header */}
@@ -423,16 +425,42 @@ export default function Analysis() {
                                                                     )}
                                                                     {todo.mutations && Object.keys(todo.mutations).length > 0 && (
                                                                         <div className={`mt-3 rounded overflow-hidden border ${isDarkMode ? 'border-slate-600' : 'border-gray-300'}`}>
-                                                                            <div className={`px-3 py-1.5 text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-                                                                                Proposed Changes
+                                                                            <div className={`px-3 py-1.5 text-xs font-medium flex items-center justify-between ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                                                                                <span>Proposed Changes</span>
+                                                                                {!todo.recommendation_status && !sentTodos.has(todo.id) && (
+                                                                                    <label className="flex items-center gap-1.5 cursor-pointer" onClick={e => e.stopPropagation()}>
+                                                                                        <input
+                                                                                            type="checkbox"
+                                                                                            checked={selectedForSquash.has(todo.id)}
+                                                                                            onChange={() => setSelectedForSquash(prev => {
+                                                                                                const next = new Set(prev);
+                                                                                                next.has(todo.id) ? next.delete(todo.id) : next.add(todo.id);
+                                                                                                return next;
+                                                                                            })}
+                                                                                            className="rounded border-gray-500"
+                                                                                        />
+                                                                                        <span className="text-xs">Select for squash</span>
+                                                                                    </label>
+                                                                                )}
                                                                             </div>
                                                                             <div className={`font-mono text-xs ${isDarkMode ? 'bg-slate-900' : 'bg-gray-50'}`}>
-                                                                                {Object.entries(todo.mutations).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => (
-                                                                                    <div key={key} className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
-                                                                                        <span className="select-none w-6 text-center text-emerald-400 py-0.5 flex-shrink-0">+</span>
-                                                                                        <span className="py-0.5 text-emerald-300">{key} = {value}</span>
-                                                                                    </div>
-                                                                                ))}
+                                                                                {Object.entries(todo.mutations).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => {
+                                                                                    const oldVal = todo.current_values?.[key];
+                                                                                    return (
+                                                                                        <div key={key}>
+                                                                                            {oldVal != null && (
+                                                                                                <div className="flex bg-red-500/10 border-l-2 border-red-500">
+                                                                                                    <span className="select-none w-6 text-center text-red-400 py-0.5 flex-shrink-0">-</span>
+                                                                                                    <span className="py-0.5 text-red-300">{key} = {oldVal}</span>
+                                                                                                </div>
+                                                                                            )}
+                                                                                            <div className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
+                                                                                                <span className="select-none w-6 text-center text-emerald-400 py-0.5 flex-shrink-0">+</span>
+                                                                                                <span className="py-0.5 text-emerald-300">{key} = {value}</span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    );
+                                                                                })}
                                                                             </div>
                                                                             <div className={`px-3 py-2 flex items-center gap-3 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'} border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
                                                                                 {todo.recommendation_status === 'passed' ? (
@@ -545,6 +573,56 @@ export default function Analysis() {
                 </div>
             </main>
             <Foot/>
+
+            {/* Squash Action Bar */}
+            {selectedForSquash.size >= 2 && (
+                <div className={`fixed bottom-0 left-0 right-0 z-50 border-t shadow-lg ${isDarkMode ? 'bg-slate-800 border-slate-600' : 'bg-white border-gray-300'}`}>
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <span className={`text-sm font-medium ${textPrimary}`}>
+                                {selectedForSquash.size} TODOs selected
+                            </span>
+                            <span className={`text-xs ${textMuted}`}>
+                                {(() => {
+                                    const merged: Record<string, string> = {};
+                                    todos.filter(t => selectedForSquash.has(t.id) && t.mutations).forEach(t => {
+                                        Object.assign(merged, t.mutations);
+                                    });
+                                    return `${Object.keys(merged).length} param changes`;
+                                })()}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                            <button
+                                onClick={() => setSelectedForSquash(new Set())}
+                                className={`px-3 py-1.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                            >
+                                Clear
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setSquashing(true);
+                                    squashTodos(Array.from(selectedForSquash)).then(() => {
+                                        const ids = selectedForSquash;
+                                        setSentTodos(prev => {
+                                            const next = new Set(prev);
+                                            ids.forEach(id => next.add(id));
+                                            return next;
+                                        });
+                                        setSelectedForSquash(new Set());
+                                    }).catch(err => {
+                                        alert(`Squash failed: ${err.message || err}`);
+                                    }).finally(() => setSquashing(false));
+                                }}
+                                disabled={squashing}
+                                className="px-4 py-1.5 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {squashing ? 'Squashing...' : 'Squash & Queue for Backtest'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

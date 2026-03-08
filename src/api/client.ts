@@ -176,3 +176,7 @@ export function fetchAnalysisTodos(opts: {run_id?: string; status?: string} = {}
 export function sendTodoToOptimizer(todoId: number): Promise<any> {
     return apiPost(`/api/analysis/todos/${todoId}/recommend`);
 }
+
+export function squashTodos(todoIds: number[]): Promise<any> {
+    return apiPost('/api/analysis/todos/squash', {todo_ids: todoIds});
+}
