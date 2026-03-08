@@ -521,6 +521,7 @@ export interface AnalysisTodoApi {
     affected_files: string[];
     complexity: string;
     mutations?: Record<string, string>;
+    current_values?: Record<string, string>;
     status: 'open' | 'in_progress' | 'implemented' | 'wont_fix' | 'obsolete';
     implemented_at?: string;
     implemented_sha?: string;
