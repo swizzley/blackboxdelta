@@ -28,6 +28,12 @@ const scopeColors: Record<string, { text: string; bg: string }> = {
     hourly:  {text: 'text-gray-400',   bg: 'bg-gray-500/20'},
 };
 
+const triggerColors: Record<string, { text: string; bg: string; label: string }> = {
+    'service': {text: 'text-gray-400', bg: 'bg-gray-500/20', label: 'Auto'},
+    'api':     {text: 'text-blue-400', bg: 'bg-blue-500/20', label: 'API'},
+    'ad-hoc':  {text: 'text-amber-400', bg: 'bg-amber-500/20', label: 'Manual'},
+};
+
 const priorityLabels: Record<number, { label: string; color: string; bg: string }> = {
     1: {label: 'P1 Critical', color: 'text-red-400', bg: 'bg-red-500/20'},
     2: {label: 'P2 High', color: 'text-orange-400', bg: 'bg-orange-500/20'},
@@ -441,6 +447,7 @@ export default function Analysis() {
     // Render a run row (clickable to load detail)
     const renderRunRow = (run: AnalysisRunApi, indent: number) => {
         const sc = scopeColors[run.scope || 'hourly'] || scopeColors.hourly;
+        const tc = triggerColors[run.trigger || 'ad-hoc'] || triggerColors['ad-hoc'];
         const isActive = runDetail?.run.run_id === run.run_id;
         return (
             <div
@@ -455,6 +462,9 @@ export default function Analysis() {
             >
                 <span className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text} flex-shrink-0`}>
                     {(run.scope || 'hourly').charAt(0).toUpperCase() + (run.scope || 'hourly').slice(1)}
+                </span>
+                <span className={`text-xs px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} flex-shrink-0`}>
+                    {tc.label}
                 </span>
                 <span className={`${isActive ? 'text-cyan-400' : textPrimary} flex-1 min-w-0 truncate`}>
                     {dayjs(run.created_at).format('h:mm A')}
@@ -854,10 +864,16 @@ export default function Analysis() {
                                                     </h2>
                                                     {(() => {
                                                         const rsc = scopeColors[runDetail.run.scope || 'hourly'] || scopeColors.hourly;
+                                                        const rtc = triggerColors[runDetail.run.trigger || 'ad-hoc'] || triggerColors['ad-hoc'];
                                                         return (
-                                                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${rsc.bg} ${rsc.text}`}>
-                                                                {runDetail.run.scope || 'hourly'}
-                                                            </span>
+                                                            <>
+                                                                <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${rsc.bg} ${rsc.text}`}>
+                                                                    {runDetail.run.scope || 'hourly'}
+                                                                </span>
+                                                                <span className={`text-xs px-1.5 py-0.5 rounded ${rtc.bg} ${rtc.text}`}>
+                                                                    {rtc.label}
+                                                                </span>
+                                                            </>
                                                         );
                                                     })()}
                                                 </div>
