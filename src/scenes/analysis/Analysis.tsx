@@ -237,15 +237,23 @@ export default function Analysis() {
         });
     }, [apiAvailable]);
 
-    // Poll for job completion
+    // Check for running jobs on mount
+    useEffect(() => {
+        if (!apiAvailable) return;
+        fetchAnalysisJobs().then(jobs => {
+            const running = jobs?.find(j => j.status === 'running');
+            if (running) setRunningJob(running);
+        });
+    }, [apiAvailable]);
+
+    // Poll for job progress + completion
     useEffect(() => {
         if (!runningJob || runningJob.status !== 'running') return;
         const interval = setInterval(() => {
             fetchAnalysisJobs().then(jobs => {
                 const j = jobs?.find(j => j.id === runningJob.id);
-                if (j && j.status !== 'running') {
+                if (j) {
                     setRunningJob(j);
-                    // Reload runs on completion
                     if (j.status === 'completed') {
                         reloadRuns();
                     }
