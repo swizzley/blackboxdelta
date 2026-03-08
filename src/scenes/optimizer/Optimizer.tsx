@@ -324,11 +324,12 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, onRefresh}: {
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{t.id}</span>
                     <span className={`text-xs ${muted}`}>Gen {t.generation}</span>
-                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>AI: {t.ai_score}</span>
-                    {r && (
+                    {r && r.total_trades > 0 ? (
                         <span className={`text-xs ${muted} hidden sm:inline`}>
-                            Sharpe {r.sharpe_ratio?.toFixed(2)} · PF {r.profit_factor?.toFixed(2)} · {r.win_rate ? `${(r.win_rate * 100).toFixed(0)}%` : '—'}
+                            {r.total_trades} trades · {r.win_rate?.toFixed(0)}% WR · PF {r.profit_factor?.toFixed(2)} · Sharpe {r.sharpe_ratio?.toFixed(3)} · <span className={plColor(r.total_pnl)}>P&L {r.total_pnl?.toFixed(2)}</span>
                         </span>
+                    ) : (
+                        <span className={`text-xs ${muted} hidden sm:inline`}>No OOS data</span>
                     )}
                     {isLive && (
                         <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
