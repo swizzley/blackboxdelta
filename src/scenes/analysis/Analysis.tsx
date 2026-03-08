@@ -434,9 +434,19 @@ export default function Analysis() {
                                                                                     </div>
                                                                                 ))}
                                                                             </div>
-                                                                            <div className={`px-3 py-2 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'} border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                                                                                {sentTodos.has(todo.id) || todo.status === 'in_progress' ? (
-                                                                                    <span className="text-xs text-blue-400">Sent to Optimizer</span>
+                                                                            <div className={`px-3 py-2 flex items-center gap-3 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'} border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                                                {todo.recommendation_status === 'passed' ? (
+                                                                                    <span className="text-xs font-medium text-emerald-400 bg-emerald-500/20 px-2 py-1 rounded">Backtest Passed</span>
+                                                                                ) : todo.recommendation_status === 'failed' ? (
+                                                                                    <span className="text-xs font-medium text-red-400 bg-red-500/20 px-2 py-1 rounded">Backtest Failed</span>
+                                                                                ) : todo.recommendation_status === 'running' ? (
+                                                                                    <span className="text-xs font-medium text-yellow-400 bg-yellow-500/20 px-2 py-1 rounded">Backtest Running...</span>
+                                                                                ) : todo.recommendation_status === 'queued' ? (
+                                                                                    <span className="text-xs font-medium text-blue-400 bg-blue-500/20 px-2 py-1 rounded">Queued for Backtest</span>
+                                                                                ) : todo.recommendation_status === 'applied' ? (
+                                                                                    <span className="text-xs font-medium text-cyan-400 bg-cyan-500/20 px-2 py-1 rounded">Applied to Trunk</span>
+                                                                                ) : sentTodos.has(todo.id) || todo.recommendation_status === 'pending' ? (
+                                                                                    <span className="text-xs text-blue-400">Sent to Optimizer (pending queue)</span>
                                                                                 ) : (
                                                                                     <button
                                                                                         onClick={(e) => {
@@ -451,7 +461,7 @@ export default function Analysis() {
                                                                                         disabled={sendingTodo === todo.id}
                                                                                         className="px-3 py-1 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                                                                                     >
-                                                                                        {sendingTodo === todo.id ? 'Sending...' : 'Send to Optimizer'}
+                                                                                        {sendingTodo === todo.id ? 'Sending...' : 'Queue for Backtest'}
                                                                                     </button>
                                                                                 )}
                                                                             </div>

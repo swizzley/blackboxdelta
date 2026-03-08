@@ -526,6 +526,8 @@ export interface AnalysisTodoApi {
     implemented_sha?: string;
     implemented_by?: string;
     notes?: string;
+    recommendation_id?: number;
+    recommendation_status?: string;
 }
 
 export interface AnalysisRunDetailApi {
