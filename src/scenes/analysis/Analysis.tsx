@@ -365,23 +365,6 @@ export default function Analysis() {
         );
     }
 
-    const anyData = providerRuns.length > 0 || runs.ollama.length > 0 || runs.anthropic.length > 0;
-    if (!anyData) {
-        return (
-            <div className={`min-h-screen ${isDarkMode ? 'bg-slate-900' : 'bg-gray-100'}`}>
-                <Nav/>
-                <main className="-mt-24 pb-12">
-                    <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8 pt-8">
-                        <p className={`text-center py-20 ${textMuted}`}>
-                            No analysis runs yet. Run <code className="font-mono text-cyan-400">swizzley-analyzer</code> to generate your first report.
-                        </p>
-                    </div>
-                </main>
-                <Foot/>
-            </div>
-        );
-    }
-
     // Render a run row (clickable to load detail)
     const renderRunRow = (run: AnalysisRunApi, indent: number) => {
         const sc = scopeColors[run.scope || 'hourly'] || scopeColors.hourly;
@@ -639,17 +622,14 @@ export default function Analysis() {
                                         setRunDetail(null);
                                         setExpandedTodo(null);
                                     }}
-                                    disabled={!hasData}
                                     className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
                                         ${isActive
                                             ? `${isDarkMode ? 'bg-slate-800 text-cyan-400' : 'bg-white text-cyan-600'} border-b-2 border-cyan-400`
-                                            : hasData
-                                                ? `${isDarkMode ? 'bg-slate-700/50 text-gray-400 hover:text-gray-200' : 'bg-gray-200 text-gray-600 hover:text-gray-800'}`
-                                                : `${isDarkMode ? 'bg-slate-800/30 text-gray-600' : 'bg-gray-100 text-gray-400'} cursor-not-allowed`
+                                            : `${isDarkMode ? 'bg-slate-700/50 text-gray-400 hover:text-gray-200' : 'bg-gray-200 text-gray-600 hover:text-gray-800'}`
                                         }`}
                                 >
                                     {p.charAt(0).toUpperCase() + p.slice(1)}
-                                    {!hasData && <span className="ml-1 text-xs">(no data)</span>}
+                                    {hasData && <span className="ml-1 text-xs opacity-60">({runs[p].length})</span>}
                                 </button>
                             );
                         })}
