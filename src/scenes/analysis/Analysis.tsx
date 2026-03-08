@@ -223,15 +223,22 @@ function buildTodoPrompt(todo: AnalysisTodoApi): string {
     return parts.join('\n');
 }
 
-// Sort models: recommended first, then by size descending
-function sortedModels(models: OllamaModel[]): OllamaModel[] {
-    return [...models].sort((a, b) => {
-        // Recommended model first
-        if (a.name === 'qwen3:14b') return -1;
-        if (b.name === 'qwen3:14b') return 1;
-        // Then by size descending
-        return b.size_gb - a.size_gb;
-    });
+// Curated model list: recommended + runners-up only
+const CURATED_MODELS: { name: string; label: string }[] = [
+    {name: 'qwen3:14b', label: 'qwen3:14b (recommended)'},
+    {name: 'deepseek-r1:14b', label: 'deepseek-r1:14b (reasoning runner-up)'},
+    {name: 'phi4:14b', label: 'phi4:14b (math runner-up)'},
+    {name: 'qwen2.5:14b', label: 'qwen2.5:14b (baseline)'},
+];
+
+function curatedModels(available: OllamaModel[]): { name: string; label: string; size: string }[] {
+    const avail = new Set(available.map(m => m.name));
+    return CURATED_MODELS
+        .filter(c => avail.has(c.name))
+        .map(c => {
+            const m = available.find(a => a.name === c.name)!;
+            return {name: c.name, label: c.label, size: m.parameter_size};
+        });
 }
 
 // Forex market is open Sun 5pm ET – Fri 5pm ET (Mon-Fri UTC, plus Sun evening)
@@ -732,27 +739,15 @@ export default function Analysis() {
                                         <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (recommended)</option>
                                         <option value="claude-opus-4-20250514">Claude Opus 4</option>
                                     </select>
-                                ) : activeProvider === 'hybrid' ? (
-                                    <select
-                                        value={selectedModel}
-                                        onChange={e => setSelectedModel(e.target.value)}
-                                        className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
-                                    >
-                                        {sortedModels(models).map(m => (
-                                            <option key={m.name} value={m.name}>
-                                                {m.name} + Claude Sonnet ({m.parameter_size}){m.name === 'qwen3:14b' ? ' (recommended)' : ''}
-                                            </option>
-                                        ))}
-                                    </select>
                                 ) : (
                                     <select
                                         value={selectedModel}
                                         onChange={e => setSelectedModel(e.target.value)}
                                         className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
                                     >
-                                        {sortedModels(models).map(m => (
+                                        {curatedModels(models).map(m => (
                                             <option key={m.name} value={m.name}>
-                                                {m.name} ({m.parameter_size}, {m.size_gb.toFixed(1)}GB){m.name === 'qwen3:14b' ? ' (recommended)' : ''}
+                                                {activeProvider === 'hybrid' ? `${m.label} + Claude Sonnet` : m.label}
                                             </option>
                                         ))}
                                     </select>
