@@ -478,6 +478,7 @@ export interface OptimizerRecommendation {
     status: string;
     is_result?: OptimizerResult;
     oos_result?: OptimizerResult;
+    trunk_id?: number;
     created_at: string;
     executed_at?: string;
 }

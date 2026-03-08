@@ -605,6 +605,7 @@ function RecommendationRow({rec, isDarkMode, muted, onQueue, onSkip, onApply}: {
                     <span className={`text-sm font-medium truncate ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                         {rec.source}{rec.source_id ? ` #${rec.source_id}` : ''}
                     </span>
+                    {rec.trunk_id && <span className={`text-xs font-mono ${muted} hidden sm:inline`}>trunk #{rec.trunk_id}</span>}
                     <span className={`text-xs ${muted} hidden sm:inline`}>{dayjs(rec.created_at).fromNow()}</span>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
