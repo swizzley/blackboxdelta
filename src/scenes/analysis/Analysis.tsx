@@ -9,6 +9,7 @@ import {useApi} from '../../context/Api';
 import type {AnalysisRunApi, AnalysisTodoApi, AnalysisRunDetailApi} from '../../context/Types';
 import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer, squashTodos,
     fetchAnalysisModels, triggerAnalysisRun, fetchAnalysisJobs, type OllamaModel, type AnalysisJob} from '../../api/client';
+import ReactMarkdown from 'react-markdown';
 
 dayjs.extend(relativeTime);
 dayjs.extend(isoWeek);
@@ -264,6 +265,7 @@ export default function Analysis() {
     const [runDetail, setRunDetail] = useState<AnalysisRunDetailApi | null>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
     const [expandedTodo, setExpandedTodo] = useState<number | null>(null);
+    const [summaryOpen, setSummaryOpen] = useState(false);
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
     const [sendingTodo, setSendingTodo] = useState<number | null>(null);
     const [sentTodos, setSentTodos] = useState<Set<number>>(new Set());
@@ -394,6 +396,7 @@ export default function Analysis() {
     const loadRunDetail = useCallback((runId: string) => {
         setLoadingDetail(true);
         setExpandedTodo(null);
+        setSummaryOpen(false);
         fetchAnalysisRunDetail(runId).then(data => {
             setRunDetail(data ?? null);
         }).finally(() => setLoadingDetail(false));
@@ -882,37 +885,59 @@ export default function Analysis() {
                                                 )}
                                             </div>
 
-                                            {/* Queue All button */}
-                                            {(() => {
-                                                const queueable = todos.filter(t =>
-                                                    t.status === 'open' && t.mutations && Object.keys(t.mutations).length > 0
-                                                    && !sentTodos.has(t.id) && !t.recommendation_status
-                                                );
-                                                if (queueable.length === 0) return null;
-                                                return (
-                                                    <div className={`mt-3 pt-3 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                                                        <button
-                                                            onClick={() => {
-                                                                setQueueingAll(true);
-                                                                const ids = queueable.map(t => t.id);
-                                                                squashTodos(ids).then(() => {
-                                                                    setSentTodos(prev => {
-                                                                        const next = new Set(prev);
-                                                                        ids.forEach(id => next.add(id));
-                                                                        return next;
-                                                                    });
-                                                                }).catch(err => {
-                                                                    alert(`Failed: ${err.message || err}`);
-                                                                }).finally(() => setQueueingAll(false));
-                                                            }}
-                                                            disabled={queueingAll}
-                                                            className="px-3 py-1.5 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        >
-                                                            {queueingAll ? 'Queueing...' : `Queue All ${queueable.length} Parameter TODOs for Backtest`}
-                                                        </button>
-                                                    </div>
-                                                );
-                                            })()}
+                                            {/* Executive Summary Drawer */}
+                                            {runDetail.run.synthesis && (
+                                                <div className={`mt-3 pt-3 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                    <button
+                                                        onClick={() => setSummaryOpen(!summaryOpen)}
+                                                        className={`w-full flex items-center justify-between text-left ${textPrimary}`}
+                                                    >
+                                                        <span className="text-sm font-semibold">Executive Summary</span>
+                                                        <svg className={`w-4 h-4 transition-transform ${summaryOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                    {summaryOpen && (
+                                                        <div className="mt-3">
+                                                            <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''}`}>
+                                                                <ReactMarkdown>{runDetail.run.synthesis}</ReactMarkdown>
+                                                            </div>
+
+                                                            {/* Queue All button */}
+                                                            {(() => {
+                                                                const queueable = todos.filter(t =>
+                                                                    t.status === 'open' && t.mutations && Object.keys(t.mutations).length > 0
+                                                                    && !sentTodos.has(t.id) && !t.recommendation_status
+                                                                );
+                                                                if (queueable.length === 0) return null;
+                                                                return (
+                                                                    <div className={`mt-4 pt-3 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                setQueueingAll(true);
+                                                                                const ids = queueable.map(t => t.id);
+                                                                                squashTodos(ids).then(() => {
+                                                                                    setSentTodos(prev => {
+                                                                                        const next = new Set(prev);
+                                                                                        ids.forEach(id => next.add(id));
+                                                                                        return next;
+                                                                                    });
+                                                                                }).catch(err => {
+                                                                                    alert(`Failed: ${err.message || err}`);
+                                                                                }).finally(() => setQueueingAll(false));
+                                                                            }}
+                                                                            disabled={queueingAll}
+                                                                            className="px-3 py-1.5 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                        >
+                                                                            {queueingAll ? 'Queueing...' : `Queue All ${queueable.length} Parameter TODOs for Backtest`}
+                                                                        </button>
+                                                                    </div>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
 
                                         </div>
 
