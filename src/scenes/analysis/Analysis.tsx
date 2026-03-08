@@ -6,7 +6,7 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import type {AnalysisRunApi, AnalysisTodoApi, AnalysisRunDetailApi} from '../../context/Types';
-import {fetchAnalysisRuns, fetchAnalysisRunDetail} from '../../api/client';
+import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer} from '../../api/client';
 
 dayjs.extend(relativeTime);
 
@@ -55,6 +55,8 @@ export default function Analysis() {
     const [filterStatus, setFilterStatus] = useState<string | null>(null);
     const [runDetail, setRunDetail] = useState<AnalysisRunDetailApi | null>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
+    const [sendingTodo, setSendingTodo] = useState<number | null>(null);
+    const [sentTodos, setSentTodos] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         if (!apiAvailable) return;
@@ -416,6 +418,42 @@ export default function Analysis() {
                                                                                         {f}
                                                                                     </code>
                                                                                 ))}
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                    {todo.mutations && Object.keys(todo.mutations).length > 0 && (
+                                                                        <div className={`mt-3 rounded overflow-hidden border ${isDarkMode ? 'border-slate-600' : 'border-gray-300'}`}>
+                                                                            <div className={`px-3 py-1.5 text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                                                                                Proposed Changes
+                                                                            </div>
+                                                                            <div className={`font-mono text-xs ${isDarkMode ? 'bg-slate-900' : 'bg-gray-50'}`}>
+                                                                                {Object.entries(todo.mutations).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => (
+                                                                                    <div key={key} className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
+                                                                                        <span className="select-none w-6 text-center text-emerald-400 py-0.5 flex-shrink-0">+</span>
+                                                                                        <span className="py-0.5 text-emerald-300">{key} = {value}</span>
+                                                                                    </div>
+                                                                                ))}
+                                                                            </div>
+                                                                            <div className={`px-3 py-2 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'} border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                                                {sentTodos.has(todo.id) || todo.status === 'in_progress' ? (
+                                                                                    <span className="text-xs text-blue-400">Sent to Optimizer</span>
+                                                                                ) : (
+                                                                                    <button
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            setSendingTodo(todo.id);
+                                                                                            sendTodoToOptimizer(todo.id).then(() => {
+                                                                                                setSentTodos(prev => new Set(prev).add(todo.id));
+                                                                                            }).catch(err => {
+                                                                                                alert(`Failed: ${err.message || err}`);
+                                                                                            }).finally(() => setSendingTodo(null));
+                                                                                        }}
+                                                                                        disabled={sendingTodo === todo.id}
+                                                                                        className="px-3 py-1 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                                    >
+                                                                                        {sendingTodo === todo.id ? 'Sending...' : 'Send to Optimizer'}
+                                                                                    </button>
+                                                                                )}
                                                                             </div>
                                                                         </div>
                                                                     )}

@@ -172,3 +172,7 @@ export function fetchAnalysisTodos(opts: {run_id?: string; status?: string} = {}
     const qs = params.toString();
     return apiFetch(`/api/analysis/todos${qs ? '?' + qs : ''}`);
 }
+
+export function sendTodoToOptimizer(todoId: number): Promise<any> {
+    return apiPost(`/api/analysis/todos/${todoId}/recommend`);
+}

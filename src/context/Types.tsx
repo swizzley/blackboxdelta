@@ -520,6 +520,7 @@ export interface AnalysisTodoApi {
     evidence: string;
     affected_files: string[];
     complexity: string;
+    mutations?: Record<string, string>;
     status: 'open' | 'in_progress' | 'implemented' | 'wont_fix' | 'obsolete';
     implemented_at?: string;
     implemented_sha?: string;
