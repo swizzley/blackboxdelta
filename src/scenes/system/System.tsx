@@ -63,7 +63,8 @@ export default function System() {
     const allServices = monitor
         ? [...(monitor.services?.cipher || []), ...(monitor.services?.genesis || []), ...(monitor.services?.sage || [])]
         : [];
-    const activeCount = allServices.filter(s => s.status === 'active').length;
+    const countedServices = allServices.filter(s => s.type !== 'cli');
+    const activeCount = countedServices.filter(s => s.status === 'active').length;
     const alertCount = monitor?.alerts_firing?.length ?? 0;
 
     return (
@@ -93,7 +94,7 @@ export default function System() {
                                          icon={<SignalIcon className="w-6 h-6"/>} isDarkMode={isDarkMode}/>
                                 <KPICard label="Market" value={monitor?.market_open ? 'OPEN' : 'CLOSED'} color={monitor?.market_open ? 'ok' : 'unknown'}
                                          icon={<ChartBarIcon className="w-6 h-6"/>} isDarkMode={isDarkMode}/>
-                                <KPICard label="Services" value={`${activeCount}/${allServices.length}`} color={activeCount === allServices.length ? 'ok' : 'critical'}
+                                <KPICard label="Services" value={`${activeCount}/${countedServices.length}`} color={activeCount === countedServices.length ? 'ok' : 'critical'}
                                          icon={<ServerStackIcon className="w-6 h-6"/>} isDarkMode={isDarkMode}/>
                                 <KPICard label="Alerts" value={String(alertCount)} color={alertCount === 0 ? 'ok' : 'critical'}
                                          icon={<ExclamationTriangleIcon className="w-6 h-6"/>} isDarkMode={isDarkMode}/>
