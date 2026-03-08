@@ -412,13 +412,13 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, onRefresh}: {
                     <div className="flex items-center gap-3 pt-2 border-t border-gray-700/20">
                         <button
                             onClick={async () => { await pushTrunk(t.id); onRefresh(); }}
-                            disabled={isLive}
+                            disabled={isLive || t.generation === 0}
                             className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                                isLive
+                                isLive || t.generation === 0
                                     ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                     : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
                             }`}>
-                            {isLive ? 'Currently Live' : 'Push to Live'}
+                            {isLive ? 'Currently Live' : t.generation === 0 ? 'Baseline' : 'Push to Live'}
                         </button>
                         <button
                             onClick={async () => { await revertTrunk(t.id); onRefresh(); }}
