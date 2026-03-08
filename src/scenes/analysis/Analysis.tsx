@@ -1,6 +1,7 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useCallback} from 'react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import isoWeek from 'dayjs/plugin/isoWeek';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
@@ -9,9 +10,21 @@ import type {AnalysisRunApi, AnalysisTodoApi, AnalysisRunDetailApi} from '../../
 import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer, squashTodos} from '../../api/client';
 
 dayjs.extend(relativeTime);
+dayjs.extend(isoWeek);
 
 const PROVIDERS = ['anthropic', 'ollama'] as const;
 type Provider = typeof PROVIDERS[number];
+
+const SCOPE_ORDER = ['yearly', 'monthly', 'weekly', 'daily', 'hourly'] as const;
+type Scope = typeof SCOPE_ORDER[number];
+
+const scopeColors: Record<string, { text: string; bg: string }> = {
+    yearly:  {text: 'text-purple-400', bg: 'bg-purple-500/20'},
+    monthly: {text: 'text-indigo-400', bg: 'bg-indigo-500/20'},
+    weekly:  {text: 'text-cyan-400',   bg: 'bg-cyan-500/20'},
+    daily:   {text: 'text-emerald-400', bg: 'bg-emerald-500/20'},
+    hourly:  {text: 'text-gray-400',   bg: 'bg-gray-500/20'},
+};
 
 const priorityLabels: Record<number, { label: string; color: string; bg: string }> = {
     1: {label: 'P1 Critical', color: 'text-red-400', bg: 'bg-red-500/20'},
@@ -43,18 +56,148 @@ const categoryLabels: Record<string, string> = {
     forex_insight: 'Forex Insight',
 };
 
+// Group runs into a hierarchy: yearly > monthly > weekly > daily > hourly
+interface RunGroup {
+    key: string;        // e.g. "2026", "2026-03", "2026-W10", "2026-03-07"
+    label: string;      // display label
+    scope: Scope;       // the scope level of this group
+    run?: AnalysisRunApi; // the summary run at this level (if exists)
+    children: RunGroup[];
+    hourlyRuns: AnalysisRunApi[]; // leaf hourly runs
+}
+
+function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
+    // Separate by scope
+    const byScope: Record<string, AnalysisRunApi[]> = {};
+    for (const r of runs) {
+        const s = r.scope || 'hourly';
+        if (!byScope[s]) byScope[s] = [];
+        byScope[s].push(r);
+    }
+
+    // Build day groups from hourly runs
+    const hourlyByDay: Record<string, AnalysisRunApi[]> = {};
+    for (const r of (byScope['hourly'] || [])) {
+        const day = dayjs(r.created_at).format('YYYY-MM-DD');
+        if (!hourlyByDay[day]) hourlyByDay[day] = [];
+        hourlyByDay[day].push(r);
+    }
+
+    // Build day nodes
+    const dayNodes: Record<string, RunGroup> = {};
+    // First from daily runs
+    for (const r of (byScope['daily'] || [])) {
+        const day = r.data_start || dayjs(r.created_at).format('YYYY-MM-DD');
+        dayNodes[day] = {
+            key: day, label: dayjs(day).format('ddd, MMM D'), scope: 'daily',
+            run: r, children: [], hourlyRuns: hourlyByDay[day] || [],
+        };
+    }
+    // Then from hourly runs that don't have a daily summary
+    for (const [day, hrs] of Object.entries(hourlyByDay)) {
+        if (!dayNodes[day]) {
+            dayNodes[day] = {
+                key: day, label: dayjs(day).format('ddd, MMM D'), scope: 'daily',
+                children: [], hourlyRuns: hrs,
+            };
+        }
+    }
+
+    // Build week groups
+    const weekNodes: Record<string, RunGroup> = {};
+    for (const r of (byScope['weekly'] || [])) {
+        const d = dayjs(r.created_at);
+        const wk = d.format('YYYY') + '-W' + String(d.isoWeek()).padStart(2, '0');
+        const start = r.data_start ? dayjs(r.data_start).format('MMM D') : '';
+        const end = r.data_end ? dayjs(r.data_end).format('MMM D') : '';
+        weekNodes[wk] = {
+            key: wk, label: `Week ${d.isoWeek()}${start ? ` (${start} - ${end})` : ''}`,
+            scope: 'weekly', run: r, children: [], hourlyRuns: [],
+        };
+    }
+
+    // Assign day nodes to weeks
+    for (const [day, node] of Object.entries(dayNodes)) {
+        const d = dayjs(day);
+        const wk = d.format('YYYY') + '-W' + String(d.isoWeek()).padStart(2, '0');
+        if (!weekNodes[wk]) {
+            weekNodes[wk] = {
+                key: wk, label: `Week ${d.isoWeek()}`,
+                scope: 'weekly', children: [], hourlyRuns: [],
+            };
+        }
+        weekNodes[wk].children.push(node);
+    }
+    // Sort days within each week (newest first)
+    for (const wk of Object.values(weekNodes)) {
+        wk.children.sort((a, b) => b.key.localeCompare(a.key));
+    }
+
+    // Build month groups
+    const monthNodes: Record<string, RunGroup> = {};
+    for (const r of (byScope['monthly'] || [])) {
+        const mo = r.data_start ? r.data_start.slice(0, 7) : dayjs(r.created_at).format('YYYY-MM');
+        monthNodes[mo] = {
+            key: mo, label: dayjs(mo + '-01').format('MMMM YYYY'),
+            scope: 'monthly', run: r, children: [], hourlyRuns: [],
+        };
+    }
+
+    // Assign weeks to months (use the month of the week's Monday)
+    for (const [wk, node] of Object.entries(weekNodes)) {
+        // Parse YYYY-Wnn
+        const year = parseInt(wk.slice(0, 4));
+        const week = parseInt(wk.slice(6));
+        const monday = dayjs().year(year).isoWeek(week).startOf('isoWeek');
+        const mo = monday.format('YYYY-MM');
+        if (!monthNodes[mo]) {
+            monthNodes[mo] = {
+                key: mo, label: dayjs(mo + '-01').format('MMMM YYYY'),
+                scope: 'monthly', children: [], hourlyRuns: [],
+            };
+        }
+        monthNodes[mo].children.push(node);
+    }
+    for (const mo of Object.values(monthNodes)) {
+        mo.children.sort((a, b) => b.key.localeCompare(a.key));
+    }
+
+    // Build year groups
+    const yearNodes: Record<string, RunGroup> = {};
+    for (const r of (byScope['yearly'] || [])) {
+        const yr = r.data_start ? r.data_start.slice(0, 4) : dayjs(r.created_at).format('YYYY');
+        yearNodes[yr] = {
+            key: yr, label: yr, scope: 'yearly',
+            run: r, children: [], hourlyRuns: [],
+        };
+    }
+    for (const [mo, node] of Object.entries(monthNodes)) {
+        const yr = mo.slice(0, 4);
+        if (!yearNodes[yr]) {
+            yearNodes[yr] = {
+                key: yr, label: yr, scope: 'yearly',
+                children: [], hourlyRuns: [],
+            };
+        }
+        yearNodes[yr].children.push(node);
+    }
+    for (const yr of Object.values(yearNodes)) {
+        yr.children.sort((a, b) => b.key.localeCompare(a.key));
+    }
+
+    return Object.values(yearNodes).sort((a, b) => b.key.localeCompare(a.key));
+}
+
 export default function Analysis() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
     const [runs, setRuns] = useState<Record<Provider, AnalysisRunApi[]>>({anthropic: [], ollama: []});
-    const [latestTodos, setLatestTodos] = useState<Record<Provider, AnalysisTodoApi[]>>({anthropic: [], ollama: []});
     const [activeProvider, setActiveProvider] = useState<Provider>('anthropic');
     const [loading, setLoading] = useState(true);
-    const [expandedTodo, setExpandedTodo] = useState<number | null>(null);
-    const [filterPriority, setFilterPriority] = useState<number | null>(null);
-    const [filterStatus, setFilterStatus] = useState<string | null>(null);
     const [runDetail, setRunDetail] = useState<AnalysisRunDetailApi | null>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
+    const [expandedTodo, setExpandedTodo] = useState<number | null>(null);
+    const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
     const [sendingTodo, setSendingTodo] = useState<number | null>(null);
     const [sentTodos, setSentTodos] = useState<Set<number>>(new Set());
     const [selectedForSquash, setSelectedForSquash] = useState<Set<number>>(new Set());
@@ -65,25 +208,35 @@ export default function Analysis() {
         setLoading(true);
         let loaded = 0;
         const runResults: Record<Provider, AnalysisRunApi[]> = {anthropic: [], ollama: []};
-        const todoResults: Record<Provider, AnalysisTodoApi[]> = {anthropic: [], ollama: []};
 
         PROVIDERS.forEach(p => {
-            fetchAnalysisRuns(p, 20).then(data => {
+            fetchAnalysisRuns(p, 100).then(data => {
                 runResults[p] = data ?? [];
-                // Fetch todos for the latest run of this provider
-                const latestRun = runResults[p][0];
-                if (latestRun) {
-                    return fetchAnalysisRunDetail(latestRun.run_id).then(detail => {
-                        todoResults[p] = detail?.todos ?? [];
-                    });
-                }
             }).catch(() => {}).finally(() => {
                 loaded++;
                 if (loaded === PROVIDERS.length) {
                     setRuns(runResults);
-                    setLatestTodos(todoResults);
                     if (runResults.anthropic.length === 0 && runResults.ollama.length > 0) {
                         setActiveProvider('ollama');
+                    }
+                    // Auto-expand the most recent group
+                    for (const p of PROVIDERS) {
+                        const tree = buildRunTree(runResults[p]);
+                        if (tree.length > 0) {
+                            const yr = tree[0];
+                            const expanded = new Set<string>([yr.key]);
+                            if (yr.children.length > 0) {
+                                expanded.add(yr.children[0].key);
+                                if (yr.children[0].children.length > 0) {
+                                    expanded.add(yr.children[0].children[0].key);
+                                    if (yr.children[0].children[0].children.length > 0) {
+                                        expanded.add(yr.children[0].children[0].children[0].key);
+                                    }
+                                }
+                            }
+                            setExpandedGroups(expanded);
+                            break;
+                        }
                     }
                     setLoading(false);
                 }
@@ -91,37 +244,25 @@ export default function Analysis() {
         });
     }, [apiAvailable]);
 
-    const loadRunDetail = (runId: string) => {
+    const toggleGroup = useCallback((key: string) => {
+        setExpandedGroups(prev => {
+            const next = new Set(prev);
+            next.has(key) ? next.delete(key) : next.add(key);
+            return next;
+        });
+    }, []);
+
+    const loadRunDetail = useCallback((runId: string) => {
         setLoadingDetail(true);
         setExpandedTodo(null);
         fetchAnalysisRunDetail(runId).then(data => {
             setRunDetail(data ?? null);
         }).finally(() => setLoadingDetail(false));
-    };
+    }, []);
 
     const providerRuns = runs[activeProvider];
-    const latestRun = providerRuns[0] ?? null;
-    const viewingHistorical = runDetail !== null;
-    const todos: AnalysisTodoApi[] = viewingHistorical
-        ? (runDetail.todos || [])
-        : (latestTodos[activeProvider] || []);
-
-    const totalOpen = todos.filter(t => t.status === 'open').length;
-    const totalInProgress = todos.filter(t => t.status === 'in_progress').length;
-    const totalImplemented = todos.filter(t => t.status === 'implemented').length;
-    const totalP1 = todos.filter(t => t.priority === 1).length;
-
-    const filteredTodos = todos.filter(t => {
-        if (filterPriority !== null && t.priority !== filterPriority) return false;
-        if (filterStatus !== null && t.status !== filterStatus) return false;
-        return true;
-    });
-
-    const groupedByPriority = filteredTodos.reduce<Record<number, AnalysisTodoApi[]>>((acc, t) => {
-        if (!acc[t.priority]) acc[t.priority] = [];
-        acc[t.priority].push(t);
-        return acc;
-    }, {});
+    const runTree = buildRunTree(providerRuns);
+    const todos: AnalysisTodoApi[] = runDetail?.todos || [];
 
     const cardClass = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`;
     const textMuted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
@@ -133,9 +274,7 @@ export default function Analysis() {
                 <Nav/>
                 <main className="-mt-24 pb-12">
                     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8 pt-8">
-                        <p className={`text-center py-20 ${textMuted}`}>
-                            Analysis requires VPN connection.
-                        </p>
+                        <p className={`text-center py-20 ${textMuted}`}>Analysis requires VPN connection.</p>
                     </div>
                 </main>
                 <Foot/>
@@ -149,9 +288,7 @@ export default function Analysis() {
                 <Nav/>
                 <main className="-mt-24 pb-12">
                     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8 pt-8">
-                        <p className={`text-center py-20 ${textMuted}`}>
-                            Loading analysis data...
-                        </p>
+                        <p className={`text-center py-20 ${textMuted}`}>Loading analysis data...</p>
                     </div>
                 </main>
                 <Foot/>
@@ -176,6 +313,236 @@ export default function Analysis() {
         );
     }
 
+    // Render a run row (clickable to load detail)
+    const renderRunRow = (run: AnalysisRunApi, indent: number) => {
+        const sc = scopeColors[run.scope || 'hourly'] || scopeColors.hourly;
+        const isActive = runDetail?.run.run_id === run.run_id;
+        return (
+            <div
+                key={run.run_id}
+                onClick={() => loadRunDetail(run.run_id)}
+                className={`flex items-center gap-3 px-3 py-2 cursor-pointer rounded text-sm transition-colors
+                    ${isActive
+                        ? `${isDarkMode ? 'bg-cyan-500/10 ring-1 ring-cyan-500/30' : 'bg-cyan-50 ring-1 ring-cyan-300'}`
+                        : `${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'}`
+                    }`}
+                style={{paddingLeft: `${indent * 16 + 12}px`}}
+            >
+                <span className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text} flex-shrink-0`}>
+                    {(run.scope || 'hourly').charAt(0).toUpperCase() + (run.scope || 'hourly').slice(1)}
+                </span>
+                <span className={`${isActive ? 'text-cyan-400' : textPrimary} flex-1 min-w-0 truncate`}>
+                    {dayjs(run.created_at).format('h:mm A')}
+                </span>
+                <span className={`text-xs ${textMuted} flex-shrink-0`}>
+                    {run.order_count} orders &middot; {run.todo_count} TODOs
+                </span>
+            </div>
+        );
+    };
+
+    // Render a group node (collapsible)
+    const renderGroup = (group: RunGroup, depth: number): JSX.Element => {
+        const isExpanded = expandedGroups.has(group.key);
+        const sc = scopeColors[group.scope] || scopeColors.hourly;
+        const hasContent = group.children.length > 0 || group.hourlyRuns.length > 0;
+        const totalRuns = countRuns(group);
+
+        return (
+            <div key={group.key}>
+                <div
+                    onClick={() => toggleGroup(group.key)}
+                    className={`flex items-center gap-2 px-3 py-2 cursor-pointer rounded text-sm transition-colors
+                        ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'}`}
+                    style={{paddingLeft: `${depth * 16 + 12}px`}}
+                >
+                    {hasContent && (
+                        <svg className={`w-4 h-4 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''} ${textMuted}`}
+                             fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                        </svg>
+                    )}
+                    <span className={`font-medium ${sc.text}`}>{group.label}</span>
+                    {group.run && (
+                        <span
+                            onClick={(e) => { e.stopPropagation(); loadRunDetail(group.run!.run_id); }}
+                            className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text} cursor-pointer hover:opacity-80`}
+                        >
+                            {group.scope} report
+                        </span>
+                    )}
+                    <span className={`text-xs ${textMuted} ml-auto`}>{totalRuns} run{totalRuns !== 1 ? 's' : ''}</span>
+                </div>
+                {isExpanded && (
+                    <div>
+                        {group.children.map(child => renderGroup(child, depth + 1))}
+                        {group.hourlyRuns.map(run => renderRunRow(run, depth + 1))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Render a TODO card
+    const renderTodoCard = (todo: AnalysisTodoApi) => {
+        const sc = statusColors[todo.status] || statusColors.open;
+        const isExpanded = expandedTodo === todo.id;
+
+        return (
+            <div key={todo.id} className={`${cardClass} transition-all`}>
+                {/* Header row */}
+                <div className="flex items-start justify-between gap-3 cursor-pointer hover:opacity-80"
+                     onClick={() => setExpandedTodo(isExpanded ? null : todo.id)}>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text}`}>
+                                {sc.label}
+                            </span>
+                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${priorityLabels[todo.priority]?.bg || 'bg-gray-500/20'} ${priorityLabels[todo.priority]?.color || 'text-gray-400'}`}>
+                                {priorityLabels[todo.priority]?.label || `P${todo.priority}`}
+                            </span>
+                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                                {categoryLabels[todo.category] || todo.category}
+                            </span>
+                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+                                {todo.complexity}
+                            </span>
+                        </div>
+                        <p className={`mt-1.5 font-medium ${textPrimary}`}>{todo.title}</p>
+                        {!isExpanded && (
+                            <p className={`mt-0.5 text-sm ${textMuted} truncate`}>{todo.expected_impact}</p>
+                        )}
+                    </div>
+                    <svg className={`w-5 h-5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''} ${textMuted}`}
+                         fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
+                    </svg>
+                </div>
+
+                {/* Expanded detail */}
+                {isExpanded && (
+                    <div className={`mt-4 pt-4 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                        <div className="space-y-3 text-sm">
+                            <div>
+                                <p className={`font-medium ${textMuted}`}>Description</p>
+                                <p className={textPrimary}>{todo.description}</p>
+                            </div>
+                            <div>
+                                <p className={`font-medium ${textMuted}`}>Expected Impact</p>
+                                <p className="text-emerald-400">{todo.expected_impact}</p>
+                            </div>
+                            <div>
+                                <p className={`font-medium ${textMuted}`}>Evidence</p>
+                                <p className={textPrimary}>{todo.evidence}</p>
+                            </div>
+                            {todo.affected_files.length > 0 && (
+                                <div>
+                                    <p className={`font-medium ${textMuted}`}>Affected Files</p>
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                        {todo.affected_files.map((f, i) => (
+                                            <code key={i} className={`text-xs px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-700 text-cyan-300' : 'bg-gray-100 text-cyan-700'}`}>
+                                                {f}
+                                            </code>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {todo.mutations && Object.keys(todo.mutations).length > 0 && (
+                                <div className={`mt-3 rounded overflow-hidden border ${isDarkMode ? 'border-slate-600' : 'border-gray-300'}`}>
+                                    <div className={`px-3 py-1.5 text-xs font-medium flex items-center justify-between ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                                        <span>Proposed Changes</span>
+                                        {!todo.recommendation_status && !sentTodos.has(todo.id) && (
+                                            <label className="flex items-center gap-1.5 cursor-pointer" onClick={e => e.stopPropagation()}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedForSquash.has(todo.id)}
+                                                    onChange={() => setSelectedForSquash(prev => {
+                                                        const next = new Set(prev);
+                                                        next.has(todo.id) ? next.delete(todo.id) : next.add(todo.id);
+                                                        return next;
+                                                    })}
+                                                    className="rounded border-gray-500"
+                                                />
+                                                <span className="text-xs">Select for squash</span>
+                                            </label>
+                                        )}
+                                    </div>
+                                    <div className={`font-mono text-xs ${isDarkMode ? 'bg-slate-900' : 'bg-gray-50'}`}>
+                                        {Object.entries(todo.mutations).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => {
+                                            const oldVal = todo.current_values?.[key];
+                                            return (
+                                                <div key={key}>
+                                                    {oldVal != null && (
+                                                        <div className="flex bg-red-500/10 border-l-2 border-red-500">
+                                                            <span className="select-none w-6 text-center text-red-400 py-0.5 flex-shrink-0">-</span>
+                                                            <span className="py-0.5 text-red-300">{key} = {oldVal}</span>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
+                                                        <span className="select-none w-6 text-center text-emerald-400 py-0.5 flex-shrink-0">+</span>
+                                                        <span className="py-0.5 text-emerald-300">{key} = {value}</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className={`px-3 py-2 flex items-center gap-3 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'} border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                        {todo.recommendation_status === 'passed' ? (
+                                            <span className="text-xs font-medium text-emerald-400 bg-emerald-500/20 px-2 py-1 rounded">Backtest Passed</span>
+                                        ) : todo.recommendation_status === 'failed' ? (
+                                            <span className="text-xs font-medium text-red-400 bg-red-500/20 px-2 py-1 rounded">Backtest Failed</span>
+                                        ) : todo.recommendation_status === 'running' ? (
+                                            <span className="text-xs font-medium text-yellow-400 bg-yellow-500/20 px-2 py-1 rounded">Backtest Running...</span>
+                                        ) : todo.recommendation_status === 'queued' ? (
+                                            <span className="text-xs font-medium text-blue-400 bg-blue-500/20 px-2 py-1 rounded">Queued for Backtest</span>
+                                        ) : todo.recommendation_status === 'applied' ? (
+                                            <span className="text-xs font-medium text-cyan-400 bg-cyan-500/20 px-2 py-1 rounded">Applied to Trunk</span>
+                                        ) : sentTodos.has(todo.id) || todo.recommendation_status === 'pending' ? (
+                                            <span className="text-xs text-blue-400">Sent to Optimizer (pending queue)</span>
+                                        ) : (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSendingTodo(todo.id);
+                                                    sendTodoToOptimizer(todo.id).then(() => {
+                                                        setSentTodos(prev => new Set(prev).add(todo.id));
+                                                    }).catch(err => {
+                                                        alert(`Failed: ${err.message || err}`);
+                                                    }).finally(() => setSendingTodo(null));
+                                                }}
+                                                disabled={sendingTodo === todo.id}
+                                                className="px-3 py-1 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {sendingTodo === todo.id ? 'Sending...' : 'Queue for Backtest'}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {todo.status === 'implemented' && (
+                                <div className={`p-3 rounded ${isDarkMode ? 'bg-emerald-500/10' : 'bg-emerald-50'}`}>
+                                    <p className="font-medium text-emerald-400">Implemented</p>
+                                    {todo.implemented_at && (
+                                        <p className={`text-xs ${textMuted}`}>
+                                            {dayjs(todo.implemented_at).format('MMM D, YYYY h:mm A')}
+                                            {todo.implemented_by && ` by ${todo.implemented_by}`}
+                                        </p>
+                                    )}
+                                    {todo.implemented_sha && (
+                                        <code className="text-xs text-cyan-400 mt-1 block">{todo.implemented_sha}</code>
+                                    )}
+                                    {todo.notes && (
+                                        <p className={`text-xs mt-1 ${textMuted}`}>{todo.notes}</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className={`min-h-screen ${isDarkMode ? 'bg-slate-900' : 'bg-gray-100'}`}>
             <Nav/>
@@ -185,15 +552,9 @@ export default function Analysis() {
                     {/* Header */}
                     <div className="mb-6">
                         <h1 className={`text-2xl font-bold ${textPrimary}`}>AI Trade Analysis</h1>
-                        {viewingHistorical ? (
-                            <p className={`mt-1 text-sm ${textMuted}`}>
-                                <span className="text-cyan-400 font-medium">Viewing run {runDetail.run.run_id}</span> &middot; {runDetail.run.provider} / {runDetail.run.model} &middot; {runDetail.run.order_count} orders &middot; {runDetail.todos?.length || 0} recommendations
-                            </p>
-                        ) : latestRun ? (
-                            <p className={`mt-1 text-sm ${textMuted}`}>
-                                Last run: {dayjs(latestRun.created_at).fromNow()} ({latestRun.model}) &middot; {latestRun.order_count} orders analyzed &middot; {latestRun.todo_count} recommendations
-                            </p>
-                        ) : null}
+                        <p className={`mt-1 text-sm ${textMuted}`}>
+                            {providerRuns.length} runs &middot; {activeProvider}
+                        </p>
                     </div>
 
                     {/* Provider Tab Bar */}
@@ -225,349 +586,97 @@ export default function Analysis() {
                         })}
                     </div>
 
-                    {/* Run Detail View */}
-                    {runDetail && (
-                        <div className={`${cardClass} mb-6`}>
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className={`text-lg font-semibold ${textPrimary}`}>
-                                    Run Detail: {runDetail.run.run_id}
-                                </h2>
-                                <button
-                                    onClick={() => { setRunDetail(null); setExpandedTodo(null); }}
-                                    className={`px-3 py-1 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                                >
-                                    Back to Latest
-                                </button>
-                            </div>
-                            <div className={`text-sm ${textMuted} mb-4`}>
-                                <span>{runDetail.run.provider} / {runDetail.run.model}</span>
-                                <span className="mx-2">&middot;</span>
-                                <span>{runDetail.run.order_count} orders</span>
-                                {runDetail.run.data_start && runDetail.run.data_end && (
-                                    <>
-                                        <span className="mx-2">&middot;</span>
-                                        <span>{runDetail.run.data_start} to {runDetail.run.data_end}</span>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Synthesis */}
-                            {runDetail.run.synthesis && (
-                                <div className="mb-4">
-                                    <h3 className={`text-sm font-semibold mb-2 ${textMuted}`}>Executive Summary</h3>
-                                    <div className={`text-sm ${textPrimary} whitespace-pre-wrap`}>{runDetail.run.synthesis}</div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {loadingDetail && (
-                        <div className={`${cardClass} mb-6 text-center`}>
-                            <p className={textMuted}>Loading run detail...</p>
-                        </div>
-                    )}
-
                     {providerRuns.length === 0 ? (
                         <p className={`text-center py-12 ${textMuted}`}>
                             No analysis data for {activeProvider}. Run <code className="font-mono text-cyan-400">swizzley-analyzer --provider {activeProvider}</code> to generate.
                         </p>
                     ) : (
-                        <>
-                            {/* Stat Cards */}
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                                <div className={cardClass}>
-                                    <p className={`text-sm font-medium ${textMuted}`}>Open</p>
-                                    <p className="mt-1 text-2xl font-semibold text-yellow-400">{totalOpen}</p>
-                                </div>
-                                <div className={cardClass}>
-                                    <p className={`text-sm font-medium ${textMuted}`}>In Progress</p>
-                                    <p className="mt-1 text-2xl font-semibold text-blue-400">{totalInProgress}</p>
-                                </div>
-                                <div className={cardClass}>
-                                    <p className={`text-sm font-medium ${textMuted}`}>Implemented</p>
-                                    <p className="mt-1 text-2xl font-semibold text-emerald-400">{totalImplemented}</p>
-                                </div>
-                                <div className={cardClass}>
-                                    <p className={`text-sm font-medium ${textMuted}`}>Critical (P1)</p>
-                                    <p className="mt-1 text-2xl font-semibold text-red-400">{totalP1}</p>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                            {/* Left: Run Tree */}
+                            <div className={`${cardClass} lg:col-span-1 self-start lg:sticky lg:top-4`}>
+                                <h2 className={`text-sm font-semibold mb-3 ${textMuted}`}>Run History</h2>
+                                <div className="space-y-0.5 -mx-2">
+                                    {runTree.map(group => renderGroup(group, 0))}
                                 </div>
                             </div>
 
-                            {/* Filters */}
-                            <div className={`${cardClass} mb-6`}>
-                                <div className="flex flex-wrap gap-2 items-center">
-                                    <span className={`text-sm font-medium ${textMuted} mr-2`}>Filter:</span>
+                            {/* Right: Run Detail + TODOs */}
+                            <div className="lg:col-span-2 space-y-4">
+                                {loadingDetail && (
+                                    <div className={`${cardClass} text-center`}>
+                                        <p className={textMuted}>Loading run detail...</p>
+                                    </div>
+                                )}
 
-                                    {[1, 2, 3, 4, 5].map(p => {
-                                        const pl = priorityLabels[p];
-                                        const active = filterPriority === p;
-                                        return (
-                                            <button
-                                                key={p}
-                                                onClick={() => setFilterPriority(active ? null : p)}
-                                                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors
-                                                    ${active ? `${pl.bg} ${pl.color} ring-1 ring-current` : `${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-600'} hover:opacity-80`}`}
-                                            >
-                                                {pl.label}
-                                            </button>
-                                        );
-                                    })}
+                                {runDetail && (
+                                    <>
+                                        {/* Run Header */}
+                                        <div className={cardClass}>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <h2 className={`text-lg font-semibold ${textPrimary}`}>
+                                                        {(runDetail.run.scope || 'hourly').charAt(0).toUpperCase() + (runDetail.run.scope || 'hourly').slice(1)} Report
+                                                    </h2>
+                                                    {(() => {
+                                                        const rsc = scopeColors[runDetail.run.scope || 'hourly'] || scopeColors.hourly;
+                                                        return (
+                                                            <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${rsc.bg} ${rsc.text}`}>
+                                                                {runDetail.run.scope || 'hourly'}
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                </div>
+                                                <button
+                                                    onClick={() => { setRunDetail(null); setExpandedTodo(null); }}
+                                                    className={`px-3 py-1 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
+                                            <div className={`text-sm ${textMuted} space-y-1`}>
+                                                <p>
+                                                    <span>{runDetail.run.provider} / {runDetail.run.model}</span>
+                                                    <span className="mx-2">&middot;</span>
+                                                    <span>{dayjs(runDetail.run.created_at).format('MMM D, YYYY h:mm A')}</span>
+                                                    <span className="mx-2">&middot;</span>
+                                                    <span>{runDetail.run.order_count} orders</span>
+                                                    <span className="mx-2">&middot;</span>
+                                                    <span>{todos.length} TODOs</span>
+                                                </p>
+                                                {runDetail.run.data_start && runDetail.run.data_end && (
+                                                    <p className="text-xs">
+                                                        Data range: {runDetail.run.data_start} to {runDetail.run.data_end}
+                                                    </p>
+                                                )}
+                                            </div>
 
-                                    <span className={`${textMuted} mx-1`}>|</span>
-
-                                    {['open', 'in_progress', 'implemented', 'wont_fix'].map(s => {
-                                        const sc = statusColors[s];
-                                        const active = filterStatus === s;
-                                        return (
-                                            <button
-                                                key={s}
-                                                onClick={() => setFilterStatus(active ? null : s)}
-                                                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors
-                                                    ${active ? `${sc.bg} ${sc.text} ring-1 ring-current` : `${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-600'} hover:opacity-80`}`}
-                                            >
-                                                {sc.label}
-                                            </button>
-                                        );
-                                    })}
-
-                                    {(filterPriority !== null || filterStatus !== null) && (
-                                        <button
-                                            onClick={() => {
-                                                setFilterPriority(null);
-                                                setFilterStatus(null);
-                                            }}
-                                            className="px-3 py-1 rounded-full text-xs font-medium text-gray-400 hover:text-white"
-                                        >
-                                            Clear
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* TODO List grouped by priority */}
-                            {Object.keys(groupedByPriority).sort((a, b) => Number(a) - Number(b)).map(pStr => {
-                                const p = Number(pStr);
-                                const items = groupedByPriority[p];
-                                const pl = priorityLabels[p] || {label: `P${p}`, color: 'text-gray-400', bg: 'bg-gray-500/20'};
-
-                                return (
-                                    <div key={p} className="mb-6">
-                                        <h2 className={`text-lg font-semibold mb-3 ${pl.color}`}>
-                                            {pl.label}
-                                            <span className={`ml-2 text-sm font-normal ${textMuted}`}>({items.length})</span>
-                                        </h2>
-
-                                        <div className="space-y-2">
-                                            {items.map(todo => {
-                                                const sc = statusColors[todo.status] || statusColors.open;
-                                                const isExpanded = expandedTodo === todo.id;
-
-                                                return (
-                                                    <div key={todo.id}
-                                                         className={`${cardClass} transition-all`}
-                                                    >
-                                                        {/* Header row */}
-                                                        <div className="flex items-start justify-between gap-3 cursor-pointer hover:opacity-80"
-                                                             onClick={() => setExpandedTodo(isExpanded ? null : todo.id)}>
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center gap-2 flex-wrap">
-                                                                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text}`}>
-                                                                        {sc.label}
-                                                                    </span>
-                                                                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-                                                                        {categoryLabels[todo.category] || todo.category}
-                                                                    </span>
-                                                                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
-                                                                        {todo.complexity}
-                                                                    </span>
-                                                                </div>
-                                                                <p className={`mt-1.5 font-medium ${textPrimary}`}>{todo.title}</p>
-                                                                {!isExpanded && (
-                                                                    <p className={`mt-0.5 text-sm ${textMuted} truncate`}>
-                                                                        {todo.expected_impact}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                            <svg className={`w-5 h-5 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''} ${textMuted}`}
-                                                                 fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>
-                                                            </svg>
-                                                        </div>
-
-                                                        {/* Expanded detail */}
-                                                        {isExpanded && (
-                                                            <div className={`mt-4 pt-4 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                                                                <div className="space-y-3 text-sm">
-                                                                    <div>
-                                                                        <p className={`font-medium ${textMuted}`}>Description</p>
-                                                                        <p className={textPrimary}>{todo.description}</p>
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className={`font-medium ${textMuted}`}>Expected Impact</p>
-                                                                        <p className="text-emerald-400">{todo.expected_impact}</p>
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className={`font-medium ${textMuted}`}>Evidence</p>
-                                                                        <p className={textPrimary}>{todo.evidence}</p>
-                                                                    </div>
-                                                                    {todo.affected_files.length > 0 && (
-                                                                        <div>
-                                                                            <p className={`font-medium ${textMuted}`}>Affected Files</p>
-                                                                            <div className="flex flex-wrap gap-1 mt-1">
-                                                                                {todo.affected_files.map((f, i) => (
-                                                                                    <code key={i}
-                                                                                          className={`text-xs px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-700 text-cyan-300' : 'bg-gray-100 text-cyan-700'}`}>
-                                                                                        {f}
-                                                                                    </code>
-                                                                                ))}
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                    {todo.mutations && Object.keys(todo.mutations).length > 0 && (
-                                                                        <div className={`mt-3 rounded overflow-hidden border ${isDarkMode ? 'border-slate-600' : 'border-gray-300'}`}>
-                                                                            <div className={`px-3 py-1.5 text-xs font-medium flex items-center justify-between ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-                                                                                <span>Proposed Changes</span>
-                                                                                {!todo.recommendation_status && !sentTodos.has(todo.id) && (
-                                                                                    <label className="flex items-center gap-1.5 cursor-pointer" onClick={e => e.stopPropagation()}>
-                                                                                        <input
-                                                                                            type="checkbox"
-                                                                                            checked={selectedForSquash.has(todo.id)}
-                                                                                            onChange={() => setSelectedForSquash(prev => {
-                                                                                                const next = new Set(prev);
-                                                                                                next.has(todo.id) ? next.delete(todo.id) : next.add(todo.id);
-                                                                                                return next;
-                                                                                            })}
-                                                                                            className="rounded border-gray-500"
-                                                                                        />
-                                                                                        <span className="text-xs">Select for squash</span>
-                                                                                    </label>
-                                                                                )}
-                                                                            </div>
-                                                                            <div className={`font-mono text-xs ${isDarkMode ? 'bg-slate-900' : 'bg-gray-50'}`}>
-                                                                                {Object.entries(todo.mutations).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => {
-                                                                                    const oldVal = todo.current_values?.[key];
-                                                                                    return (
-                                                                                        <div key={key}>
-                                                                                            {oldVal != null && (
-                                                                                                <div className="flex bg-red-500/10 border-l-2 border-red-500">
-                                                                                                    <span className="select-none w-6 text-center text-red-400 py-0.5 flex-shrink-0">-</span>
-                                                                                                    <span className="py-0.5 text-red-300">{key} = {oldVal}</span>
-                                                                                                </div>
-                                                                                            )}
-                                                                                            <div className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
-                                                                                                <span className="select-none w-6 text-center text-emerald-400 py-0.5 flex-shrink-0">+</span>
-                                                                                                <span className="py-0.5 text-emerald-300">{key} = {value}</span>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    );
-                                                                                })}
-                                                                            </div>
-                                                                            <div className={`px-3 py-2 flex items-center gap-3 ${isDarkMode ? 'bg-slate-800' : 'bg-gray-50'} border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                                                                                {todo.recommendation_status === 'passed' ? (
-                                                                                    <span className="text-xs font-medium text-emerald-400 bg-emerald-500/20 px-2 py-1 rounded">Backtest Passed</span>
-                                                                                ) : todo.recommendation_status === 'failed' ? (
-                                                                                    <span className="text-xs font-medium text-red-400 bg-red-500/20 px-2 py-1 rounded">Backtest Failed</span>
-                                                                                ) : todo.recommendation_status === 'running' ? (
-                                                                                    <span className="text-xs font-medium text-yellow-400 bg-yellow-500/20 px-2 py-1 rounded">Backtest Running...</span>
-                                                                                ) : todo.recommendation_status === 'queued' ? (
-                                                                                    <span className="text-xs font-medium text-blue-400 bg-blue-500/20 px-2 py-1 rounded">Queued for Backtest</span>
-                                                                                ) : todo.recommendation_status === 'applied' ? (
-                                                                                    <span className="text-xs font-medium text-cyan-400 bg-cyan-500/20 px-2 py-1 rounded">Applied to Trunk</span>
-                                                                                ) : sentTodos.has(todo.id) || todo.recommendation_status === 'pending' ? (
-                                                                                    <span className="text-xs text-blue-400">Sent to Optimizer (pending queue)</span>
-                                                                                ) : (
-                                                                                    <button
-                                                                                        onClick={(e) => {
-                                                                                            e.stopPropagation();
-                                                                                            setSendingTodo(todo.id);
-                                                                                            sendTodoToOptimizer(todo.id).then(() => {
-                                                                                                setSentTodos(prev => new Set(prev).add(todo.id));
-                                                                                            }).catch(err => {
-                                                                                                alert(`Failed: ${err.message || err}`);
-                                                                                            }).finally(() => setSendingTodo(null));
-                                                                                        }}
-                                                                                        disabled={sendingTodo === todo.id}
-                                                                                        className="px-3 py-1 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                                    >
-                                                                                        {sendingTodo === todo.id ? 'Sending...' : 'Queue for Backtest'}
-                                                                                    </button>
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-                                                                    {todo.status === 'implemented' && (
-                                                                        <div className={`p-3 rounded ${isDarkMode ? 'bg-emerald-500/10' : 'bg-emerald-50'}`}>
-                                                                            <p className="font-medium text-emerald-400">Implemented</p>
-                                                                            {todo.implemented_at && (
-                                                                                <p className={`text-xs ${textMuted}`}>
-                                                                                    {dayjs(todo.implemented_at).format('MMM D, YYYY h:mm A')}
-                                                                                    {todo.implemented_by && ` by ${todo.implemented_by}`}
-                                                                                </p>
-                                                                            )}
-                                                                            {todo.implemented_sha && (
-                                                                                <code className="text-xs text-cyan-400 mt-1 block">{todo.implemented_sha}</code>
-                                                                            )}
-                                                                            {todo.notes && (
-                                                                                <p className={`text-xs mt-1 ${textMuted}`}>{todo.notes}</p>
-                                                                            )}
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
+                                            {runDetail.run.synthesis && (
+                                                <div className={`mt-4 pt-4 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                    <h3 className={`text-sm font-semibold mb-2 ${textMuted}`}>Executive Summary</h3>
+                                                    <div className={`text-sm ${textPrimary} whitespace-pre-wrap`}>{runDetail.run.synthesis}</div>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                );
-                            })}
 
-                            {filteredTodos.length === 0 && (
-                                <p className={`text-center py-12 ${textMuted}`}>
-                                    No TODO items match the current filters.
-                                </p>
-                            )}
+                                        {/* TODOs */}
+                                        {todos.length > 0 && (
+                                            <div className="space-y-2">
+                                                {todos
+                                                    .sort((a, b) => a.priority - b.priority)
+                                                    .map(todo => renderTodoCard(todo))}
+                                            </div>
+                                        )}
+                                    </>
+                                )}
 
-                            {/* Run History */}
-                            {providerRuns.length > 0 && (
-                                <div className={`${cardClass} mt-8`}>
-                                    <h2 className={`text-lg font-semibold mb-3 ${textPrimary}`}>Run History</h2>
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-sm">
-                                            <thead>
-                                            <tr className={textMuted}>
-                                                <th className="text-left py-2 pr-4">Run ID</th>
-                                                <th className="text-left py-2 pr-4">Date</th>
-                                                <th className="text-left py-2 pr-4">Provider</th>
-                                                <th className="text-left py-2 pr-4">Model</th>
-                                                <th className="text-right py-2 pr-4">Orders</th>
-                                                <th className="text-right py-2">TODOs</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            {providerRuns.map((run, i) => (
-                                                <tr key={run.run_id}
-                                                    onClick={() => loadRunDetail(run.run_id)}
-                                                    className={`cursor-pointer ${i === 0 ? 'text-cyan-400' : textPrimary} border-t ${isDarkMode ? 'border-slate-700 hover:bg-slate-700/50' : 'border-gray-200 hover:bg-gray-50'}`}>
-                                                    <td className="py-2 pr-4 font-mono text-xs">{run.run_id}</td>
-                                                    <td className="py-2 pr-4">{dayjs(run.created_at).format('MMM D, YYYY h:mm A')}</td>
-                                                    <td className="py-2 pr-4">
-                                                        <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-                                                            {run.provider || activeProvider}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-2 pr-4">{run.model.replace('claude-', '').replace(/-\d+$/, '')}</td>
-                                                    <td className="py-2 pr-4 text-right">{run.order_count}</td>
-                                                    <td className="py-2 text-right">{run.todo_count}</td>
-                                                </tr>
-                                            ))}
-                                            </tbody>
-                                        </table>
+                                {!runDetail && !loadingDetail && (
+                                    <div className={`${cardClass} text-center py-12`}>
+                                        <p className={textMuted}>Select a run from the tree to view its report and recommendations.</p>
                                     </div>
-                                </div>
-                            )}
-                        </>
+                                )}
+                            </div>
+                        </div>
                     )}
 
                 </div>
@@ -625,4 +734,12 @@ export default function Analysis() {
             )}
         </div>
     );
+}
+
+function countRuns(group: RunGroup): number {
+    let n = group.hourlyRuns.length + (group.run ? 1 : 0);
+    for (const child of group.children) {
+        n += countRuns(child);
+    }
+    return n;
 }
