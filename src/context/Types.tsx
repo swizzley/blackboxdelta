@@ -426,6 +426,20 @@ export interface OptimizerTrunk {
     promoted_from_branch_id?: number;
 }
 
+export interface OptimizerTrunkDetail {
+    trunk: OptimizerTrunk;
+    params: Record<string, string>;
+    diffs: OptimizerParamDiff[];
+    directive?: string;
+}
+
+export interface OptimizerParamDiff {
+    key: string;
+    old_value?: string;
+    new_value?: string;
+    removed?: boolean;
+}
+
 export interface OptimizerResult {
     total_trades: number;
     win_rate: number;

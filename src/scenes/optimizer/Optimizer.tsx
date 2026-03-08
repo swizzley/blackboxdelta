@@ -6,13 +6,14 @@ import {useApi} from '../../context/Api';
 import {
     fetchOptimizerStatus, fetchOptimizerGenerations,
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
-    fetchOptimizerBranches,
+    fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     queueRecommendation, skipRecommendation,
     applyRecommendation, pushTrunk, revertTrunk,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
     OptimizerRecommendation, OptimizerResult, OptimizerBranch,
+    OptimizerTrunkDetail,
 } from '../../context/Types';
 import {
     BeakerIcon, ArrowTrendingUpIcon, ClockIcon,
@@ -62,7 +63,6 @@ export default function Optimizer() {
     const iconCl = 'w-5 h-5 text-cyan-500';
     const thCl = `text-left text-xs font-medium uppercase tracking-wider ${muted}`;
     const tdCl = `text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`;
-    const rowBg = isDarkMode ? 'even:bg-slate-700/30' : 'even:bg-gray-50';
 
     return (
         <>
@@ -117,65 +117,10 @@ export default function Optimizer() {
                                 {trunks.length === 0 ? (
                                     <p className={`text-sm ${muted}`}>No trunks recorded</p>
                                 ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead>
-                                                <tr className="border-b border-gray-700/30">
-                                                    <th className={`${thCl} pb-2 pr-4`}>ID</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Gen</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>AI Score</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Sharpe</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>PF</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Win Rate</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>P&L</th>
-                                                    <th className={`${thCl} pb-2 pr-4`}>Promoted</th>
-                                                    <th className={`${thCl} pb-2`}>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {trunks.map(t => (
-                                                    <tr key={t.id} className={rowBg}>
-                                                        <td className={`${tdCl} py-2 pr-4 font-mono`}>{t.id}</td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>{t.generation}</td>
-                                                        <td className={`${tdCl} py-2 pr-4 font-semibold`}>{t.ai_score}</td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>{t.oos_result?.sharpe_ratio?.toFixed(2) ?? '—'}</td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>{t.oos_result?.profit_factor?.toFixed(2) ?? '—'}</td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>{t.oos_result?.win_rate ? `${(t.oos_result.win_rate * 100).toFixed(0)}%` : '—'}</td>
-                                                        <td className={`${tdCl} py-2 pr-4 ${plColor(t.oos_result?.total_pnl)}`}>{t.oos_result?.total_pnl?.toFixed(2) ?? '—'}</td>
-                                                        <td className={`${tdCl} py-2 pr-4`}>
-                                                            {dayjs(t.promoted_at).fromNow()}
-                                                            {t.pushed_at && (
-                                                                <span className={`ml-1 text-xs ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}
-                                                                      title={`Pushed ${dayjs(t.pushed_at).format('YYYY-MM-DD HH:mm')}`}>
-                                                                    (pushed)
-                                                                </span>
-                                                            )}
-                                                        </td>
-                                                        <td className={`${tdCl} py-2`}>
-                                                            <div className="flex gap-1.5">
-                                                                <button
-                                                                    onClick={async () => { await pushTrunk(t.id); loadData(); }}
-                                                                    disabled={!!t.pushed_at}
-                                                                    className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
-                                                                        t.pushed_at
-                                                                            ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                                            : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
-                                                                    }`}>
-                                                                    Push Live
-                                                                </button>
-                                                                <button
-                                                                    onClick={async () => { await revertTrunk(t.id); loadData(); }}
-                                                                    className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
-                                                                        isDarkMode ? 'bg-amber-900/40 hover:bg-amber-800/60 text-amber-400' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'
-                                                                    }`}>
-                                                                    Revert
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                    <div className="space-y-1">
+                                        {trunks.map(t => (
+                                            <TrunkRow key={t.id} trunk={t} isDarkMode={isDarkMode} muted={muted} onRefresh={loadData}/>
+                                        ))}
                                     </div>
                                 )}
                             </div>
@@ -333,6 +278,142 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
                             </table>
                         </div>
                     )}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function TrunkRow({trunk: t, isDarkMode, muted, onRefresh}: {
+    trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; onRefresh: () => void;
+}) {
+    const [expanded, setExpanded] = useState(false);
+    const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
+
+    const toggle = async () => {
+        if (!expanded && detail === null) {
+            const data = await fetchOptimizerTrunkDetail(t.id);
+            setDetail(data ?? null);
+        }
+        setExpanded(!expanded);
+    };
+
+    const r = t.oos_result;
+
+    return (
+        <div className={`rounded-lg ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+            <button onClick={toggle} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{t.id}</span>
+                    <span className={`text-xs ${muted}`}>Gen {t.generation}</span>
+                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>AI: {t.ai_score}</span>
+                    {r && (
+                        <span className={`text-xs ${muted} hidden sm:inline`}>
+                            Sharpe {r.sharpe_ratio?.toFixed(2)} · PF {r.profit_factor?.toFixed(2)} · {r.win_rate ? `${(r.win_rate * 100).toFixed(0)}%` : '—'}
+                        </span>
+                    )}
+                    {t.pushed_at && (
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
+                        }`}>pushed</span>
+                    )}
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                    <span className={`text-xs ${muted}`}>{dayjs(t.promoted_at).fromNow()}</span>
+                    {expanded
+                        ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/>
+                        : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>
+                    }
+                </div>
+            </button>
+
+            {expanded && (
+                <div className="px-4 pb-4 space-y-4">
+                    {/* OOS Results */}
+                    {r && (
+                        <div>
+                            <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>OOS Results</p>
+                            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="Win%" value={r.win_rate ? `${(r.win_rate * 100).toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="Trades" value={String(r.total_trades)} isDarkMode={isDarkMode}/>
+                                <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Branch directive */}
+                    {detail?.directive && (
+                        <div>
+                            <p className={`text-xs font-medium uppercase tracking-wider mb-1 ${muted}`}>Exploration Directive</p>
+                            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{detail.directive}</p>
+                        </div>
+                    )}
+
+                    {/* Param diffs */}
+                    {detail && detail.diffs.length > 0 && (
+                        <div>
+                            <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
+                                Changes from Previous Trunk ({detail.diffs.length} params)
+                            </p>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b border-gray-700/20">
+                                            <th className={`text-left text-xs font-medium uppercase tracking-wider pb-1.5 pr-4 ${muted}`}>Parameter</th>
+                                            <th className={`text-left text-xs font-medium uppercase tracking-wider pb-1.5 pr-4 ${muted}`}>Old</th>
+                                            <th className={`text-left text-xs font-medium uppercase tracking-wider pb-1.5 ${muted}`}>New</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {detail.diffs.sort((a, b) => a.key.localeCompare(b.key)).map(d => (
+                                            <tr key={d.key} className={isDarkMode ? 'even:bg-slate-600/20' : 'even:bg-gray-50/50'}>
+                                                <td className={`text-xs font-mono py-1 pr-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{d.key}</td>
+                                                <td className={`text-xs font-mono py-1 pr-4 ${d.removed ? 'text-red-500' : (isDarkMode ? 'text-gray-500' : 'text-gray-400')}`}>
+                                                    {d.old_value ?? '—'}
+                                                </td>
+                                                <td className={`text-xs font-mono py-1 ${d.removed ? 'text-red-500 line-through' : 'text-emerald-500 font-semibold'}`}>
+                                                    {d.removed ? 'removed' : d.new_value}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {detail && detail.diffs.length === 0 && (
+                        <p className={`text-sm ${muted}`}>No parameter changes (initial trunk or identical params)</p>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 pt-2 border-t border-gray-700/20">
+                        <button
+                            onClick={async () => { await pushTrunk(t.id); onRefresh(); }}
+                            disabled={!!t.pushed_at}
+                            className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                                t.pushed_at
+                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
+                            }`}>
+                            {t.pushed_at ? `Pushed ${dayjs(t.pushed_at).fromNow()}` : 'Push to Live'}
+                        </button>
+                        <button
+                            onClick={async () => { await revertTrunk(t.id); onRefresh(); }}
+                            className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                                isDarkMode ? 'bg-amber-900/40 hover:bg-amber-800/60 text-amber-400' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'
+                            }`}>
+                            Revert to This
+                        </button>
+                        {t.pushed_at && (
+                            <span className={`text-xs ${muted}`}>
+                                Last pushed {dayjs(t.pushed_at).format('YYYY-MM-DD HH:mm')}
+                            </span>
+                        )}
+                    </div>
                 </div>
             )}
         </div>
