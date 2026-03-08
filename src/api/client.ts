@@ -180,3 +180,33 @@ export function sendTodoToOptimizer(todoId: number): Promise<any> {
 export function squashTodos(todoIds: number[]): Promise<any> {
     return apiPost('/api/analysis/todos/squash', {todo_ids: todoIds});
 }
+
+export interface OllamaModel {
+    name: string;
+    parameter_size: string;
+    family: string;
+    size_gb: number;
+}
+
+export function fetchAnalysisModels(): Promise<OllamaModel[] | null> {
+    return apiFetch('/api/analysis/models');
+}
+
+export interface AnalysisJob {
+    id: string;
+    model: string;
+    provider: string;
+    from: string;
+    to: string;
+    status: string;
+    started_at: string;
+    error?: string;
+}
+
+export function triggerAnalysisRun(model: string, from: string, to: string, provider = 'ollama'): Promise<AnalysisJob | null> {
+    return apiPost('/api/analysis/run', {model, from, to, provider});
+}
+
+export function fetchAnalysisJobs(): Promise<AnalysisJob[] | null> {
+    return apiFetch('/api/analysis/jobs');
+}
