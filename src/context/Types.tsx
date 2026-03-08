@@ -492,6 +492,11 @@ export interface OptimizerBranch {
     sharpe_ratio: number;
     max_drawdown: number;
     failure_reason?: string;
+    is_start?: string;
+    is_end?: string;
+    oos_start?: string;
+    oos_end?: string;
+    param_diffs?: OptimizerParamDiff[];
     created_at: string;
     completed_at?: string;
 }

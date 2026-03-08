@@ -286,7 +286,7 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
                                 </thead>
                                 <tbody>
                                     {branches.map(b => (
-                                        <BranchRow key={b.id} branch={b} isDarkMode={isDarkMode} tdCl={tdCl} winnerId={gen.winner_branch_id}/>
+                                        <BranchRow key={b.id} branch={b} isDarkMode={isDarkMode} tdCl={tdCl} winnerId={gen.winner_branch_id} muted={muted}/>
                                     ))}
                                 </tbody>
                             </table>
@@ -442,7 +442,8 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, onRefresh}: {
     );
 }
 
-function BranchRow({branch: b, isDarkMode, tdCl, winnerId}: {branch: OptimizerBranch; isDarkMode: boolean; tdCl: string; winnerId?: number}) {
+function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: OptimizerBranch; isDarkMode: boolean; tdCl: string; winnerId?: number; muted: string}) {
+    const [expanded, setExpanded] = useState(false);
     const isWinner = winnerId === b.id;
     const rowCls = isWinner
         ? (isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50')
@@ -464,22 +465,109 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId}: {branch: OptimizerBr
     const sharpe = r?.sharpe_ratio ?? b.sharpe_ratio;
     const dd = r?.max_drawdown ?? b.max_drawdown;
 
+    // Compute duration
+    const durationStr = b.created_at && b.completed_at
+        ? (() => {
+            const ms = dayjs(b.completed_at).diff(dayjs(b.created_at));
+            if (ms < 60_000) return `${Math.round(ms / 1000)}s`;
+            if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m`;
+            const h = Math.floor(ms / 3_600_000);
+            const m = Math.round((ms % 3_600_000) / 60_000);
+            return `${h}h ${m}m`;
+        })()
+        : null;
+
+    const dateRange = (start?: string, end?: string) => {
+        if (!start || !end) return null;
+        return `${dayjs(start).format('YYYY-MM-DD')} → ${dayjs(end).format('YYYY-MM-DD')}`;
+    };
+
     return (
-        <tr className={rowCls}>
-            <td className={`${tdCl} py-1.5 pr-3 font-mono`}>
-                {isWinner && <span className="text-emerald-500 mr-1" title="Winner">★</span>}
-                {b.id}
-            </td>
-            <td className={`text-xs font-medium py-1.5 pr-3 ${statusCls}`}>{b.status}{b.failure_reason ? `: ${b.failure_reason}` : ''}</td>
-            <td className={`${tdCl} py-1.5 pr-3`}>{trades || '—'}</td>
-            <td className={`${tdCl} py-1.5 pr-3`}>{winRate ? `${(winRate * 100).toFixed(0)}%` : '—'}</td>
-            <td className={`${tdCl} py-1.5 pr-3`}>{pf ? pf.toFixed(2) : '—'}</td>
-            <td className={`${tdCl} py-1.5 pr-3`}>{sharpe ? sharpe.toFixed(2) : '—'}</td>
-            <td className={`${tdCl} py-1.5 pr-3`}>{dd ? dd.toFixed(4) : '—'}</td>
-            <td className={`${tdCl} py-1.5 text-xs truncate max-w-[200px]`} title={b.exploration_directive}>
-                {b.exploration_directive || '—'}
-            </td>
-        </tr>
+        <>
+            <tr className={`${rowCls} cursor-pointer`} onClick={() => setExpanded(!expanded)}>
+                <td className={`${tdCl} py-1.5 pr-3 font-mono`}>
+                    {isWinner && <span className="text-emerald-500 mr-1" title="Winner">★</span>}
+                    {b.id}
+                </td>
+                <td className={`text-xs font-medium py-1.5 pr-3 ${statusCls}`}>{b.status}</td>
+                <td className={`${tdCl} py-1.5 pr-3`}>{trades || '—'}</td>
+                <td className={`${tdCl} py-1.5 pr-3`}>{winRate ? `${(winRate * 100).toFixed(0)}%` : '—'}</td>
+                <td className={`${tdCl} py-1.5 pr-3`}>{pf ? pf.toFixed(2) : '—'}</td>
+                <td className={`${tdCl} py-1.5 pr-3`}>{sharpe ? sharpe.toFixed(2) : '—'}</td>
+                <td className={`${tdCl} py-1.5 pr-3`}>{dd ? dd.toFixed(4) : '—'}</td>
+                <td className={`${tdCl} py-1.5 text-xs truncate max-w-[200px]`} title={b.exploration_directive}>
+                    {b.exploration_directive || '—'}
+                    {expanded
+                        ? <ChevronUpIcon className={`w-3 h-3 inline ml-1 ${muted}`}/>
+                        : <ChevronDownIcon className={`w-3 h-3 inline ml-1 ${muted}`}/>
+                    }
+                </td>
+            </tr>
+            {expanded && (
+                <tr className={rowCls}>
+                    <td colSpan={8} className="px-3 pb-3 pt-1">
+                        <div className="space-y-3">
+                            {/* Meta row: duration, date ranges */}
+                            <div className="flex flex-wrap gap-4 text-xs">
+                                {durationStr && (
+                                    <span className={muted}>Duration: <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{durationStr}</span></span>
+                                )}
+                                {dateRange(b.is_start, b.is_end) && (
+                                    <span className={muted}>IS: <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{dateRange(b.is_start, b.is_end)}</span></span>
+                                )}
+                                {dateRange(b.oos_start, b.oos_end) && (
+                                    <span className={muted}>OOS: <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{dateRange(b.oos_start, b.oos_end)}</span></span>
+                                )}
+                            </div>
+
+                            {/* Failure reason */}
+                            {b.failure_reason && (
+                                <div className="text-xs text-red-400 font-mono">{b.failure_reason}</div>
+                            )}
+
+                            {/* IS + OOS results side by side */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {b.is_result && (
+                                    <ResultBlock label="In-Sample" result={b.is_result} isDarkMode={isDarkMode} muted={muted}/>
+                                )}
+                                {b.oos_result && (
+                                    <ResultBlock label="Out-of-Sample" result={b.oos_result} isDarkMode={isDarkMode} muted={muted}/>
+                                )}
+                            </div>
+
+                            {/* Param diffs */}
+                            {b.param_diffs && b.param_diffs.length > 0 && (
+                                <div>
+                                    <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
+                                        Mutations ({b.param_diffs.length} params)
+                                    </p>
+                                    <div className={`rounded-lg overflow-hidden border ${isDarkMode ? 'border-slate-600 bg-slate-900' : 'border-gray-300 bg-gray-950'}`}>
+                                        <div className="overflow-x-auto">
+                                            {b.param_diffs.sort((a, b) => a.key.localeCompare(b.key)).map(d => (
+                                                <div key={d.key}>
+                                                    {d.old_value != null && (
+                                                        <div className="flex bg-red-500/10 border-l-2 border-red-500">
+                                                            <span className="select-none w-6 text-center text-red-400 text-xs font-mono py-0.5 flex-shrink-0">-</span>
+                                                            <span className="text-xs font-mono py-0.5 text-red-300">{d.key} = {d.old_value}</span>
+                                                        </div>
+                                                    )}
+                                                    {!d.removed && (
+                                                        <div className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
+                                                            <span className="select-none w-6 text-center text-emerald-400 text-xs font-mono py-0.5 flex-shrink-0">+</span>
+                                                            <span className="text-xs font-mono py-0.5 text-emerald-300">{d.key} = {d.new_value}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </td>
+                </tr>
+            )}
+        </>
     );
 }
 
