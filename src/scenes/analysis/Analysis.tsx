@@ -7,7 +7,8 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import type {AnalysisRunApi, AnalysisTodoApi, AnalysisRunDetailApi} from '../../context/Types';
-import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer, squashTodos} from '../../api/client';
+import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer, squashTodos,
+    fetchAnalysisModels, triggerAnalysisRun, fetchAnalysisJobs, type OllamaModel, type AnalysisJob} from '../../api/client';
 
 dayjs.extend(relativeTime);
 dayjs.extend(isoWeek);
@@ -202,6 +203,61 @@ export default function Analysis() {
     const [sentTodos, setSentTodos] = useState<Set<number>>(new Set());
     const [selectedForSquash, setSelectedForSquash] = useState<Set<number>>(new Set());
     const [squashing, setSquashing] = useState(false);
+
+    // Ad-hoc run controls
+    const [models, setModels] = useState<OllamaModel[]>([]);
+    const [selectedModel, setSelectedModel] = useState('');
+    const [runFrom, setRunFrom] = useState(dayjs().subtract(1, 'day').format('YYYY-MM-DD'));
+    const [runTo, setRunTo] = useState(dayjs().subtract(1, 'day').format('YYYY-MM-DD'));
+    const [runningJob, setRunningJob] = useState<AnalysisJob | null>(null);
+
+    // Load models
+    useEffect(() => {
+        if (!apiAvailable) return;
+        fetchAnalysisModels().then(data => {
+            if (data) {
+                setModels(data);
+                if (!selectedModel && data.length > 0) {
+                    // Default to qwen2.5:14b if available, otherwise first
+                    const def = data.find(m => m.name === 'qwen2.5:14b');
+                    setSelectedModel(def ? def.name : data[0].name);
+                }
+            }
+        });
+    }, [apiAvailable]);
+
+    // Poll for job completion
+    useEffect(() => {
+        if (!runningJob || runningJob.status !== 'running') return;
+        const interval = setInterval(() => {
+            fetchAnalysisJobs().then(jobs => {
+                const j = jobs?.find(j => j.id === runningJob.id);
+                if (j && j.status !== 'running') {
+                    setRunningJob(j);
+                    // Reload runs on completion
+                    if (j.status === 'completed') {
+                        reloadRuns();
+                    }
+                }
+            });
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [runningJob]);
+
+    const reloadRuns = useCallback(() => {
+        const runResults: Record<Provider, AnalysisRunApi[]> = {anthropic: [], ollama: []};
+        let loaded = 0;
+        PROVIDERS.forEach(p => {
+            fetchAnalysisRuns(p, 100).then(data => {
+                runResults[p] = data ?? [];
+            }).catch(() => {}).finally(() => {
+                loaded++;
+                if (loaded === PROVIDERS.length) {
+                    setRuns(runResults);
+                }
+            });
+        });
+    }, []);
 
     useEffect(() => {
         if (!apiAvailable) return;
@@ -586,9 +642,81 @@ export default function Analysis() {
                         })}
                     </div>
 
-                    {providerRuns.length === 0 ? (
+                    {/* Ad-hoc Run Controls */}
+                    <div className={`${cardClass} mb-6`}>
+                        <div className="flex flex-wrap items-end gap-3">
+                            <div className="flex-1 min-w-[200px]">
+                                <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Model</label>
+                                <select
+                                    value={selectedModel}
+                                    onChange={e => setSelectedModel(e.target.value)}
+                                    disabled={runningJob?.status === 'running'}
+                                    className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                >
+                                    {models.map(m => (
+                                        <option key={m.name} value={m.name}>
+                                            {m.name} ({m.parameter_size}, {m.size_gb.toFixed(1)}GB)
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className={`block text-xs font-medium mb-1 ${textMuted}`}>From</label>
+                                <input
+                                    type="date"
+                                    value={runFrom}
+                                    onChange={e => setRunFrom(e.target.value)}
+                                    disabled={runningJob?.status === 'running'}
+                                    className={`px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                />
+                            </div>
+                            <div>
+                                <label className={`block text-xs font-medium mb-1 ${textMuted}`}>To</label>
+                                <input
+                                    type="date"
+                                    value={runTo}
+                                    onChange={e => setRunTo(e.target.value)}
+                                    disabled={runningJob?.status === 'running'}
+                                    className={`px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                />
+                            </div>
+                            <div>
+                                {runningJob?.status === 'running' ? (
+                                    <div className="px-4 py-1.5 rounded text-sm font-medium bg-yellow-500/20 text-yellow-400 flex items-center gap-2">
+                                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                        </svg>
+                                        Running ({runningJob.model})...
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            triggerAnalysisRun(selectedModel, runFrom, runTo).then(job => {
+                                                if (job) setRunningJob(job);
+                                            }).catch(err => alert(`Failed: ${err.message || err}`));
+                                        }}
+                                        disabled={!selectedModel || !runFrom || !runTo}
+                                        className="px-4 py-1.5 rounded text-sm font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Run Analysis
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                        {runningJob && runningJob.status !== 'running' && (
+                            <div className={`mt-2 text-xs ${runningJob.status === 'completed' ? 'text-emerald-400' : 'text-red-400'}`}>
+                                {runningJob.status === 'completed'
+                                    ? `Completed: ${runningJob.model} (${runningJob.from} to ${runningJob.to})`
+                                    : `Failed: ${runningJob.error || 'unknown error'}`
+                                }
+                            </div>
+                        )}
+                    </div>
+
+                    {providerRuns.length === 0 && !runningJob ? (
                         <p className={`text-center py-12 ${textMuted}`}>
-                            No analysis data for {activeProvider}. Run <code className="font-mono text-cyan-400">swizzley-analyzer --provider {activeProvider}</code> to generate.
+                            No analysis data for {activeProvider}. Select a model above and click Run Analysis.
                         </p>
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
