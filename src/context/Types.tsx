@@ -502,6 +502,7 @@ export interface AnalysisRunApi {
     created_at: string;
     provider: string;
     model: string;
+    scope: string; // hourly, daily, weekly, monthly, yearly
     order_count: number;
     todo_count: number;
     synthesis: string;
