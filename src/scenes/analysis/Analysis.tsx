@@ -34,6 +34,12 @@ const triggerColors: Record<string, { text: string; bg: string; label: string }>
     'ad-hoc':  {text: 'text-amber-400', bg: 'bg-amber-500/20', label: 'Manual'},
 };
 
+const providerColors: Record<string, { text: string; bg: string; label: string }> = {
+    anthropic: {text: 'text-orange-400', bg: 'bg-orange-500/20', label: 'Claude'},
+    ollama:    {text: 'text-sky-400',    bg: 'bg-sky-500/20',    label: 'Ollama'},
+    hybrid:    {text: 'text-violet-400', bg: 'bg-violet-500/20', label: 'Hybrid'},
+};
+
 const priorityLabels: Record<number, { label: string; color: string; bg: string }> = {
     1: {label: 'P1 Critical', color: 'text-red-400', bg: 'bg-red-500/20'},
     2: {label: 'P2 High', color: 'text-orange-400', bg: 'bg-orange-500/20'},
@@ -280,11 +286,8 @@ function defaultMarketDay(): string {
 export default function Analysis() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
-    const [runs, setRuns] = useState<Record<Provider, AnalysisRunApi[]>>({anthropic: [], ollama: [], hybrid: []});
-    const [activeProvider, setActiveProvider] = useState<Provider>(() => {
-        const hash = window.location.hash.replace('#', '') as Provider;
-        return PROVIDERS.includes(hash as any) ? hash : 'anthropic';
-    });
+    const [allRuns, setAllRuns] = useState<AnalysisRunApi[]>([]);
+    const [runProvider, setRunProvider] = useState<Provider>('hybrid');
     const [loading, setLoading] = useState(true);
     const [runDetail, setRunDetail] = useState<AnalysisRunDetailApi | null>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
@@ -342,14 +345,14 @@ export default function Analysis() {
                 if (j) {
                     setRunningJob(j);
                     if (j.status === 'completed') {
-                        // Reload runs and auto-select the newest one
-                        const provider = (j.provider || activeProvider) as Provider;
-                        fetchAnalysisRuns(provider, 100).then(data => {
-                            if (data && data.length > 0) {
-                                setRuns(prev => ({...prev, [provider]: data}));
-                                loadRunDetail(data[0].run_id);
-                            }
-                        });
+                        // Reload all runs and auto-select the newest one
+                        Promise.all(PROVIDERS.map(p => fetchAnalysisRuns(p, 100)))
+                            .then(results => {
+                                const merged = results.flatMap((r, i) => (r ?? []).map(run => ({...run, provider: run.provider || PROVIDERS[i]})));
+                                merged.sort((a, b) => b.created_at.localeCompare(a.created_at));
+                                setAllRuns(merged);
+                                if (merged.length > 0) loadRunDetail(merged[0].run_id);
+                            });
                     }
                 }
             });
@@ -361,56 +364,33 @@ export default function Analysis() {
     useEffect(() => {
         if (!apiAvailable) return;
         setLoading(true);
-        let loaded = 0;
-        const runResults: Record<Provider, AnalysisRunApi[]> = {anthropic: [], ollama: [], hybrid: []};
+        Promise.all(PROVIDERS.map(p => fetchAnalysisRuns(p, 100).catch(() => null)))
+            .then(results => {
+                const merged = results.flatMap((r, i) => (r ?? []).map(run => ({...run, provider: run.provider || PROVIDERS[i]})));
+                merged.sort((a, b) => b.created_at.localeCompare(a.created_at));
+                setAllRuns(merged);
 
-        PROVIDERS.forEach(p => {
-            fetchAnalysisRuns(p, 100).then(data => {
-                runResults[p] = data ?? [];
-            }).catch(() => {}).finally(() => {
-                loaded++;
-                if (loaded === PROVIDERS.length) {
-                    setRuns(runResults);
-                    // Pick provider: use hash if set, otherwise most recent data
-                    const hash = window.location.hash.replace('#', '') as Provider;
-                    const fromHash = PROVIDERS.includes(hash as any) ? hash : null;
-                    const best = fromHash || PROVIDERS.reduce((a, b) => {
-                        const aRuns = runResults[a];
-                        const bRuns = runResults[b];
-                        if (aRuns.length === 0) return b;
-                        if (bRuns.length === 0) return a;
-                        return aRuns[0].created_at > bRuns[0].created_at ? a : b;
-                    });
-                    setActiveProvider(best);
-                    window.location.hash = best;
-                    // Auto-expand the most recent group and load latest run
-                    for (const p of PROVIDERS) {
-                        const tree = buildRunTree(runResults[p]);
-                        if (tree.length > 0) {
-                            const yr = tree[0];
-                            const expanded = new Set<string>([yr.key]);
-                            if (yr.children.length > 0) {
-                                expanded.add(yr.children[0].key);
-                                if (yr.children[0].children.length > 0) {
-                                    expanded.add(yr.children[0].children[0].key);
-                                    if (yr.children[0].children[0].children.length > 0) {
-                                        expanded.add(yr.children[0].children[0].children[0].key);
-                                    }
-                                }
+                // Auto-expand the most recent group and load latest run
+                const tree = buildRunTree(merged);
+                if (tree.length > 0) {
+                    const yr = tree[0];
+                    const expanded = new Set<string>([yr.key]);
+                    if (yr.children.length > 0) {
+                        expanded.add(yr.children[0].key);
+                        if (yr.children[0].children.length > 0) {
+                            expanded.add(yr.children[0].children[0].key);
+                            if (yr.children[0].children[0].children.length > 0) {
+                                expanded.add(yr.children[0].children[0].children[0].key);
                             }
-                            setExpandedGroups(expanded);
-                            break;
                         }
                     }
-                    // Auto-load the latest run for the active provider
-                    const latestRuns = runResults[best];
-                    if (latestRuns.length > 0) {
-                        loadRunDetail(latestRuns[0].run_id);
-                    }
-                    setLoading(false);
+                    setExpandedGroups(expanded);
                 }
+                if (merged.length > 0) {
+                    loadRunDetail(merged[0].run_id);
+                }
+                setLoading(false);
             });
-        });
     }, [apiAvailable]);
 
     const toggleGroup = useCallback((key: string) => {
@@ -437,8 +417,7 @@ export default function Analysis() {
         }).finally(() => setLoadingCompare(false));
     }, []);
 
-    const providerRuns = runs[activeProvider];
-    const runTree = buildRunTree(providerRuns);
+    const runTree = buildRunTree(allRuns);
     const todos: AnalysisTodoApi[] = runDetail?.todos || [];
 
     const cardClass = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`;
@@ -477,13 +456,14 @@ export default function Analysis() {
     const renderRunRow = (run: AnalysisRunApi, indent: number) => {
         const sc = scopeColors[run.scope || 'hourly'] || scopeColors.hourly;
         const tc = triggerColors[run.trigger || 'ad-hoc'] || triggerColors['ad-hoc'];
+        const pc = providerColors[run.provider] || providerColors.ollama;
         const isActive = runDetail?.run.run_id === run.run_id;
         const isCompare = compareDetail?.run.run_id === run.run_id;
         return (
             <div
                 key={run.run_id}
                 onClick={() => loadRunDetail(run.run_id)}
-                className={`flex items-center gap-2 px-3 py-2 cursor-pointer rounded text-sm transition-colors
+                className={`flex items-center gap-1.5 px-3 py-2 cursor-pointer rounded text-sm transition-colors
                     ${isActive
                         ? `${isDarkMode ? 'bg-cyan-500/10 ring-1 ring-cyan-500/30' : 'bg-cyan-50 ring-1 ring-cyan-300'}`
                         : isCompare
@@ -492,6 +472,9 @@ export default function Analysis() {
                     }`}
                 style={{paddingLeft: `${indent * 16 + 12}px`}}
             >
+                <span className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${pc.bg} ${pc.text} flex-shrink-0`}>
+                    {pc.label}
+                </span>
                 <span className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text} flex-shrink-0`}>
                     {(run.scope || 'hourly').charAt(0).toUpperCase() + (run.scope || 'hourly').slice(1)}
                 </span>
@@ -502,7 +485,7 @@ export default function Analysis() {
                     {dayjs(run.created_at).format('h:mm A')}
                 </span>
                 <span className={`text-xs ${textMuted} flex-shrink-0`}>
-                    {run.order_count} orders
+                    {run.order_count}
                 </span>
                 {/* Compare button: show when a run is selected and this isn't it */}
                 {runDetail && !isActive && (
@@ -760,44 +743,28 @@ export default function Analysis() {
                     <div className="mb-6">
                         <h1 className={`text-2xl font-bold ${textPrimary}`}>AI Trade Analysis</h1>
                         <p className={`mt-1 text-sm ${textMuted}`}>
-                            {providerRuns.length} runs &middot; {activeProvider}
+                            {allRuns.length} runs
                         </p>
-                    </div>
-
-                    {/* Provider Tab Bar */}
-                    <div className="flex gap-1 mb-6">
-                        {PROVIDERS.map(p => {
-                            const hasData = runs[p].length > 0;
-                            const isActive = activeProvider === p;
-                            return (
-                                <button
-                                    key={p}
-                                    onClick={() => {
-                                        setActiveProvider(p);
-                                        window.location.hash = p;
-                                        setRunDetail(null);
-                                        setCompareDetail(null);
-                                        setExpandedTodo(null);
-                                    }}
-                                    className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
-                                        ${isActive
-                                            ? `${isDarkMode ? 'bg-slate-800 text-cyan-400' : 'bg-white text-cyan-600'} border-b-2 border-cyan-400`
-                                            : `${isDarkMode ? 'bg-slate-700/50 text-gray-400 hover:text-gray-200' : 'bg-gray-200 text-gray-600 hover:text-gray-800'}`
-                                        }`}
-                                >
-                                    {p.charAt(0).toUpperCase() + p.slice(1)}
-                                    {hasData && <span className="ml-1 text-xs opacity-60">({runs[p].length})</span>}
-                                </button>
-                            );
-                        })}
                     </div>
 
                     {/* Ad-hoc Run Controls */}
                     <div className={`${cardClass} mb-6`}>
                         <div className="flex flex-wrap items-end gap-3">
+                            <div className="min-w-[120px]">
+                                <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Provider</label>
+                                <select
+                                    value={runProvider}
+                                    onChange={e => setRunProvider(e.target.value as Provider)}
+                                    className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                >
+                                    {PROVIDERS.map(p => (
+                                        <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <div className="flex-1 min-w-[200px]">
                                 <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Model</label>
-                                {activeProvider === 'anthropic' ? (
+                                {runProvider === 'anthropic' ? (
                                     <select
                                         value={selectedModel}
                                         onChange={e => setSelectedModel(e.target.value)}
@@ -814,7 +781,7 @@ export default function Analysis() {
                                     >
                                         {curatedModels(models).map(m => (
                                             <option key={m.name} value={m.name}>
-                                                {activeProvider === 'hybrid' ? `${m.label} + Claude Sonnet` : m.label}
+                                                {runProvider === 'hybrid' ? `${m.label} + Claude Sonnet` : m.label}
                                             </option>
                                         ))}
                                     </select>
@@ -862,7 +829,7 @@ export default function Analysis() {
                                 ) : (
                                     <button
                                         onClick={() => {
-                                            triggerAnalysisRun(selectedModel, runFrom, runTo, activeProvider).then(job => {
+                                            triggerAnalysisRun(selectedModel, runFrom, runTo, runProvider).then(job => {
                                                 if (job) setRunningJob(job);
                                             }).catch(err => alert(`Failed: ${err.message || err}`));
                                         }}
@@ -884,9 +851,9 @@ export default function Analysis() {
                         )}
                     </div>
 
-                    {providerRuns.length === 0 ? (
+                    {allRuns.length === 0 ? (
                         <p className={`text-center py-12 ${textMuted}`}>
-                            No analysis data for {activeProvider}. Select a model above and click Run Analysis.
+                            No analysis data. Select a provider and model above and click Run Analysis.
                         </p>
                     ) : (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
