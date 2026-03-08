@@ -489,6 +489,17 @@ export default function Analysis() {
                 <span className={`text-xs ${textMuted} flex-shrink-0`}>
                     {run.order_count}
                 </span>
+                {run.todo_count > 0 && run.tested_todo_count >= run.todo_count && (
+                    <span className="inline-flex px-1.5 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 flex-shrink-0" title="All TODOs tested">
+                        Tested
+                    </span>
+                )}
+                {run.todo_count > 0 && run.tested_todo_count > 0 && run.tested_todo_count < run.todo_count && (
+                    <span className="inline-flex px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400 flex-shrink-0"
+                          title={`${run.tested_todo_count}/${run.todo_count} TODOs tested`}>
+                        {run.tested_todo_count}/{run.todo_count}
+                    </span>
+                )}
                 {/* Compare button: show when a run is selected and this isn't it */}
                 {runDetail && !isActive && (
                     <button
@@ -1058,6 +1069,16 @@ export default function Analysis() {
                                                     <span>{runDetail.run.order_count} orders</span>
                                                     <span className="mx-2">&middot;</span>
                                                     <span>{todos.length} TODOs</span>
+                                                    {runDetail.run.todo_count > 0 && runDetail.run.tested_todo_count > 0 && (
+                                                        <>
+                                                            <span className="mx-2">&middot;</span>
+                                                            {runDetail.run.tested_todo_count >= runDetail.run.todo_count ? (
+                                                                <span className="text-emerald-400 font-medium">Fully Tested</span>
+                                                            ) : (
+                                                                <span className="text-yellow-400 font-medium">{runDetail.run.tested_todo_count}/{runDetail.run.todo_count} Tested</span>
+                                                            )}
+                                                        </>
+                                                    )}
                                                 </p>
                                                 {runDetail.run.data_start && runDetail.run.data_end && (
                                                     <p className="text-xs">
