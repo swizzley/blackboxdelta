@@ -13,7 +13,7 @@ import {
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
     OptimizerRecommendation, OptimizerResult, OptimizerBranch,
-    OptimizerTrunkDetail,
+    OptimizerTrunkDetail, OptimizerParamDiff,
 } from '../../context/Types';
 import {
     BeakerIcon, ClockIcon,
@@ -141,17 +141,46 @@ export default function Optimizer() {
                                                     <GenerationCard gen={activeGen} isDarkMode={isDarkMode} muted={muted}/>
                                                 </div>
                                             )}
+
+                                            {/* Diff drawer: changes since last push */}
+                                            {trunk && (
+                                                <TrunkDiffDrawer trunkId={trunk.id} isDarkMode={isDarkMode} muted={muted}/>
+                                            )}
+
+                                            {/* Per-timeframe counts */}
+                                            <div className="mt-3 flex gap-4">
+                                                <span className={`text-xs ${muted}`}>{tfTrunks.length} trunk{tfTrunks.length !== 1 ? 's' : ''}</span>
+                                                <span className={`text-xs ${muted}`}>{generations.filter(g => g.timeframe === tf).length} gen{generations.filter(g => g.timeframe === tf).length !== 1 ? 's' : ''}</span>
+                                            </div>
                                         </div>
                                     );
                                 })}
                             </div>
 
-                            {/* Summary stats */}
+                            {/* Verification Queue (Recommendations) */}
                             <div className={`${card} mb-6`}>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <MiniStat label="Total Trunks" value={String(status?.total_trunks ?? 0)} isDarkMode={isDarkMode}/>
-                                    <MiniStat label="Generations" value={String(status?.total_generations ?? 0)} isDarkMode={isDarkMode}/>
-                                </div>
+                                <h2 className={heading}><LightBulbIcon className={iconCl}/>Verification Queue</h2>
+                                {recommendations.length === 0 ? (
+                                    <div className={`text-center py-6 ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'} rounded-lg`}>
+                                        <LightBulbIcon className={`w-8 h-8 mx-auto mb-2 ${isDarkMode ? 'text-gray-600' : 'text-gray-300'}`}/>
+                                        <p className={`text-sm ${muted}`}>No pending recommendations</p>
+                                        <p className={`text-xs ${muted} mt-1`}>Analysis TODOs with parameter mutations will appear here for verification</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {recommendations.map(rec => (
+                                            <RecommendationRow
+                                                key={rec.id}
+                                                rec={rec}
+                                                isDarkMode={isDarkMode}
+                                                muted={muted}
+                                                onQueue={async () => { await queueRecommendation(rec.id); loadData(); }}
+                                                onSkip={async () => { await skipRecommendation(rec.id); loadData(); }}
+                                                onApply={async () => { await applyRecommendation(rec.id); loadData(); }}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Trunk History */}
@@ -196,27 +225,6 @@ export default function Optimizer() {
                                 )}
                             </div>
 
-                            {/* Recommendations */}
-                            <div className={`${card} mb-6`}>
-                                <h2 className={heading}><LightBulbIcon className={iconCl}/>Recommendations</h2>
-                                {recommendations.length === 0 ? (
-                                    <p className={`text-sm ${muted}`}>No recommendations</p>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {recommendations.map(rec => (
-                                            <RecommendationRow
-                                                key={rec.id}
-                                                rec={rec}
-                                                isDarkMode={isDarkMode}
-                                                muted={muted}
-                                                onQueue={async () => { await queueRecommendation(rec.id); loadData(); }}
-                                                onSkip={async () => { await skipRecommendation(rec.id); loadData(); }}
-                                                onApply={async () => { await applyRecommendation(rec.id); loadData(); }}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
                         </>
                     )}
                 </div>
@@ -246,6 +254,75 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
             ) : (
                 <p className={`text-sm ${muted}`}>No OOS result available</p>
             )}
+        </div>
+    );
+}
+
+function TrunkDiffDrawer({trunkId, isDarkMode, muted}: {trunkId: number; isDarkMode: boolean; muted: string}) {
+    const [expanded, setExpanded] = useState(false);
+    const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const toggle = async () => {
+        if (!expanded && detail === null) {
+            setLoading(true);
+            const data = await fetchOptimizerTrunkDetail(trunkId);
+            setDetail(data ?? null);
+            setLoading(false);
+        }
+        setExpanded(!expanded);
+    };
+
+    const diffs = detail?.diffs ?? [];
+
+    return (
+        <div className="mt-2">
+            <button onClick={toggle} className={`flex items-center gap-1.5 text-xs ${muted} hover:${isDarkMode ? 'text-gray-300' : 'text-gray-700'} transition-colors`}>
+                {expanded
+                    ? <ChevronUpIcon className="w-3.5 h-3.5"/>
+                    : <ChevronDownIcon className="w-3.5 h-3.5"/>
+                }
+                {loading ? 'Loading...' : `Changes since last deploy${diffs.length > 0 ? ` (${diffs.length})` : ''}`}
+            </button>
+            {expanded && detail && (
+                <div className="mt-2">
+                    {diffs.length === 0 ? (
+                        <p className={`text-xs ${muted}`}>No parameter changes since {detail.diff_base_id ? `trunk #${detail.diff_base_id}` : 'baseline'}</p>
+                    ) : (
+                        <DiffBlock diffs={diffs} baseId={detail.diff_base_id} isDarkMode={isDarkMode} muted={muted}/>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function DiffBlock({diffs, baseId, isDarkMode, muted}: {diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string}) {
+    return (
+        <div>
+            <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
+                vs {baseId ? `trunk #${baseId}` : 'baseline'} — {diffs.length} param{diffs.length !== 1 ? 's' : ''}
+            </p>
+            <div className={`rounded-lg overflow-hidden border max-h-64 overflow-y-auto ${isDarkMode ? 'border-slate-600 bg-slate-900' : 'border-gray-300 bg-gray-950'}`}>
+                <div className="overflow-x-auto">
+                    {[...diffs].sort((a, b) => a.key.localeCompare(b.key)).map(d => (
+                        <div key={d.key}>
+                            {d.old_value != null && (
+                                <div className="flex bg-red-500/10 border-l-2 border-red-500">
+                                    <span className="select-none w-6 text-center text-red-400 text-xs font-mono py-0.5 flex-shrink-0">-</span>
+                                    <span className="text-xs font-mono py-0.5 text-red-300">{d.key} = {d.old_value}</span>
+                                </div>
+                            )}
+                            {!d.removed && (
+                                <div className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
+                                    <span className="select-none w-6 text-center text-emerald-400 text-xs font-mono py-0.5 flex-shrink-0">+</span>
+                                    <span className="text-xs font-mono py-0.5 text-emerald-300">{d.key} = {d.new_value}</span>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
