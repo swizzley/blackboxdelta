@@ -197,7 +197,7 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="Profit Factor" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="Win Rate" value={r.win_rate ? `${(r.win_rate * 100).toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
+                    <ResultStat label="Win Rate" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
                 </div>
             ) : (
@@ -360,7 +360,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, onRefresh}: {
                             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                 <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                                 <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="Win%" value={r.win_rate ? `${(r.win_rate * 100).toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="Win%" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
                                 <ResultStat label="Trades" value={String(r.total_trades)} isDarkMode={isDarkMode}/>
                                 <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                                 <ResultStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
@@ -492,7 +492,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
                 </td>
                 <td className={`text-xs font-medium py-1.5 pr-3 ${statusCls}`}>{b.status}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{trades || '—'}</td>
-                <td className={`${tdCl} py-1.5 pr-3`}>{winRate ? `${(winRate * 100).toFixed(0)}%` : '—'}</td>
+                <td className={`${tdCl} py-1.5 pr-3`}>{winRate ? `${winRate.toFixed(0)}%` : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{pf ? pf.toFixed(2) : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{sharpe ? sharpe.toFixed(2) : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{dd ? dd.toFixed(4) : '—'}</td>
@@ -672,7 +672,7 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
             <div className="grid grid-cols-3 gap-2">
                 <ResultStat label="Sharpe" value={result.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="PF" value={result.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                <ResultStat label="Win%" value={result.win_rate ? `${(result.win_rate * 100).toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
+                <ResultStat label="Win%" value={result.win_rate ? `${result.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="Trades" value={String(result.total_trades)} isDarkMode={isDarkMode}/>
                 <ResultStat label="Max DD" value={result.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="P&L" value={result.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(result.total_pnl)}/>
