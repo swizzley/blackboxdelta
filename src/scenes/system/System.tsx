@@ -207,7 +207,7 @@ export default function System() {
 
                             {/* Replication Visualization */}
                             {monitor && (
-                                <ReplicationViz replication={monitor.replication} isDarkMode={isDarkMode} card={card} heading={heading} iconCl={iconCl}/>
+                                <ReplicationViz replication={monitor.replication} database={monitor.database} isDarkMode={isDarkMode} card={card} heading={heading} iconCl={iconCl}/>
                             )}
 
                             {/* Infrastructure */}
@@ -357,8 +357,9 @@ function ServerServices({title, services, isDarkMode, muted, card, heading, icon
     );
 }
 
-function ReplicationViz({replication, isDarkMode, card, heading, iconCl}: {
+function ReplicationViz({replication, database, isDarkMode, card, heading, iconCl}: {
     replication?: {status?: string; message?: string; io_running?: boolean; sql_running?: boolean; seconds_behind_source?: number};
+    database?: Record<string, {status?: string}>;
     isDarkMode: boolean; card: string; heading: string; iconCl: string;
 }) {
     const isOk = replication?.status === 'ok';
@@ -367,17 +368,20 @@ function ReplicationViz({replication, isDarkMode, card, heading, iconCl}: {
     const dotColor = isOk ? 'fill-emerald-400' : isBroken ? 'fill-red-500' : 'fill-yellow-400';
     const glowColor = isOk ? 'text-emerald-500' : isBroken ? 'text-red-500' : 'text-yellow-500';
 
+    const cipherDbOk = database?.cipher?.status === 'ok';
+    const genesisDbOk = database?.genesis?.status === 'ok';
+
     return (
         <div className={`${card} mb-6`}>
             <h2 className={heading}><ArrowPathIcon className={iconCl}/>Database Replication</h2>
             <div className="flex items-center justify-center gap-0 py-4">
-                {/* Genesis DB */}
+                {/* Cipher DB (master) */}
                 <div className="flex flex-col items-center gap-2 w-28">
                     <div className={`relative rounded-xl p-3 ${isDarkMode ? 'bg-slate-700/70' : 'bg-gray-100'}`}>
-                        <CircleStackIcon className={`w-10 h-10 ${isOk ? 'text-cyan-500' : isBroken ? 'text-red-500 animate-pulse' : 'text-yellow-500'}`}/>
-                        <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${isOk ? 'bg-emerald-400' : isBroken ? 'bg-red-500 animate-ping' : 'bg-yellow-400 animate-pulse'}`}/>
+                        <CircleStackIcon className={`w-10 h-10 ${cipherDbOk ? 'text-cyan-500' : 'text-red-500 animate-pulse'}`}/>
+                        <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${cipherDbOk ? 'bg-emerald-400' : 'bg-red-500 animate-ping'}`}/>
                     </div>
-                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Genesis</span>
+                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Cipher</span>
                     <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>master</span>
                 </div>
 
@@ -444,13 +448,13 @@ function ReplicationViz({replication, isDarkMode, card, heading, iconCl}: {
                     </p>
                 </div>
 
-                {/* Cipher DB */}
+                {/* Genesis DB (replica) */}
                 <div className="flex flex-col items-center gap-2 w-28">
                     <div className={`relative rounded-xl p-3 ${isDarkMode ? 'bg-slate-700/70' : 'bg-gray-100'}`}>
-                        <CircleStackIcon className={`w-10 h-10 ${isOk ? 'text-cyan-500' : isBroken ? 'text-red-500 animate-pulse' : 'text-yellow-500'}`}/>
-                        <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${isOk ? 'bg-emerald-400' : isBroken ? 'bg-red-500 animate-ping' : 'bg-yellow-400 animate-pulse'}`}/>
+                        <CircleStackIcon className={`w-10 h-10 ${genesisDbOk ? 'text-cyan-500' : 'text-red-500 animate-pulse'}`}/>
+                        <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${genesisDbOk ? 'bg-emerald-400' : 'bg-red-500 animate-ping'}`}/>
                     </div>
-                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Cipher</span>
+                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Genesis</span>
                     <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>replica</span>
                 </div>
             </div>
