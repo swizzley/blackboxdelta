@@ -495,3 +495,39 @@ export interface OptimizerBranch {
     created_at: string;
     completed_at?: string;
 }
+
+// Analysis API types (from /api/analysis/*)
+export interface AnalysisRunApi {
+    run_id: string;
+    created_at: string;
+    provider: string;
+    model: string;
+    order_count: number;
+    todo_count: number;
+    synthesis: string;
+    data_start?: string;
+    data_end?: string;
+}
+
+export interface AnalysisTodoApi {
+    id: number;
+    run_id: string;
+    priority: number;
+    category: string;
+    title: string;
+    description: string;
+    expected_impact: string;
+    evidence: string;
+    affected_files: string[];
+    complexity: string;
+    status: 'open' | 'in_progress' | 'implemented' | 'wont_fix' | 'obsolete';
+    implemented_at?: string;
+    implemented_sha?: string;
+    implemented_by?: string;
+    notes?: string;
+}
+
+export interface AnalysisRunDetailApi {
+    run: AnalysisRunApi;
+    todos: AnalysisTodoApi[];
+}

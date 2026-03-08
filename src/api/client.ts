@@ -4,6 +4,7 @@ import type {
     ApiAlert, ApiMarket, ApiSetting,
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
     OptimizerBranch, OptimizerTrunkDetail,
+    AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
 } from '../context/Types';
 
 const TIMEOUT = 5000;
@@ -150,4 +151,24 @@ export function pushTrunk(id: number): Promise<any> {
 
 export function revertTrunk(id: number): Promise<any> {
     return apiPost(`/api/optimizer/trunks/${id}/revert`);
+}
+
+// Analysis
+export function fetchAnalysisRuns(provider?: string, limit = 20): Promise<AnalysisRunApi[] | null> {
+    const params = new URLSearchParams();
+    if (provider) params.set('provider', provider);
+    params.set('limit', String(limit));
+    return apiFetch(`/api/analysis/runs?${params}`);
+}
+
+export function fetchAnalysisRunDetail(runId: string): Promise<AnalysisRunDetailApi | null> {
+    return apiFetch(`/api/analysis/runs/${runId}`);
+}
+
+export function fetchAnalysisTodos(opts: {run_id?: string; status?: string} = {}): Promise<AnalysisTodoApi[] | null> {
+    const params = new URLSearchParams();
+    if (opts.run_id) params.set('run_id', opts.run_id);
+    if (opts.status) params.set('status', opts.status);
+    const qs = params.toString();
+    return apiFetch(`/api/analysis/todos${qs ? '?' + qs : ''}`);
 }

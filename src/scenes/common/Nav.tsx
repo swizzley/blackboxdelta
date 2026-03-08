@@ -4,9 +4,12 @@ import {Fragment, useState} from "react";
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 
-const navigation = [
+const publicNav = [
     {name: 'Dashboard', href: '/'},
     {name: 'History', href: '/history'},
+];
+
+const vpnNav = [
     {name: 'Analysis', href: '/analysis'},
     {name: 'System', href: '/system'},
     {name: 'Optimizer', href: '/optimizer'},
@@ -80,7 +83,7 @@ export default function Nav() {
                         </div>
                         <div className="hidden border-t border-gray-300 py-5 lg:block">
                             <nav className="flex space-x-4">
-                                {navigation.map((item) => (
+                                {[...publicNav, ...(apiAvailable ? vpnNav : [])].map((item) => (
                                     <a
                                         key={item.name}
                                         href={item.href}
@@ -139,7 +142,7 @@ export default function Nav() {
                                                 </div>
                                             </div>
                                             <div className="mt-3 space-y-1 px-2">
-                                                {navigation.map((item) => (
+                                                {[...publicNav, ...(apiAvailable ? vpnNav : [])].map((item) => (
                                                     <a
                                                         key={item.name}
                                                         href={item.href}
