@@ -189,6 +189,40 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
     return Object.values(yearNodes).sort((a, b) => b.key.localeCompare(a.key));
 }
 
+// Build a Claude Code prompt from a TODO item
+function buildTodoPrompt(todo: AnalysisTodoApi): string {
+    const parts = [
+        `## Analysis Finding: ${todo.title}`,
+        '',
+        `**Priority:** P${todo.priority} | **Category:** ${todo.category} | **Complexity:** ${todo.complexity}`,
+        '',
+        `### Description`,
+        todo.description,
+        '',
+        `### Expected Impact`,
+        todo.expected_impact,
+        '',
+        `### Evidence`,
+        todo.evidence,
+    ];
+    if (todo.affected_files.length > 0) {
+        parts.push('', `### Affected Files`, ...todo.affected_files.map(f => `- ${f}`));
+    }
+    if (todo.mutations && Object.keys(todo.mutations).length > 0) {
+        parts.push('', `### Proposed Parameter Changes`);
+        for (const [k, v] of Object.entries(todo.mutations).sort(([a], [b]) => a.localeCompare(b))) {
+            const old = todo.current_values?.[k];
+            parts.push(`- ${k}: ${old != null ? `${old} → ` : ''}${v}`);
+        }
+    }
+    parts.push(
+        '',
+        '---',
+        'Investigate the files listed above. Implement the changes described, following existing code conventions. Show me what you plan to change before making edits.'
+    );
+    return parts.join('\n');
+}
+
 // Forex market is open Sun 5pm ET – Fri 5pm ET (Mon-Fri UTC, plus Sun evening)
 function defaultMarketDay(): string {
     const now = dayjs();
@@ -217,6 +251,8 @@ export default function Analysis() {
     const [sentTodos, setSentTodos] = useState<Set<number>>(new Set());
     const [selectedForSquash, setSelectedForSquash] = useState<Set<number>>(new Set());
     const [squashing, setSquashing] = useState(false);
+    const [queueingAll, setQueueingAll] = useState(false);
+    const [copiedTodo, setCopiedTodo] = useState<number | null>(null);
 
     // Ad-hoc run controls
     const [models, setModels] = useState<OllamaModel[]>([]);
@@ -513,6 +549,25 @@ export default function Analysis() {
                                             </code>
                                         ))}
                                     </div>
+                                </div>
+                            )}
+                            {/* Copy as Prompt — for code-change TODOs without mutations, or any TODO */}
+                            {(!todo.mutations || Object.keys(todo.mutations).length === 0) && (
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const prompt = buildTodoPrompt(todo);
+                                            navigator.clipboard.writeText(prompt).then(() => {
+                                                setCopiedTodo(todo.id);
+                                                setTimeout(() => setCopiedTodo(null), 2000);
+                                            });
+                                        }}
+                                        className="px-3 py-1 rounded text-xs font-medium bg-purple-600 hover:bg-purple-500 text-white"
+                                    >
+                                        {copiedTodo === todo.id ? 'Copied!' : 'Copy as Prompt'}
+                                    </button>
+                                    <span className={`text-xs ${textMuted}`}>Paste into Claude Code to implement</span>
                                 </div>
                             )}
                             {todo.mutations && Object.keys(todo.mutations).length > 0 && (
@@ -826,6 +881,43 @@ export default function Analysis() {
                                         {/* TODOs */}
                                         {todos.length > 0 && (
                                             <div className="space-y-2">
+                                                {/* Batch actions bar */}
+                                                {(() => {
+                                                    const queueable = todos.filter(t =>
+                                                        t.status === 'open' && t.mutations && Object.keys(t.mutations).length > 0
+                                                        && !sentTodos.has(t.id) && !t.recommendation_status
+                                                    );
+                                                    const codeTodos = todos.filter(t =>
+                                                        t.status === 'open' && (!t.mutations || Object.keys(t.mutations).length === 0)
+                                                    );
+                                                    if (queueable.length === 0 && codeTodos.length === 0) return null;
+                                                    return (
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            {queueable.length > 0 && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setQueueingAll(true);
+                                                                        // Squash all queueable TODOs into one recommendation
+                                                                        const ids = queueable.map(t => t.id);
+                                                                        squashTodos(ids).then(() => {
+                                                                            setSentTodos(prev => {
+                                                                                const next = new Set(prev);
+                                                                                ids.forEach(id => next.add(id));
+                                                                                return next;
+                                                                            });
+                                                                        }).catch(err => {
+                                                                            alert(`Failed: ${err.message || err}`);
+                                                                        }).finally(() => setQueueingAll(false));
+                                                                    }}
+                                                                    disabled={queueingAll}
+                                                                    className="px-3 py-1.5 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    {queueingAll ? 'Queueing...' : `Queue All ${queueable.length} for Backtest`}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()}
                                                 {todos
                                                     .sort((a, b) => a.priority - b.priority)
                                                     .map(todo => renderTodoCard(todo))}
