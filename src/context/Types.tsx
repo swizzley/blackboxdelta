@@ -443,11 +443,15 @@ export interface OptimizerParamDiff {
 
 export interface OptimizerResult {
     total_trades: number;
+    wins: number;
+    losses: number;
     win_rate: number;
-    profit_factor: number;
-    sharpe_ratio: number;
-    max_drawdown: number;
     total_pnl: number;
+    profit_factor: number;
+    avg_win: number;
+    avg_loss: number;
+    max_drawdown: number;
+    sharpe_ratio: number;
 }
 
 export interface OptimizerGeneration {
