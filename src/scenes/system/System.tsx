@@ -332,6 +332,8 @@ function ServerServices({title, services, isDarkMode, muted, card, heading, icon
                             <div className="flex items-center gap-2.5">
                                 {s.status === 'active' ? (
                                     <CheckCircleIcon className="w-5 h-5 text-emerald-500 flex-shrink-0"/>
+                                ) : s.type === 'cli' ? (
+                                    <XCircleIcon className="w-5 h-5 text-gray-400 flex-shrink-0"/>
                                 ) : (
                                     <XCircleIcon className="w-5 h-5 text-red-500 flex-shrink-0"/>
                                 )}

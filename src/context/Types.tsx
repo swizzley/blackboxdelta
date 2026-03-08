@@ -296,6 +296,7 @@ export interface MonitorStatus {
 export interface MonitorServiceInfo {
     name: string;
     status: string;
+    type?: string;
     uptime?: string;
     pid?: number;
     memory_mb?: number;
