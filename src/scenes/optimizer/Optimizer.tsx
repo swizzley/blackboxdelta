@@ -99,10 +99,36 @@ export default function Optimizer() {
 
                                     return (
                                         <div key={tf} className={card}>
-                                            <h2 className={heading}>
-                                                <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
-                                                Trunk
-                                            </h2>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <h2 className={`${heading} !mb-0`}>
+                                                    <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
+                                                    Trunk
+                                                </h2>
+                                                {trunk && (
+                                                    <div className="flex items-center gap-2">
+                                                        {!isUpToDate && (
+                                                            <span className={`text-xs ${muted}`}>
+                                                                {evolutionsSincePush} ev{evolutionsSincePush !== 1 ? 's' : ''}
+                                                            </span>
+                                                        )}
+                                                        {isUpToDate && liveTrunk && (
+                                                            <span className={`text-xs ${muted}`}>
+                                                                {dayjs(liveTrunk.pushed_at).fromNow()}
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            onClick={async () => { await pushTrunk(trunk.id); loadData(); }}
+                                                            disabled={isUpToDate}
+                                                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                                                                isUpToDate
+                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                    : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
+                                                            }`}>
+                                                            {isUpToDate ? 'Up to date' : `Deploy #${trunk.id}`}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
                                             {trunk ? (
                                                 <TrunkCard trunk={trunk} isDarkMode={isDarkMode} muted={muted}/>
                                             ) : (
@@ -113,32 +139,6 @@ export default function Optimizer() {
                                             {activeGen && (
                                                 <div className="mt-3">
                                                     <GenerationCard gen={activeGen} isDarkMode={isDarkMode} muted={muted}/>
-                                                </div>
-                                            )}
-
-                                            {/* Deploy button */}
-                                            {trunk && (
-                                                <div className="mt-3 flex items-center gap-2 flex-wrap">
-                                                    <button
-                                                        onClick={async () => { await pushTrunk(trunk.id); loadData(); }}
-                                                        disabled={isUpToDate}
-                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                                                            isUpToDate
-                                                                ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                                : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
-                                                        }`}>
-                                                        {isUpToDate ? 'Up to date' : `Deploy #${trunk.id}`}
-                                                    </button>
-                                                    {!isUpToDate && (
-                                                        <span className={`text-xs ${muted}`}>
-                                                            {evolutionsSincePush} ev{evolutionsSincePush !== 1 ? 's' : ''}
-                                                        </span>
-                                                    )}
-                                                    {isUpToDate && liveTrunk && (
-                                                        <span className={`text-xs ${muted}`}>
-                                                            {dayjs(liveTrunk.pushed_at).fromNow()}
-                                                        </span>
-                                                    )}
                                                 </div>
                                             )}
                                         </div>
