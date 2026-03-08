@@ -8,7 +8,7 @@ import {
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     queueRecommendation, skipRecommendation,
-    applyRecommendation, pushTrunk, revertTrunk,
+    applyRecommendation, pushTrunk,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -98,6 +98,43 @@ export default function Optimizer() {
                                         <MiniStat label="Consec. Failures" value={String(status?.consecutive_failures ?? 0)} isDarkMode={isDarkMode}
                                                   warn={(status?.consecutive_failures ?? 0) > 3}/>
                                     </div>
+                                    {/* Deploy button */}
+                                    {status?.current_trunk && (() => {
+                                        const currentId = status.current_trunk!.id;
+                                        const liveTrunk = trunks
+                                            .filter(t => t.pushed_at)
+                                            .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime())[0];
+                                        const liveId = liveTrunk?.id;
+                                        const isUpToDate = currentId === liveId;
+                                        const evolutionsSincePush = liveId != null
+                                            ? trunks.filter(t => t.id > liveId && t.id <= currentId).length
+                                            : currentId;
+                                        return (
+                                            <div className="mt-4 flex items-center gap-3">
+                                                <button
+                                                    onClick={async () => { await pushTrunk(currentId); loadData(); }}
+                                                    disabled={isUpToDate}
+                                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                                        isUpToDate
+                                                            ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                            : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
+                                                    }`}>
+                                                    {isUpToDate ? 'Live params up to date' : `Deploy Trunk #${currentId} to Live`}
+                                                </button>
+                                                {!isUpToDate && (
+                                                    <span className={`text-xs ${muted}`}>
+                                                        {evolutionsSincePush} evolution{evolutionsSincePush !== 1 ? 's' : ''} since last deploy
+                                                        {liveTrunk && <> (#{liveId} pushed {dayjs(liveTrunk.pushed_at).fromNow()})</>}
+                                                    </span>
+                                                )}
+                                                {isUpToDate && liveTrunk && (
+                                                    <span className={`text-xs ${muted}`}>
+                                                        Deployed {dayjs(liveTrunk.pushed_at).fromNow()}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
 
                                 {/* Active Generation */}
@@ -132,7 +169,7 @@ export default function Optimizer() {
                                             });
                                             return sorted.map(t => (
                                                 <TrunkRow key={t.id} trunk={t} isDarkMode={isDarkMode} muted={muted}
-                                                          isLive={t.id === liveId} onRefresh={loadData}/>
+                                                          isLive={t.id === liveId}/>
                                             ));
                                         })()}
                                     </div>
@@ -298,8 +335,8 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
     );
 }
 
-function TrunkRow({trunk: t, isDarkMode, muted, isLive, onRefresh}: {
-    trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; isLive: boolean; onRefresh: () => void;
+function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
+    trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; isLive: boolean;
 }) {
     const [expanded, setExpanded] = useState(false);
     const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
@@ -408,35 +445,6 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, onRefresh}: {
                     {detail && (!detail.diffs || detail.diffs.length === 0) && (
                         <p className={`text-sm ${muted}`}>No parameter changes (initial trunk or identical params)</p>
                     )}
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-3 pt-2 border-t border-gray-700/20">
-                        <button
-                            onClick={async () => { await pushTrunk(t.id); onRefresh(); }}
-                            disabled={isLive || t.generation === 0}
-                            className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                                isLive || t.generation === 0
-                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
-                            }`}>
-                            {isLive ? 'Currently Live' : t.generation === 0 ? 'Baseline' : 'Push to Live'}
-                        </button>
-                        <button
-                            onClick={async () => { await revertTrunk(t.id); onRefresh(); }}
-                            disabled={!wasPushed}
-                            className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                                wasPushed
-                                    ? isDarkMode ? 'bg-amber-900/40 hover:bg-amber-800/60 text-amber-400' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'
-                                    : isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}>
-                            Revert to This
-                        </button>
-                        {wasPushed && (
-                            <span className={`text-xs ${muted}`}>
-                                {isLive ? 'Pushed' : 'Last pushed'} {dayjs(t.pushed_at).format('YYYY-MM-DD HH:mm')}
-                            </span>
-                        )}
-                    </div>
                 </div>
             )}
         </div>
