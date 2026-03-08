@@ -13,7 +13,7 @@ import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer, squashTo
 dayjs.extend(relativeTime);
 dayjs.extend(isoWeek);
 
-const PROVIDERS = ['anthropic', 'ollama'] as const;
+const PROVIDERS = ['anthropic', 'ollama', 'hybrid'] as const;
 type Provider = typeof PROVIDERS[number];
 
 const SCOPE_ORDER = ['yearly', 'monthly', 'weekly', 'daily', 'hourly'] as const;
@@ -192,7 +192,7 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
 export default function Analysis() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
-    const [runs, setRuns] = useState<Record<Provider, AnalysisRunApi[]>>({anthropic: [], ollama: []});
+    const [runs, setRuns] = useState<Record<Provider, AnalysisRunApi[]>>({anthropic: [], ollama: [], hybrid: []});
     const [activeProvider, setActiveProvider] = useState<Provider>('anthropic');
     const [loading, setLoading] = useState(true);
     const [runDetail, setRunDetail] = useState<AnalysisRunDetailApi | null>(null);
@@ -245,7 +245,7 @@ export default function Analysis() {
     }, [runningJob]);
 
     const reloadRuns = useCallback(() => {
-        const runResults: Record<Provider, AnalysisRunApi[]> = {anthropic: [], ollama: []};
+        const runResults: Record<Provider, AnalysisRunApi[]> = {anthropic: [], ollama: [], hybrid: []};
         let loaded = 0;
         PROVIDERS.forEach(p => {
             fetchAnalysisRuns(p, 100).then(data => {
@@ -263,7 +263,7 @@ export default function Analysis() {
         if (!apiAvailable) return;
         setLoading(true);
         let loaded = 0;
-        const runResults: Record<Provider, AnalysisRunApi[]> = {anthropic: [], ollama: []};
+        const runResults: Record<Provider, AnalysisRunApi[]> = {anthropic: [], ollama: [], hybrid: []};
 
         PROVIDERS.forEach(p => {
             fetchAnalysisRuns(p, 100).then(data => {
@@ -272,10 +272,18 @@ export default function Analysis() {
                 loaded++;
                 if (loaded === PROVIDERS.length) {
                     setRuns(runResults);
-                    if (runResults.anthropic.length === 0 && runResults.ollama.length > 0) {
-                        setActiveProvider('ollama');
+                    // Pick the provider with the most recent data
+                    const best = PROVIDERS.reduce((a, b) => {
+                        const aRuns = runResults[a];
+                        const bRuns = runResults[b];
+                        if (aRuns.length === 0) return b;
+                        if (bRuns.length === 0) return a;
+                        return aRuns[0].created_at > bRuns[0].created_at ? a : b;
+                    });
+                    if (runResults[best].length > 0) {
+                        setActiveProvider(best);
                     }
-                    // Auto-expand the most recent group
+                    // Auto-expand the most recent group and load latest run
                     for (const p of PROVIDERS) {
                         const tree = buildRunTree(runResults[p]);
                         if (tree.length > 0) {
@@ -293,6 +301,11 @@ export default function Analysis() {
                             setExpandedGroups(expanded);
                             break;
                         }
+                    }
+                    // Auto-load the latest run for the active provider
+                    const latestRuns = runResults[best];
+                    if (latestRuns.length > 0) {
+                        loadRunDetail(latestRuns[0].run_id);
                     }
                     setLoading(false);
                 }
@@ -647,18 +660,43 @@ export default function Analysis() {
                         <div className="flex flex-wrap items-end gap-3">
                             <div className="flex-1 min-w-[200px]">
                                 <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Model</label>
-                                <select
-                                    value={selectedModel}
-                                    onChange={e => setSelectedModel(e.target.value)}
-                                    disabled={runningJob?.status === 'running'}
-                                    className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
-                                >
-                                    {models.map(m => (
-                                        <option key={m.name} value={m.name}>
-                                            {m.name} ({m.parameter_size}, {m.size_gb.toFixed(1)}GB)
-                                        </option>
-                                    ))}
-                                </select>
+                                {activeProvider === 'anthropic' ? (
+                                    <select
+                                        value={selectedModel}
+                                        onChange={e => setSelectedModel(e.target.value)}
+                                        disabled={runningJob?.status === 'running'}
+                                        className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                    >
+                                        <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                                        <option value="claude-opus-4-20250514">Claude Opus 4</option>
+                                    </select>
+                                ) : activeProvider === 'hybrid' ? (
+                                    <select
+                                        value={selectedModel}
+                                        onChange={e => setSelectedModel(e.target.value)}
+                                        disabled={runningJob?.status === 'running'}
+                                        className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                    >
+                                        {models.map(m => (
+                                            <option key={m.name} value={m.name}>
+                                                {m.name} + Claude Sonnet ({m.parameter_size})
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <select
+                                        value={selectedModel}
+                                        onChange={e => setSelectedModel(e.target.value)}
+                                        disabled={runningJob?.status === 'running'}
+                                        className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                    >
+                                        {models.map(m => (
+                                            <option key={m.name} value={m.name}>
+                                                {m.name} ({m.parameter_size}, {m.size_gb.toFixed(1)}GB)
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
                             </div>
                             <div>
                                 <label className={`block text-xs font-medium mb-1 ${textMuted}`}>From</label>
@@ -692,7 +730,7 @@ export default function Analysis() {
                                 ) : (
                                     <button
                                         onClick={() => {
-                                            triggerAnalysisRun(selectedModel, runFrom, runTo).then(job => {
+                                            triggerAnalysisRun(selectedModel, runFrom, runTo, activeProvider).then(job => {
                                                 if (job) setRunningJob(job);
                                             }).catch(err => alert(`Failed: ${err.message || err}`));
                                         }}
@@ -779,12 +817,6 @@ export default function Analysis() {
                                                 )}
                                             </div>
 
-                                            {runDetail.run.synthesis && (
-                                                <div className={`mt-4 pt-4 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                                                    <h3 className={`text-sm font-semibold mb-2 ${textMuted}`}>Executive Summary</h3>
-                                                    <div className={`text-sm ${textPrimary} whitespace-pre-wrap`}>{runDetail.run.synthesis}</div>
-                                                </div>
-                                            )}
                                         </div>
 
                                         {/* TODOs */}
