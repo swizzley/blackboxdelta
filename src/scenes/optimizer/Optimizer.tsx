@@ -16,7 +16,7 @@ import type {
     OptimizerTrunkDetail,
 } from '../../context/Types';
 import {
-    BeakerIcon, ArrowTrendingUpIcon, ClockIcon,
+    BeakerIcon, ClockIcon,
     TableCellsIcon, LightBulbIcon, ChevronDownIcon, ChevronUpIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
