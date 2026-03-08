@@ -408,9 +408,8 @@ export interface ScoreDataPoint {
 
 // Optimizer types
 export interface OptimizerStatus {
-    current_trunk: OptimizerTrunk | null;
-    active_generation: OptimizerGeneration | null;
-    consecutive_failures: number;
+    current_trunks: OptimizerTrunk[];
+    active_generations: OptimizerGeneration[];
     total_generations: number;
     total_trunks: number;
 }
@@ -418,6 +417,7 @@ export interface OptimizerStatus {
 export interface OptimizerTrunk {
     id: number;
     generation: number;
+    timeframe: string;
     param_count?: number;
     oos_result?: OptimizerResult;
     ai_score: number;

@@ -82,69 +82,75 @@ export default function Optimizer() {
                         </div>
                     ) : (
                         <>
-                            {/* Current Trunk + Active Generation */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                {/* Current Trunk */}
-                                <div className={card}>
-                                    <h2 className={heading}><ArrowTrendingUpIcon className={iconCl}/>Current Trunk</h2>
-                                    {status?.current_trunk ? (
-                                        <TrunkCard trunk={status.current_trunk} isDarkMode={isDarkMode} muted={muted}/>
-                                    ) : (
-                                        <p className={`text-sm ${muted}`}>No active trunk</p>
-                                    )}
-                                    <div className="grid grid-cols-3 gap-3 mt-4">
-                                        <MiniStat label="Total Trunks" value={String(status?.total_trunks ?? 0)} isDarkMode={isDarkMode}/>
-                                        <MiniStat label="Generations" value={String(status?.total_generations ?? 0)} isDarkMode={isDarkMode}/>
-                                        <MiniStat label="Consec. Failures" value={String(status?.consecutive_failures ?? 0)} isDarkMode={isDarkMode}
-                                                  warn={(status?.consecutive_failures ?? 0) > 3}/>
-                                    </div>
-                                    {/* Deploy button */}
-                                    {status?.current_trunk && (() => {
-                                        const currentId = status.current_trunk!.id;
-                                        const liveTrunk = trunks
-                                            .filter(t => t.pushed_at)
-                                            .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime())[0];
-                                        const liveId = liveTrunk?.id;
-                                        const isUpToDate = currentId === liveId;
-                                        const evolutionsSincePush = liveId != null
-                                            ? trunks.filter(t => t.id > liveId && t.id <= currentId).length
-                                            : currentId;
-                                        return (
-                                            <div className="mt-4 flex items-center gap-3">
-                                                <button
-                                                    onClick={async () => { await pushTrunk(currentId); loadData(); }}
-                                                    disabled={isUpToDate}
-                                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                                                        isUpToDate
-                                                            ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                            : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
-                                                    }`}>
-                                                    {isUpToDate ? 'Live params up to date' : `Deploy Trunk #${currentId} to Live`}
-                                                </button>
-                                                {!isUpToDate && (
-                                                    <span className={`text-xs ${muted}`}>
-                                                        {evolutionsSincePush} evolution{evolutionsSincePush !== 1 ? 's' : ''} since last deploy
-                                                        {liveTrunk && <> (#{liveId} pushed {dayjs(liveTrunk.pushed_at).fromNow()})</>}
-                                                    </span>
-                                                )}
-                                                {isUpToDate && liveTrunk && (
-                                                    <span className={`text-xs ${muted}`}>
-                                                        Deployed {dayjs(liveTrunk.pushed_at).fromNow()}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        );
-                                    })()}
-                                </div>
+                            {/* Per-Timeframe Trunks */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                {['scalp', 'intraday', 'swing'].map(tf => {
+                                    const trunk = status?.current_trunks?.find(t => t.timeframe === tf);
+                                    const activeGen = status?.active_generations?.find(g => g.timeframe === tf);
+                                    const tfTrunks = trunks.filter(t => t.timeframe === tf);
+                                    const liveTrunk = tfTrunks
+                                        .filter(t => t.pushed_at)
+                                        .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime())[0];
+                                    const liveId = liveTrunk?.id;
+                                    const isUpToDate = trunk ? trunk.id === liveId : true;
+                                    const evolutionsSincePush = liveId != null && trunk
+                                        ? tfTrunks.filter(t => t.id > liveId && t.id <= trunk.id).length
+                                        : trunk?.id ?? 0;
 
-                                {/* Active Generation */}
-                                <div className={card}>
-                                    <h2 className={heading}><BeakerIcon className={iconCl}/>Active Generation</h2>
-                                    {status?.active_generation ? (
-                                        <GenerationCard gen={status.active_generation} isDarkMode={isDarkMode} muted={muted}/>
-                                    ) : (
-                                        <p className={`text-sm ${muted}`}>No generation running</p>
-                                    )}
+                                    return (
+                                        <div key={tf} className={card}>
+                                            <h2 className={heading}>
+                                                <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
+                                                Trunk
+                                            </h2>
+                                            {trunk ? (
+                                                <TrunkCard trunk={trunk} isDarkMode={isDarkMode} muted={muted}/>
+                                            ) : (
+                                                <p className={`text-sm ${muted}`}>No trunk</p>
+                                            )}
+
+                                            {/* Active generation for this timeframe */}
+                                            {activeGen && (
+                                                <div className="mt-3">
+                                                    <GenerationCard gen={activeGen} isDarkMode={isDarkMode} muted={muted}/>
+                                                </div>
+                                            )}
+
+                                            {/* Deploy button */}
+                                            {trunk && (
+                                                <div className="mt-3 flex items-center gap-2 flex-wrap">
+                                                    <button
+                                                        onClick={async () => { await pushTrunk(trunk.id); loadData(); }}
+                                                        disabled={isUpToDate}
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                                                            isUpToDate
+                                                                ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
+                                                        }`}>
+                                                        {isUpToDate ? 'Up to date' : `Deploy #${trunk.id}`}
+                                                    </button>
+                                                    {!isUpToDate && (
+                                                        <span className={`text-xs ${muted}`}>
+                                                            {evolutionsSincePush} ev{evolutionsSincePush !== 1 ? 's' : ''}
+                                                        </span>
+                                                    )}
+                                                    {isUpToDate && liveTrunk && (
+                                                        <span className={`text-xs ${muted}`}>
+                                                            {dayjs(liveTrunk.pushed_at).fromNow()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Summary stats */}
+                            <div className={`${card} mb-6`}>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <MiniStat label="Total Trunks" value={String(status?.total_trunks ?? 0)} isDarkMode={isDarkMode}/>
+                                    <MiniStat label="Generations" value={String(status?.total_generations ?? 0)} isDarkMode={isDarkMode}/>
                                 </div>
                             </div>
 
@@ -360,6 +366,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
             <button onClick={toggle} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{t.id}</span>
+                    <TimeframeBadge tf={t.timeframe} isDarkMode={isDarkMode}/>
                     <span className={`text-xs ${muted}`}>Gen {t.generation}</span>
                     {r && r.total_trades > 0 ? (
                         <span className={`text-xs ${muted} hidden sm:inline`}>

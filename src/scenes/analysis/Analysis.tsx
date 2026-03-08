@@ -96,17 +96,30 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
         hourlyByDay[day].push(r);
     }
 
-    // Build day nodes
+    // Build day nodes — multiple daily runs on the same day become leaf runs
     const dayNodes: Record<string, RunGroup> = {};
-    // First from daily runs
+    const dailyByDay: Record<string, AnalysisRunApi[]> = {};
     for (const r of (byScope['daily'] || [])) {
         const day = r.data_start || dayjs(r.created_at).format('YYYY-MM-DD');
-        dayNodes[day] = {
-            key: day, label: dayjs(day).format('ddd, MMM D'), scope: 'daily',
-            run: r, children: [], hourlyRuns: hourlyByDay[day] || [],
-        };
+        if (!dailyByDay[day]) dailyByDay[day] = [];
+        dailyByDay[day].push(r);
     }
-    // Then from hourly runs that don't have a daily summary
+    for (const [day, dailyRuns] of Object.entries(dailyByDay)) {
+        if (dailyRuns.length === 1) {
+            // Single daily run = summary node for the day
+            dayNodes[day] = {
+                key: day, label: dayjs(day).format('ddd, MMM D'), scope: 'daily',
+                run: dailyRuns[0], children: [], hourlyRuns: hourlyByDay[day] || [],
+            };
+        } else {
+            // Multiple daily runs = all shown as leaf runs alongside hourly
+            dayNodes[day] = {
+                key: day, label: dayjs(day).format('ddd, MMM D'), scope: 'daily',
+                children: [], hourlyRuns: [...dailyRuns, ...(hourlyByDay[day] || [])],
+            };
+        }
+    }
+    // Then from hourly/leaf runs that don't have a daily summary
     for (const [day, hrs] of Object.entries(hourlyByDay)) {
         if (!dayNodes[day]) {
             dayNodes[day] = {
