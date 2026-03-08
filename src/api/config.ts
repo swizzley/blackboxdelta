@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'api_base';
-const DEFAULT_BASE = 'https://cipher.aspendenver.local:8080';
+const DEFAULT_BASE = 'https://cipher.aspendenver.local';
 
 export function getApiBase(): string {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -9,6 +9,12 @@ export function getApiBase(): string {
         const migrated = stored.replace('genesis.aspendenver.local', 'cipher.aspendenver.local');
         localStorage.setItem(STORAGE_KEY, migrated);
         return migrated;
+    }
+    // Strip :8080 port (API now on 443)
+    if (stored.includes(':8080')) {
+        const stripped = stored.replace(':8080', '');
+        localStorage.setItem(STORAGE_KEY, stripped);
+        return stripped;
     }
     // Auto-upgrade stale http:// entries to https://
     if (stored.startsWith('http://') && DEFAULT_BASE.startsWith('https://')) {
