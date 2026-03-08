@@ -280,6 +280,10 @@ export default function Analysis() {
     const [queueingAll, setQueueingAll] = useState(false);
     const [copiedTodo, setCopiedTodo] = useState<number | null>(null);
 
+    // Comparison mode
+    const [compareDetail, setCompareDetail] = useState<AnalysisRunDetailApi | null>(null);
+    const [loadingCompare, setLoadingCompare] = useState(false);
+
     // Ad-hoc run controls
     const [models, setModels] = useState<OllamaModel[]>([]);
     const [selectedModel, setSelectedModel] = useState('');
@@ -408,6 +412,13 @@ export default function Analysis() {
         }).finally(() => setLoadingDetail(false));
     }, []);
 
+    const loadCompareDetail = useCallback((runId: string) => {
+        setLoadingCompare(true);
+        fetchAnalysisRunDetail(runId).then(data => {
+            setCompareDetail(data ?? null);
+        }).finally(() => setLoadingCompare(false));
+    }, []);
+
     const providerRuns = runs[activeProvider];
     const runTree = buildRunTree(providerRuns);
     const todos: AnalysisTodoApi[] = runDetail?.todos || [];
@@ -449,13 +460,16 @@ export default function Analysis() {
         const sc = scopeColors[run.scope || 'hourly'] || scopeColors.hourly;
         const tc = triggerColors[run.trigger || 'ad-hoc'] || triggerColors['ad-hoc'];
         const isActive = runDetail?.run.run_id === run.run_id;
+        const isCompare = compareDetail?.run.run_id === run.run_id;
         return (
             <div
                 key={run.run_id}
                 onClick={() => loadRunDetail(run.run_id)}
-                className={`flex items-center gap-3 px-3 py-2 cursor-pointer rounded text-sm transition-colors
+                className={`flex items-center gap-2 px-3 py-2 cursor-pointer rounded text-sm transition-colors
                     ${isActive
                         ? `${isDarkMode ? 'bg-cyan-500/10 ring-1 ring-cyan-500/30' : 'bg-cyan-50 ring-1 ring-cyan-300'}`
+                        : isCompare
+                        ? `${isDarkMode ? 'bg-purple-500/10 ring-1 ring-purple-500/30' : 'bg-purple-50 ring-1 ring-purple-300'}`
                         : `${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'}`
                     }`}
                 style={{paddingLeft: `${indent * 16 + 12}px`}}
@@ -466,12 +480,33 @@ export default function Analysis() {
                 <span className={`text-xs px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} flex-shrink-0`}>
                     {tc.label}
                 </span>
-                <span className={`${isActive ? 'text-cyan-400' : textPrimary} flex-1 min-w-0 truncate`}>
+                <span className={`${isActive ? 'text-cyan-400' : isCompare ? 'text-purple-400' : textPrimary} flex-1 min-w-0 truncate`}>
                     {dayjs(run.created_at).format('h:mm A')}
                 </span>
                 <span className={`text-xs ${textMuted} flex-shrink-0`}>
-                    {run.order_count} orders &middot; {run.todo_count} TODOs
+                    {run.order_count} orders
                 </span>
+                {/* Compare button: show when a run is selected and this isn't it */}
+                {runDetail && !isActive && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (isCompare) {
+                                setCompareDetail(null);
+                            } else {
+                                loadCompareDetail(run.run_id);
+                            }
+                        }}
+                        className={`px-1.5 py-0.5 rounded text-xs font-medium flex-shrink-0 transition-colors
+                            ${isCompare
+                                ? 'bg-purple-600 text-white'
+                                : `${isDarkMode ? 'bg-slate-700 text-gray-400 hover:bg-purple-600 hover:text-white' : 'bg-gray-200 text-gray-500 hover:bg-purple-500 hover:text-white'}`
+                            }`}
+                        title={isCompare ? 'Remove from comparison' : 'Compare with selected run'}
+                    >
+                        {isCompare ? 'VS' : 'vs'}
+                    </button>
+                )}
             </div>
         );
     };
@@ -723,6 +758,7 @@ export default function Analysis() {
                                         setActiveProvider(p);
                                         window.location.hash = p;
                                         setRunDetail(null);
+                                        setCompareDetail(null);
                                         setExpandedTodo(null);
                                     }}
                                     className={`px-4 py-2 rounded-t-lg text-sm font-medium transition-colors
@@ -845,15 +881,140 @@ export default function Analysis() {
                                 </div>
                             </div>
 
-                            {/* Right: Run Detail + TODOs */}
+                            {/* Right: Run Detail + TODOs (or Comparison View) */}
                             <div className="lg:col-span-2 space-y-4">
-                                {loadingDetail && (
+                                {(loadingDetail || loadingCompare) && (
                                     <div className={`${cardClass} text-center`}>
-                                        <p className={textMuted}>Loading run detail...</p>
+                                        <p className={textMuted}>Loading...</p>
                                     </div>
                                 )}
 
-                                {runDetail && (
+                                {/* Comparison View */}
+                                {runDetail && compareDetail && (
+                                    <>
+                                        {/* Comparison Header */}
+                                        <div className={cardClass}>
+                                            <div className="flex items-center justify-between mb-3">
+                                                <h2 className={`text-lg font-semibold ${textPrimary}`}>Run Comparison</h2>
+                                                <button
+                                                    onClick={() => setCompareDetail(null)}
+                                                    className={`px-3 py-1 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                                >
+                                                    Exit Comparison
+                                                </button>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {[runDetail, compareDetail].map((detail, idx) => {
+                                                    const sc = scopeColors[detail.run.scope || 'hourly'] || scopeColors.hourly;
+                                                    const tc = triggerColors[detail.run.trigger || 'ad-hoc'] || triggerColors['ad-hoc'];
+                                                    const borderColor = idx === 0 ? 'border-cyan-500/30' : 'border-purple-500/30';
+                                                    const labelColor = idx === 0 ? 'text-cyan-400' : 'text-purple-400';
+                                                    return (
+                                                        <div key={detail.run.run_id} className={`p-3 rounded border ${borderColor} ${isDarkMode ? 'bg-slate-900/50' : 'bg-gray-50'}`}>
+                                                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                                                                <span className={`text-xs font-bold ${labelColor}`}>{idx === 0 ? 'A' : 'B'}</span>
+                                                                <span className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text}`}>
+                                                                    {detail.run.scope || 'hourly'}
+                                                                </span>
+                                                                <span className={`text-xs px-1.5 py-0.5 rounded ${tc.bg} ${tc.text}`}>
+                                                                    {tc.label}
+                                                                </span>
+                                                            </div>
+                                                            <p className={`text-sm font-medium ${textPrimary}`}>{detail.run.model}</p>
+                                                            <p className={`text-xs ${textMuted}`}>
+                                                                {dayjs(detail.run.created_at).format('MMM D, h:mm A')}
+                                                                <span className="mx-1">&middot;</span>
+                                                                {detail.run.order_count} orders
+                                                                <span className="mx-1">&middot;</span>
+                                                                {detail.todos.length} TODOs
+                                                            </p>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+
+                                        {/* Side-by-side Syntheses */}
+                                        {(runDetail.run.synthesis || compareDetail.run.synthesis) && (
+                                            <div className={cardClass}>
+                                                <h3 className={`text-sm font-semibold mb-3 ${textMuted}`}>Executive Summary</h3>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    {[runDetail, compareDetail].map((detail, idx) => {
+                                                        const borderColor = idx === 0 ? 'border-l-cyan-500' : 'border-l-purple-500';
+                                                        const labelColor = idx === 0 ? 'text-cyan-400' : 'text-purple-400';
+                                                        return (
+                                                            <div key={detail.run.run_id} className={`border-l-2 ${borderColor} pl-3`}>
+                                                                <p className={`text-xs font-bold mb-2 ${labelColor}`}>
+                                                                    {idx === 0 ? 'A' : 'B'}: {detail.run.model}
+                                                                </p>
+                                                                {detail.run.synthesis ? (
+                                                                    <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''} text-sm`}>
+                                                                        <ReactMarkdown>{detail.run.synthesis}</ReactMarkdown>
+                                                                    </div>
+                                                                ) : (
+                                                                    <p className={`text-sm italic ${textMuted}`}>No synthesis available</p>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Side-by-side TODOs */}
+                                        <div className={cardClass}>
+                                            <h3 className={`text-sm font-semibold mb-3 ${textMuted}`}>TODO Comparison</h3>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {[runDetail, compareDetail].map((detail, idx) => {
+                                                    const borderColor = idx === 0 ? 'border-l-cyan-500' : 'border-l-purple-500';
+                                                    const labelColor = idx === 0 ? 'text-cyan-400' : 'text-purple-400';
+                                                    const dtodos = detail.todos.sort((a, b) => a.priority - b.priority);
+                                                    return (
+                                                        <div key={detail.run.run_id} className={`border-l-2 ${borderColor} pl-3`}>
+                                                            <p className={`text-xs font-bold mb-2 ${labelColor}`}>
+                                                                {idx === 0 ? 'A' : 'B'}: {dtodos.length} TODOs
+                                                            </p>
+                                                            <div className="space-y-2">
+                                                                {dtodos.map(todo => {
+                                                                    const prio = priorityLabels[todo.priority] || {label: `P${todo.priority}`, color: 'text-gray-400', bg: 'bg-gray-500/20'};
+                                                                    return (
+                                                                        <div key={todo.id} className={`p-2 rounded ${isDarkMode ? 'bg-slate-900/50' : 'bg-gray-50'}`}>
+                                                                            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                                                                                <span className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${prio.bg} ${prio.color}`}>
+                                                                                    {prio.label}
+                                                                                </span>
+                                                                                <span className={`inline-flex px-1.5 py-0.5 rounded text-xs ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
+                                                                                    {categoryLabels[todo.category] || todo.category}
+                                                                                </span>
+                                                                            </div>
+                                                                            <p className={`text-sm font-medium ${textPrimary}`}>{todo.title}</p>
+                                                                            <p className={`text-xs mt-0.5 ${textMuted}`}>{todo.expected_impact}</p>
+                                                                            {todo.mutations && Object.keys(todo.mutations).length > 0 && (
+                                                                                <div className={`mt-1.5 font-mono text-xs rounded overflow-hidden ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
+                                                                                    {Object.entries(todo.mutations).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => (
+                                                                                        <div key={key} className="flex bg-emerald-500/10 border-l-2 border-emerald-500 px-1.5 py-0.5">
+                                                                                            <span className="text-emerald-300">{key} = {value}</span>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                                {dtodos.length === 0 && (
+                                                                    <p className={`text-sm italic ${textMuted}`}>No TODOs</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Normal Detail View (no comparison) */}
+                                {runDetail && !compareDetail && (
                                     <>
                                         {/* Run Header */}
                                         <div className={cardClass}>
@@ -878,7 +1039,7 @@ export default function Analysis() {
                                                     })()}
                                                 </div>
                                                 <button
-                                                    onClick={() => { setRunDetail(null); setExpandedTodo(null); }}
+                                                    onClick={() => { setRunDetail(null); setCompareDetail(null); setExpandedTodo(null); }}
                                                     className={`px-3 py-1 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                                                 >
                                                     Close
