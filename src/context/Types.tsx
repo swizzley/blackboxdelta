@@ -516,6 +516,7 @@ export interface AnalysisRunApi {
     trigger: string; // service, api, ad-hoc
     order_count: number;
     todo_count: number;
+    tested_todo_count: number;
     synthesis: string;
     data_start?: string;
     data_end?: string;
