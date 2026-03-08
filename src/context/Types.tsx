@@ -277,7 +277,7 @@ export interface ApiSetting {
     enabled: boolean;
 }
 
-// Monitoring service types (from monitoring-service on genesis:8082)
+// Monitoring service types (from monitoring-service on cipher:8082)
 export interface MonitorStatus {
     timestamp: string;
     market_open: boolean;
