@@ -714,7 +714,7 @@ export default function Analysis() {
                         )}
                     </div>
 
-                    {providerRuns.length === 0 && !runningJob ? (
+                    {providerRuns.length === 0 ? (
                         <p className={`text-center py-12 ${textMuted}`}>
                             No analysis data for {activeProvider}. Select a model above and click Run Analysis.
                         </p>
