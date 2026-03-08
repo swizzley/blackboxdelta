@@ -258,7 +258,14 @@ export default function Analysis() {
                 if (j) {
                     setRunningJob(j);
                     if (j.status === 'completed') {
-                        reloadRuns();
+                        // Reload runs and auto-select the newest one
+                        const provider = (j.provider || activeProvider) as Provider;
+                        fetchAnalysisRuns(provider, 100).then(data => {
+                            if (data && data.length > 0) {
+                                setRuns(prev => ({...prev, [provider]: data}));
+                                loadRunDetail(data[0].run_id);
+                            }
+                        });
                     }
                 }
             });
@@ -266,20 +273,6 @@ export default function Analysis() {
         return () => clearInterval(interval);
     }, [runningJob]);
 
-    const reloadRuns = useCallback(() => {
-        const runResults: Record<Provider, AnalysisRunApi[]> = {anthropic: [], ollama: [], hybrid: []};
-        let loaded = 0;
-        PROVIDERS.forEach(p => {
-            fetchAnalysisRuns(p, 100).then(data => {
-                runResults[p] = data ?? [];
-            }).catch(() => {}).finally(() => {
-                loaded++;
-                if (loaded === PROVIDERS.length) {
-                    setRuns(runResults);
-                }
-            });
-        });
-    }, []);
 
     useEffect(() => {
         if (!apiAvailable) return;
