@@ -223,6 +223,17 @@ function buildTodoPrompt(todo: AnalysisTodoApi): string {
     return parts.join('\n');
 }
 
+// Sort models: recommended first, then by size descending
+function sortedModels(models: OllamaModel[]): OllamaModel[] {
+    return [...models].sort((a, b) => {
+        // Recommended model first
+        if (a.name === 'qwen3:14b') return -1;
+        if (b.name === 'qwen3:14b') return 1;
+        // Then by size descending
+        return b.size_gb - a.size_gb;
+    });
+}
+
 // Forex market is open Sun 5pm ET – Fri 5pm ET (Mon-Fri UTC, plus Sun evening)
 function defaultMarketDay(): string {
     const now = dayjs();
@@ -268,8 +279,8 @@ export default function Analysis() {
             if (data) {
                 setModels(data);
                 if (!selectedModel && data.length > 0) {
-                    // Default to qwen2.5:14b if available, otherwise first
-                    const def = data.find(m => m.name === 'qwen2.5:14b');
+                    // Default to qwen3:14b if available, then qwen2.5:14b, otherwise first
+                    const def = data.find(m => m.name === 'qwen3:14b') || data.find(m => m.name === 'qwen2.5:14b');
                     setSelectedModel(def ? def.name : data[0].name);
                 }
             }
@@ -716,20 +727,20 @@ export default function Analysis() {
                                     <select
                                         value={selectedModel}
                                         onChange={e => setSelectedModel(e.target.value)}
-                                        className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                        className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
                                     >
-                                        <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                                        <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (recommended)</option>
                                         <option value="claude-opus-4-20250514">Claude Opus 4</option>
                                     </select>
                                 ) : activeProvider === 'hybrid' ? (
                                     <select
                                         value={selectedModel}
                                         onChange={e => setSelectedModel(e.target.value)}
-                                        className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                        className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
                                     >
-                                        {models.map(m => (
+                                        {sortedModels(models).map(m => (
                                             <option key={m.name} value={m.name}>
-                                                {m.name} + Claude Sonnet ({m.parameter_size})
+                                                {m.name} + Claude Sonnet ({m.parameter_size}){m.name === 'qwen3:14b' ? ' (recommended)' : ''}
                                             </option>
                                         ))}
                                     </select>
@@ -737,11 +748,11 @@ export default function Analysis() {
                                     <select
                                         value={selectedModel}
                                         onChange={e => setSelectedModel(e.target.value)}
-                                        className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                        className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
                                     >
-                                        {models.map(m => (
+                                        {sortedModels(models).map(m => (
                                             <option key={m.name} value={m.name}>
-                                                {m.name} ({m.parameter_size}, {m.size_gb.toFixed(1)}GB)
+                                                {m.name} ({m.parameter_size}, {m.size_gb.toFixed(1)}GB){m.name === 'qwen3:14b' ? ' (recommended)' : ''}
                                             </option>
                                         ))}
                                     </select>
@@ -753,7 +764,7 @@ export default function Analysis() {
                                     type="date"
                                     value={runFrom}
                                     onChange={e => setRunFrom(e.target.value)}
-                                    className={`px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                    className={`px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
                                 />
                             </div>
                             <div>
@@ -762,7 +773,7 @@ export default function Analysis() {
                                     type="date"
                                     value={runTo}
                                     onChange={e => setRunTo(e.target.value)}
-                                    className={`px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
+                                    className={`px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
                                 />
                             </div>
                             <div>
@@ -876,48 +887,43 @@ export default function Analysis() {
                                                 )}
                                             </div>
 
+                                            {/* Queue All button */}
+                                            {(() => {
+                                                const queueable = todos.filter(t =>
+                                                    t.status === 'open' && t.mutations && Object.keys(t.mutations).length > 0
+                                                    && !sentTodos.has(t.id) && !t.recommendation_status
+                                                );
+                                                if (queueable.length === 0) return null;
+                                                return (
+                                                    <div className={`mt-3 pt-3 border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                        <button
+                                                            onClick={() => {
+                                                                setQueueingAll(true);
+                                                                const ids = queueable.map(t => t.id);
+                                                                squashTodos(ids).then(() => {
+                                                                    setSentTodos(prev => {
+                                                                        const next = new Set(prev);
+                                                                        ids.forEach(id => next.add(id));
+                                                                        return next;
+                                                                    });
+                                                                }).catch(err => {
+                                                                    alert(`Failed: ${err.message || err}`);
+                                                                }).finally(() => setQueueingAll(false));
+                                                            }}
+                                                            disabled={queueingAll}
+                                                            className="px-3 py-1.5 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        >
+                                                            {queueingAll ? 'Queueing...' : `Queue All ${queueable.length} Parameter TODOs for Backtest`}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })()}
+
                                         </div>
 
                                         {/* TODOs */}
                                         {todos.length > 0 && (
                                             <div className="space-y-2">
-                                                {/* Batch actions bar */}
-                                                {(() => {
-                                                    const queueable = todos.filter(t =>
-                                                        t.status === 'open' && t.mutations && Object.keys(t.mutations).length > 0
-                                                        && !sentTodos.has(t.id) && !t.recommendation_status
-                                                    );
-                                                    const codeTodos = todos.filter(t =>
-                                                        t.status === 'open' && (!t.mutations || Object.keys(t.mutations).length === 0)
-                                                    );
-                                                    if (queueable.length === 0 && codeTodos.length === 0) return null;
-                                                    return (
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            {queueable.length > 0 && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setQueueingAll(true);
-                                                                        // Squash all queueable TODOs into one recommendation
-                                                                        const ids = queueable.map(t => t.id);
-                                                                        squashTodos(ids).then(() => {
-                                                                            setSentTodos(prev => {
-                                                                                const next = new Set(prev);
-                                                                                ids.forEach(id => next.add(id));
-                                                                                return next;
-                                                                            });
-                                                                        }).catch(err => {
-                                                                            alert(`Failed: ${err.message || err}`);
-                                                                        }).finally(() => setQueueingAll(false));
-                                                                    }}
-                                                                    disabled={queueingAll}
-                                                                    className="px-3 py-1.5 rounded text-xs font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                >
-                                                                    {queueingAll ? 'Queueing...' : `Queue All ${queueable.length} for Backtest`}
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })()}
                                                 {todos
                                                     .sort((a, b) => a.priority - b.priority)
                                                     .map(todo => renderTodoCard(todo))}
