@@ -430,6 +430,7 @@ export interface OptimizerTrunkDetail {
     trunk: OptimizerTrunk;
     params: Record<string, string>;
     diffs: OptimizerParamDiff[];
+    diff_base_id?: number;
     directive?: string;
 }
 
