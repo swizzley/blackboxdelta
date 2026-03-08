@@ -40,7 +40,7 @@ export default function Optimizer() {
         if (!apiAvailable) return;
         const [s, t, g, r] = await Promise.all([
             fetchOptimizerStatus(),
-            fetchOptimizerTrunks(10),
+            fetchOptimizerTrunks(),
             fetchOptimizerGenerations(20),
             fetchOptimizerRecommendations(),
         ]);
