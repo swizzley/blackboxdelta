@@ -1,4 +1,5 @@
 import {useEffect, useState, useCallback} from 'react';
+import {useNavigate} from 'react-router-dom';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -286,6 +287,7 @@ function defaultMarketDay(): string {
 export default function Analysis() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
+    const navigate = useNavigate();
     const [allRuns, setAllRuns] = useState<AnalysisRunApi[]>([]);
     const [runProvider, setRunProvider] = useState<Provider>('hybrid');
     const [loading, setLoading] = useState(true);
@@ -704,7 +706,7 @@ export default function Analysis() {
                                         ) : todo.recommendation_status === 'applied' ? (
                                             <span className="text-xs font-medium text-cyan-400 bg-cyan-500/20 px-2 py-1 rounded">Applied to Trunk</span>
                                         ) : sentTodos.has(todo.id) || todo.recommendation_status === 'pending' ? (
-                                            <span className="text-xs text-blue-400">Sent to Optimizer (pending queue)</span>
+                                            <span className="text-xs text-blue-400">Queued for backtest</span>
                                         ) : (
                                             <button
                                                 onClick={(e) => {
@@ -712,6 +714,7 @@ export default function Analysis() {
                                                     setSendingTodo(todo.id);
                                                     sendTodoToOptimizer(todo.id).then(() => {
                                                         setSentTodos(prev => new Set(prev).add(todo.id));
+                                                        navigate('/optimizer');
                                                     }).catch(err => {
                                                         alert(`Failed: ${err.message || err}`);
                                                     }).finally(() => setSendingTodo(null));
@@ -1100,6 +1103,7 @@ export default function Analysis() {
                                                                                         ids.forEach(id => next.add(id));
                                                                                         return next;
                                                                                     });
+                                                                                    navigate('/optimizer');
                                                                                 }).catch(err => {
                                                                                     alert(`Failed: ${err.message || err}`);
                                                                                 }).finally(() => setQueueingAll(false));
@@ -1179,6 +1183,7 @@ export default function Analysis() {
                                             return next;
                                         });
                                         setSelectedForSquash(new Set());
+                                        navigate('/optimizer');
                                     }).catch(err => {
                                         alert(`Squash failed: ${err.message || err}`);
                                     }).finally(() => setSquashing(false));
