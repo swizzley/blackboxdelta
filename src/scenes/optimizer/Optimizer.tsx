@@ -375,35 +375,31 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, onRefresh}: {
                         </div>
                     )}
 
-                    {/* Param diffs */}
+                    {/* Param diffs — git-diff style */}
                     {detail && detail.diffs && detail.diffs.length > 0 && (
                         <div>
                             <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
                                 Changes since {detail.diff_base_id ? `trunk #${detail.diff_base_id}` : 'baseline'} ({detail.diffs.length} params)
                             </p>
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead>
-                                        <tr className="border-b border-gray-700/20">
-                                            <th className={`text-left text-xs font-medium uppercase tracking-wider pb-1.5 pr-4 ${muted}`}>Parameter</th>
-                                            <th className={`text-left text-xs font-medium uppercase tracking-wider pb-1.5 pr-4 ${muted}`}>Old</th>
-                                            <th className={`text-left text-xs font-medium uppercase tracking-wider pb-1.5 ${muted}`}>New</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {detail.diffs.sort((a, b) => a.key.localeCompare(b.key)).map(d => (
-                                            <tr key={d.key} className={isDarkMode ? 'even:bg-slate-600/20' : 'even:bg-gray-50/50'}>
-                                                <td className={`text-xs font-mono py-1 pr-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{d.key}</td>
-                                                <td className={`text-xs font-mono py-1 pr-4 ${d.removed ? 'text-red-500' : (isDarkMode ? 'text-gray-500' : 'text-gray-400')}`}>
-                                                    {d.old_value ?? '—'}
-                                                </td>
-                                                <td className={`text-xs font-mono py-1 ${d.removed ? 'text-red-500 line-through' : 'text-emerald-500 font-semibold'}`}>
-                                                    {d.removed ? 'removed' : d.new_value}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                            <div className={`rounded-lg overflow-hidden border ${isDarkMode ? 'border-slate-600 bg-slate-900' : 'border-gray-300 bg-gray-950'}`}>
+                                <div className="overflow-x-auto">
+                                    {detail.diffs.sort((a, b) => a.key.localeCompare(b.key)).map(d => (
+                                        <div key={d.key}>
+                                            {d.old_value != null && (
+                                                <div className="flex bg-red-500/10 border-l-2 border-red-500">
+                                                    <span className="select-none w-6 text-center text-red-400 text-xs font-mono py-0.5 flex-shrink-0">-</span>
+                                                    <span className="text-xs font-mono py-0.5 text-red-300">{d.key} = {d.old_value}</span>
+                                                </div>
+                                            )}
+                                            {!d.removed && (
+                                                <div className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
+                                                    <span className="select-none w-6 text-center text-emerald-400 text-xs font-mono py-0.5 flex-shrink-0">+</span>
+                                                    <span className="text-xs font-mono py-0.5 text-emerald-300">{d.key} = {d.new_value}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     )}
