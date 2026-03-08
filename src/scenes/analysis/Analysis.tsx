@@ -189,6 +189,17 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
     return Object.values(yearNodes).sort((a, b) => b.key.localeCompare(a.key));
 }
 
+// Forex market is open Sun 5pm ET – Fri 5pm ET (Mon-Fri UTC, plus Sun evening)
+function defaultMarketDay(): string {
+    const now = dayjs();
+    const day = now.day(); // 0=Sun, 6=Sat
+    if (day >= 1 && day <= 5) return now.format('YYYY-MM-DD'); // Mon-Fri: today
+    // Sat/Sun: last Friday
+    let d = now;
+    while (d.day() === 0 || d.day() === 6) d = d.subtract(1, 'day');
+    return d.format('YYYY-MM-DD');
+}
+
 export default function Analysis() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
@@ -207,8 +218,8 @@ export default function Analysis() {
     // Ad-hoc run controls
     const [models, setModels] = useState<OllamaModel[]>([]);
     const [selectedModel, setSelectedModel] = useState('');
-    const [runFrom, setRunFrom] = useState(dayjs().subtract(1, 'day').format('YYYY-MM-DD'));
-    const [runTo, setRunTo] = useState(dayjs().subtract(1, 'day').format('YYYY-MM-DD'));
+    const [runFrom, setRunFrom] = useState(() => defaultMarketDay());
+    const [runTo, setRunTo] = useState(() => defaultMarketDay());
     const [runningJob, setRunningJob] = useState<AnalysisJob | null>(null);
 
     // Load models
@@ -644,7 +655,6 @@ export default function Analysis() {
                                     <select
                                         value={selectedModel}
                                         onChange={e => setSelectedModel(e.target.value)}
-                                        disabled={runningJob?.status === 'running'}
                                         className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
                                     >
                                         <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
@@ -654,7 +664,6 @@ export default function Analysis() {
                                     <select
                                         value={selectedModel}
                                         onChange={e => setSelectedModel(e.target.value)}
-                                        disabled={runningJob?.status === 'running'}
                                         className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
                                     >
                                         {models.map(m => (
@@ -667,7 +676,6 @@ export default function Analysis() {
                                     <select
                                         value={selectedModel}
                                         onChange={e => setSelectedModel(e.target.value)}
-                                        disabled={runningJob?.status === 'running'}
                                         className={`w-full px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
                                     >
                                         {models.map(m => (
@@ -684,7 +692,6 @@ export default function Analysis() {
                                     type="date"
                                     value={runFrom}
                                     onChange={e => setRunFrom(e.target.value)}
-                                    disabled={runningJob?.status === 'running'}
                                     className={`px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
                                 />
                             </div>
@@ -694,18 +701,29 @@ export default function Analysis() {
                                     type="date"
                                     value={runTo}
                                     onChange={e => setRunTo(e.target.value)}
-                                    disabled={runningJob?.status === 'running'}
                                     className={`px-3 py-1.5 rounded text-sm ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}
                                 />
                             </div>
                             <div>
                                 {runningJob?.status === 'running' ? (
-                                    <div className="px-4 py-1.5 rounded text-sm font-medium bg-yellow-500/20 text-yellow-400 flex items-center gap-2">
-                                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                        </svg>
-                                        Running ({runningJob.model})...
+                                    <div className="flex flex-col gap-1.5">
+                                        <div className="px-4 py-1.5 rounded text-sm font-medium bg-yellow-500/20 text-yellow-400 flex items-center gap-2">
+                                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                            </svg>
+                                            {runningJob.phase > 0
+                                                ? `Phase ${runningJob.phase}/6: ${runningJob.phase_name || '...'}`
+                                                : `Starting (${runningJob.model})...`}
+                                        </div>
+                                        {runningJob.phase > 0 && (
+                                            <div className={`h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                                                <div
+                                                    className="h-full bg-yellow-400 rounded-full transition-all duration-500"
+                                                    style={{width: `${Math.round((runningJob.phase / 6) * 100)}%`}}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <button
