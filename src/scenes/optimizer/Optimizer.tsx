@@ -8,6 +8,7 @@ import {
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches,
     queueRecommendation, skipRecommendation,
+    applyRecommendation, pushTrunk, revertTrunk,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -127,7 +128,8 @@ export default function Optimizer() {
                                                     <th className={`${thCl} pb-2 pr-4`}>PF</th>
                                                     <th className={`${thCl} pb-2 pr-4`}>Win Rate</th>
                                                     <th className={`${thCl} pb-2 pr-4`}>P&L</th>
-                                                    <th className={`${thCl} pb-2`}>Promoted</th>
+                                                    <th className={`${thCl} pb-2 pr-4`}>Promoted</th>
+                                                    <th className={`${thCl} pb-2`}>Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -140,7 +142,36 @@ export default function Optimizer() {
                                                         <td className={`${tdCl} py-2 pr-4`}>{t.oos_result?.profit_factor?.toFixed(2) ?? '—'}</td>
                                                         <td className={`${tdCl} py-2 pr-4`}>{t.oos_result?.win_rate ? `${(t.oos_result.win_rate * 100).toFixed(0)}%` : '—'}</td>
                                                         <td className={`${tdCl} py-2 pr-4 ${plColor(t.oos_result?.total_pnl)}`}>{t.oos_result?.total_pnl?.toFixed(2) ?? '—'}</td>
-                                                        <td className={`${tdCl} py-2`}>{dayjs(t.promoted_at).fromNow()}</td>
+                                                        <td className={`${tdCl} py-2 pr-4`}>
+                                                            {dayjs(t.promoted_at).fromNow()}
+                                                            {t.pushed_at && (
+                                                                <span className={`ml-1 text-xs ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}
+                                                                      title={`Pushed ${dayjs(t.pushed_at).format('YYYY-MM-DD HH:mm')}`}>
+                                                                    (pushed)
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td className={`${tdCl} py-2`}>
+                                                            <div className="flex gap-1.5">
+                                                                <button
+                                                                    onClick={async () => { await pushTrunk(t.id); loadData(); }}
+                                                                    disabled={!!t.pushed_at}
+                                                                    className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+                                                                        t.pushed_at
+                                                                            ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                            : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
+                                                                    }`}>
+                                                                    Push Live
+                                                                </button>
+                                                                <button
+                                                                    onClick={async () => { await revertTrunk(t.id); loadData(); }}
+                                                                    className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+                                                                        isDarkMode ? 'bg-amber-900/40 hover:bg-amber-800/60 text-amber-400' : 'bg-amber-100 hover:bg-amber-200 text-amber-700'
+                                                                    }`}>
+                                                                    Revert
+                                                                </button>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -178,6 +209,7 @@ export default function Optimizer() {
                                                 muted={muted}
                                                 onQueue={async () => { await queueRecommendation(rec.id); loadData(); }}
                                                 onSkip={async () => { await skipRecommendation(rec.id); loadData(); }}
+                                                onApply={async () => { await applyRecommendation(rec.id); loadData(); }}
                                             />
                                         ))}
                                     </div>
@@ -348,18 +380,21 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId}: {branch: OptimizerBr
     );
 }
 
-function RecommendationRow({rec, isDarkMode, muted, onQueue, onSkip}: {
+function RecommendationRow({rec, isDarkMode, muted, onQueue, onSkip, onApply}: {
     rec: OptimizerRecommendation; isDarkMode: boolean; muted: string;
-    onQueue: () => void; onSkip: () => void;
+    onQueue: () => void; onSkip: () => void; onApply: () => void;
 }) {
     const [expanded, setExpanded] = useState(false);
     const isPending = rec.status === 'pending';
+    const isPassed = rec.status === 'passed';
+    const canApply = isPassed;
 
     return (
         <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <RecStatusBadge status={rec.status} isDarkMode={isDarkMode}/>
+                    {rec.timeframe && <TimeframeBadge tf={rec.timeframe} isDarkMode={isDarkMode}/>}
                     <span className={`text-sm font-medium truncate ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                         {rec.source}{rec.source_id ? ` #${rec.source_id}` : ''}
                     </span>
@@ -380,6 +415,17 @@ function RecommendationRow({rec, isDarkMode, muted, onQueue, onSkip}: {
                             </button>
                         </>
                     )}
+                    <button onClick={canApply ? onApply : undefined}
+                            disabled={!canApply}
+                            className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
+                                canApply
+                                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer'
+                                    : isDarkMode
+                                        ? 'bg-slate-700 text-gray-600 cursor-not-allowed'
+                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}>
+                        Apply to Trunk
+                    </button>
                     <button onClick={() => setExpanded(!expanded)}
                             className={`p-1 rounded ${isDarkMode ? 'hover:bg-slate-600' : 'hover:bg-gray-200'}`}>
                         {expanded
@@ -507,6 +553,9 @@ function RecStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
             break;
         case 'skipped':
             cls = isDarkMode ? 'bg-slate-700 text-gray-500 line-through' : 'bg-gray-100 text-gray-400 line-through';
+            break;
+        case 'applied':
+            cls = isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-100 text-cyan-700';
             break;
         default:
             cls = isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500';

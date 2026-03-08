@@ -422,6 +422,7 @@ export interface OptimizerTrunk {
     oos_result?: OptimizerResult;
     ai_score: number;
     promoted_at: string;
+    pushed_at?: string;
     promoted_from_branch_id?: number;
 }
 
@@ -452,6 +453,7 @@ export interface OptimizerRecommendation {
     id: number;
     source: string;
     source_id?: string;
+    timeframe?: string;
     rationale?: string;
     mutations: Record<string, string>;
     status: string;

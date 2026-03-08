@@ -132,6 +132,18 @@ export function skipRecommendation(id: number): Promise<any> {
     return apiPost(`/api/optimizer/recommendations/${id}/skip`);
 }
 
-export function createRecommendation(mutations: Record<string, string>, rationale: string): Promise<any> {
-    return apiPost('/api/optimizer/recommendations', {mutations, rationale});
+export function createRecommendation(mutations: Record<string, string>, rationale: string, timeframe?: string): Promise<any> {
+    return apiPost('/api/optimizer/recommendations', {mutations, rationale, timeframe});
+}
+
+export function applyRecommendation(id: number): Promise<any> {
+    return apiPost(`/api/optimizer/recommendations/${id}/apply`);
+}
+
+export function pushTrunk(id: number): Promise<any> {
+    return apiPost(`/api/optimizer/trunks/${id}/push`);
+}
+
+export function revertTrunk(id: number): Promise<any> {
+    return apiPost(`/api/optimizer/trunks/${id}/revert`);
 }
