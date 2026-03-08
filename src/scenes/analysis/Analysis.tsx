@@ -83,9 +83,14 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
         byScope[s].push(r);
     }
 
-    // Build day groups from hourly runs
+    // Build day groups from hourly runs (and any unrecognized scopes like "all")
     const hourlyByDay: Record<string, AnalysisRunApi[]> = {};
-    for (const r of (byScope['hourly'] || [])) {
+    const knownScopes = new Set(['hourly', 'daily', 'weekly', 'monthly', 'yearly']);
+    const leafRuns = [
+        ...(byScope['hourly'] || []),
+        ...Object.entries(byScope).filter(([s]) => !knownScopes.has(s)).flatMap(([, runs]) => runs),
+    ];
+    for (const r of leafRuns) {
         const day = dayjs(r.created_at).format('YYYY-MM-DD');
         if (!hourlyByDay[day]) hourlyByDay[day] = [];
         hourlyByDay[day].push(r);
