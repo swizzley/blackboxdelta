@@ -4,7 +4,7 @@ const DEFAULT_BASE = 'https://cipher.aspendenver.local';
 export function getApiBase(): string {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return DEFAULT_BASE;
-    // Migrate genesis → cipher (genesis is offline)
+    // Migrate genesis → cipher (genesis is now replica only)
     if (stored.includes('genesis.aspendenver.local')) {
         const migrated = stored.replace('genesis.aspendenver.local', 'cipher.aspendenver.local');
         localStorage.setItem(STORAGE_KEY, migrated);

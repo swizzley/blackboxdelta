@@ -176,7 +176,7 @@ export interface AnalysisTodo {
     notes?: string;
 }
 
-// API response types (from swizzley-api on genesis:8080)
+// API response types (from swizzley-api on cipher:8080)
 export interface ApiHealth {
     status: string;
     uptime: string;

@@ -61,7 +61,7 @@ export default function System() {
     const iconCl = 'w-5 h-5 text-cyan-500';
 
     const allServices = monitor
-        ? [...(monitor.services?.genesis || []), ...(monitor.services?.cipher || []), ...(monitor.services?.sage || [])]
+        ? [...(monitor.services?.cipher || []), ...(monitor.services?.genesis || []), ...(monitor.services?.sage || [])]
         : [];
     const activeCount = allServices.filter(s => s.status === 'active').length;
     const alertCount = monitor?.alerts_firing?.length ?? 0;
@@ -124,8 +124,8 @@ export default function System() {
                             {/* Services */}
                             {monitor && (
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                                    <ServerServices title="Genesis" services={monitor.services?.genesis || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
                                     <ServerServices title="Cipher" services={monitor.services?.cipher || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
+                                    <ServerServices title="Genesis" services={monitor.services?.genesis || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} subtitle="replica"/>
                                     <ServerServices title="Sage" services={monitor.services?.sage || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
                                 </div>
                             )}
@@ -213,10 +213,10 @@ export default function System() {
                             {/* Infrastructure */}
                             {monitor && (
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                                    <ServerResources title="Genesis" res={monitor.resources?.genesis} db={monitor.database?.genesis}
-                                                     isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
                                     <ServerResources title="Cipher" res={monitor.resources?.cipher} db={monitor.database?.cipher}
                                                      isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
+                                    <ServerResources title="Genesis" res={monitor.resources?.genesis} db={monitor.database?.genesis}
+                                                     isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} subtitle="replica"/>
                                     <ServerResources title="Sage" res={monitor.resources?.sage}
                                                      isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
                                 </div>
@@ -317,12 +317,12 @@ function ProgressBar({pct, isDarkMode}: {pct: number; isDarkMode: boolean}) {
     );
 }
 
-function ServerServices({title, services, isDarkMode, muted, card, heading, iconCl}: {
-    title: string; services: MonitorServiceInfo[]; isDarkMode: boolean; muted: string; card: string; heading: string; iconCl: string;
+function ServerServices({title, services, isDarkMode, muted, card, heading, iconCl, subtitle}: {
+    title: string; services: MonitorServiceInfo[]; isDarkMode: boolean; muted: string; card: string; heading: string; iconCl: string; subtitle?: string;
 }) {
     return (
         <div className={card}>
-            <h2 className={heading}><ServerStackIcon className={iconCl}/>{title} Services</h2>
+            <h2 className={heading}><ServerStackIcon className={iconCl}/>{title} Services{subtitle && <span className={`text-xs font-normal ${isDarkMode ? 'text-gray-500' : 'text-gray-400'} ml-1`}>({subtitle})</span>}</h2>
             {services.length === 0 ? (
                 <p className={`text-sm ${muted}`}>No services reported</p>
             ) : (
@@ -369,7 +369,7 @@ function ReplicationViz({replication, database, isDarkMode, card, heading, iconC
     const glowColor = isOk ? 'text-emerald-500' : isBroken ? 'text-red-500' : 'text-yellow-500';
 
     const cipherDbOk = database?.cipher?.status === 'ok';
-    const genesisDbOk = database?.genesis?.status === 'ok';
+    const genesisDbOk = database?.genesis?.status === 'ok' || replication?.status === 'ok';
 
     return (
         <div className={`${card} mb-6`}>
@@ -473,18 +473,19 @@ function ReplicationViz({replication, database, isDarkMode, card, heading, iconC
     );
 }
 
-function ServerResources({title, res, db, isDarkMode, muted, card, heading, iconCl}: {
+function ServerResources({title, res, db, isDarkMode, muted, card, heading, iconCl, subtitle}: {
     title: string;
     res?: {status?: string; message?: string};
     db?: {status?: string; message?: string};
     isDarkMode: boolean; muted: string; card: string; heading: string; iconCl: string;
+    subtitle?: string;
 }) {
     const msg = res?.message;
     const parts = msg?.split(' | ') ?? [];
 
     return (
         <div className={card}>
-            <h2 className={heading}><CpuChipIcon className={iconCl}/>{title} Infrastructure</h2>
+            <h2 className={heading}><CpuChipIcon className={iconCl}/>{title} Infrastructure{subtitle && <span className={`text-xs font-normal ${isDarkMode ? 'text-gray-500' : 'text-gray-400'} ml-1`}>({subtitle})</span>}</h2>
             <div className="space-y-4">
                 {parts.length > 0 && (
                     <div className="grid grid-cols-1 gap-3">
