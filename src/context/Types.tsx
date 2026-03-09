@@ -436,6 +436,7 @@ export interface OptimizerTrunk {
     promoted_at: string;
     pushed_at?: string;
     promoted_from_branch_id?: number;
+    promoted_from_recommendation_id?: number;
 }
 
 export interface OptimizerTrunkDetail {

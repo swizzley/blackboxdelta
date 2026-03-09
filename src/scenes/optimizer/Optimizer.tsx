@@ -509,6 +509,11 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
                             isDarkMode ? 'bg-slate-600 text-gray-400' : 'bg-gray-200 text-gray-500'
                         }`}>previously pushed</span>
                     )}
+                    {t.promoted_from_recommendation_id && (
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            isDarkMode ? 'bg-violet-900/50 text-violet-300' : 'bg-violet-100 text-violet-700'
+                        }`}>from rec #{t.promoted_from_recommendation_id}</span>
+                    )}
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                     <span className={`text-xs ${muted}`}>{dayjs(t.promoted_at).fromNow()}</span>
