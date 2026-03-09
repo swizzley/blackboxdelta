@@ -81,6 +81,13 @@ interface RunGroup {
     hourlyRuns: AnalysisRunApi[]; // leaf hourly runs
 }
 
+// Returns true for forex market-closed days (Saturday and Sunday).
+// The full weekend is omitted — Sunday opens late (~22:00 UTC) but isn't worth showing.
+function isMarketClosed(d: dayjs.Dayjs): boolean {
+    const dow = d.day(); // 0=Sun, 6=Sat
+    return dow === 0 || dow === 6;
+}
+
 function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
     // Separate by scope
     const byScope: Record<string, AnalysisRunApi[]> = {};
@@ -90,83 +97,89 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
         byScope[s].push(r);
     }
 
-    // Build day groups from hourly runs (and any unrecognized scopes like "all")
-    const hourlyByDay: Record<string, AnalysisRunApi[]> = {};
+    // Build hourly run lookup: day -> hour -> run
     const knownScopes = new Set(['hourly', 'daily', 'weekly', 'monthly', 'yearly']);
     const leafRuns = [
         ...(byScope['hourly'] || []),
-        ...Object.entries(byScope).filter(([s]) => !knownScopes.has(s)).flatMap(([, runs]) => runs),
+        ...Object.entries(byScope).filter(([s]) => !knownScopes.has(s)).flatMap(([, rs]) => rs),
     ];
+    const hourlyByDay: Record<string, Record<number, AnalysisRunApi>> = {};
     for (const r of leafRuns) {
         const day = dayjs(r.created_at).format('YYYY-MM-DD');
-        if (!hourlyByDay[day]) hourlyByDay[day] = [];
-        hourlyByDay[day].push(r);
+        const h = dayjs(r.created_at).hour();
+        if (!hourlyByDay[day]) hourlyByDay[day] = {};
+        hourlyByDay[day][h] = r;
     }
 
-    // Build day nodes — multiple daily runs on the same day become leaf runs
-    const dayNodes: Record<string, RunGroup> = {};
+    // Daily run lookup: day -> runs
     const dailyByDay: Record<string, AnalysisRunApi[]> = {};
     for (const r of (byScope['daily'] || [])) {
         const day = dayjs(r.created_at).format('YYYY-MM-DD');
         if (!dailyByDay[day]) dailyByDay[day] = [];
         dailyByDay[day].push(r);
     }
-    for (const [day, dailyRuns] of Object.entries(dailyByDay)) {
-        if (dailyRuns.length === 1) {
-            // Single daily run = summary node for the day
-            dayNodes[day] = {
-                key: day, label: dayjs(day).format('ddd, MMM D'), scope: 'daily',
-                run: dailyRuns[0], children: [], hourlyRuns: hourlyByDay[day] || [],
-            };
-        } else {
-            // Multiple daily runs = all shown as leaf runs alongside hourly
-            dayNodes[day] = {
-                key: day, label: dayjs(day).format('ddd, MMM D'), scope: 'daily',
-                children: [], hourlyRuns: [...dailyRuns, ...(hourlyByDay[day] || [])],
-            };
-        }
-    }
-    // Then from hourly/leaf runs that don't have a daily summary
-    for (const [day, hrs] of Object.entries(hourlyByDay)) {
-        if (!dayNodes[day]) {
-            dayNodes[day] = {
-                key: day, label: dayjs(day).format('ddd, MMM D'), scope: 'daily',
-                children: [], hourlyRuns: hrs,
-            };
-        }
+
+    // Determine calendar range: from oldest run to today
+    const today = dayjs();
+    let startDate = today.startOf('day');
+    for (const r of runs) {
+        const d = dayjs(r.created_at).startOf('day');
+        if (d.isBefore(startDate)) startDate = d;
     }
 
-    // Build week groups
+    // Generate ALL market-open (Mon-Fri) day nodes from startDate to today
+    const dayNodes: Record<string, RunGroup> = {};
+    let d = startDate;
+    while (d.isBefore(today) || d.isSame(today, 'day')) {
+        if (!isMarketClosed(d)) {
+            const day = d.format('YYYY-MM-DD');
+            const hourlyRuns = Object.values(hourlyByDay[day] || {});
+            const dailyRuns = dailyByDay[day] || [];
+            if (dailyRuns.length === 1) {
+                dayNodes[day] = {
+                    key: day, label: d.format('ddd, MMM D'), scope: 'daily',
+                    run: dailyRuns[0], children: [], hourlyRuns,
+                };
+            } else if (dailyRuns.length > 1) {
+                dayNodes[day] = {
+                    key: day, label: d.format('ddd, MMM D'), scope: 'daily',
+                    children: [], hourlyRuns: [...dailyRuns, ...hourlyRuns],
+                };
+            } else {
+                dayNodes[day] = {
+                    key: day, label: d.format('ddd, MMM D'), scope: 'daily',
+                    children: [], hourlyRuns,
+                };
+            }
+        }
+        d = d.add(1, 'day');
+    }
+
+    // Build week nodes — all day nodes assigned to their ISO week
     const weekNodes: Record<string, RunGroup> = {};
     for (const r of (byScope['weekly'] || [])) {
-        const d = dayjs(r.created_at);
-        const wk = d.format('YYYY') + '-W' + String(d.isoWeek()).padStart(2, '0');
+        const rd = dayjs(r.created_at);
+        const wk = rd.format('YYYY') + '-W' + String(rd.isoWeek()).padStart(2, '0');
         const start = r.data_start ? dayjs(r.data_start).format('MMM D') : '';
         const end = r.data_end ? dayjs(r.data_end).format('MMM D') : '';
         weekNodes[wk] = {
-            key: wk, label: `Week ${d.isoWeek()}${start ? ` (${start} - ${end})` : ''}`,
+            key: wk, label: `Week ${rd.isoWeek()}${start ? ` (${start} - ${end})` : ''}`,
             scope: 'weekly', run: r, children: [], hourlyRuns: [],
         };
     }
-
-    // Assign day nodes to weeks
     for (const [day, node] of Object.entries(dayNodes)) {
-        const d = dayjs(day);
-        const wk = d.format('YYYY') + '-W' + String(d.isoWeek()).padStart(2, '0');
+        const rd = dayjs(day);
+        const wk = rd.format('YYYY') + '-W' + String(rd.isoWeek()).padStart(2, '0');
         if (!weekNodes[wk]) {
-            weekNodes[wk] = {
-                key: wk, label: `Week ${d.isoWeek()}`,
-                scope: 'weekly', children: [], hourlyRuns: [],
-            };
+            weekNodes[wk] = { key: wk, label: `Week ${rd.isoWeek()}`, scope: 'weekly', children: [], hourlyRuns: [] };
         }
         weekNodes[wk].children.push(node);
     }
-    // Sort days within each week (newest first)
     for (const wk of Object.values(weekNodes)) {
         wk.children.sort((a, b) => b.key.localeCompare(a.key));
     }
 
-    // Build month groups
+    // Build month nodes
     const monthNodes: Record<string, RunGroup> = {};
     for (const r of (byScope['monthly'] || [])) {
         const mo = dayjs(r.created_at).format('YYYY-MM');
@@ -175,19 +188,13 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
             scope: 'monthly', run: r, children: [], hourlyRuns: [],
         };
     }
-
-    // Assign weeks to months (use the month of the week's Monday)
     for (const [wk, node] of Object.entries(weekNodes)) {
-        // Parse YYYY-Wnn
         const year = parseInt(wk.slice(0, 4));
         const week = parseInt(wk.slice(6));
         const monday = dayjs().year(year).isoWeek(week).startOf('isoWeek');
         const mo = monday.format('YYYY-MM');
         if (!monthNodes[mo]) {
-            monthNodes[mo] = {
-                key: mo, label: dayjs(mo + '-01').format('MMMM YYYY'),
-                scope: 'monthly', children: [], hourlyRuns: [],
-            };
+            monthNodes[mo] = { key: mo, label: dayjs(mo + '-01').format('MMMM YYYY'), scope: 'monthly', children: [], hourlyRuns: [] };
         }
         monthNodes[mo].children.push(node);
     }
@@ -195,22 +202,16 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
         mo.children.sort((a, b) => b.key.localeCompare(a.key));
     }
 
-    // Build year groups
+    // Build year nodes
     const yearNodes: Record<string, RunGroup> = {};
     for (const r of (byScope['yearly'] || [])) {
         const yr = dayjs(r.created_at).format('YYYY');
-        yearNodes[yr] = {
-            key: yr, label: yr, scope: 'yearly',
-            run: r, children: [], hourlyRuns: [],
-        };
+        yearNodes[yr] = { key: yr, label: yr, scope: 'yearly', run: r, children: [], hourlyRuns: [] };
     }
     for (const [mo, node] of Object.entries(monthNodes)) {
         const yr = mo.slice(0, 4);
         if (!yearNodes[yr]) {
-            yearNodes[yr] = {
-                key: yr, label: yr, scope: 'yearly',
-                children: [], hourlyRuns: [],
-            };
+            yearNodes[yr] = { key: yr, label: yr, scope: 'yearly', children: [], hourlyRuns: [] };
         }
         yearNodes[yr].children.push(node);
     }
@@ -532,12 +533,53 @@ export default function Analysis() {
         );
     };
 
+    // Render a placeholder row for an hour with no run
+    const renderSkippedSlot = (hourLabel: string, indent: number) => (
+        <div
+            key={`skipped-${hourLabel}`}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded text-sm opacity-40 select-none`}
+            style={{paddingLeft: `${indent * 16 + 12}px`}}
+        >
+            <span className={`flex-1 min-w-0 truncate ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                {hourLabel}
+                <span className="ml-1.5 text-[10px]">— 0 trades in window</span>
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-600/40 text-gray-400 font-mono flex-shrink-0">SKIPPED</span>
+        </div>
+    );
+
     // Render a group node (collapsible)
     const renderGroup = (group: RunGroup, depth: number): JSX.Element => {
         const isExpanded = expandedGroups.has(group.key);
         const sc = scopeColors[group.scope] || scopeColors.hourly;
-        const hasContent = group.children.length > 0 || group.hourlyRuns.length > 0;
+        // Day nodes always have content (24 hour slots, even if all skipped)
+        const hasContent = group.scope === 'daily' || group.children.length > 0 || group.hourlyRuns.length > 0;
         const totalRuns = countRuns(group);
+
+        // For day nodes: fill all hours 0-maxHour, skipped where no run exists
+        let hourSlots: JSX.Element[] = [];
+        if (group.scope === 'daily') {
+            const day = group.key;
+            const now = dayjs();
+            const isToday = day === now.format('YYYY-MM-DD');
+            const maxHour = isToday ? now.hour() : 23;
+
+            const runByHour: Record<number, AnalysisRunApi> = {};
+            for (const run of group.hourlyRuns) {
+                if ((run.scope || 'hourly') === 'hourly') {
+                    runByHour[dayjs(run.created_at).hour()] = run;
+                }
+            }
+
+            for (let h = maxHour; h >= 0; h--) {
+                if (runByHour[h]) {
+                    hourSlots.push(<div key={runByHour[h].run_id}>{renderRunRow(runByHour[h], depth + 1)}</div>);
+                } else {
+                    const label = dayjs(day + 'T' + String(h).padStart(2, '0') + ':00').format('h:mm A');
+                    hourSlots.push(renderSkippedSlot(label, depth + 1));
+                }
+            }
+        }
 
         return (
             <div key={group.key}>
@@ -567,7 +609,9 @@ export default function Analysis() {
                 {isExpanded && (
                     <div>
                         {group.children.map(child => renderGroup(child, depth + 1))}
-                        {group.hourlyRuns.map(run => renderRunRow(run, depth + 1))}
+                        {hourSlots.length > 0
+                            ? hourSlots
+                            : group.hourlyRuns.map(run => renderRunRow(run, depth + 1))}
                     </div>
                 )}
             </div>
