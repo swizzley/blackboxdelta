@@ -526,7 +526,7 @@ export interface AnalysisRunApi {
     created_at: string;
     provider: string;
     model: string;
-    scope: string; // hourly, daily, weekly, monthly, yearly
+    scope: string; // hourly, daily, weekly, monthly, yearly, trunk
     trigger: string; // service, api, ad-hoc
     order_count: number;
     todo_count: number;
@@ -535,6 +535,8 @@ export interface AnalysisRunApi {
     data_start?: string;
     data_end?: string;
     skipped?: boolean;
+    timeframe?: string;
+    trunk_id?: number;
 }
 
 export interface AnalysisTodoApi {

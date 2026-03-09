@@ -105,8 +105,11 @@ export function fetchOptimizerGenerations(limit = 20): Promise<OptimizerGenerati
     return apiFetch(`/api/optimizer/generations?limit=${limit}`);
 }
 
-export function fetchOptimizerTrunks(limit = 20): Promise<OptimizerTrunk[] | null> {
-    return apiFetch(`/api/optimizer/trunks?limit=${limit}`);
+export function fetchOptimizerTrunks(limit = 20, timeframe?: string): Promise<OptimizerTrunk[] | null> {
+    const params = new URLSearchParams();
+    params.set('limit', String(limit));
+    if (timeframe) params.set('timeframe', timeframe);
+    return apiFetch(`/api/optimizer/trunks?${params}`);
 }
 
 export function fetchOptimizerTrunkDetail(trunkId: number, baseId?: number): Promise<OptimizerTrunkDetail | null> {
@@ -214,8 +217,13 @@ export interface AnalysisJob {
     error?: string;
 }
 
-export function triggerAnalysisRun(model: string, from: string, to: string, provider = 'ollama', anthropicModel?: string): Promise<AnalysisJob | null> {
-    return apiPost('/api/analysis/run', {model, from, to, provider, ...(anthropicModel ? {anthropic_model: anthropicModel} : {})});
+export function triggerAnalysisRun(model: string, from: string, to: string, provider = 'ollama', anthropicModel?: string, timeframe?: string, trunkId?: number): Promise<AnalysisJob | null> {
+    return apiPost('/api/analysis/run', {
+        model, from, to, provider,
+        ...(anthropicModel ? {anthropic_model: anthropicModel} : {}),
+        ...(timeframe ? {timeframe} : {}),
+        ...(trunkId ? {trunk_id: trunkId} : {}),
+    });
 }
 
 export function fetchAnalysisJobs(): Promise<AnalysisJob[] | null> {

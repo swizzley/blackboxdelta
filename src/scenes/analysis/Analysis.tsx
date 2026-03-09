@@ -7,15 +7,16 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
-import type {AnalysisRunApi, AnalysisTodoApi, AnalysisRunDetailApi} from '../../context/Types';
+import type {AnalysisRunApi, AnalysisTodoApi, AnalysisRunDetailApi, OptimizerTrunk} from '../../context/Types';
 import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer, squashTodos,
-    fetchAnalysisModels, triggerAnalysisRun, fetchAnalysisJobs, type OllamaModel, type AnalysisJob} from '../../api/client';
+    fetchAnalysisModels, triggerAnalysisRun, fetchAnalysisJobs, fetchOptimizerTrunks,
+    type OllamaModel, type AnalysisJob} from '../../api/client';
 import ReactMarkdown from 'react-markdown';
 
 dayjs.extend(relativeTime);
 dayjs.extend(isoWeek);
 
-const PROVIDERS = ['anthropic', 'ollama', 'hybrid'] as const;
+const PROVIDERS = ['ollama', 'hybrid'] as const;
 type Provider = typeof PROVIDERS[number];
 
 const SCOPE_ORDER = ['yearly', 'monthly', 'weekly', 'daily', 'hourly'] as const;
@@ -27,6 +28,7 @@ const scopeColors: Record<string, { text: string; bg: string }> = {
     weekly:  {text: 'text-cyan-400',   bg: 'bg-cyan-500/20'},
     daily:   {text: 'text-emerald-400', bg: 'bg-emerald-500/20'},
     hourly:  {text: 'text-gray-400',   bg: 'bg-gray-500/20'},
+    trunk:   {text: 'text-pink-400',    bg: 'bg-pink-500/20'},
 };
 
 const triggerColors: Record<string, { text: string; bg: string; label: string }> = {
@@ -98,7 +100,7 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
     }
 
     // Build hourly run lookup: day -> hour -> run
-    const knownScopes = new Set(['hourly', 'daily', 'weekly', 'monthly', 'yearly']);
+    const knownScopes = new Set(['hourly', 'daily', 'weekly', 'monthly', 'yearly', 'trunk']);
     const leafRuns = [
         ...(byScope['hourly'] || []),
         ...Object.entries(byScope).filter(([s]) => !knownScopes.has(s)).flatMap(([, rs]) => rs),
@@ -372,6 +374,24 @@ export default function Analysis() {
     const [runTo, setRunTo] = useState(() => defaultMarketDay());
     const [runningJob, setRunningJob] = useState<AnalysisJob | null>(null);
 
+    // Mode toggle: live orders vs trunk analysis
+    const [analysisMode, setAnalysisMode] = useState<'live' | 'trunk'>('live');
+    const [runTimeframe, setRunTimeframe] = useState('');
+    const [trunks, setTrunks] = useState<OptimizerTrunk[]>([]);
+    const [selectedTrunkId, setSelectedTrunkId] = useState<number | null>(null);
+
+    // Load trunks when in trunk mode or when timeframe changes
+    useEffect(() => {
+        if (!apiAvailable) return;
+        if (analysisMode !== 'trunk') return;
+        fetchOptimizerTrunks(20, runTimeframe || undefined).then(data => {
+            if (data) {
+                setTrunks(data);
+                if (data.length > 0 && !selectedTrunkId) setSelectedTrunkId(data[0].id);
+            }
+        });
+    }, [apiAvailable, analysisMode, runTimeframe]);
+
     // Load models
     useEffect(() => {
         if (!apiAvailable) return;
@@ -539,8 +559,13 @@ export default function Analysis() {
                     {pc.label}
                 </span>
                 <span className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text} flex-shrink-0`}>
-                    {(run.scope || 'hourly').charAt(0).toUpperCase() + (run.scope || 'hourly').slice(1)}
+                    {run.scope === 'trunk' ? `Trunk #${run.trunk_id}` : (run.scope || 'hourly').charAt(0).toUpperCase() + (run.scope || 'hourly').slice(1)}
                 </span>
+                {run.timeframe && (
+                    <span className="inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-600/30 text-slate-300 flex-shrink-0">
+                        {run.timeframe}
+                    </span>
+                )}
                 {run.provider === 'ollama' && run.trigger === 'service' && (
                     <span className={`text-xs px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} flex-shrink-0`}>
                         {tc.label}
@@ -889,6 +914,63 @@ export default function Analysis() {
 
                     {/* Ad-hoc Run Controls */}
                     <div className={`${cardClass} mb-6`}>
+                        {/* Row 1: Mode toggle + Timeframe */}
+                        <div className="flex flex-wrap items-end gap-3 mb-3">
+                            <div>
+                                <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Mode</label>
+                                <div className={`inline-flex rounded overflow-hidden border ${isDarkMode ? 'border-slate-600' : 'border-gray-300'}`}>
+                                    {(['live', 'trunk'] as const).map(mode => (
+                                        <button
+                                            key={mode}
+                                            onClick={() => setAnalysisMode(mode)}
+                                            className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                                                analysisMode === mode
+                                                    ? mode === 'trunk'
+                                                        ? 'bg-pink-600 text-white'
+                                                        : 'bg-cyan-600 text-white'
+                                                    : isDarkMode ? 'bg-slate-800 text-gray-400 hover:text-gray-200' : 'bg-white text-gray-600 hover:text-gray-900'
+                                            }`}
+                                        >
+                                            {mode === 'live' ? 'Live Orders' : 'Trunk Analysis'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="min-w-[120px]">
+                                <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Timeframe</label>
+                                <select
+                                    value={runTimeframe}
+                                    onChange={e => {
+                                        setRunTimeframe(e.target.value);
+                                        setSelectedTrunkId(null);
+                                    }}
+                                    className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                >
+                                    <option value="">All</option>
+                                    <option value="scalp">Scalp</option>
+                                    <option value="intraday">Intraday</option>
+                                    <option value="swing">Swing</option>
+                                </select>
+                            </div>
+                            {analysisMode === 'trunk' && (
+                                <div className="flex-1 min-w-[240px]">
+                                    <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Trunk</label>
+                                    <select
+                                        value={selectedTrunkId ?? ''}
+                                        onChange={e => setSelectedTrunkId(e.target.value ? Number(e.target.value) : null)}
+                                        className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                    >
+                                        {trunks.length === 0 && <option value="">No trunks found</option>}
+                                        {trunks.map(t => (
+                                            <option key={t.id} value={t.id}>
+                                                Trunk #{t.id} — {t.timeframe} — Sharpe: {t.oos_result?.sharpe_ratio?.toFixed(2) ?? 'N/A'}, WR: {t.oos_result?.win_rate ? (t.oos_result.win_rate * 100).toFixed(0) + '%' : 'N/A'} — {dayjs(t.promoted_at).fromNow()}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+                        {/* Row 2: Provider, Model, Dates, Run */}
                         <div className="flex flex-wrap items-end gap-3">
                             <div className="min-w-[120px]">
                                 <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Provider</label>
@@ -904,26 +986,15 @@ export default function Analysis() {
                             </div>
                             <div className="flex-1 min-w-[200px]">
                                 <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Model</label>
-                                {runProvider === 'anthropic' ? (
-                                    <select
-                                        value={selectedModel}
-                                        onChange={e => setSelectedModel(e.target.value)}
-                                        className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
-                                    >
-                                        <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (recommended)</option>
-                                        <option value="claude-opus-4-20250514">Claude Opus 4</option>
-                                    </select>
-                                ) : (
-                                    <select
-                                        value={selectedModel}
-                                        onChange={e => setSelectedModel(e.target.value)}
-                                        className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
-                                    >
-                                        {curatedModels(models).map(m => (
-                                            <option key={m.name} value={m.name}>{m.label}</option>
-                                        ))}
-                                    </select>
-                                )}
+                                <select
+                                    value={selectedModel}
+                                    onChange={e => setSelectedModel(e.target.value)}
+                                    className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                >
+                                    {curatedModels(models).map(m => (
+                                        <option key={m.name} value={m.name}>{m.label}</option>
+                                    ))}
+                                </select>
                             </div>
                             {runProvider === 'hybrid' && (
                                 <div className="flex-1 min-w-[160px]">
@@ -938,24 +1009,28 @@ export default function Analysis() {
                                     </select>
                                 </div>
                             )}
-                            <div>
-                                <label className={`block text-xs font-medium mb-1 ${textMuted}`}>From</label>
-                                <input
-                                    type="date"
-                                    value={runFrom}
-                                    onChange={e => setRunFrom(e.target.value)}
-                                    className={`px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
-                                />
-                            </div>
-                            <div>
-                                <label className={`block text-xs font-medium mb-1 ${textMuted}`}>To</label>
-                                <input
-                                    type="date"
-                                    value={runTo}
-                                    onChange={e => setRunTo(e.target.value)}
-                                    className={`px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
-                                />
-                            </div>
+                            {analysisMode === 'live' && (
+                                <>
+                                    <div>
+                                        <label className={`block text-xs font-medium mb-1 ${textMuted}`}>From</label>
+                                        <input
+                                            type="date"
+                                            value={runFrom}
+                                            onChange={e => setRunFrom(e.target.value)}
+                                            className={`px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={`block text-xs font-medium mb-1 ${textMuted}`}>To</label>
+                                        <input
+                                            type="date"
+                                            value={runTo}
+                                            onChange={e => setRunTo(e.target.value)}
+                                            className={`px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                        />
+                                    </div>
+                                </>
+                            )}
                             <div>
                                 {runningJob?.status === 'running' ? (
                                     <div className="flex flex-col gap-1.5">
@@ -980,14 +1055,23 @@ export default function Analysis() {
                                 ) : (
                                     <button
                                         onClick={() => {
-                                            triggerAnalysisRun(selectedModel, runFrom, runTo, runProvider, runProvider === 'hybrid' ? hybridAnthropicModel : undefined).then(job => {
+                                            const isTrunk = analysisMode === 'trunk';
+                                            triggerAnalysisRun(
+                                                selectedModel,
+                                                isTrunk ? '' : runFrom,
+                                                isTrunk ? '' : runTo,
+                                                runProvider,
+                                                runProvider === 'hybrid' ? hybridAnthropicModel : undefined,
+                                                runTimeframe || undefined,
+                                                isTrunk ? (selectedTrunkId ?? undefined) : undefined,
+                                            ).then(job => {
                                                 if (job) setRunningJob(job);
                                             }).catch(err => alert(`Failed: ${err.message || err}`));
                                         }}
-                                        disabled={!selectedModel || !runFrom || !runTo}
+                                        disabled={!selectedModel || (analysisMode === 'live' && (!runFrom || !runTo)) || (analysisMode === 'trunk' && !selectedTrunkId)}
                                         className="px-4 py-1.5 rounded text-sm font-medium bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        Run Analysis
+                                        {analysisMode === 'trunk' ? 'Analyze Trunk' : 'Run Analysis'}
                                     </button>
                                 )}
                             </div>
@@ -1157,7 +1241,9 @@ export default function Analysis() {
                                             <div className="flex items-center justify-between mb-3">
                                                 <div className="flex items-center gap-2">
                                                     <h2 className={`text-lg font-semibold ${textPrimary}`}>
-                                                        {(runDetail.run.scope || 'hourly').charAt(0).toUpperCase() + (runDetail.run.scope || 'hourly').slice(1)} Report
+                                                        {runDetail.run.scope === 'trunk'
+                                                            ? `Trunk #${runDetail.run.trunk_id} Analysis`
+                                                            : `${(runDetail.run.scope || 'hourly').charAt(0).toUpperCase() + (runDetail.run.scope || 'hourly').slice(1)} Report`}
                                                     </h2>
                                                     {(() => {
                                                         const rsc = scopeColors[runDetail.run.scope || 'hourly'] || scopeColors.hourly;
