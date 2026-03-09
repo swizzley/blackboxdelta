@@ -279,7 +279,14 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
     return (
         <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700/70' : 'bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors`} onClick={toggle}>
             <div className="flex items-center justify-between mb-3">
-                <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Trunk #{trunk.id}</span>
+                <div className="flex items-center gap-2">
+                    <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Trunk #{trunk.id}</span>
+                    {trunk.promoted_from_recommendation_id && (
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            isDarkMode ? 'bg-violet-900/50 text-violet-300' : 'bg-violet-100 text-violet-700'
+                        }`}>{trunk.promoted_rec_source ?? 'rec'}</span>
+                    )}
+                </div>
                 <div className="flex items-center gap-2">
                     <span className={`text-xs ${muted}`}>Gen {trunk.generation} — {dayjs(trunk.promoted_at).fromNow()}</span>
                     {loading
@@ -512,7 +519,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
                     {t.promoted_from_recommendation_id && (
                         <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                             isDarkMode ? 'bg-violet-900/50 text-violet-300' : 'bg-violet-100 text-violet-700'
-                        }`}>from rec #{t.promoted_from_recommendation_id}</span>
+                        }`}>{t.promoted_rec_source ?? 'rec'}</span>
                     )}
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
