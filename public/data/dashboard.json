@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-09T20:57:21Z",
+  "generated": "2026-03-09T21:00:01Z",
   "all_time": {
     "total_orders": 1395,
     "pending": 0,
@@ -246,30 +246,30 @@
     },
     {
       "date": "2026-03-09",
-      "avg_final_score": 4.9,
+      "avg_final_score": 4.91,
       "avg_confidence": 0.99,
-      "avg_trend": 0.56,
-      "avg_ma": 6.71,
+      "avg_trend": 0.57,
+      "avg_ma": 6.75,
       "avg_crossover": 2.2,
       "avg_oscillator": -0.88,
-      "avg_volatility": 1.04,
+      "avg_volatility": 1.05,
       "avg_volume": 2.02,
-      "avg_fib_stack": 1.93,
+      "avg_fib_stack": 1.95,
       "avg_momentum_projection": 0.7,
       "avg_structure": 3.38,
-      "avg_cycle": 0.98,
+      "avg_cycle": 0.97,
       "avg_pattern": -0.28,
       "avg_sentiment": -0.017,
-      "count": 4305
+      "count": 4317
     }
   ],
   "recommendation_counts": {
-    "Buy": 2466,
+    "Buy": 2470,
     "Minimal Buy": 98,
     "Minimal Sell": 27,
-    "Moderate Buy": 3543,
-    "Moderate Sell": 3198,
-    "Sell": 1510,
+    "Moderate Buy": 3546,
+    "Moderate Sell": 3200,
+    "Sell": 1513,
     "Strong Buy": 15,
     "Weak Buy": 377,
     "Weak Sell": 186
