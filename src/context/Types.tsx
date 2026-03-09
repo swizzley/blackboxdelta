@@ -341,6 +341,8 @@ export interface MonitorOandaStatus {
     open_trades: number;
     status: string;
     message?: string;
+    massive_lag_s?: number;
+    massive_lag_status?: string;
 }
 
 export interface MonitorOllamaStatus {

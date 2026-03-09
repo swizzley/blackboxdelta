@@ -182,22 +182,48 @@ export default function System() {
                                         </div>
                                     </div>
 
-                                    {/* OANDA */}
+                                    {/* OANDA + Massive */}
                                     <div className={card}>
-                                        <h2 className={heading}><GlobeAltIcon className={iconCl}/>OANDA Broker</h2>
-                                        <div className={`flex items-center gap-3 rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                            {monitor.oanda?.connected ? (
-                                                <CheckCircleIcon className="w-8 h-8 text-emerald-500 flex-shrink-0"/>
-                                            ) : (
-                                                <XCircleIcon className="w-8 h-8 text-red-500 flex-shrink-0"/>
-                                            )}
-                                            <div>
-                                                <p className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                                                    {monitor.oanda?.connected ? 'Connected' : 'Disconnected'}
-                                                </p>
-                                                {monitor.oanda?.message && (
-                                                    <p className={`text-xs ${muted}`}>{monitor.oanda.message}</p>
+                                        <h2 className={heading}><GlobeAltIcon className={iconCl}/>Broker &amp; Data Feed</h2>
+                                        <div className="space-y-2">
+                                            {/* OANDA row */}
+                                            <div className={`flex items-center gap-3 rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                {monitor.oanda?.connected ? (
+                                                    <CheckCircleIcon className="w-6 h-6 text-emerald-500 flex-shrink-0"/>
+                                                ) : (
+                                                    <XCircleIcon className="w-6 h-6 text-red-500 flex-shrink-0"/>
                                                 )}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`font-medium text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>OANDA</p>
+                                                    <p className={`text-xs ${muted}`}>{monitor.oanda?.connected ? 'Connected' : 'Disconnected'}</p>
+                                                </div>
+                                            </div>
+                                            {/* Massive row */}
+                                            <div className={`flex items-center gap-3 rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                {(() => {
+                                                    const st = monitor.oanda?.massive_lag_status;
+                                                    const color = st === 'ok' ? 'text-emerald-500' : st === 'warn' ? 'text-yellow-400' : 'text-red-500';
+                                                    const Icon = (st === 'ok' || st === 'warn') ? CheckCircleIcon : XCircleIcon;
+                                                    return <Icon className={`w-6 h-6 flex-shrink-0 ${color}`}/>;
+                                                })()}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className={`font-medium text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Massive</p>
+                                                    <p className={`text-xs ${muted}`}>collection-engine data feed</p>
+                                                </div>
+                                                {monitor.oanda?.massive_lag_s !== undefined && monitor.oanda.massive_lag_s >= 0 && (() => {
+                                                    const lag = monitor.oanda.massive_lag_s;
+                                                    const st = monitor.oanda.massive_lag_status;
+                                                    const cls = st === 'ok'
+                                                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                                                        : st === 'warn'
+                                                            ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+                                                            : 'bg-red-500/20 text-red-400 border-red-500/40';
+                                                    return (
+                                                        <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded border ${cls}`}>
+                                                            {lag}s
+                                                        </span>
+                                                    );
+                                                })()}
                                             </div>
                                         </div>
                                     </div>
