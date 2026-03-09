@@ -31,6 +31,10 @@ export default function System() {
     const {apiAvailable, apiBase} = useApi();
     const [monitor, setMonitor] = useState<MonitorStatus | null>(null);
     const [monitorConnected, setMonitorConnected] = useState(false);
+    const [drawerService, setDrawerService] = useState<{host: string; name: string} | null>(null);
+    const [drawerOutput, setDrawerOutput] = useState<string>('');
+    const [drawerLoading, setDrawerLoading] = useState(false);
+    const [expandedTable, setExpandedTable] = useState<string | null>(null);
 
     useEffect(() => {
         if (!apiAvailable) {
@@ -54,6 +58,17 @@ export default function System() {
 
         return () => { mounted = false; cleanup?.(); };
     }, [apiAvailable, apiBase]);
+
+    useEffect(() => {
+        if (!drawerService) return;
+        setDrawerLoading(true);
+        setDrawerOutput('');
+        fetch(`${apiBase}/api/monitor/service-status?host=${drawerService.host}&name=${drawerService.name}`, {signal: AbortSignal.timeout(10000)})
+            .then(res => res.ok ? res.json() : null)
+            .then(data => { if (data) setDrawerOutput(data.output ?? ''); })
+            .catch(() => setDrawerOutput('Failed to load service status.'))
+            .finally(() => setDrawerLoading(false));
+    }, [drawerService, apiBase]);
 
     const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
     const heading = `text-lg font-semibold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
@@ -125,9 +140,9 @@ export default function System() {
                             {/* Services */}
                             {monitor && (
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                                    <ServerServices title="Cipher" services={monitor.services?.cipher || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
-                                    <ServerServices title="Genesis" services={monitor.services?.genesis || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} subtitle="replica"/>
-                                    <ServerServices title="Sage" services={monitor.services?.sage || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
+                                    <ServerServices title="Cipher" host="cipher" services={monitor.services?.cipher || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} onServiceClick={(host, name) => setDrawerService({host, name})}/>
+                                    <ServerServices title="Genesis" host="genesis" services={monitor.services?.genesis || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} subtitle="replica" onServiceClick={(host, name) => setDrawerService({host, name})}/>
+                                    <ServerServices title="Sage" host="sage" services={monitor.services?.sage || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} onServiceClick={(host, name) => setDrawerService({host, name})}/>
                                 </div>
                             )}
 
@@ -139,12 +154,26 @@ export default function System() {
                                         <h2 className={heading}><BoltIcon className={iconCl}/>Data Pipeline</h2>
                                         <div className="space-y-2">
                                             {Object.entries(monitor.data_freshness || {}).map(([table, d]) => (
-                                                <div key={table} className={`flex items-center justify-between rounded-lg px-3 py-2 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                                    <div className="flex items-center gap-2.5">
-                                                        <StatusDot status={statusColor(d.status)}/>
-                                                        <span className={`font-medium text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{table}</span>
+                                                <div key={table}>
+                                                    <div
+                                                        onClick={() => setExpandedTable(expandedTable === table ? null : table)}
+                                                        className={`flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer ${isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'} ${expandedTable === table ? 'rounded-b-none' : ''}`}
+                                                    >
+                                                        <div className="flex items-center gap-2.5">
+                                                            <StatusDot status={statusColor(d.status)}/>
+                                                            <span className={`font-medium text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{table}</span>
+                                                        </div>
+                                                        <span className={`text-xs ${muted}`}>{d.message || '—'}</span>
                                                     </div>
-                                                    <span className={`text-xs ${muted}`}>{d.message || '—'}</span>
+                                                    {expandedTable === table && (
+                                                        <div className={`px-3 py-2 rounded-b-lg text-xs font-mono ${isDarkMode ? 'bg-slate-800 text-gray-400' : 'bg-gray-100 text-gray-600'} border-t ${isDarkMode ? 'border-slate-600' : 'border-gray-200'}`}>
+                                                            {d.last_ts ? (
+                                                                <span>Last record: {new Date(d.last_ts).toUTCString()}</span>
+                                                            ) : (
+                                                                <span>{d.message || 'No data'}</span>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ))}
                                             {Object.keys(monitor.data_freshness || {}).length === 0 && (
@@ -267,6 +296,13 @@ export default function System() {
                 </div>
             </div>
             <Foot/>
+            <ServiceDrawer
+                service={drawerService}
+                output={drawerOutput}
+                loading={drawerLoading}
+                onClose={() => setDrawerService(null)}
+                isDarkMode={isDarkMode}
+            />
         </>
     );
 }
@@ -318,8 +354,9 @@ function ProgressBar({pct, isDarkMode}: {pct: number; isDarkMode: boolean}) {
     );
 }
 
-function ServerServices({title, services, isDarkMode, muted, card, heading, iconCl, subtitle}: {
-    title: string; services: MonitorServiceInfo[]; isDarkMode: boolean; muted: string; card: string; heading: string; iconCl: string; subtitle?: string;
+function ServerServices({title, host, services, isDarkMode, muted, card, heading, iconCl, subtitle, onServiceClick}: {
+    title: string; host: string; services: MonitorServiceInfo[]; isDarkMode: boolean; muted: string; card: string; heading: string; iconCl: string; subtitle?: string;
+    onServiceClick: (host: string, name: string) => void;
 }) {
     return (
         <div className={card}>
@@ -329,7 +366,7 @@ function ServerServices({title, services, isDarkMode, muted, card, heading, icon
             ) : (
                 <div className="space-y-2">
                     {services.map(s => (
-                        <div key={s.name} className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                        <div key={s.name} onClick={() => onServiceClick(host, s.name)} className={`flex items-center justify-between rounded-lg px-3 py-2.5 cursor-pointer ${isDarkMode ? 'bg-slate-700/50 hover:ring-1 hover:ring-cyan-500/40' : 'bg-gray-50 hover:ring-1 hover:ring-cyan-500/40'}`}>
                             <div className="flex items-center gap-2.5">
                                 {s.status === 'active' ? (
                                     <CheckCircleIcon className="w-5 h-5 text-emerald-500 flex-shrink-0"/>
@@ -568,6 +605,44 @@ function MiniStat({label, value, isDarkMode}: {label: string; value: string; isD
             <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p>
             <p className={`text-lg font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{value}</p>
         </div>
+    );
+}
+
+function ServiceDrawer({service, output, loading, onClose}: {
+    service: {host: string; name: string} | null;
+    output: string;
+    loading: boolean;
+    onClose: () => void;
+    isDarkMode: boolean;
+}) {
+    useEffect(() => {
+        if (!service) return;
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
+    }, [service, onClose]);
+
+    if (!service) return null;
+    return (
+        <>
+            <div className="fixed inset-0 bg-black/60 z-40" onClick={onClose}/>
+            <div className="fixed inset-y-0 right-0 w-full max-w-2xl z-50 flex flex-col bg-black border-l border-cyan-900/50 shadow-2xl">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-cyan-900/40 bg-gray-950">
+                    <div>
+                        <span className="text-cyan-400 font-mono text-sm font-bold">{service.name}</span>
+                        <span className="text-cyan-700 font-mono text-xs ml-2">@ {service.host}</span>
+                    </div>
+                    <button onClick={onClose} className="text-cyan-600 hover:text-cyan-300 text-xl font-bold leading-none">&times;</button>
+                </div>
+                <div className="flex-1 overflow-auto p-4 bg-black">
+                    {loading ? (
+                        <p className="text-cyan-500 font-mono text-sm animate-pulse">Loading...</p>
+                    ) : (
+                        <pre className="text-cyan-400 text-xs font-mono whitespace-pre-wrap leading-relaxed">{output || 'No output'}</pre>
+                    )}
+                </div>
+            </div>
+        </>
     );
 }
 

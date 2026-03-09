@@ -23,6 +23,7 @@ export default {
       fontFamily: {
         serif: 'var(--font-inter)',
         display: ['var(--font-lexend)', { fontFeatureSettings: '"ss01"' }],
+        mono: ['Comic Code', 'Fira Code', 'ui-monospace', 'monospace'],
       },
       maxWidth: {
         '8xl': '88rem',

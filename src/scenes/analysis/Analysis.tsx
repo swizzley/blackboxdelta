@@ -461,6 +461,7 @@ export default function Analysis() {
         const pc = providerColors[run.provider] || providerColors.ollama;
         const isActive = runDetail?.run.run_id === run.run_id;
         const isCompare = compareDetail?.run.run_id === run.run_id;
+        const isSkipped = run.skipped === true;
         return (
             <div
                 key={run.run_id}
@@ -470,6 +471,8 @@ export default function Analysis() {
                         ? `${isDarkMode ? 'bg-cyan-500/10 ring-1 ring-cyan-500/30' : 'bg-cyan-50 ring-1 ring-cyan-300'}`
                         : isCompare
                         ? `${isDarkMode ? 'bg-purple-500/10 ring-1 ring-purple-500/30' : 'bg-purple-50 ring-1 ring-purple-300'}`
+                        : isSkipped
+                        ? `${isDarkMode ? 'bg-gray-800/60 opacity-60' : 'bg-gray-100/80 opacity-60'}`
                         : `${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'}`
                     }`}
                 style={{paddingLeft: `${indent * 16 + 12}px`}}
@@ -483,12 +486,16 @@ export default function Analysis() {
                 <span className={`text-xs px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} flex-shrink-0`}>
                     {tc.label}
                 </span>
-                <span className={`${isActive ? 'text-cyan-400' : isCompare ? 'text-purple-400' : textPrimary} flex-1 min-w-0 truncate`}>
+                <span className={`${isActive ? 'text-cyan-400' : isCompare ? 'text-purple-400' : isSkipped ? (isDarkMode ? 'text-gray-500' : 'text-gray-400') : textPrimary} flex-1 min-w-0 truncate`}>
                     {dayjs(run.created_at).format('h:mm A')}
+                    {isSkipped && <span className="ml-1.5 text-[10px] text-gray-500">Skipped — 0 trades in window</span>}
                 </span>
-                <span className={`text-xs ${textMuted} flex-shrink-0`}>
+                {isSkipped && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-600/40 text-gray-400 font-mono flex-shrink-0">SKIPPED</span>
+                )}
+                {!isSkipped && <span className={`text-xs ${textMuted} flex-shrink-0`}>
                     {run.order_count}
-                </span>
+                </span>}
                 {run.todo_count > 0 && run.tested_todo_count >= run.todo_count && (
                     <span className="inline-flex px-1.5 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 flex-shrink-0" title="All TODOs tested">
                         Tested

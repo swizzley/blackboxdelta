@@ -308,6 +308,7 @@ export interface MonitorDataFreshness {
     threshold_seconds: number;
     status: string;
     message?: string;
+    last_ts?: number;
 }
 
 export interface MonitorDBHealth {
@@ -521,6 +522,7 @@ export interface AnalysisRunApi {
     synthesis: string;
     data_start?: string;
     data_end?: string;
+    skipped?: boolean;
 }
 
 export interface AnalysisTodoApi {

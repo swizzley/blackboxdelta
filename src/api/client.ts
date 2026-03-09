@@ -212,3 +212,25 @@ export function triggerAnalysisRun(model: string, from: string, to: string, prov
 export function fetchAnalysisJobs(): Promise<AnalysisJob[] | null> {
     return apiFetch('/api/analysis/jobs');
 }
+
+export interface LiveData {
+    total_open: number;
+    open_longs: number;
+    open_shorts: number;
+    open_by_timeframe: Record<string, number>;
+    open_pairs: string[];
+    open_orders: Array<{
+        id: string;
+        symbol: string;
+        direction: string;
+        timeframe: string;
+        status: string;
+        opened: string;
+        units: number;
+        price: number;
+    }>;
+}
+
+export function fetchLive(): Promise<LiveData | null> {
+    return apiFetch('/api/live');
+}

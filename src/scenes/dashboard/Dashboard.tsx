@@ -15,7 +15,8 @@ import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {formatDollar} from '../common/Util';
-import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar} from '../../api/client';
+import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar, fetchLive} from '../../api/client';
+import type {LiveData} from '../../api/client';
 import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, TimeframeStats, TimeframeRow, ApiCalendarDay, DayData} from '../../context/Types';
 
 type Period = '1H' | '4H' | '12H' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'All';
@@ -385,6 +386,9 @@ export default function Dashboard() {
             <Nav/>
             <div className={`min-h-screen pb-12 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-500`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-20">
+                    {/* Live Positions */}
+                    <LiveActivity apiAvailable={apiAvailable} isDarkMode={isDarkMode}/>
+
                     {/* Period Selector + Active Filters */}
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                         <div className="flex items-center gap-2">
@@ -577,6 +581,118 @@ function computeStatsFromDayFiles(dateCutoff: string | null, period: string, anc
 
     if (orders.length === 0) return null;
     return computeStatsFromOrders(orders);
+}
+
+function LiveActivity({apiAvailable, isDarkMode}: {apiAvailable: boolean; isDarkMode: boolean}) {
+    const [liveData, setLiveData] = useState<LiveData | null>(null);
+    const [ordersExpanded, setOrdersExpanded] = useState(false);
+
+    useEffect(() => {
+        if (!apiAvailable) return;
+        fetchLive().then(d => setLiveData(d));
+        const interval = setInterval(() => {
+            fetchLive().then(d => setLiveData(d));
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [apiAvailable]);
+
+    if (!apiAvailable || !liveData) return null;
+
+    const tfOrder = ['scalp', 'intraday', 'swing'];
+    const cardBg = isDarkMode ? 'bg-slate-800' : 'bg-white';
+    const muted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
+
+    return (
+        <div className={`${cardBg} rounded-lg shadow p-5 mb-6 transition-colors duration-500`}>
+            <div className="flex items-center gap-2 mb-4">
+                <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Live Positions</h2>
+                {liveData.total_open > 0 && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"/>
+                )}
+            </div>
+            {liveData.total_open === 0 ? (
+                <div className={`rounded-lg px-3 py-3 text-sm ${muted} ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                    No open positions
+                </div>
+            ) : (
+                <>
+                    {/* KPI row */}
+                    <div className={`rounded-lg px-4 py-3 mb-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                        <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                            <span className="font-bold text-cyan-400">{liveData.total_open}</span> open
+                            <span className="mx-2 text-gray-500">|</span>
+                            <span className="text-emerald-400">{liveData.open_longs} Long ↑</span>
+                            <span className="mx-2 text-gray-500">|</span>
+                            <span className="text-rose-400">{liveData.open_shorts} Short ↓</span>
+                        </p>
+                    </div>
+
+                    {/* Timeframe breakdown */}
+                    <div className={`rounded-lg px-4 py-3 mb-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                        <p className={`text-xs ${muted}`}>
+                            {tfOrder.map(tf => (
+                                <span key={tf} className="mr-4">
+                                    <span className={`font-medium capitalize ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{tf.charAt(0).toUpperCase() + tf.slice(1)}:</span>{' '}
+                                    <span className={`font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{liveData.open_by_timeframe[tf] ?? 0}</span>
+                                </span>
+                            ))}
+                        </p>
+                    </div>
+
+                    {/* Pair tags */}
+                    {liveData.open_pairs.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                            {liveData.open_pairs.map(pair => (
+                                <span key={pair} className="inline-flex px-2 py-0.5 rounded text-xs font-mono font-medium bg-cyan-500/20 text-cyan-400">
+                                    {pair}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Expandable orders table */}
+                    <button
+                        onClick={() => setOrdersExpanded(e => !e)}
+                        className={`text-xs font-medium ${isDarkMode ? 'text-cyan-500 hover:text-cyan-400' : 'text-cyan-600 hover:text-cyan-700'} mb-2`}
+                    >
+                        {ordersExpanded ? '▲ Hide orders' : '▼ Show orders'}
+                    </button>
+                    {ordersExpanded && (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-xs">
+                                <thead>
+                                    <tr className={`${muted} border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                        <th className="text-left py-1.5 pr-3 font-medium">Symbol</th>
+                                        <th className="text-left py-1.5 pr-3 font-medium">Direction</th>
+                                        <th className="text-left py-1.5 pr-3 font-medium">Timeframe</th>
+                                        <th className="text-left py-1.5 pr-3 font-medium">Status</th>
+                                        <th className="text-right py-1.5 pr-3 font-medium">Price</th>
+                                        <th className="text-left py-1.5 font-medium">Opened</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {liveData.open_orders.map(o => (
+                                        <tr key={o.id} className={`border-b ${isDarkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
+                                            <td className={`py-1.5 pr-3 font-mono font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{o.symbol}</td>
+                                            <td className={`py-1.5 pr-3 font-medium ${o.direction === 'Long' ? 'text-emerald-400' : 'text-rose-400'}`}>{o.direction}</td>
+                                            <td className="py-1.5 pr-3">
+                                                <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                                                    {o.timeframe}
+                                                </span>
+                                            </td>
+                                            <td className={`py-1.5 pr-3 ${muted}`}>{o.status}</td>
+                                            <td className={`py-1.5 pr-3 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{o.price}</td>
+                                            <td className={`py-1.5 ${muted}`}>{dayjs(o.opened).format('HH:mm')}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+    );
 }
 
 function formatDuration(mins: number): string {
