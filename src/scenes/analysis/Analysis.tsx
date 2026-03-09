@@ -79,6 +79,7 @@ interface RunGroup {
     run?: AnalysisRunApi; // the summary run at this level (if exists)
     children: RunGroup[];
     hourlyRuns: AnalysisRunApi[]; // leaf hourly runs
+    scheduled?: boolean; // if true, render full 24-hour grid with skipped slots for missing hours
 }
 
 // Returns true for days the forex market is fully closed (Saturday only).
@@ -118,6 +119,9 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
         dailyByDay[day].push(r);
     }
 
+    // Scheduled = has hourly runs (service-triggered). Ad-hoc = daily/weekly/etc only.
+    const isScheduled = (byScope['hourly']?.length ?? 0) > 0;
+
     // Determine calendar range: from oldest run to today
     const today = dayjs();
     let startDate = today.startOf('day');
@@ -126,12 +130,44 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
         if (d.isBefore(startDate)) startDate = d;
     }
 
-    // Generate ALL market-open (Mon-Fri) day nodes from startDate to today
+    // Build day nodes
     const dayNodes: Record<string, RunGroup> = {};
-    let d = startDate;
-    while (d.isBefore(today) || d.isSame(today, 'day')) {
-        if (!isMarketClosed(d)) {
-            const day = d.format('YYYY-MM-DD');
+
+    if (isScheduled) {
+        // Generate ALL market-open days from startDate to today (full calendar with skipped slots)
+        let d = startDate;
+        while (d.isBefore(today) || d.isSame(today, 'day')) {
+            if (!isMarketClosed(d)) {
+                const day = d.format('YYYY-MM-DD');
+                const hourlyRuns = Object.values(hourlyByDay[day] || {});
+                const dailyRuns = dailyByDay[day] || [];
+                if (dailyRuns.length === 1) {
+                    dayNodes[day] = {
+                        key: day, label: d.format('ddd, MMM D'), scope: 'daily',
+                        run: dailyRuns[0], children: [], hourlyRuns, scheduled: true,
+                    };
+                } else if (dailyRuns.length > 1) {
+                    dayNodes[day] = {
+                        key: day, label: d.format('ddd, MMM D'), scope: 'daily',
+                        children: [], hourlyRuns: [...dailyRuns, ...hourlyRuns], scheduled: true,
+                    };
+                } else {
+                    dayNodes[day] = {
+                        key: day, label: d.format('ddd, MMM D'), scope: 'daily',
+                        children: [], hourlyRuns, scheduled: true,
+                    };
+                }
+            }
+            d = d.add(1, 'day');
+        }
+    } else {
+        // Ad-hoc: only create day nodes for days that have actual runs (no skipped slots)
+        const allDays = new Set([
+            ...Object.keys(hourlyByDay),
+            ...Object.keys(dailyByDay),
+        ]);
+        for (const day of allDays) {
+            const d = dayjs(day);
             const hourlyRuns = Object.values(hourlyByDay[day] || {});
             const dailyRuns = dailyByDay[day] || [];
             if (dailyRuns.length === 1) {
@@ -139,19 +175,13 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
                     key: day, label: d.format('ddd, MMM D'), scope: 'daily',
                     run: dailyRuns[0], children: [], hourlyRuns,
                 };
-            } else if (dailyRuns.length > 1) {
+            } else {
                 dayNodes[day] = {
                     key: day, label: d.format('ddd, MMM D'), scope: 'daily',
                     children: [], hourlyRuns: [...dailyRuns, ...hourlyRuns],
                 };
-            } else {
-                dayNodes[day] = {
-                    key: day, label: d.format('ddd, MMM D'), scope: 'daily',
-                    children: [], hourlyRuns,
-                };
             }
         }
-        d = d.add(1, 'day');
     }
 
     // Build week nodes — all day nodes assigned to their ISO week
@@ -551,13 +581,13 @@ export default function Analysis() {
     const renderGroup = (group: RunGroup, depth: number): JSX.Element => {
         const isExpanded = expandedGroups.has(group.key);
         const sc = scopeColors[group.scope] || scopeColors.hourly;
-        // Day nodes always have content (24 hour slots, even if all skipped)
-        const hasContent = group.scope === 'daily' || group.children.length > 0 || group.hourlyRuns.length > 0;
+        // Scheduled day nodes always have content (24 hour slots, even if all skipped)
+        const hasContent = group.scheduled || group.children.length > 0 || group.hourlyRuns.length > 0;
         const totalRuns = countRuns(group);
 
-        // For day nodes: fill all hours 0-maxHour, skipped where no run exists
+        // For scheduled day nodes: fill all hours 0-maxHour, skipped where no run exists
         let hourSlots: JSX.Element[] = [];
-        if (group.scope === 'daily') {
+        if (group.scheduled) {
             const day = group.key;
             const now = dayjs();
             const isToday = day === now.format('YYYY-MM-DD');
