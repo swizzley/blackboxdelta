@@ -9,7 +9,7 @@ import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import type {AnalysisRunApi, AnalysisTodoApi, AnalysisRunDetailApi, OptimizerTrunk} from '../../context/Types';
 import {fetchAnalysisRuns, fetchAnalysisRunDetail, sendTodoToOptimizer, squashTodos,
-    fetchAnalysisModels, triggerAnalysisRun, fetchAnalysisJobs, fetchOptimizerTrunks,
+    fetchAnalysisModels, triggerAnalysisRun, fetchAnalysisJobs, fetchOptimizerTrunks, stopAnalysisJob,
     type OllamaModel, type AnalysisJob} from '../../api/client';
 import ReactMarkdown from 'react-markdown';
 
@@ -1034,14 +1034,26 @@ export default function Analysis() {
                             <div>
                                 {runningJob?.status === 'running' ? (
                                     <div className="flex flex-col gap-1.5">
-                                        <div className="px-4 py-1.5 rounded text-sm font-medium bg-yellow-500/20 text-yellow-400 flex items-center gap-2">
-                                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                            </svg>
-                                            {runningJob.phase > 0
-                                                ? `Phase ${runningJob.phase}/6: ${runningJob.phase_name || '...'}`
-                                                : `Starting (${runningJob.model})...`}
+                                        <div className="flex items-center gap-2">
+                                            <div className="px-4 py-1.5 rounded text-sm font-medium bg-yellow-500/20 text-yellow-400 flex items-center gap-2">
+                                                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                                </svg>
+                                                {runningJob.phase > 0
+                                                    ? `Phase ${runningJob.phase}/6: ${runningJob.phase_name || '...'}`
+                                                    : `Starting (${runningJob.model})...`}
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    stopAnalysisJob().then(j => {
+                                                        if (j) setRunningJob(j);
+                                                    });
+                                                }}
+                                                className="px-3 py-1.5 rounded text-sm font-medium bg-red-600 hover:bg-red-500 text-white"
+                                            >
+                                                Stop
+                                            </button>
                                         </div>
                                         {runningJob.phase > 0 && (
                                             <div className={`h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
@@ -1077,9 +1089,11 @@ export default function Analysis() {
                             </div>
                         </div>
                         {runningJob && runningJob.status !== 'running' && (
-                            <div className={`mt-2 text-xs ${runningJob.status === 'completed' ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <div className={`mt-2 text-xs ${runningJob.status === 'completed' ? 'text-emerald-400' : runningJob.status === 'stopped' ? 'text-yellow-400' : 'text-red-400'}`}>
                                 {runningJob.status === 'completed'
                                     ? `Completed: ${runningJob.model} (${runningJob.from} to ${runningJob.to})`
+                                    : runningJob.status === 'stopped'
+                                    ? `Stopped at phase ${runningJob.phase}`
                                     : `Failed: ${runningJob.error || 'unknown error'}`
                                 }
                             </div>

@@ -230,6 +230,10 @@ export function fetchAnalysisJobs(): Promise<AnalysisJob[] | null> {
     return apiFetch('/api/analysis/jobs');
 }
 
+export function stopAnalysisJob(): Promise<AnalysisJob | null> {
+    return apiPost('/api/analysis/stop');
+}
+
 export interface LiveData {
     total_open: number;
     open_longs: number;
