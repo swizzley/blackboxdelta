@@ -314,6 +314,17 @@ function defaultMarketDay(): string {
     return d.format('YYYY-MM-DD');
 }
 
+// Mirrors Go's detectTimeframeFromKeys: returns the first timeframe suffix found in mutation keys.
+function detectTodoTimeframe(todo: AnalysisTodoApi): string {
+    if (!todo.mutations) return '';
+    for (const key of Object.keys(todo.mutations)) {
+        if (key.endsWith('.scalp')) return 'scalp';
+        if (key.endsWith('.intraday')) return 'intraday';
+        if (key.endsWith('.swing')) return 'swing';
+    }
+    return '';
+}
+
 export default function Analysis() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
@@ -1199,16 +1210,31 @@ export default function Analysis() {
                                                                         <button
                                                                             onClick={() => {
                                                                                 setQueueingAll(true);
-                                                                                const ids = queueable.map(t => t.id);
-                                                                                squashTodos(ids).then(() => {
+                                                                                const byTf: Record<string, AnalysisTodoApi[]> = {};
+                                                                                for (const t of queueable) {
+                                                                                    const tf = detectTodoTimeframe(t);
+                                                                                    if (!byTf[tf]) byTf[tf] = [];
+                                                                                    byTf[tf].push(t);
+                                                                                }
+                                                                                const calls: Promise<any>[] = [];
+                                                                                const allIds: number[] = [];
+                                                                                for (const group of Object.values(byTf)) {
+                                                                                    if (group.length >= 2) {
+                                                                                        calls.push(squashTodos(group.map(t => t.id)));
+                                                                                    } else {
+                                                                                        calls.push(sendTodoToOptimizer(group[0].id));
+                                                                                    }
+                                                                                    group.forEach(t => allIds.push(t.id));
+                                                                                }
+                                                                                Promise.all(calls).then(() => {
                                                                                     setSentTodos(prev => {
                                                                                         const next = new Set(prev);
-                                                                                        ids.forEach(id => next.add(id));
+                                                                                        allIds.forEach(id => next.add(id));
                                                                                         return next;
                                                                                     });
                                                                                     navigate('/optimizer');
                                                                                 }).catch(err => {
-                                                                                    alert(`Failed: ${err.message || err}`);
+                                                                                    alert(`Failed to queue all: ${err.message || err}`);
                                                                                 }).finally(() => setQueueingAll(false));
                                                                             }}
                                                                             disabled={queueingAll}
