@@ -419,7 +419,7 @@ export default function Analysis() {
         }).finally(() => setLoadingCompare(false));
     }, []);
 
-    const runTree = buildRunTree(allRuns);
+    const runTree = buildRunTree(allRuns.filter(r => r.provider === runProvider));
     const todos: AnalysisTodoApi[] = runDetail?.todos || [];
 
     const cardClass = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`;
