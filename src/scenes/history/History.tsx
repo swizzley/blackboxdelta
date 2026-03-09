@@ -1,4 +1,4 @@
-import {useEffect, useState, useCallback, useRef} from 'react';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
@@ -196,44 +196,82 @@ export default function History() {
                                     <th className={th} onClick={() => handleSort('profit')}>P&L<SortIndicator col="profit"/></th>
                                 </tr>
                                 </thead>
-                                <tbody className={`divide-y ${isDarkMode ? 'divide-slate-700' : 'divide-gray-100'}`}>
-                                {paged.map(o => (
-                                    <tr
-                                        key={o.id}
-                                        onClick={() => navigate(`/trade/${o.created.slice(0,10).replace(/-/g,'/')}/${o.id}`)}
-                                        className={`cursor-pointer ${isDarkMode ? 'hover:bg-slate-700/50 text-gray-200' : 'hover:bg-gray-50 text-gray-700'}`}
-                                    >
-                                        <td className={td}>{dayjs(o.created).format('YYYY-MM-DD HH:mm')}</td>
-                                        <td className={`${td} font-medium`}>
-                                            {o.symbol.replace('_', '/')}
-                                            {isSameCandle(o) && <span className="text-pink-500 ml-0.5" title="Entry and exit on same candle">*</span>}
-                                        </td>
-                                        <td className={td}>
-                                            <span className={o.direction === 'Long' ? 'text-emerald-500' : 'text-red-500'}>
-                                                {o.direction}
-                                            </span>
-                                        </td>
-                                        <td className={td}>{o.timeframe}</td>
-                                        <td className={td}>
-                                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
-                                                ${o.status === 'CLOSED' ? 'bg-gray-100 text-gray-700 dark:bg-slate-600 dark:text-gray-300' :
-                                                o.status === 'FILLED' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                                                    o.status === 'CANCELLED' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
-                                                        'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400'}`}
+                                <tbody>
+                                {(() => {
+                                    const rows: React.ReactNode[] = [];
+                                    let lastDay = '';
+                                    paged.forEach((o, i) => {
+                                        const day = o.created.slice(0, 10);
+                                        if (day !== lastDay) {
+                                            // Compute day totals for closed orders in this page
+                                            const dayOrders = paged.filter(x => x.created.startsWith(day));
+                                            const dayPL = dayOrders.reduce((sum, x) => sum + (x.profit ?? 0), 0);
+                                            const closed = dayOrders.filter(x => x.profit !== null);
+                                            const wins = closed.filter(x => (x.profit ?? 0) > 0).length;
+                                            lastDay = day;
+                                            rows.push(
+                                                <tr key={`day-${day}`} className={isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100/80'}>
+                                                    <td colSpan={7} className="px-3 py-1.5">
+                                                        <div className="flex items-center gap-3">
+                                                            <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                                {dayjs(day).format('ddd, MMM D YYYY')}
+                                                            </span>
+                                                            <span className={`text-xs font-bold ${dayPL > 0 ? 'text-emerald-500' : dayPL < 0 ? 'text-red-500' : isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                                {formatDollar(dayPL)}
+                                                            </span>
+                                                            {closed.length > 0 && (
+                                                                <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                                                    {wins}W/{closed.length - wins}L
+                                                                </span>
+                                                            )}
+                                                            <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                                                {dayOrders.length} orders
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        }
+                                        rows.push(
+                                            <tr
+                                                key={o.id}
+                                                onClick={() => navigate(`/trade/${o.created.slice(0,10).replace(/-/g,'/')}/${o.id}`)}
+                                                className={`cursor-pointer border-t ${isDarkMode ? 'border-slate-700 hover:bg-slate-700/50 text-gray-200' : 'border-gray-100 hover:bg-gray-50 text-gray-700'}`}
                                             >
-                                                {o.status}
-                                            </span>
-                                        </td>
-                                        <td className={`${td} text-xs`}>{o.close_reason ?? '-'}</td>
-                                        <td className={`${td} font-medium ${
-                                            o.profit === null ? '' :
-                                                o.profit > 0 ? 'text-emerald-500' :
-                                                    o.profit < 0 ? 'text-red-500' : ''
-                                        }`}>
-                                            {o.profit !== null ? formatDollar(o.profit) : '-'}
-                                        </td>
-                                    </tr>
-                                ))}
+                                                <td className={td}>{dayjs(o.created).format('YYYY-MM-DD HH:mm')}</td>
+                                                <td className={`${td} font-medium`}>
+                                                    {o.symbol.replace('_', '/')}
+                                                    {isSameCandle(o) && <span className="text-pink-500 ml-0.5" title="Entry and exit on same candle">*</span>}
+                                                </td>
+                                                <td className={td}>
+                                                    <span className={o.direction === 'Long' ? 'text-emerald-500' : 'text-red-500'}>
+                                                        {o.direction}
+                                                    </span>
+                                                </td>
+                                                <td className={td}>{o.timeframe}</td>
+                                                <td className={td}>
+                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                                                        ${o.status === 'CLOSED' ? 'bg-gray-100 text-gray-700 dark:bg-slate-600 dark:text-gray-300' :
+                                                        o.status === 'FILLED' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                                                            o.status === 'CANCELLED' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                                                'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400'}`}
+                                                    >
+                                                        {o.status}
+                                                    </span>
+                                                </td>
+                                                <td className={`${td} text-xs`}>{o.close_reason ?? '-'}</td>
+                                                <td className={`${td} font-medium ${
+                                                    o.profit === null ? '' :
+                                                        o.profit > 0 ? 'text-emerald-500' :
+                                                            o.profit < 0 ? 'text-red-500' : ''
+                                                }`}>
+                                                    {o.profit !== null ? formatDollar(o.profit) : '-'}
+                                                </td>
+                                            </tr>
+                                        );
+                                    });
+                                    return rows;
+                                })()}
                                 </tbody>
                             </table>
                         </div>
