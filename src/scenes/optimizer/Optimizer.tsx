@@ -191,20 +191,25 @@ export default function Optimizer() {
                                 ) : (
                                     <div className="space-y-1">
                                         {(() => {
-                                            // Find the live trunk (most recent pushed_at)
-                                            const liveTrunk = trunks
-                                                .filter(t => t.pushed_at)
-                                                .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime())[0];
-                                            const liveId = liveTrunk?.id;
-                                            // Sort: live trunk first, then by ID descending
+                                            // Find the live trunk per timeframe — most recently pushed for each tf
+                                            const liveIdByTf = new Map<string, number>();
+                                            for (const tf of ['scalp', 'intraday', 'swing']) {
+                                                const pushed = trunks
+                                                    .filter(t => t.timeframe === tf && t.pushed_at)
+                                                    .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime());
+                                                if (pushed.length > 0) liveIdByTf.set(tf, pushed[0].id);
+                                            }
+                                            // Sort: live trunks first (by tf order), then by ID descending
+                                            const liveIds = new Set(liveIdByTf.values());
                                             const sorted = [...trunks].sort((a, b) => {
-                                                if (a.id === liveId) return -1;
-                                                if (b.id === liveId) return 1;
+                                                const aLive = liveIds.has(a.id) ? 1 : 0;
+                                                const bLive = liveIds.has(b.id) ? 1 : 0;
+                                                if (aLive !== bLive) return bLive - aLive;
                                                 return b.id - a.id;
                                             });
                                             return sorted.map(t => (
                                                 <TrunkRow key={t.id} trunk={t} isDarkMode={isDarkMode} muted={muted}
-                                                          isLive={t.id === liveId}/>
+                                                          isLive={liveIdByTf.get(t.timeframe) === t.id}/>
                                             ));
                                         })()}
                                     </div>
