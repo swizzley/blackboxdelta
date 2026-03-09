@@ -644,7 +644,7 @@ function LiveActivity({apiAvailable, isDarkMode}: {apiAvailable: boolean; isDark
                         <div className="flex flex-wrap gap-1.5 mb-3">
                             {liveData.open_pairs.map(pair => (
                                 <span key={pair} className="inline-flex px-2 py-0.5 rounded text-xs font-mono font-medium bg-cyan-500/20 text-cyan-400">
-                                    {pair}
+                                    {pair.replace('_', '/')}
                                 </span>
                             ))}
                         </div>
@@ -673,7 +673,7 @@ function LiveActivity({apiAvailable, isDarkMode}: {apiAvailable: boolean; isDark
                                 <tbody>
                                     {liveData.open_orders.map(o => (
                                         <tr key={o.id} className={`border-b ${isDarkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
-                                            <td className={`py-1.5 pr-3 font-mono font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{o.symbol}</td>
+                                            <td className={`py-1.5 pr-3 font-mono font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{o.symbol.replace('_', '/')}</td>
                                             <td className={`py-1.5 pr-3 font-medium ${o.direction === 'Long' ? 'text-emerald-400' : 'text-rose-400'}`}>{o.direction}</td>
                                             <td className="py-1.5 pr-3">
                                                 <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
