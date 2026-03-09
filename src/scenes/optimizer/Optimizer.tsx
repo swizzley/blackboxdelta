@@ -258,6 +258,16 @@ export default function Optimizer() {
 
 // --- Sub-components ---
 
+function TrunkSourceDot({trunk}: {trunk: OptimizerTrunk}) {
+    const color = trunk.promoted_from_recommendation_id
+        ? 'bg-violet-400' : trunk.promoted_from_branch_id
+        ? 'bg-cyan-500' : 'bg-slate-500';
+    const title = trunk.promoted_from_recommendation_id
+        ? (trunk.promoted_rec_source ?? 'recommendation')
+        : trunk.promoted_from_branch_id ? 'optimizer' : 'seed';
+    return <span className={`inline-block w-2 h-2 rounded-sm flex-shrink-0 ${color}`} title={title}/>;
+}
+
 function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMode: boolean; muted: string}) {
     const r = trunk.oos_result;
     const [expanded, setExpanded] = useState(false);
@@ -279,13 +289,9 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
     return (
         <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700/70' : 'bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors`} onClick={toggle}>
             <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                    <TrunkSourceDot trunk={trunk}/>
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Trunk #{trunk.id}</span>
-                    {trunk.promoted_from_recommendation_id && (
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                            isDarkMode ? 'bg-violet-900/50 text-violet-300' : 'bg-violet-100 text-violet-700'
-                        }`}>{trunk.promoted_rec_source ?? 'rec'}</span>
-                    )}
                 </div>
                 <div className="flex items-center gap-2">
                     <span className={`text-xs ${muted}`}>Gen {trunk.generation} — {dayjs(trunk.promoted_at).fromNow()}</span>
@@ -360,20 +366,27 @@ function TrunkDiffDrawer({trunkId, isDarkMode, muted}: {trunkId: number; isDarkM
     );
 }
 
-function DiffBlock({diffs, baseId, isDarkMode: _isDarkMode, muted}: {diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string}) {
+function DiffBlock({diffs, baseId, isDarkMode, muted}: {diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string}) {
+    const filtered = [...diffs]
+        .filter(d => d.key !== 'check.trunk_winrate')
+        .sort((a, b) => a.key.localeCompare(b.key));
     return (
         <div>
             <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
-                vs {baseId ? `trunk #${baseId}` : 'baseline'} — {diffs.length} param{diffs.length !== 1 ? 's' : ''}
+                vs {baseId ? `trunk #${baseId}` : 'baseline'} — {filtered.length} param{filtered.length !== 1 ? 's' : ''}
             </p>
-            <div className="rounded border border-zinc-700 bg-zinc-950 px-2 py-1.5 overflow-hidden flex flex-wrap gap-1">
-                {[...diffs].sort((a, b) => a.key.localeCompare(b.key)).map(d => (
-                    <span key={d.key} className="inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800">
-                        <span className="text-zinc-400">{d.key}:</span>
+            <div className={`rounded border px-2 py-1.5 overflow-hidden flex flex-wrap gap-1 ${
+                isDarkMode ? 'border-slate-600/50 bg-slate-900/60' : 'border-gray-300 bg-gray-200/60'
+            }`}>
+                {filtered.map(d => (
+                    <span key={d.key} className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                        isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                    }`}>
+                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{d.key}:</span>
                         {d.old_value != null && <span className="text-red-400">{d.old_value}</span>}
-                        {d.old_value != null && !d.removed && <span className="text-zinc-600">→</span>}
+                        {d.old_value != null && !d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>→</span>}
                         {!d.removed && <span className="text-emerald-400">{d.new_value}</span>}
-                        {d.removed && <span className="text-zinc-600">(removed)</span>}
+                        {d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>(removed)</span>}
                     </span>
                 ))}
             </div>
@@ -496,7 +509,10 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
         }`}>
             <button onClick={toggle} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{t.id}</span>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <TrunkSourceDot trunk={t}/>
+                        <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{t.id}</span>
+                    </div>
                     <TimeframeBadge tf={t.timeframe} isDarkMode={isDarkMode}/>
                     <span className={`text-xs ${muted}`}>Gen {t.generation}</span>
                     {r && r.total_trades > 0 ? (
@@ -515,11 +531,6 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
                         <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                             isDarkMode ? 'bg-slate-600 text-gray-400' : 'bg-gray-200 text-gray-500'
                         }`}>previously pushed</span>
-                    )}
-                    {t.promoted_from_recommendation_id && (
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                            isDarkMode ? 'bg-violet-900/50 text-violet-300' : 'bg-violet-100 text-violet-700'
-                        }`}>{t.promoted_rec_source ?? 'rec'}</span>
                     )}
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
@@ -739,15 +750,18 @@ function RecommendationRow({rec, isDarkMode, muted, onQueue, onSkip, onApply}: {
                     )}
 
                     {/* Mutations */}
-                    {rec.mutations && Object.keys(rec.mutations).length > 0 && (
+                    {rec.mutations && Object.keys(rec.mutations).filter(k => k !== 'check.trunk_winrate').length > 0 && (
                         <div>
                             <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>Mutations</p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {Object.entries(rec.mutations).map(([k, v]) => (
-                                    <span key={k} className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-mono ${
-                                        isDarkMode ? 'bg-slate-600 text-gray-300' : 'bg-gray-200 text-gray-600'
+                            <div className={`rounded border px-2 py-1.5 overflow-hidden flex flex-wrap gap-1 ${
+                                isDarkMode ? 'border-slate-600/50 bg-slate-900/60' : 'border-gray-300 bg-gray-200/60'
+                            }`}>
+                                {Object.entries(rec.mutations).filter(([k]) => k !== 'check.trunk_winrate').sort(([a],[b]) => a.localeCompare(b)).map(([k, v]) => (
+                                    <span key={k} className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
                                     }`}>
-                                        {k}={v}
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{k}:</span>
+                                        <span className="text-emerald-400">{v}</span>
                                     </span>
                                 ))}
                             </div>
