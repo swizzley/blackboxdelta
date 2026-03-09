@@ -101,8 +101,9 @@ export function fetchOptimizerTrunks(limit = 20): Promise<OptimizerTrunk[] | nul
     return apiFetch(`/api/optimizer/trunks?limit=${limit}`);
 }
 
-export function fetchOptimizerTrunkDetail(trunkId: number): Promise<OptimizerTrunkDetail | null> {
-    return apiFetch(`/api/optimizer/trunks/${trunkId}`);
+export function fetchOptimizerTrunkDetail(trunkId: number, baseId?: number): Promise<OptimizerTrunkDetail | null> {
+    const qs = baseId !== undefined ? `?base_id=${baseId}` : '';
+    return apiFetch(`/api/optimizer/trunks/${trunkId}${qs}`);
 }
 
 export function fetchOptimizerBranches(generationId: number): Promise<OptimizerBranch[] | null> {

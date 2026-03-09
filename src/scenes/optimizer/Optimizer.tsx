@@ -260,11 +260,35 @@ export default function Optimizer() {
 
 function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMode: boolean; muted: string}) {
     const r = trunk.oos_result;
+    const [expanded, setExpanded] = useState(false);
+    const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const toggle = async () => {
+        if (!expanded && detail === null) {
+            setLoading(true);
+            const data = await fetchOptimizerTrunkDetail(trunk.id, 0);
+            setDetail(data ?? null);
+            setLoading(false);
+        }
+        setExpanded(e => !e);
+    };
+
+    const diffs = detail?.diffs ?? [];
+
     return (
-        <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+        <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700/70' : 'bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors`} onClick={toggle}>
             <div className="flex items-center justify-between mb-3">
                 <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Trunk #{trunk.id}</span>
-                <span className={`text-xs ${muted}`}>Gen {trunk.generation} — {dayjs(trunk.promoted_at).fromNow()}</span>
+                <div className="flex items-center gap-2">
+                    <span className={`text-xs ${muted}`}>Gen {trunk.generation} — {dayjs(trunk.promoted_at).fromNow()}</span>
+                    {loading
+                        ? <span className={`text-xs ${muted}`}>Loading…</span>
+                        : expanded
+                            ? <ChevronUpIcon className={`w-3.5 h-3.5 ${muted}`}/>
+                            : <ChevronDownIcon className={`w-3.5 h-3.5 ${muted}`}/>
+                    }
+                </div>
             </div>
             {r ? (
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
@@ -276,6 +300,15 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                 </div>
             ) : (
                 <p className={`text-sm ${muted}`}>No OOS result available</p>
+            )}
+            {expanded && detail && (
+                <div className="mt-3 pt-3 border-t border-slate-600/30" onClick={e => e.stopPropagation()}>
+                    {diffs.length === 0 ? (
+                        <p className={`text-xs ${muted}`}>No significant changes from baseline (trunk #{detail.diff_base_id})</p>
+                    ) : (
+                        <DiffBlock diffs={diffs} baseId={detail.diff_base_id} isDarkMode={isDarkMode} muted={muted}/>
+                    )}
+                </div>
             )}
         </div>
     );
