@@ -54,6 +54,10 @@ export interface CalendarDay {
     winners: number;
     losers: number;
     total: number;
+    win_pl?: number;
+    loss_pl?: number;
+    dur_sum?: number;
+    dur_count?: number;
 }
 
 export type CalendarData = Record<string, CalendarDay>;

@@ -325,10 +325,15 @@ export default function Dashboard() {
         // Last resort: recompute from calendar/PL data for this period
         if (filteredCalendar && Object.keys(filteredCalendar).length > 0) {
             let winners = 0, losers = 0, total = 0;
+            let winPL = 0, lossPL = 0, durSum = 0, durCount = 0;
             for (const day of Object.values(filteredCalendar)) {
                 winners += day.winners;
                 losers += day.losers;
                 total += day.total;
+                winPL += day.win_pl ?? 0;
+                lossPL += day.loss_pl ?? 0;
+                durSum += day.dur_sum ?? 0;
+                durCount += day.dur_count ?? 0;
             }
             const be = total - winners - losers;
             const totalPL = filteredPL.reduce((sum, d) => sum + d.daily_pl, 0);
@@ -339,7 +344,9 @@ export default function Dashboard() {
                 winners, losers, breakeven: be,
                 win_rate_pct: decided > 0 ? Math.round((winners / decided) * 10000) / 100 : null,
                 win_loss_ratio: losers > 0 ? Math.round((winners / losers) * 100) / 100 : null,
-                avg_win: null, avg_loss: null, avg_time_in_trade_mins: null,
+                avg_win: winners > 0 ? Math.round((winPL / winners) * 100) / 100 : null,
+                avg_loss: losers > 0 ? Math.round((lossPL / losers) * 100) / 100 : null,
+                avg_time_in_trade_mins: durCount > 0 ? Math.round(durSum / durCount) : null,
                 long_pl: 0, short_pl: 0,
             };
         }
