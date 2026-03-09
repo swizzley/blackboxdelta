@@ -186,15 +186,31 @@ function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
 
     // Build week nodes — all day nodes assigned to their ISO week
     const weekNodes: Record<string, RunGroup> = {};
+    // Group weekly runs by ISO week first, so multiple runs in the same week are handled correctly
+    const weeklyByWk: Record<string, AnalysisRunApi[]> = {};
     for (const r of (byScope['weekly'] || [])) {
         const rd = dayjs(r.created_at);
         const wk = rd.format('YYYY') + '-W' + String(rd.isoWeek()).padStart(2, '0');
-        const start = r.data_start ? dayjs(r.data_start).format('MMM D') : '';
-        const end = r.data_end ? dayjs(r.data_end).format('MMM D') : '';
-        weekNodes[wk] = {
-            key: wk, label: `Week ${rd.isoWeek()}${start ? ` (${start} - ${end})` : ''}`,
-            scope: 'weekly', run: r, children: [], hourlyRuns: [],
-        };
+        if (!weeklyByWk[wk]) weeklyByWk[wk] = [];
+        weeklyByWk[wk].push(r);
+    }
+    for (const [wk, wkRuns] of Object.entries(weeklyByWk)) {
+        const rd = dayjs(wkRuns[0].created_at);
+        const newest = wkRuns[wkRuns.length - 1];
+        const start = newest.data_start ? dayjs(newest.data_start).format('MMM D') : '';
+        const end = newest.data_end ? dayjs(newest.data_end).format('MMM D') : '';
+        if (wkRuns.length === 1) {
+            weekNodes[wk] = {
+                key: wk, label: `Week ${rd.isoWeek()}${start ? ` (${start} - ${end})` : ''}`,
+                scope: 'weekly', run: wkRuns[0], children: [], hourlyRuns: [],
+            };
+        } else {
+            // Multiple weekly runs in the same week: show newest as primary, rest accessible via hourlyRuns
+            weekNodes[wk] = {
+                key: wk, label: `Week ${rd.isoWeek()}${start ? ` (${start} - ${end})` : ''}`,
+                scope: 'weekly', run: newest, children: [], hourlyRuns: wkRuns.slice(0, -1),
+            };
+        }
     }
     for (const [day, node] of Object.entries(dayNodes)) {
         const rd = dayjs(day);
