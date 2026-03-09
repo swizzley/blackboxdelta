@@ -359,25 +359,16 @@ function DiffBlock({diffs, baseId, isDarkMode, muted}: {diffs: OptimizerParamDif
             <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
                 vs {baseId ? `trunk #${baseId}` : 'baseline'} — {diffs.length} param{diffs.length !== 1 ? 's' : ''}
             </p>
-            <div className={`rounded-lg overflow-hidden border max-h-64 overflow-y-auto ${isDarkMode ? 'border-slate-600 bg-slate-900' : 'border-gray-300 bg-gray-950'}`}>
-                <div className="overflow-x-auto">
-                    {[...diffs].sort((a, b) => a.key.localeCompare(b.key)).map(d => (
-                        <div key={d.key}>
-                            {d.old_value != null && (
-                                <div className="flex bg-red-500/10 border-l-2 border-red-500">
-                                    <span className="select-none w-6 text-center text-red-400 text-xs font-mono py-0.5 flex-shrink-0">-</span>
-                                    <span className="text-xs font-mono py-0.5 text-red-300">{d.key} = {d.old_value}</span>
-                                </div>
-                            )}
-                            {!d.removed && (
-                                <div className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
-                                    <span className="select-none w-6 text-center text-emerald-400 text-xs font-mono py-0.5 flex-shrink-0">+</span>
-                                    <span className="text-xs font-mono py-0.5 text-emerald-300">{d.key} = {d.new_value}</span>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
+            <div className="flex flex-wrap gap-1.5">
+                {[...diffs].sort((a, b) => a.key.localeCompare(b.key)).map(d => (
+                    <span key={d.key} className={`inline-flex items-center gap-1 text-xs font-mono px-2 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
+                        <span className={muted}>{d.key}:</span>
+                        {d.old_value != null && <span className="text-red-400">{d.old_value}</span>}
+                        {d.old_value != null && !d.removed && <span className={muted}>→</span>}
+                        {!d.removed && <span className="text-emerald-400">{d.new_value}</span>}
+                        {d.removed && <span className={muted}>(removed)</span>}
+                    </span>
+                ))}
             </div>
         </div>
     );
@@ -553,33 +544,9 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
                         </div>
                     )}
 
-                    {/* Param diffs — git-diff style */}
+                    {/* Param diffs */}
                     {detail && detail.diffs && detail.diffs.length > 0 && (
-                        <div>
-                            <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
-                                Changes since {detail.diff_base_id ? `trunk #${detail.diff_base_id}` : 'baseline'} ({detail.diffs.length} params)
-                            </p>
-                            <div className={`rounded-lg overflow-hidden border ${isDarkMode ? 'border-slate-600 bg-slate-900' : 'border-gray-300 bg-gray-950'}`}>
-                                <div className="overflow-x-auto">
-                                    {detail.diffs.sort((a, b) => a.key.localeCompare(b.key)).map(d => (
-                                        <div key={d.key}>
-                                            {d.old_value != null && (
-                                                <div className="flex bg-red-500/10 border-l-2 border-red-500">
-                                                    <span className="select-none w-6 text-center text-red-400 text-xs font-mono py-0.5 flex-shrink-0">-</span>
-                                                    <span className="text-xs font-mono py-0.5 text-red-300">{d.key} = {d.old_value}</span>
-                                                </div>
-                                            )}
-                                            {!d.removed && (
-                                                <div className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
-                                                    <span className="select-none w-6 text-center text-emerald-400 text-xs font-mono py-0.5 flex-shrink-0">+</span>
-                                                    <span className="text-xs font-mono py-0.5 text-emerald-300">{d.key} = {d.new_value}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
+                        <DiffBlock diffs={detail.diffs} baseId={detail.diff_base_id} isDarkMode={isDarkMode} muted={muted}/>
                     )}
 
                     {detail && (!detail.diffs || detail.diffs.length === 0) && (
@@ -686,31 +653,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
 
                             {/* Param diffs */}
                             {b.param_diffs && b.param_diffs.length > 0 && (
-                                <div>
-                                    <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
-                                        Mutations ({b.param_diffs.length} params)
-                                    </p>
-                                    <div className={`rounded-lg overflow-hidden border ${isDarkMode ? 'border-slate-600 bg-slate-900' : 'border-gray-300 bg-gray-950'}`}>
-                                        <div className="overflow-x-auto">
-                                            {b.param_diffs.sort((a, b) => a.key.localeCompare(b.key)).map(d => (
-                                                <div key={d.key}>
-                                                    {d.old_value != null && (
-                                                        <div className="flex bg-red-500/10 border-l-2 border-red-500">
-                                                            <span className="select-none w-6 text-center text-red-400 text-xs font-mono py-0.5 flex-shrink-0">-</span>
-                                                            <span className="text-xs font-mono py-0.5 text-red-300">{d.key} = {d.old_value}</span>
-                                                        </div>
-                                                    )}
-                                                    {!d.removed && (
-                                                        <div className="flex bg-emerald-500/10 border-l-2 border-emerald-500">
-                                                            <span className="select-none w-6 text-center text-emerald-400 text-xs font-mono py-0.5 flex-shrink-0">+</span>
-                                                            <span className="text-xs font-mono py-0.5 text-emerald-300">{d.key} = {d.new_value}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
+                                <DiffBlock diffs={b.param_diffs} isDarkMode={isDarkMode} muted={muted}/>
                             )}
                         </div>
                     </td>
