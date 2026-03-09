@@ -346,7 +346,8 @@ export default function Analysis() {
     const {apiAvailable} = useApi();
     const navigate = useNavigate();
     const [allRuns, setAllRuns] = useState<AnalysisRunApi[]>([]);
-    const [runProvider, setRunProvider] = useState<Provider>('hybrid');
+    const [runProvider, setRunProvider] = useState<Provider>('ollama');
+    const [hybridAnthropicModel, setHybridAnthropicModel] = useState('claude-sonnet-4-20250514');
     const [loading, setLoading] = useState(true);
     const [runDetail, setRunDetail] = useState<AnalysisRunDetailApi | null>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
@@ -918,14 +919,30 @@ export default function Analysis() {
                                         onChange={e => setSelectedModel(e.target.value)}
                                         className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
                                     >
-                                        {curatedModels(models).map(m => (
-                                            <option key={m.name} value={m.name}>
-                                                {runProvider === 'hybrid' ? `${m.label} + Claude Sonnet` : m.label}
-                                            </option>
-                                        ))}
+                                        {curatedModels(models).map(m => {
+                                            const claudeLabel = hybridAnthropicModel.includes('opus') ? 'Claude Opus' : 'Claude Sonnet';
+                                            return (
+                                                <option key={m.name} value={m.name}>
+                                                    {runProvider === 'hybrid' ? `${m.label} + ${claudeLabel}` : m.label}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 )}
                             </div>
+                            {runProvider === 'hybrid' && (
+                                <div className="flex-1 min-w-[160px]">
+                                    <label className={`block text-xs font-medium mb-1 ${textMuted}`}>Claude Model</label>
+                                    <select
+                                        value={hybridAnthropicModel}
+                                        onChange={e => setHybridAnthropicModel(e.target.value)}
+                                        className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                    >
+                                        <option value="claude-sonnet-4-20250514">Sonnet 4</option>
+                                        <option value="claude-opus-4-20250514">Opus 4</option>
+                                    </select>
+                                </div>
+                            )}
                             <div>
                                 <label className={`block text-xs font-medium mb-1 ${textMuted}`}>From</label>
                                 <input
@@ -968,7 +985,7 @@ export default function Analysis() {
                                 ) : (
                                     <button
                                         onClick={() => {
-                                            triggerAnalysisRun(selectedModel, runFrom, runTo, runProvider).then(job => {
+                                            triggerAnalysisRun(selectedModel, runFrom, runTo, runProvider, runProvider === 'hybrid' ? hybridAnthropicModel : undefined).then(job => {
                                                 if (job) setRunningJob(job);
                                             }).catch(err => alert(`Failed: ${err.message || err}`));
                                         }}

@@ -206,8 +206,8 @@ export interface AnalysisJob {
     error?: string;
 }
 
-export function triggerAnalysisRun(model: string, from: string, to: string, provider = 'ollama'): Promise<AnalysisJob | null> {
-    return apiPost('/api/analysis/run', {model, from, to, provider});
+export function triggerAnalysisRun(model: string, from: string, to: string, provider = 'ollama', anthropicModel?: string): Promise<AnalysisJob | null> {
+    return apiPost('/api/analysis/run', {model, from, to, provider, ...(anthropicModel ? {anthropic_model: anthropicModel} : {})});
 }
 
 export function fetchAnalysisJobs(): Promise<AnalysisJob[] | null> {
