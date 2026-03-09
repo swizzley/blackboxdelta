@@ -51,7 +51,6 @@ export default function TradeDetail() {
                 duration_mins: null,
                 alert_id: apiOrder.alert_id,
                 risk_reward: apiOrder.risk_reward,
-                score: apiOrder.score,
             };
 
             // Compute duration from created/closed
