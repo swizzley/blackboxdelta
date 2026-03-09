@@ -1,26 +1,35 @@
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
-import axios from 'axios';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import StatCard from '../common/StatCard';
 import HourBlock from './HourBlock';
 import {useTheme} from '../../context/Theme';
+import {useApi} from '../../context/Api';
 import {DayData} from '../../context/Types';
 import {formatDollar} from '../common/Util';
+import {fetchDay} from '../../api/client';
 import dayjs from 'dayjs';
 
 export default function DayDetail() {
     const {isDarkMode} = useTheme();
+    const {apiAvailable} = useApi();
     const {year, month, day} = useParams();
     const [data, setData] = useState<DayData | null>(null);
     const [error, setError] = useState(false);
 
     useEffect(() => {
-        axios.get(`/data/days/${year}/${month}/${day}.json`)
-            .then(r => setData(r.data))
+        if (!apiAvailable) {
+            setError(true);
+            return;
+        }
+        fetchDay(`${year}-${month}-${day}`)
+            .then(r => {
+                if (r) setData(r);
+                else setError(true);
+            })
             .catch(() => setError(true));
-    }, [year, month, day]);
+    }, [year, month, day, apiAvailable]);
 
     const dateDisplay = dayjs(`${year}-${month}-${day}`).format('dddd, MMMM D, YYYY');
 
@@ -40,7 +49,14 @@ export default function DayDetail() {
 
                     {error ? (
                         <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-12 shadow text-center`}>
-                            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>No data for this day.</p>
+                            <p className={`text-lg font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                {apiAvailable ? 'No data for this day.' : 'Day detail requires VPN access.'}
+                            </p>
+                            {!apiAvailable && (
+                                <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    Connect to VPN to view daily order breakdowns.
+                                </p>
+                            )}
                         </div>
                     ) : !data ? (
                         <p className={`text-center py-20 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Loading...</p>

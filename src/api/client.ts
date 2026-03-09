@@ -73,6 +73,14 @@ export function fetchPrices(symbol: string, timeframe: string, limit = 500): Pro
     return apiFetch(`/api/prices/${symbol}/${timeframe}?limit=${limit}`);
 }
 
+export function fetchPricesAround(symbol: string, timeframe: string, aroundMs: number, limit = 200): Promise<any[] | null> {
+    return apiFetch(`/api/prices/${symbol}/${timeframe}?around=${aroundMs}&limit=${limit}`);
+}
+
+export function fetchDay(date: string): Promise<any | null> {
+    return apiFetch(`/api/days/${date}`);
+}
+
 export function fetchMarkets(): Promise<ApiMarket[] | null> {
     return apiFetch('/api/markets');
 }

@@ -919,14 +919,9 @@ export default function Analysis() {
                                         onChange={e => setSelectedModel(e.target.value)}
                                         className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
                                     >
-                                        {curatedModels(models).map(m => {
-                                            const claudeLabel = hybridAnthropicModel.includes('opus') ? 'Claude Opus' : 'Claude Sonnet';
-                                            return (
-                                                <option key={m.name} value={m.name}>
-                                                    {runProvider === 'hybrid' ? `${m.label} + ${claudeLabel}` : m.label}
-                                                </option>
-                                            );
-                                        })}
+                                        {curatedModels(models).map(m => (
+                                            <option key={m.name} value={m.name}>{m.label}</option>
+                                        ))}
                                     </select>
                                 )}
                             </div>

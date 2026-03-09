@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
-import axios from 'axios';
 import ReactECharts from 'echarts-for-react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
@@ -8,74 +7,70 @@ import StatCard from '../common/StatCard';
 import {useTheme} from '../../context/Theme';
 import {formatDollar} from '../common/Util';
 import {useApi} from '../../context/Api';
-import {fetchOrder as apiFetchOrder} from '../../api/client';
+import {fetchOrder as apiFetchOrder, fetchPricesAround} from '../../api/client';
 import {OrderDetail, Score} from '../../context/Types';
 import dayjs from 'dayjs';
 
 export default function TradeDetail() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
-    const {year, month, day, id} = useParams();
+    const {id} = useParams();
     const [trade, setTrade] = useState<OrderDetail | null>(null);
     const [error, setError] = useState(false);
 
     useEffect(() => {
         if (!id) return;
-        const staticUrl = `/data/trades/${year}/${month}/${day}/${id}.json`;
+        if (!apiAvailable) {
+            setError(true);
+            return;
+        }
 
-        // Try static first (has full detail + candles), then supplement with API
-        axios.get(staticUrl)
-            .then(r => {
-                setTrade(r.data);
-                // If API available, overlay with fresher data for non-candle fields
-                if (apiAvailable) {
-                    apiFetchOrder(id).then(apiOrder => {
-                        if (apiOrder) {
-                            setTrade(prev => prev ? {
-                                ...prev,
-                                status: apiOrder.status,
-                                profit: apiOrder.profit,
-                                stop_loss: apiOrder.stop_loss,
-                                take_profit: apiOrder.take_profit,
-                                closed: apiOrder.closed ?? prev.closed,
-                            } : prev);
-                        }
-                    });
-                }
-            })
-            .catch(() => {
-                // Static failed — try API as sole source
-                if (apiAvailable) {
-                    apiFetchOrder(id).then(apiOrder => {
-                        if (apiOrder) {
-                            setTrade({
-                                id: apiOrder.id,
-                                trade_id: apiOrder.trade_id,
-                                symbol: apiOrder.symbol,
-                                direction: apiOrder.direction,
-                                timeframe: apiOrder.timeframe,
-                                status: apiOrder.status,
-                                type: apiOrder.type,
-                                entry: apiOrder.price,
-                                stop_loss: apiOrder.stop_loss,
-                                take_profit: apiOrder.take_profit,
-                                quantity: apiOrder.quantity,
-                                profit: apiOrder.profit,
-                                created: apiOrder.created,
-                                closed: apiOrder.closed,
-                                duration_mins: null,
-                                alert_id: apiOrder.alert_id,
-                                risk_reward: apiOrder.risk_reward,
-                            });
-                        } else {
-                            setError(true);
-                        }
-                    });
-                } else {
-                    setError(true);
-                }
-            });
-    }, [year, month, day, id, apiAvailable]);
+        apiFetchOrder(id).then(async apiOrder => {
+            if (!apiOrder) {
+                setError(true);
+                return;
+            }
+
+            const direction = (apiOrder.quantity ?? 0) > 0 ? 'Long' : 'Short';
+            const detail: OrderDetail = {
+                id: apiOrder.id,
+                trade_id: apiOrder.trade_id,
+                symbol: apiOrder.symbol,
+                direction,
+                timeframe: apiOrder.timeframe,
+                status: apiOrder.status,
+                type: apiOrder.type,
+                entry: apiOrder.price,
+                stop_loss: apiOrder.stop_loss,
+                take_profit: apiOrder.take_profit,
+                quantity: apiOrder.quantity,
+                profit: apiOrder.profit,
+                close_reason: apiOrder.close_reason,
+                created: apiOrder.created,
+                closed: apiOrder.closed,
+                duration_mins: null,
+                alert_id: apiOrder.alert_id,
+                risk_reward: apiOrder.risk_reward,
+                score: apiOrder.score,
+            };
+
+            // Compute duration from created/closed
+            if (apiOrder.created && apiOrder.closed) {
+                const mins = Math.round((new Date(apiOrder.closed).getTime() - new Date(apiOrder.created).getTime()) / 60000);
+                detail.duration_mins = Math.max(0, mins);
+            }
+
+            setTrade(detail);
+
+            // Fetch candles for chart
+            const symbol = apiOrder.symbol.replace('_', '');
+            const aroundMs = new Date(apiOrder.created).getTime();
+            const candles = await fetchPricesAround(symbol, apiOrder.timeframe, aroundMs, 200);
+            if (candles && candles.length > 0) {
+                setTrade(prev => prev ? {...prev, candles} : prev);
+            }
+        });
+    }, [id, apiAvailable]);
 
     return (
         <>
@@ -95,7 +90,14 @@ export default function TradeDetail() {
 
                     {error ? (
                         <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-12 shadow text-center`}>
-                            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Trade not found.</p>
+                            <p className={`text-lg font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                {apiAvailable ? 'Trade not found.' : 'Trade detail requires VPN access.'}
+                            </p>
+                            {!apiAvailable && (
+                                <p className={`mt-2 text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    Connect to VPN to view trade details and candle charts.
+                                </p>
+                            )}
                         </div>
                     ) : !trade ? (
                         <p className={`text-center py-20 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Loading...</p>

@@ -6,10 +6,10 @@ import {useApi} from '../../context/Api';
 
 const publicNav = [
     {name: 'Dashboard', href: '/'},
-    {name: 'History', href: '/history'},
 ];
 
 const vpnNav = [
+    {name: 'History', href: '/history'},
     {name: 'Analysis', href: '/analysis'},
     {name: 'System', href: '/system'},
     {name: 'Optimizer', href: '/optimizer'},
