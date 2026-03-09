@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-09T20:00:01Z",
+  "generated": "2026-03-09T20:02:40Z",
   "all_time": {
     "total_orders": 1388,
     "pending": 0,
@@ -10,7 +10,7 @@
     "losers": 926,
     "breakeven": 60,
     "win_loss_ratio": 0.43,
-    "win_rate_pct": 28.9,
+    "win_rate_pct": 0.29,
     "avg_win": 0.02,
     "avg_loss": -0.02,
     "avg_time_in_trade_mins": 43,
@@ -29,7 +29,7 @@
       "losers": 2,
       "breakeven": 11,
       "win_loss_ratio": 1,
-      "win_rate_pct": 13.3,
+      "win_rate_pct": 0.13,
       "avg_win": 0.13,
       "avg_loss": -1.44,
       "avg_time_in_trade_mins": 1024,
@@ -47,7 +47,7 @@
       "losers": 8,
       "breakeven": 11,
       "win_loss_ratio": 0.38,
-      "win_rate_pct": 13.6,
+      "win_rate_pct": 0.14,
       "avg_win": 0.75,
       "avg_loss": -0.16,
       "avg_time_in_trade_mins": 578,
@@ -65,7 +65,7 @@
       "losers": 916,
       "breakeven": 38,
       "win_loss_ratio": 0.43,
-      "win_rate_pct": 29.3,
+      "win_rate_pct": 0.29,
       "avg_win": 0.01,
       "avg_loss": -0.02,
       "avg_time_in_trade_mins": 36,
@@ -246,32 +246,32 @@
     },
     {
       "date": "2026-03-09",
-      "avg_final_score": 5.41,
+      "avg_final_score": 5.4,
       "avg_confidence": 0.99,
       "avg_trend": 0.71,
-      "avg_ma": 8,
-      "avg_crossover": 2.35,
+      "avg_ma": 7.96,
+      "avg_crossover": 2.34,
       "avg_oscillator": -0.83,
       "avg_volatility": 1.1,
       "avg_volume": 2.02,
-      "avg_fib_stack": 2.31,
+      "avg_fib_stack": 2.3,
       "avg_momentum_projection": 0.8,
       "avg_structure": 3.41,
       "avg_cycle": 0.97,
       "avg_pattern": -0.29,
       "avg_sentiment": -0.017,
-      "count": 4167
+      "count": 4177
     }
   ],
   "recommendation_counts": {
     "Buy": 2447,
     "Minimal Buy": 98,
     "Minimal Sell": 27,
-    "Moderate Buy": 3518,
-    "Moderate Sell": 3162,
-    "Sell": 1462,
+    "Moderate Buy": 3522,
+    "Moderate Sell": 3164,
+    "Sell": 1463,
     "Strong Buy": 15,
-    "Weak Buy": 369,
-    "Weak Sell": 184
+    "Weak Buy": 370,
+    "Weak Sell": 186
   }
 }
