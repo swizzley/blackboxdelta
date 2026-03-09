@@ -254,6 +254,10 @@ export interface ApiOrder {
     risk_reward?: number;
 }
 
+export interface ApiAlertScore {
+    final_score: number;
+}
+
 export interface ApiAlert {
     id: number;
     time: string;
@@ -262,7 +266,7 @@ export interface ApiAlert {
     strategy: string;
     timeframe: string;
     direction: string;
-    score: number;
+    score?: ApiAlertScore;
 }
 
 export interface ApiMarket {

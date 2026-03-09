@@ -65,8 +65,8 @@ export default function Status() {
     }, [apiAvailable, apiBase]);
 
     // Auto-scroll feeds
-    useEffect(() => { ordersEndRef.current?.scrollIntoView({behavior: 'smooth'}); }, [liveOrders]);
-    useEffect(() => { alertsEndRef.current?.scrollIntoView({behavior: 'smooth'}); }, [liveAlerts]);
+    useEffect(() => { ordersEndRef.current?.scrollIntoView({behavior: 'smooth', block: 'nearest'}); }, [liveOrders]);
+    useEffect(() => { alertsEndRef.current?.scrollIntoView({behavior: 'smooth', block: 'nearest'}); }, [liveAlerts]);
 
     const handleSaveUrl = useCallback(() => {
         setApiBase(urlInput.trim());
@@ -327,9 +327,9 @@ export default function Status() {
                                                 <div className="flex items-center gap-2">
                                                     <span className={muted}>{a.strategy}</span>
                                                     <span className={`font-medium ${
-                                                        Number(a.score) >= 70 ? 'text-emerald-500' :
-                                                        Number(a.score) >= 50 ? 'text-yellow-500' : 'text-red-500'
-                                                    }`}>{Number(a.score).toFixed(1)}</span>
+                                                        (a.score?.final_score ?? 0) >= 70 ? 'text-emerald-500' :
+                                                        (a.score?.final_score ?? 0) >= 50 ? 'text-yellow-500' : 'text-red-500'
+                                                    }`}>{(a.score?.final_score ?? 0).toFixed(1)}</span>
                                                 </div>
                                             </div>
                                         ))}
