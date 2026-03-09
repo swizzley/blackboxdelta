@@ -200,7 +200,7 @@ export default function History() {
                                 {(() => {
                                     const rows: React.ReactNode[] = [];
                                     let lastDay = '';
-                                    paged.forEach((o, i) => {
+                                    paged.forEach(o => {
                                         const day = o.created.slice(0, 10);
                                         if (day !== lastDay) {
                                             // Compute day totals for closed orders in this page
