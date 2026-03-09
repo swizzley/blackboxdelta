@@ -1,13 +1,13 @@
 {
-  "generated": "2026-03-09T17:55:10Z",
+  "generated": "2026-03-09T18:00:01Z",
   "all_time": {
     "total_orders": 1385,
     "pending": 0,
-    "open_positions": 3,
-    "closed_orders": 1382,
+    "open_positions": 2,
+    "closed_orders": 1383,
     "total_pl": -14.31,
     "winners": 399,
-    "losers": 922,
+    "losers": 923,
     "breakeven": 60,
     "win_loss_ratio": 0.43,
     "win_rate_pct": 0.29,
@@ -15,7 +15,7 @@
     "avg_loss": -0.02,
     "avg_time_in_trade_mins": 43,
     "long_pl": -4.78,
-    "short_pl": -9.53
+    "short_pl": -9.54
   },
   "by_timeframe": [
     {
@@ -58,11 +58,11 @@
       "timeframe": "scalp",
       "total_orders": 1348,
       "pending": 0,
-      "open_positions": 3,
-      "closed_orders": 1345,
+      "open_positions": 2,
+      "closed_orders": 1346,
       "total_pl": -12.66,
       "winners": 394,
-      "losers": 912,
+      "losers": 913,
       "breakeven": 38,
       "win_loss_ratio": 0.43,
       "win_rate_pct": 0.29,
@@ -184,7 +184,7 @@
       "long_wins": 3,
       "long_losses": 15,
       "short_wins": 2,
-      "short_losses": 15,
+      "short_losses": 16,
       "long_pl": -0.02,
       "short_pl": -0.03
     }
@@ -246,11 +246,11 @@
     },
     {
       "date": "2026-03-09",
-      "avg_final_score": 5.37,
+      "avg_final_score": 5.38,
       "avg_confidence": 0.99,
       "avg_trend": 0.7,
-      "avg_ma": 7.7,
-      "avg_crossover": 2.27,
+      "avg_ma": 7.71,
+      "avg_crossover": 2.28,
       "avg_oscillator": -0.84,
       "avg_volatility": 1.1,
       "avg_volume": 1.97,
@@ -260,16 +260,16 @@
       "avg_cycle": 0.98,
       "avg_pattern": -0.27,
       "avg_sentiment": -0.022,
-      "count": 3744
+      "count": 3748
     }
   ],
   "recommendation_counts": {
-    "Buy": 2365,
+    "Buy": 2366,
     "Minimal Buy": 91,
     "Minimal Sell": 25,
-    "Moderate Buy": 3399,
+    "Moderate Buy": 3401,
     "Moderate Sell": 3069,
-    "Sell": 1409,
+    "Sell": 1410,
     "Strong Buy": 15,
     "Weak Buy": 323,
     "Weak Sell": 163
