@@ -353,20 +353,20 @@ function TrunkDiffDrawer({trunkId, isDarkMode, muted}: {trunkId: number; isDarkM
     );
 }
 
-function DiffBlock({diffs, baseId, isDarkMode, muted}: {diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string}) {
+function DiffBlock({diffs, baseId, isDarkMode: _isDarkMode, muted}: {diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string}) {
     return (
         <div>
             <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
                 vs {baseId ? `trunk #${baseId}` : 'baseline'} — {diffs.length} param{diffs.length !== 1 ? 's' : ''}
             </p>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="rounded border border-zinc-700 bg-zinc-950 px-2 py-1.5 overflow-hidden flex flex-wrap gap-1">
                 {[...diffs].sort((a, b) => a.key.localeCompare(b.key)).map(d => (
-                    <span key={d.key} className={`inline-flex items-center gap-1 text-xs font-mono px-2 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-100'}`}>
-                        <span className={muted}>{d.key}:</span>
+                    <span key={d.key} className="inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800">
+                        <span className="text-zinc-400">{d.key}:</span>
                         {d.old_value != null && <span className="text-red-400">{d.old_value}</span>}
-                        {d.old_value != null && !d.removed && <span className={muted}>→</span>}
+                        {d.old_value != null && !d.removed && <span className="text-zinc-600">→</span>}
                         {!d.removed && <span className="text-emerald-400">{d.new_value}</span>}
-                        {d.removed && <span className={muted}>(removed)</span>}
+                        {d.removed && <span className="text-zinc-600">(removed)</span>}
                     </span>
                 ))}
             </div>
