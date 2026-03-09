@@ -186,11 +186,15 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
             },
         },
         legend: {
+            type: 'scroll',
             data: [
                 pointLabel, 'Cumulative', 'Winners', 'Losers',
                 ...(hasDirection ? ['Long WR', 'Short WR'] : []),
             ],
             textStyle: {color: isDarkMode ? '#9ca3af' : '#374151', fontSize: 11},
+            pageTextStyle: {color: isDarkMode ? '#9ca3af' : '#374151'},
+            pageIconColor: isDarkMode ? '#9ca3af' : '#374151',
+            pageIconInactiveColor: isDarkMode ? '#475569' : '#d1d5db',
             top: 0,
         },
         grid: {
