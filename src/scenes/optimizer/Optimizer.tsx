@@ -82,6 +82,23 @@ export default function Optimizer() {
                         </div>
                     ) : (
                         <>
+                            {/* Per-Timeframe OOS Trade Totals */}
+                            <div className="grid grid-cols-3 gap-6 mb-4">
+                                {['scalp', 'intraday', 'swing'].map(tf => {
+                                    const tfTrunks = trunks.filter(t => t.timeframe === tf);
+                                    const totalTrades = tfTrunks.reduce((sum, t) => sum + (t.oos_result?.total_trades ?? 0), 0);
+                                    return (
+                                        <div key={tf} className={`rounded-lg px-4 py-2 flex items-center justify-between ${isDarkMode ? 'bg-slate-800' : 'bg-white'} shadow`}>
+                                            <div className="flex items-center gap-2">
+                                                <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
+                                                <span className={`text-xs ${muted}`}>OOS trades (all trunks)</span>
+                                            </div>
+                                            <span className={`text-lg font-bold font-mono ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{totalTrades.toLocaleString()}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
                             {/* Per-Timeframe Trunks */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                                 {['scalp', 'intraday', 'swing'].map(tf => {
@@ -250,11 +267,12 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                 <span className={`text-xs ${muted}`}>Gen {trunk.generation} — {dayjs(trunk.promoted_at).fromNow()}</span>
             </div>
             {r ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                     <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="Profit Factor" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="Win Rate" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
+                    <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
                 </div>
             ) : (
                 <p className={`text-sm ${muted}`}>No OOS result available</p>
