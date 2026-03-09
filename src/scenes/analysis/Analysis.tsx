@@ -513,7 +513,7 @@ export default function Analysis() {
                 <span className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text} flex-shrink-0`}>
                     {(run.scope || 'hourly').charAt(0).toUpperCase() + (run.scope || 'hourly').slice(1)}
                 </span>
-                {(run.trigger !== 'service' || run.provider === 'ollama') && (
+                {run.provider === 'ollama' && run.trigger === 'service' && (
                     <span className={`text-xs px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} flex-shrink-0`}>
                         {tc.label}
                     </span>
