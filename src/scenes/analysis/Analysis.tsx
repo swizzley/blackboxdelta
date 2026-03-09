@@ -497,7 +497,8 @@ export default function Analysis() {
         }).finally(() => setLoadingCompare(false));
     }, []);
 
-    const runTree = buildRunTree(allRuns.filter(r => r.provider === runProvider));
+    const runTree = buildRunTree(allRuns.filter(r => r.provider === runProvider && r.scope !== 'trunk'));
+    const trunkRuns = allRuns.filter(r => r.provider === runProvider && r.scope === 'trunk').sort((a, b) => b.created_at.localeCompare(a.created_at));
     const todos: AnalysisTodoApi[] = runDetail?.todos || [];
 
     const cardClass = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`;
@@ -1109,9 +1110,32 @@ export default function Analysis() {
 
                             {/* Left: Run Tree */}
                             <div className={`${cardClass} lg:col-span-1 self-start lg:sticky lg:top-4`}>
-                                <h2 className={`text-sm font-semibold mb-3 ${textMuted}`}>Run History</h2>
+                                <h2 className={`text-sm font-semibold mb-3 ${textMuted}`}>
+                                    {analysisMode === 'trunk' ? 'Trunk Analysis History' : 'Live Orders History'}
+                                </h2>
                                 <div className="space-y-0.5 -mx-2">
-                                    {runTree.map(group => renderGroup(group, 0))}
+                                    {analysisMode === 'trunk' ? (
+                                        trunkRuns.length === 0 ? (
+                                            <p className={`px-3 text-xs ${textMuted}`}>No trunk analysis runs yet.</p>
+                                        ) : (() => {
+                                            const byDate: Record<string, AnalysisRunApi[]> = {};
+                                            for (const r of trunkRuns) {
+                                                const d = dayjs(r.created_at).format('YYYY-MM-DD');
+                                                if (!byDate[d]) byDate[d] = [];
+                                                byDate[d].push(r);
+                                            }
+                                            return Object.entries(byDate).sort(([a], [b]) => b.localeCompare(a)).map(([day, runs]) => (
+                                                <div key={day}>
+                                                    <div className={`px-3 py-1 text-[10px] font-semibold uppercase tracking-wider ${textMuted}`}>
+                                                        {dayjs(day).format('ddd, MMM D')}
+                                                    </div>
+                                                    {runs.map(run => renderRunRow(run, 0))}
+                                                </div>
+                                            ));
+                                        })()
+                                    ) : (
+                                        runTree.map(group => renderGroup(group, 0))
+                                    )}
                                 </div>
                             </div>
 
