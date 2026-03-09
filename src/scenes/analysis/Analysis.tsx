@@ -81,11 +81,10 @@ interface RunGroup {
     hourlyRuns: AnalysisRunApi[]; // leaf hourly runs
 }
 
-// Returns true for forex market-closed days (Saturday and Sunday).
-// The full weekend is omitted — Sunday opens late (~22:00 UTC) but isn't worth showing.
+// Returns true for days the forex market is fully closed (Saturday only).
+// Sunday is included — the market reopens Sunday ~22:00 UTC.
 function isMarketClosed(d: dayjs.Dayjs): boolean {
-    const dow = d.day(); // 0=Sun, 6=Sat
-    return dow === 0 || dow === 6;
+    return d.day() === 6; // 6=Saturday
 }
 
 function buildRunTree(runs: AnalysisRunApi[]): RunGroup[] {
