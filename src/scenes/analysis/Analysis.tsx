@@ -513,9 +513,11 @@ export default function Analysis() {
                 <span className={`inline-flex px-1.5 py-0.5 rounded text-xs font-medium ${sc.bg} ${sc.text} flex-shrink-0`}>
                     {(run.scope || 'hourly').charAt(0).toUpperCase() + (run.scope || 'hourly').slice(1)}
                 </span>
-                <span className={`text-xs px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} flex-shrink-0`}>
-                    {tc.label}
-                </span>
+                {(run.trigger !== 'service' || run.provider === 'ollama') && (
+                    <span className={`text-xs px-1.5 py-0.5 rounded ${tc.bg} ${tc.text} flex-shrink-0`}>
+                        {tc.label}
+                    </span>
+                )}
                 <span className={`${isActive ? 'text-cyan-400' : isCompare ? 'text-purple-400' : isSkipped ? (isDarkMode ? 'text-gray-500' : 'text-gray-400') : textPrimary} flex-1 min-w-0 truncate`}>
                     {dayjs(run.created_at).format('h:mm A')}
                     {isSkipped && <span className="ml-1.5 text-[10px] text-gray-500">Skipped — 0 trades in window</span>}
