@@ -1,5 +1,5 @@
 import {useEffect, useState, useCallback} from 'react';
-import {useNavigate} from 'react-router-dom';
+
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import isoWeek from 'dayjs/plugin/isoWeek';
@@ -346,7 +346,6 @@ function detectTodoTimeframe(todo: AnalysisTodoApi): string {
 export default function Analysis() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
-    const navigate = useNavigate();
     const [allRuns, setAllRuns] = useState<AnalysisRunApi[]>([]);
     const [runProvider, setRunProvider] = useState<Provider>('ollama');
     const [hybridAnthropicModel, setHybridAnthropicModel] = useState('claude-sonnet-4-20250514');
@@ -861,7 +860,6 @@ export default function Analysis() {
                                                     setSendingTodo(todo.id);
                                                     sendTodoToOptimizer(todo.id).then(() => {
                                                         setSentTodos(prev => new Set(prev).add(todo.id));
-                                                        navigate('/optimizer');
                                                     }).catch(err => {
                                                         alert(`Failed: ${err.message || err}`);
                                                     }).finally(() => setSendingTodo(null));
@@ -1384,7 +1382,6 @@ export default function Analysis() {
                                                                                         allIds.forEach(id => next.add(id));
                                                                                         return next;
                                                                                     });
-                                                                                    navigate('/optimizer');
                                                                                 }).catch(err => {
                                                                                     alert(`Failed to queue all: ${err.message || err}`);
                                                                                 }).finally(() => setQueueingAll(false));
@@ -1464,7 +1461,6 @@ export default function Analysis() {
                                             return next;
                                         });
                                         setSelectedForSquash(new Set());
-                                        navigate('/optimizer');
                                     }).catch(err => {
                                         alert(`Squash failed: ${err.message || err}`);
                                     }).finally(() => setSquashing(false));
