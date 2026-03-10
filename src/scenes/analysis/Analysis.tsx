@@ -1361,10 +1361,15 @@ export default function Analysis() {
                                                                             onClick={() => {
                                                                                 setQueueingAll(true);
                                                                                 const byTf: Record<string, AnalysisTodoApi[]> = {};
+                                                                                const skipped: string[] = [];
                                                                                 for (const t of queueable) {
                                                                                     const tf = detectTodoTimeframe(t);
+                                                                                    if (!tf) { skipped.push(t.title); continue; }
                                                                                     if (!byTf[tf]) byTf[tf] = [];
                                                                                     byTf[tf].push(t);
+                                                                                }
+                                                                                if (skipped.length > 0) {
+                                                                                    alert(`Skipped ${skipped.length} TODO(s) with no timeframe suffix:\n${skipped.join('\n')}`);
                                                                                 }
                                                                                 const calls: Promise<any>[] = [];
                                                                                 const allIds: number[] = [];
