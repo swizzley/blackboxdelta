@@ -286,11 +286,19 @@ export interface ApiSetting {
 }
 
 // Monitoring service types (from monitoring-service on cipher:8082)
+export interface MonitorPairFreshness {
+    symbol: string;
+    enabled: boolean;
+    age_secs: number;
+    status: string; // "ok" | "warn" | "critical" | "disabled"
+}
+
 export interface MonitorStatus {
     timestamp: string;
     market_open: boolean;
     services: Record<string, MonitorServiceInfo[]>;
     data_freshness: Record<string, MonitorDataFreshness>;
+    pair_freshness: MonitorPairFreshness[];
     database: Record<string, MonitorDBHealth>;
     replication: MonitorReplicationStatus;
     oanda: MonitorOandaStatus;

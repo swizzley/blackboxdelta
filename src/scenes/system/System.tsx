@@ -4,7 +4,7 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {connectMonitorStatus} from '../../api/sse';
-import type {MonitorStatus, MonitorServiceInfo, MonitorAlertEvent} from '../../context/Types';
+import type {MonitorStatus, MonitorServiceInfo, MonitorAlertEvent, MonitorPairFreshness} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, CpuChipIcon,
     ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon,
@@ -261,6 +261,11 @@ export default function System() {
                                 </div>
                             )}
 
+                            {/* Pair Freshness */}
+                            {monitor && (monitor.pair_freshness?.length ?? 0) > 0 && (
+                                <PairFreshnessGrid pairs={monitor.pair_freshness} isDarkMode={isDarkMode} card={card} heading={heading} iconCl={iconCl}/>
+                            )}
+
                             {/* Replication Visualization */}
                             {monitor && (
                                 <ReplicationViz replication={monitor.replication} database={monitor.database} isDarkMode={isDarkMode} card={card} heading={heading} iconCl={iconCl}/>
@@ -330,6 +335,44 @@ export default function System() {
                 isDarkMode={isDarkMode}
             />
         </>
+    );
+}
+
+function PairFreshnessGrid({pairs, isDarkMode, card, heading, iconCl}: {
+    pairs: MonitorPairFreshness[];
+    isDarkMode: boolean; card: string; heading: string; iconCl: string;
+}) {
+    const enabledCount = pairs.filter(p => p.enabled).length;
+    const okCount = pairs.filter(p => p.status === 'ok').length;
+
+    return (
+        <div className={`${card} mb-6`}>
+            <h2 className={heading}><GlobeAltIcon className={iconCl}/>Markets ({okCount}/{enabledCount} fresh)</h2>
+            <div className="flex flex-wrap gap-2">
+                {pairs.map(p => {
+                    const bg = p.status === 'ok'
+                        ? (isDarkMode ? 'bg-emerald-900/30 text-emerald-400 border-emerald-700/40' : 'bg-emerald-50 text-emerald-700 border-emerald-200')
+                        : p.status === 'warn'
+                            ? (isDarkMode ? 'bg-yellow-900/30 text-yellow-400 border-yellow-700/40' : 'bg-yellow-50 text-yellow-700 border-yellow-200')
+                            : p.status === 'critical'
+                                ? (isDarkMode ? 'bg-red-900/30 text-red-400 border-red-700/40' : 'bg-red-50 text-red-700 border-red-200')
+                                : (isDarkMode ? 'bg-slate-700/50 text-gray-500 border-slate-600' : 'bg-gray-100 text-gray-400 border-gray-200');
+                    const dot = p.status === 'ok' ? 'bg-emerald-400'
+                        : p.status === 'warn' ? 'bg-yellow-400'
+                            : p.status === 'critical' ? 'bg-red-500'
+                                : 'bg-gray-400';
+                    const ageLabel = p.status === 'disabled' ? '' : p.age_secs < 0 ? 'no data' : `${p.age_secs}s`;
+                    return (
+                        <span key={p.symbol} className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border ${bg}`}
+                              title={ageLabel ? `${p.symbol}: ${ageLabel}` : p.symbol}>
+                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dot}`}/>
+                            {p.symbol.replace('_', '/')}
+                            {ageLabel && <span className="opacity-60">{ageLabel}</span>}
+                        </span>
+                    );
+                })}
+            </div>
+        </div>
     );
 }
 

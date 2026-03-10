@@ -4,9 +4,9 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {formatDollar} from '../common/Util';
 import {useApi} from '../../context/Api';
-import {fetchMarkets, fetchSettings, fetchSystem} from '../../api/client';
+import {fetchSettings, fetchSystem} from '../../api/client';
 import {connectOrders, connectAlerts} from '../../api/sse';
-import type {ApiMarket, ApiSetting, ApiOrder, ApiAlert, ApiSystem, MonitorOllamaStatus} from '../../context/Types';
+import type {ApiSetting, ApiOrder, ApiAlert, ApiSystem, MonitorOllamaStatus} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, Cog6ToothIcon,
     GlobeAltIcon, CheckCircleIcon, ClockIcon, ArrowTrendingUpIcon,
@@ -25,7 +25,6 @@ export default function Status() {
     const [urlInput, setUrlInput] = useState(apiBase);
 
     const [system, setSystem] = useState<ApiSystem | null>(null);
-    const [markets, setMarkets] = useState<ApiMarket[] | null>(null);
     const [settings, setSettings] = useState<ApiSetting[] | null>(null);
     const [liveOrders, setLiveOrders] = useState<ApiOrder[]>([]);
     const [liveAlerts, setLiveAlerts] = useState<ApiAlert[]>([]);
@@ -37,12 +36,10 @@ export default function Status() {
     useEffect(() => {
         if (!apiAvailable) {
             setSystem(null);
-            setMarkets(null);
             setSettings(null);
             return;
         }
         fetchSystem().then(setSystem);
-        fetchMarkets().then(setMarkets);
         fetchSettings().then(setSettings);
         fetch(`${apiBase}/api/monitor/status`, {signal: AbortSignal.timeout(5000)})
             .then(res => res.ok ? res.json() : null)
@@ -205,27 +202,6 @@ export default function Status() {
                                 </div>
                             )}
 
-                            {/* Markets */}
-                            {markets && (
-                                <div className={`${card} mb-6`}>
-                                    <h2 className={heading}><GlobeAltIcon className={iconCl}/>Markets ({markets.filter(m => m.enabled).length}/{markets.length} enabled)</h2>
-                                    <div className="flex flex-wrap gap-2">
-                                        {markets.map(m => (
-                                            <span
-                                                key={m.id}
-                                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
-                                                    m.enabled
-                                                        ? (isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700')
-                                                        : (isDarkMode ? 'bg-slate-700 text-gray-500' : 'bg-gray-100 text-gray-400')
-                                                }`}
-                                            >
-                                                <span className={`w-1.5 h-1.5 rounded-full ${m.enabled ? 'bg-emerald-400' : 'bg-gray-400'}`}/>
-                                                {m.id.replace('_', '/')}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
 
                             {/* Settings */}
                             {settings && (
