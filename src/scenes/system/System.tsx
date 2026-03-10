@@ -81,6 +81,8 @@ export default function System() {
     const countedServices = allServices.filter(s => s.type !== 'cli');
     const activeCount = countedServices.filter(s => s.status === 'active').length;
     const alertCount = monitor?.alerts_firing?.length ?? 0;
+    const criticalAlerts = monitor?.alerts_firing?.filter((a: MonitorAlertEvent) => a.status === 'critical') ?? [];
+    const criticalCount = criticalAlerts.length;
 
     return (
         <>
@@ -111,18 +113,18 @@ export default function System() {
                                          icon={<ChartBarIcon className="w-6 h-6"/>} isDarkMode={isDarkMode}/>
                                 <KPICard label="Services" value={`${activeCount}/${countedServices.length}`} color={activeCount === countedServices.length ? 'ok' : 'critical'}
                                          icon={<ServerStackIcon className="w-6 h-6"/>} isDarkMode={isDarkMode}/>
-                                <KPICard label="Alerts" value={String(alertCount)} color={alertCount === 0 ? 'ok' : 'critical'}
+                                <KPICard label="Alerts" value={String(alertCount)} color={alertCount === 0 ? 'ok' : criticalCount > 0 ? 'critical' : 'warn'}
                                          icon={<ExclamationTriangleIcon className="w-6 h-6"/>} isDarkMode={isDarkMode}/>
                             </div>
 
                             {/* Firing Alerts */}
-                            {alertCount > 0 && (
+                            {criticalCount > 0 && (
                                 <div className={`${isDarkMode ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border rounded-lg shadow p-5 mb-6`}>
                                     <h2 className={`text-lg font-semibold mb-3 flex items-center gap-2 text-red-500`}>
-                                        <ExclamationTriangleIcon className="w-5 h-5"/>Firing Alerts
+                                        <ExclamationTriangleIcon className="w-5 h-5"/>Critical Alerts
                                     </h2>
                                     <div className="space-y-2">
-                                        {monitor!.alerts_firing.map((a: MonitorAlertEvent) => (
+                                        {criticalAlerts.map((a: MonitorAlertEvent) => (
                                             <div key={a.name} className={`flex items-center justify-between rounded-lg px-3 py-2 ${isDarkMode ? 'bg-red-900/10' : 'bg-red-100/50'}`}>
                                                 <div className="flex items-center gap-2.5">
                                                     <StatusDot status={a.status === 'critical' ? 'critical' : 'warn'}/>
@@ -159,11 +161,11 @@ export default function System() {
                                                         onClick={() => setExpandedTable(expandedTable === table ? null : table)}
                                                         className={`flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer ${isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'} ${expandedTable === table ? 'rounded-b-none' : ''}`}
                                                     >
-                                                        <div className="flex items-center gap-2.5">
+                                                        <div className="flex items-center gap-2.5 flex-shrink-0">
                                                             <StatusDot status={statusColor(d.status)}/>
                                                             <span className={`font-medium text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{table}</span>
                                                         </div>
-                                                        <span className={`text-xs ${muted}`}>{d.message || '—'}</span>
+                                                        <span className={`text-xs ${muted} text-right truncate ml-3`}>{d.message || '—'}</span>
                                                     </div>
                                                     {expandedTable === table && (
                                                         <div className={`px-3 py-2 rounded-b-lg text-xs font-mono ${isDarkMode ? 'bg-slate-800 text-gray-400' : 'bg-gray-100 text-gray-600'} border-t ${isDarkMode ? 'border-slate-600' : 'border-gray-200'}`}>
