@@ -488,6 +488,7 @@ export interface OptimizerGeneration {
     passed?: number;
     failed?: number;
     running?: number;
+    consecutive_failures?: number;
 }
 
 export interface OptimizerRecommendation {
