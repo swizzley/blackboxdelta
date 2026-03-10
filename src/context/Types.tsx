@@ -86,6 +86,7 @@ export interface OrderSummary {
     close_reason?: string;
     created: string;
     closed: string | null;
+    spread?: number;
 }
 
 // Order (full detail)
@@ -109,6 +110,7 @@ export interface OrderDetail {
     duration_mins: number | null;
     alert_id?: number;
     risk_reward?: number;
+    spread?: number;
     candles?: Candle[];
     score?: Score;
     versions?: Record<string, { sha: string; message: string }>;
@@ -203,6 +205,34 @@ export interface ApiSentimentSummary {
     pairs_covered: number;
 }
 
+export interface ApiSentimentPair {
+    pair: string;
+    cumulative_score: number;
+    avg_score: number;
+    article_count: number;
+    last_updated: string;
+}
+
+export interface ApiSentimentArticle {
+    id: number;
+    site_name: string;
+    headline: string;
+    url: string;
+    language: string;
+    final_score: number | null;
+    score_method: string;
+    scraped_at: string;
+    pairs: string[];
+}
+
+export interface ApiSentimentFeed {
+    site_name: string;
+    last_scraped_at: string | null;
+    last_article_count: number;
+    last_error: string | null;
+    consecutive_fails: number;
+}
+
 export interface ApiServiceVersion {
     service: string;
     sha: string;
@@ -256,6 +286,7 @@ export interface ApiOrder {
     closed: string | null;
     alert_id?: number;
     risk_reward?: number;
+    spread?: number;
 }
 
 export interface ApiAlertScore {

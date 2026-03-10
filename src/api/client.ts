@@ -5,6 +5,7 @@ import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
     OptimizerBranch, OptimizerTrunkDetail,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
+    ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
 } from '../context/Types';
 
 const TIMEOUT = 5000;
@@ -254,4 +255,17 @@ export interface LiveData {
 
 export function fetchLive(): Promise<LiveData | null> {
     return apiFetch('/api/live');
+}
+
+// Sentiment
+export function fetchSentimentPairs(): Promise<ApiSentimentPair[] | null> {
+    return apiFetch('/api/sentiment/pairs');
+}
+
+export function fetchSentimentArticles(limit = 50): Promise<ApiSentimentArticle[] | null> {
+    return apiFetch(`/api/sentiment/articles?limit=${limit}`);
+}
+
+export function fetchSentimentFeeds(): Promise<ApiSentimentFeed[] | null> {
+    return apiFetch('/api/sentiment/feeds');
 }

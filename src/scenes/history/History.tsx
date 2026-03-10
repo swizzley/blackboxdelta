@@ -34,6 +34,7 @@ function apiOrderToSummary(o: ApiOrder): OrderSummary {
         close_reason: o.close_reason,
         created: o.created,
         closed: o.closed,
+        spread: o.spread,
     };
 }
 
@@ -193,6 +194,7 @@ export default function History() {
                                     <th className={th} onClick={() => handleSort('timeframe')}>Timeframe<SortIndicator col="timeframe"/></th>
                                     <th className={th} onClick={() => handleSort('status')}>Status<SortIndicator col="status"/></th>
                                     <th className={th}>Reason</th>
+                                    <th className={th}>Spread</th>
                                     <th className={th} onClick={() => handleSort('profit')}>P&L<SortIndicator col="profit"/></th>
                                 </tr>
                                 </thead>
@@ -211,7 +213,7 @@ export default function History() {
                                             lastDay = day;
                                             rows.push(
                                                 <tr key={`day-${day}`} className={isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100/80'}>
-                                                    <td colSpan={7} className="px-3 py-1.5">
+                                                    <td colSpan={8} className="px-3 py-1.5">
                                                         <div className="flex items-center gap-3">
                                                             <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                                                                 {dayjs(day).format('ddd, MMM D YYYY')}
@@ -260,6 +262,7 @@ export default function History() {
                                                     </span>
                                                 </td>
                                                 <td className={`${td} text-xs`}>{o.close_reason ?? '-'}</td>
+                                                <td className={`${td} text-xs`}>{o.spread ? o.spread.toFixed(5) : '-'}</td>
                                                 <td className={`${td} font-medium ${
                                                     o.profit === null ? '' :
                                                         o.profit > 0 ? 'text-emerald-500' :

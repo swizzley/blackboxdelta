@@ -4,9 +4,9 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {formatDollar} from '../common/Util';
 import {useApi} from '../../context/Api';
-import {fetchSettings, fetchSystem} from '../../api/client';
+import {fetchSettings, fetchSystem, fetchSentimentPairs, fetchSentimentFeeds} from '../../api/client';
 import {connectOrders, connectAlerts} from '../../api/sse';
-import type {ApiSetting, ApiOrder, ApiAlert, ApiSystem, MonitorOllamaStatus} from '../../context/Types';
+import type {ApiSetting, ApiOrder, ApiAlert, ApiSystem, MonitorOllamaStatus, ApiSentimentPair, ApiSentimentFeed} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, Cog6ToothIcon,
     GlobeAltIcon, CheckCircleIcon, ClockIcon, ArrowTrendingUpIcon,
@@ -29,6 +29,8 @@ export default function Status() {
     const [liveOrders, setLiveOrders] = useState<ApiOrder[]>([]);
     const [liveAlerts, setLiveAlerts] = useState<ApiAlert[]>([]);
     const [ollama, setOllama] = useState<MonitorOllamaStatus | null>(null);
+    const [sentimentPairs, setSentimentPairs] = useState<ApiSentimentPair[] | null>(null);
+    const [sentimentFeeds, setSentimentFeeds] = useState<ApiSentimentFeed[] | null>(null);
     const ordersEndRef = useRef<HTMLDivElement>(null);
     const alertsEndRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +43,8 @@ export default function Status() {
         }
         fetchSystem().then(setSystem);
         fetchSettings().then(setSettings);
+        fetchSentimentPairs().then(setSentimentPairs);
+        fetchSentimentFeeds().then(setSentimentFeeds);
         fetch(`${apiBase}/api/monitor/status`, {signal: AbortSignal.timeout(5000)})
             .then(res => res.ok ? res.json() : null)
             .then(data => { if (data?.ollama) setOllama(data.ollama); })
@@ -202,6 +206,86 @@ export default function Status() {
                                 </div>
                             )}
 
+
+                            {/* Sentiment Pairs */}
+                            {sentimentPairs && sentimentPairs.length > 0 && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}><ChartBarSquareIcon className={iconCl}/>Pair Sentiment</h2>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm">
+                                            <thead className={muted}>
+                                            <tr>
+                                                <th className="text-left py-2 px-2 font-medium">Pair</th>
+                                                <th className="text-right py-2 px-2 font-medium">Score</th>
+                                                <th className="text-right py-2 px-2 font-medium">Avg</th>
+                                                <th className="text-right py-2 px-2 font-medium">Articles</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>
+                                            {sentimentPairs.map(p => (
+                                                <tr key={p.pair} className={`border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-100'}`}>
+                                                    <td className="py-1.5 px-2 font-mono font-medium">{p.pair.replace(/(.{3})/, '$1/')}</td>
+                                                    <td className={`py-1.5 px-2 text-right font-mono ${
+                                                        p.cumulative_score > 0.1 ? 'text-emerald-500' :
+                                                        p.cumulative_score < -0.1 ? 'text-red-500' : muted
+                                                    }`}>{p.cumulative_score.toFixed(3)}</td>
+                                                    <td className={`py-1.5 px-2 text-right font-mono ${
+                                                        p.avg_score > 0.1 ? 'text-emerald-500' :
+                                                        p.avg_score < -0.1 ? 'text-red-500' : muted
+                                                    }`}>{p.avg_score.toFixed(3)}</td>
+                                                    <td className={`py-1.5 px-2 text-right ${muted}`}>{p.article_count}</td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Feed Health */}
+                            {sentimentFeeds && sentimentFeeds.length > 0 && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}><SignalIcon className={iconCl}/>Sentdex Feed Health</h2>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-sm">
+                                            <thead className={muted}>
+                                            <tr>
+                                                <th className="text-left py-2 px-2 font-medium">Feed</th>
+                                                <th className="text-right py-2 px-2 font-medium">Articles</th>
+                                                <th className="text-right py-2 px-2 font-medium">Fails</th>
+                                                <th className="text-left py-2 px-2 font-medium">Last Scraped</th>
+                                                <th className="text-left py-2 px-2 font-medium">Error</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>
+                                            {sentimentFeeds.map(f => (
+                                                <tr key={f.site_name} className={`border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-100'}`}>
+                                                    <td className="py-1.5 px-2 font-medium flex items-center gap-2">
+                                                        <span className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${
+                                                            f.consecutive_fails === 0 ? 'bg-emerald-400' :
+                                                            f.consecutive_fails <= 3 ? 'bg-yellow-400' :
+                                                            f.consecutive_fails <= 10 ? 'bg-orange-400' : 'bg-red-500'
+                                                        }`}/>
+                                                        {f.site_name}
+                                                    </td>
+                                                    <td className={`py-1.5 px-2 text-right ${muted}`}>{f.last_article_count}</td>
+                                                    <td className={`py-1.5 px-2 text-right ${
+                                                        f.consecutive_fails > 10 ? 'text-red-500 font-medium' :
+                                                        f.consecutive_fails > 3 ? 'text-orange-400' : muted
+                                                    }`}>{f.consecutive_fails}</td>
+                                                    <td className={`py-1.5 px-2 text-xs ${muted}`}>
+                                                        {f.last_scraped_at ? dayjs(f.last_scraped_at).fromNow() : 'never'}
+                                                    </td>
+                                                    <td className={`py-1.5 px-2 text-xs truncate max-w-xs ${
+                                                        f.last_error ? 'text-red-400' : muted
+                                                    }`}>{f.last_error || '-'}</td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Settings */}
                             {settings && (
