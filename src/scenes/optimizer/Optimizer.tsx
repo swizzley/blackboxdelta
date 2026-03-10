@@ -35,6 +35,9 @@ export default function Optimizer() {
     const [generations, setGenerations] = useState<OptimizerGeneration[]>([]);
     const [recommendations, setRecommendations] = useState<OptimizerRecommendation[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showQueue, setShowQueue] = useState(false);
+    const [showTrunks, setShowTrunks] = useState(false);
+    const [showGens, setShowGens] = useState(false);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -176,8 +179,12 @@ export default function Optimizer() {
 
                             {/* Verification Queue (Recommendations) */}
                             <div className={`${card} mb-6`}>
-                                <h2 className={heading}><LightBulbIcon className={iconCl}/>Verification Queue</h2>
-                                {recommendations.length === 0 ? (
+                                <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowQueue(q => !q)}>
+                                    <LightBulbIcon className={iconCl}/>Verification Queue
+                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{recommendations.length}</span>
+                                    {showQueue ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                                </h2>
+                                {showQueue && (recommendations.length === 0 ? (
                                     <div className={`text-center py-6 ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'} rounded-lg`}>
                                         <LightBulbIcon className={`w-8 h-8 mx-auto mb-2 ${isDarkMode ? 'text-gray-600' : 'text-gray-300'}`}/>
                                         <p className={`text-sm ${muted}`}>No pending recommendations</p>
@@ -197,13 +204,17 @@ export default function Optimizer() {
                                             />
                                         ))}
                                     </div>
-                                )}
+                                ))}
                             </div>
 
                             {/* Trunk History */}
                             <div className={`${card} mb-6`}>
-                                <h2 className={heading}><TableCellsIcon className={iconCl}/>Trunk History</h2>
-                                {trunks.length === 0 ? (
+                                <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowTrunks(t => !t)}>
+                                    <TableCellsIcon className={iconCl}/>Trunk History
+                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{trunks.length}</span>
+                                    {showTrunks ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                                </h2>
+                                {showTrunks && (trunks.length === 0 ? (
                                     <p className={`text-sm ${muted}`}>No trunks recorded</p>
                                 ) : (
                                     <div className="space-y-1">
@@ -230,13 +241,17 @@ export default function Optimizer() {
                                             ));
                                         })()}
                                     </div>
-                                )}
+                                ))}
                             </div>
 
                             {/* Generation History with expandable branch details */}
                             <div className={`${card} mb-6`}>
-                                <h2 className={heading}><ClockIcon className={iconCl}/>Generation History</h2>
-                                {generations.length === 0 ? (
+                                <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowGens(g => !g)}>
+                                    <ClockIcon className={iconCl}/>Generation History
+                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{generations.length}</span>
+                                    {showGens ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                                </h2>
+                                {showGens && (generations.length === 0 ? (
                                     <p className={`text-sm ${muted}`}>No generations recorded</p>
                                 ) : (
                                     <div className="space-y-1">
@@ -244,7 +259,7 @@ export default function Optimizer() {
                                             <GenerationRow key={g.id} gen={g} isDarkMode={isDarkMode} muted={muted} thCl={thCl} tdCl={tdCl}/>
                                         ))}
                                     </div>
-                                )}
+                                ))}
                             </div>
 
                         </>
@@ -395,22 +410,57 @@ function DiffBlock({diffs, baseId, isDarkMode, muted}: {diffs: OptimizerParamDif
 }
 
 function GenerationCard({gen, isDarkMode, muted}: {gen: OptimizerGeneration; isDarkMode: boolean; muted: string}) {
+    // Determine explanatory badge when generation has no branches
+    const noBranches = gen.branch_count === 0 && (gen.passed ?? 0) === 0 && (gen.failed ?? 0) === 0 && (gen.running ?? 0) === 0;
+    const failures = gen.consecutive_failures ?? 0;
+    let phaseBadge: {label: string; cls: string} | null = null;
+    if (noBranches && gen.status === 'active') {
+        const ageMinutes = dayjs().diff(dayjs(gen.started_at), 'minute');
+        if (failures >= 20) {
+            phaseBadge = {label: `Stall T2 (${failures} fails)`, cls: isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'};
+        } else if (failures >= 10) {
+            phaseBadge = {label: `Stall T1 (${failures} fails)`, cls: isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'};
+        } else if (ageMinutes < 3) {
+            phaseBadge = {label: 'AI Planning', cls: isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'};
+        } else {
+            phaseBadge = {label: 'Waiting', cls: isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'};
+        }
+    } else if (gen.status === 'active' && failures >= 10) {
+        // Even when branches are running, show stall indicator if many consecutive failures
+        phaseBadge = {label: `${failures} consecutive fails`, cls: isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'};
+    }
+
     return (
         <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Gen #{gen.id}</span>
                     <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
-                    <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
+                    {phaseBadge
+                        ? <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium animate-pulse ${phaseBadge.cls}`}>{phaseBadge.label}</span>
+                        : <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
+                    }
                 </div>
                 <span className={`text-xs ${muted}`}>{dayjs(gen.started_at).fromNow()}</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <MiniStat label="Branches" value={String(gen.branch_count)} isDarkMode={isDarkMode}/>
-                <MiniStat label="Passed" value={String(gen.passed ?? 0)} isDarkMode={isDarkMode}/>
-                <MiniStat label="Failed" value={String(gen.failed ?? 0)} isDarkMode={isDarkMode}/>
-                <MiniStat label="Running" value={String(gen.running ?? 0)} isDarkMode={isDarkMode}/>
-            </div>
+            {noBranches ? (
+                <p className={`text-xs ${muted}`}>
+                    {failures >= 20
+                        ? 'Deep stall — seed reset + cooldown pause active'
+                        : failures >= 10
+                            ? 'Stalling — escalated exploration with broader mutations and relaxed verifier'
+                            : phaseBadge?.label === 'AI Planning'
+                                ? 'AI is planning branch explorations for this generation...'
+                                : 'Generation is waiting — may be paused for replication lag, OOS data coverage, or post-reset cooldown'}
+                </p>
+            ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <MiniStat label="Branches" value={String(gen.branch_count)} isDarkMode={isDarkMode}/>
+                    <MiniStat label="Passed" value={String(gen.passed ?? 0)} isDarkMode={isDarkMode}/>
+                    <MiniStat label="Failed" value={String(gen.failed ?? 0)} isDarkMode={isDarkMode}/>
+                    <MiniStat label="Running" value={String(gen.running ?? 0)} isDarkMode={isDarkMode}/>
+                </div>
+            )}
         </div>
     );
 }
