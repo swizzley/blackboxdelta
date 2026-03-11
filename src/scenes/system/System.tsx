@@ -4,7 +4,7 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {connectMonitorStatus} from '../../api/sse';
-import type {MonitorStatus, MonitorServiceInfo, MonitorAlertEvent, MonitorPairFreshness} from '../../context/Types';
+import type {MonitorStatus, MonitorServiceInfo, MonitorAlertEvent, MonitorPairFreshness, MonitorCoverageEntry} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, CpuChipIcon,
     ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon,
@@ -266,6 +266,11 @@ export default function System() {
                             {/* Pair Freshness */}
                             {monitor && (monitor.pair_freshness?.length ?? 0) > 0 && (
                                 <PairFreshnessGrid pairs={monitor.pair_freshness} isDarkMode={isDarkMode} card={card} heading={heading} iconCl={iconCl}/>
+                            )}
+
+                            {/* Signal Data Coverage */}
+                            {monitor && (monitor.coverage?.length ?? 0) > 0 && (
+                                <CoverageTable entries={monitor.coverage} isDarkMode={isDarkMode} card={card} heading={heading} iconCl={iconCl}/>
                             )}
 
                             {/* Replication Visualization */}

@@ -324,12 +324,22 @@ export interface MonitorPairFreshness {
     status: string; // "ok" | "warn" | "critical" | "disabled"
 }
 
+export interface MonitorCoverageEntry {
+    timeframe: string;
+    data_start: string;
+    data_end: string;
+    total_days: number;
+    pair_count: number;
+    status: string;
+}
+
 export interface MonitorStatus {
     timestamp: string;
     market_open: boolean;
     services: Record<string, MonitorServiceInfo[]>;
     data_freshness: Record<string, MonitorDataFreshness>;
     pair_freshness: MonitorPairFreshness[];
+    coverage: MonitorCoverageEntry[];
     database: Record<string, MonitorDBHealth>;
     replication: MonitorReplicationStatus;
     oanda: MonitorOandaStatus;
