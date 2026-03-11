@@ -449,7 +449,7 @@ function CoverageTable({entries, isDarkMode, card, heading, iconCl}: {
                                                             : (isDarkMode ? 'bg-red-900/30 text-red-400 border-red-700/40' : 'bg-red-50 text-red-700 border-red-200');
                                                     return (
                                                         <span key={p.symbol} className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-mono border ${bg}`}
-                                                              title={`${p.symbol}: ${p.rows.toLocaleString()}/${p.expected.toLocaleString()} rows (${p.coverage_pct.toFixed(1)}%)`}>
+                                                              title={`${p.symbol}: ${p.rows.toLocaleString()}/${p.expected.toLocaleString()} days (${p.coverage_pct.toFixed(1)}%)`}>
                                                             {p.symbol} <span className="opacity-70">{p.coverage_pct.toFixed(1)}%</span>
                                                         </span>
                                                     );
