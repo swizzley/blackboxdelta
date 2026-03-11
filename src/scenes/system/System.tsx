@@ -383,6 +383,53 @@ function PairFreshnessGrid({pairs, isDarkMode, card, heading, iconCl}: {
     );
 }
 
+function CoverageTable({entries, isDarkMode, card, heading, iconCl}: {
+    entries: MonitorCoverageEntry[];
+    isDarkMode: boolean; card: string; heading: string; iconCl: string;
+}) {
+    const rowBg = (status: string) =>
+        status === 'ok'
+            ? (isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50/60')
+            : status === 'warn'
+                ? (isDarkMode ? 'bg-yellow-900/20' : 'bg-yellow-50/60')
+                : (isDarkMode ? 'bg-red-900/20' : 'bg-red-50/60');
+
+    const statusColor = (status: string) =>
+        status === 'ok' ? 'text-emerald-500' : status === 'warn' ? 'text-yellow-500' : 'text-red-500';
+
+    return (
+        <div className={`${card} mb-6`}>
+            <h2 className={heading}><ChartBarIcon className={iconCl}/>Signal Data Coverage</h2>
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className={`text-left ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <th className="pb-2 pl-3 font-medium">Timeframe</th>
+                            <th className="pb-2 font-medium">Earliest</th>
+                            <th className="pb-2 font-medium">Latest</th>
+                            <th className="pb-2 font-medium text-right">Days</th>
+                            <th className="pb-2 font-medium text-right">Pairs</th>
+                            <th className="pb-2 pr-3 font-medium text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {entries.map(e => (
+                            <tr key={e.timeframe} className={`${rowBg(e.status)} rounded`}>
+                                <td className={`py-2 pl-3 font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{e.timeframe}</td>
+                                <td className={`py-2 font-mono text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{e.data_start}</td>
+                                <td className={`py-2 font-mono text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{e.data_end}</td>
+                                <td className={`py-2 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{e.total_days.toLocaleString()}</td>
+                                <td className={`py-2 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{e.pair_count}</td>
+                                <td className={`py-2 pr-3 text-right font-semibold uppercase text-xs ${statusColor(e.status)}`}>{e.status}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
 // --- Sub-components ---
 
 function KPICard({label, value, color, icon, isDarkMode}: {label: string; value: string; color: StatusColor; icon: React.ReactNode; isDarkMode: boolean}) {
