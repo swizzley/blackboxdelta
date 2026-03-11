@@ -102,11 +102,11 @@
   "2026-03-11": {
     "pl": -0.16,
     "winners": 3,
-    "losers": 33,
-    "total": 39,
+    "losers": 35,
+    "total": 41,
     "win_pl": 0.03,
     "loss_pl": -0.19,
-    "dur_sum": 3025,
-    "dur_count": 36
+    "dur_sum": 3134,
+    "dur_count": 38
   }
 }
