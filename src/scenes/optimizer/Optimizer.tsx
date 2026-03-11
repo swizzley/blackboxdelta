@@ -319,12 +319,12 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                 </div>
             </div>
             {r ? (
-                <div className="grid grid-cols-4 sm:grid-cols-7 gap-3">
+                <div className="flex flex-wrap gap-2">
                     <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="WR" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="Avg Win" value={r.avg_win?.toFixed(4) ?? '—'} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                    <ResultStat label="Avg Loss" value={r.avg_loss?.toFixed(4) ?? '—'} isDarkMode={isDarkMode} color="text-red-500"/>
+                    <ResultStat label="Avg W" value={r.avg_win?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                    <ResultStat label="Avg L" value={r.avg_loss?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-red-500"/>
                     <ResultStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
                     <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
                 </div>
@@ -839,12 +839,12 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
     return (
         <div>
             <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>{label}</p>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            <div className="flex flex-wrap gap-2">
                 <ResultStat label="Sharpe" value={result.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="PF" value={result.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="Win%" value={result.win_rate ? `${result.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
-                <ResultStat label="Avg Win" value={result.avg_win?.toFixed(4) ?? '—'} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                <ResultStat label="Avg Loss" value={result.avg_loss?.toFixed(4) ?? '—'} isDarkMode={isDarkMode} color="text-red-500"/>
+                <ResultStat label="Avg W" value={result.avg_win?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                <ResultStat label="Avg L" value={result.avg_loss?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-red-500"/>
                 <ResultStat label="Trades" value={String(result.total_trades)} isDarkMode={isDarkMode}/>
                 <ResultStat label="Max DD" value={result.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="P&L" value={result.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(result.total_pnl)}/>
