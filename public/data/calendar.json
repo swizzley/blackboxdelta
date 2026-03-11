@@ -98,5 +98,15 @@
     "loss_pl": -0.1,
     "dur_sum": 2349,
     "dur_count": 48
+  },
+  "2026-03-11": {
+    "pl": 0,
+    "winners": 0,
+    "losers": 0,
+    "total": 1,
+    "win_pl": 0,
+    "loss_pl": 0,
+    "dur_sum": 0,
+    "dur_count": 0
   }
 }
