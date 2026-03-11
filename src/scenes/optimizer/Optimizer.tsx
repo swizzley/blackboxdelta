@@ -319,14 +319,14 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                 </div>
             </div>
             {r ? (
-                <div className="flex flex-wrap gap-2">
-                    <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="WR" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="Avg W" value={r.avg_win?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                    <ResultStat label="Avg L" value={r.avg_loss?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-red-500"/>
-                    <ResultStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
-                    <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                <div className={`flex items-center gap-3 text-xs font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <InlineStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                    <InlineStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                    <InlineStat label="WR" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
+                    <InlineStat label="AvgW" value={r.avg_win?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                    <InlineStat label="AvgL" value={r.avg_loss?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-red-500"/>
+                    <InlineStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
+                    <InlineStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
                 </div>
             ) : (
                 <p className={`text-sm ${muted}`}>No OOS result available</p>
@@ -850,6 +850,15 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
                 <ResultStat label="P&L" value={result.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(result.total_pnl)}/>
             </div>
         </div>
+    );
+}
+
+function InlineStat({label, value, isDarkMode, color}: {label: string; value: string; isDarkMode: boolean; color?: string}) {
+    return (
+        <span>
+            <span className={isDarkMode ? 'text-gray-500' : 'text-gray-400'}>{label}</span>{' '}
+            <span className={color ?? (isDarkMode ? 'text-gray-200' : 'text-gray-700')}>{value}</span>
+        </span>
     );
 }
 
