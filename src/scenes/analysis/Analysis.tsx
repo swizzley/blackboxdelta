@@ -962,7 +962,7 @@ export default function Analysis() {
                                         {trunks.length === 0 && <option value="">No trunks found</option>}
                                         {trunks.map(t => (
                                             <option key={t.id} value={t.id}>
-                                                Trunk #{t.id} — {t.timeframe} — Sharpe: {t.oos_result?.sharpe_ratio?.toFixed(2) ?? 'N/A'}, WR: {t.oos_result?.win_rate ? (t.oos_result.win_rate * 100).toFixed(0) + '%' : 'N/A'} — {dayjs(t.promoted_at).fromNow()}
+                                                Trunk #{t.id} — {t.timeframe} — Sharpe: {t.oos_result?.sharpe_ratio?.toFixed(2) ?? 'N/A'}, WR: {t.oos_result?.win_rate ? t.oos_result.win_rate.toFixed(0) + '%' : 'N/A'} — {dayjs(t.promoted_at).fromNow()}
                                             </option>
                                         ))}
                                     </select>
