@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
@@ -387,15 +387,17 @@ function CoverageTable({entries, isDarkMode, card, heading, iconCl}: {
     entries: MonitorCoverageEntry[];
     isDarkMode: boolean; card: string; heading: string; iconCl: string;
 }) {
-    const rowBg = (status: string) =>
-        status === 'ok'
+    const [expanded, setExpanded] = useState<string | null>(null);
+    const expectedYears: Record<string, number> = {scalp: 3, intraday: 5, swing: 17};
+
+    const pctColor = (pct: number) =>
+        pct >= 99 ? 'text-emerald-500' : pct >= 95 ? 'text-yellow-500' : 'text-red-500';
+    const pctBg = (pct: number) =>
+        pct >= 99
             ? (isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50/60')
-            : status === 'warn'
+            : pct >= 95
                 ? (isDarkMode ? 'bg-yellow-900/20' : 'bg-yellow-50/60')
                 : (isDarkMode ? 'bg-red-900/20' : 'bg-red-50/60');
-
-    const statusColor = (status: string) =>
-        status === 'ok' ? 'text-emerald-500' : status === 'warn' ? 'text-yellow-500' : 'text-red-500';
 
     return (
         <div className={`${card} mb-6`}>
@@ -405,23 +407,58 @@ function CoverageTable({entries, isDarkMode, card, heading, iconCl}: {
                     <thead>
                         <tr className={`text-left ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                             <th className="pb-2 pl-3 font-medium">Timeframe</th>
-                            <th className="pb-2 font-medium">Earliest</th>
-                            <th className="pb-2 font-medium">Latest</th>
+                            <th className="pb-2 font-medium">Expected</th>
+                            <th className="pb-2 font-medium">Range</th>
                             <th className="pb-2 font-medium text-right">Days</th>
                             <th className="pb-2 font-medium text-right">Pairs</th>
-                            <th className="pb-2 pr-3 font-medium text-right">Status</th>
+                            <th className="pb-2 pr-3 font-medium text-right">Coverage</th>
                         </tr>
                     </thead>
                     <tbody>
                         {entries.map(e => (
-                            <tr key={e.timeframe} className={`${rowBg(e.status)} rounded`}>
-                                <td className={`py-2 pl-3 font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{e.timeframe}</td>
-                                <td className={`py-2 font-mono text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{e.data_start}</td>
-                                <td className={`py-2 font-mono text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{e.data_end}</td>
-                                <td className={`py-2 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{e.total_days.toLocaleString()}</td>
-                                <td className={`py-2 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{e.pair_count}</td>
-                                <td className={`py-2 pr-3 text-right font-semibold uppercase text-xs ${statusColor(e.status)}`}>{e.status}</td>
-                            </tr>
+                            <React.Fragment key={e.timeframe}>
+                                <tr className={`${pctBg(e.coverage_pct)} cursor-pointer`}
+                                    onClick={() => setExpanded(expanded === e.timeframe ? null : e.timeframe)}>
+                                    <td className={`py-2 pl-3 font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                                        <span className="mr-1.5">{expanded === e.timeframe ? '▾' : '▸'}</span>
+                                        {e.timeframe}
+                                    </td>
+                                    <td className={`py-2 font-mono text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                        {expectedYears[e.timeframe] ?? '?'}y
+                                    </td>
+                                    <td className={`py-2 font-mono text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                        {e.data_start} — {e.data_end}
+                                    </td>
+                                    <td className={`py-2 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                        {e.total_days.toLocaleString()}/{e.expected_days.toLocaleString()}
+                                    </td>
+                                    <td className={`py-2 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{e.pair_count}</td>
+                                    <td className={`py-2 pr-3 text-right font-bold font-mono ${pctColor(e.coverage_pct)}`}>
+                                        {e.coverage_pct.toFixed(1)}%
+                                    </td>
+                                </tr>
+                                {expanded === e.timeframe && e.pairs?.length > 0 && (
+                                    <tr>
+                                        <td colSpan={6} className={`px-3 pb-3 ${isDarkMode ? 'bg-slate-800/50' : 'bg-gray-50/80'}`}>
+                                            <div className="flex flex-wrap gap-1.5 pt-2">
+                                                {e.pairs.map(p => {
+                                                    const bg = p.coverage_pct >= 99
+                                                        ? (isDarkMode ? 'bg-emerald-900/30 text-emerald-400 border-emerald-700/40' : 'bg-emerald-50 text-emerald-700 border-emerald-200')
+                                                        : p.coverage_pct >= 95
+                                                            ? (isDarkMode ? 'bg-yellow-900/30 text-yellow-400 border-yellow-700/40' : 'bg-yellow-50 text-yellow-700 border-yellow-200')
+                                                            : (isDarkMode ? 'bg-red-900/30 text-red-400 border-red-700/40' : 'bg-red-50 text-red-700 border-red-200');
+                                                    return (
+                                                        <span key={p.symbol} className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-mono border ${bg}`}
+                                                              title={`${p.symbol}: ${p.rows.toLocaleString()}/${p.expected.toLocaleString()} rows (${p.coverage_pct.toFixed(1)}%)`}>
+                                                            {p.symbol} <span className="opacity-70">{p.coverage_pct.toFixed(1)}%</span>
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
                         ))}
                     </tbody>
                 </table>

@@ -329,7 +329,18 @@ export interface MonitorCoverageEntry {
     data_start: string;
     data_end: string;
     total_days: number;
+    expected_days: number;
+    coverage_pct: number;
     pair_count: number;
+    pairs: MonitorPairCoverage[];
+    status: string;
+}
+
+export interface MonitorPairCoverage {
+    symbol: string;
+    rows: number;
+    expected: number;
+    coverage_pct: number;
     status: string;
 }
 
