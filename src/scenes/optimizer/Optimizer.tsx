@@ -86,17 +86,17 @@ export default function Optimizer() {
                     ) : (
                         <>
                             {/* Per-Timeframe OOS Trade Totals */}
-                            <div className="grid grid-cols-3 gap-6 mb-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-4">
                                 {['scalp', 'intraday', 'swing'].map(tf => {
                                     const tfTrunks = trunks.filter(t => t.timeframe === tf);
                                     const totalTrades = tfTrunks.reduce((sum, t) => sum + (t.oos_result?.total_trades ?? 0), 0);
                                     return (
-                                        <div key={tf} className={`rounded-lg px-4 py-2 flex items-center justify-between ${isDarkMode ? 'bg-slate-800' : 'bg-white'} shadow`}>
-                                            <div className="flex items-center gap-2">
+                                        <div key={tf} className={`rounded-lg px-4 py-2 flex items-center justify-between gap-3 ${isDarkMode ? 'bg-slate-800' : 'bg-white'} shadow`}>
+                                            <div className="flex items-center gap-2 min-w-0">
                                                 <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
-                                                <span className={`text-xs ${muted}`}>OOS trades (all trunks)</span>
+                                                <span className={`text-xs ${muted} leading-tight`}>OOS trades (all trunks)</span>
                                             </div>
-                                            <span className={`text-lg font-bold font-mono ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{totalTrades.toLocaleString()}</span>
+                                            <span className={`text-lg font-bold font-mono flex-shrink-0 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{totalTrades.toLocaleString()}</span>
                                         </div>
                                     );
                                 })}
