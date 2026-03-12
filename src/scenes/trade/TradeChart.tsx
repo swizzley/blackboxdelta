@@ -188,10 +188,10 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
         candleSeries.createPriceLine({
             price: trade.entry,
             color: '#8b5cf6',
-            lineWidth: 2,
-            lineStyle: LineStyle.Solid,
+            lineWidth: 1,
+            lineStyle: LineStyle.Dashed,
             axisLabelVisible: true,
-            title: 'Entry',
+            title: '',
         });
         candleSeries.createPriceLine({
             price: trade.stop_loss,
@@ -201,14 +201,16 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             axisLabelVisible: true,
             title: 'SL',
         });
-        candleSeries.createPriceLine({
-            price: trade.take_profit,
-            color: '#10b981',
-            lineWidth: 1,
-            lineStyle: LineStyle.Dashed,
-            axisLabelVisible: true,
-            title: 'TP',
-        });
+        if (trade.take_profit && trade.take_profit > 0) {
+            candleSeries.createPriceLine({
+                price: trade.take_profit,
+                color: '#10b981',
+                lineWidth: 1,
+                lineStyle: LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'TP',
+            });
+        }
         if (trade.exit !== undefined) {
             candleSeries.createPriceLine({
                 price: trade.exit,
@@ -221,7 +223,6 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
         }
 
         // Spread lines — show estimated ask-side band
-        // Spread values from API are in pips — convert to price units
         const pipSize = isJpy ? 0.01 : 0.0001;
         if (trade.avg_spread && trade.avg_spread > 0) {
             const isShort = trade.direction === 'Short';
@@ -233,8 +234,8 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
                 color: isDarkMode ? 'rgba(251, 191, 36, 0.5)' : 'rgba(245, 158, 11, 0.5)',
                 lineWidth: 1,
                 lineStyle: LineStyle.Dashed,
-                axisLabelVisible: true,
-                title: `Avg Spread (${trade.avg_spread.toFixed(1)} pips)`,
+                axisLabelVisible: false,
+                title: `Spd ${trade.avg_spread.toFixed(1)}p`,
             });
         }
         if (trade.max_spread && trade.max_spread > 0) {
@@ -248,7 +249,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
                 lineWidth: 1,
                 lineStyle: LineStyle.Dotted,
                 axisLabelVisible: false,
-                title: `Max Spread (${trade.max_spread.toFixed(1)} pips)`,
+                title: `Max ${trade.max_spread.toFixed(1)}p`,
             });
         }
 
