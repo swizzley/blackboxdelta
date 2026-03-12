@@ -329,7 +329,7 @@ function ScoreSection({score, isDarkMode}: { score: Score; isDarkMode: boolean }
         },
         yAxis: {
             type: 'value',
-            min: 0,
+            min: -100,
             max: 100,
             axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280'},
             splitLine: {lineStyle: {color: isDarkMode ? '#1e293b' : '#f3f4f6'}},
@@ -344,7 +344,7 @@ function ScoreSection({score, isDarkMode}: { score: Score; isDarkMode: boolean }
                 barWidth: '60%',
                 label: {
                     show: true,
-                    position: 'top',
+                    position: (p: any) => p.value >= 0 ? 'top' : 'bottom',
                     color: isDarkMode ? '#d1d5db' : '#374151',
                     fontSize: 11,
                     formatter: (p: any) => p.value.toFixed(1),
@@ -354,6 +354,13 @@ function ScoreSection({score, isDarkMode}: { score: Score; isDarkMode: boolean }
                 type: 'line',
                 data: components.map(() => score.final_score),
                 lineStyle: {color: '#10b981', width: 2, type: 'dashed'},
+                symbol: 'none',
+                tooltip: {show: false},
+            },
+            {
+                type: 'line',
+                data: components.map(() => 0),
+                lineStyle: {color: isDarkMode ? '#475569' : '#94a3b8', width: 1, type: 'solid'},
                 symbol: 'none',
                 tooltip: {show: false},
             },

@@ -8,6 +8,7 @@ interface Props {
     signals: SignalRow[];
     activeKeys: string[];
     groupLabel: string;
+    groupColor?: string;
     range?: [number, number];
     isDarkMode: boolean;
     onVisibleRangeChange?: (range: LogicalRange | null) => void;
@@ -15,7 +16,7 @@ interface Props {
     onClose: () => void;
 }
 
-export default function SubPane({signals, activeKeys, groupLabel, range, isDarkMode, onVisibleRangeChange, visibleRange, onClose}: Props) {
+export default function SubPane({signals, activeKeys, groupLabel, groupColor, range, isDarkMode, onVisibleRangeChange, visibleRange, onClose}: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
@@ -137,7 +138,7 @@ export default function SubPane({signals, activeKeys, groupLabel, range, isDarkM
     return (
         <div className={`relative rounded-lg overflow-hidden mb-2 ${isDarkMode ? 'bg-[#131722]' : 'bg-white'}`}>
             <div className="absolute top-1 left-2 z-10 flex items-center gap-2">
-                <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <span className="text-xs font-medium" style={{color: groupColor ?? (isDarkMode ? '#9ca3af' : '#6b7280')}}>
                     {groupLabel}
                 </span>
             </div>

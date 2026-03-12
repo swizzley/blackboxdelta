@@ -263,3 +263,11 @@ export function findSignalDef(key: string): SignalDef | undefined {
     }
     return undefined;
 }
+
+// Find the parent component for a signal key
+export function findComponentForSignal(key: string): ComponentDef | undefined {
+    for (const comp of COMPONENTS) {
+        if (comp.signals.some(s => s.key === key)) return comp;
+    }
+    return undefined;
+}

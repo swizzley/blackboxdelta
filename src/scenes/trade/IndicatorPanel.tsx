@@ -21,8 +21,8 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
     const sorted = [...COMPONENTS];
     if (score) {
         sorted.sort((a, b) => {
-            const aVal = (score[a.scoreKey] as number) ?? 0;
-            const bVal = (score[b.scoreKey] as number) ?? 0;
+            const aVal = Math.abs((score[a.scoreKey] as number) ?? 0);
+            const bVal = Math.abs((score[b.scoreKey] as number) ?? 0);
             return bVal - aVal;
         });
     }
@@ -113,10 +113,11 @@ function ScoreInfluenceBar({score, isDarkMode, onClickComponent}: {
             color: c.color,
             value: (score[c.scoreKey] as number) ?? 0,
         }))
-        .filter(s => s.value > 0);
+        .filter(s => s.value !== 0)
+        .sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
 
-    const total = segments.reduce((sum, s) => sum + s.value, 0);
-    if (total === 0) return null;
+    const totalAbs = segments.reduce((sum, s) => sum + Math.abs(s.value), 0);
+    if (totalAbs === 0) return null;
 
     return (
         <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
@@ -125,7 +126,7 @@ function ScoreInfluenceBar({score, isDarkMode, onClickComponent}: {
                 {segments.map(s => (
                     <div
                         key={s.key}
-                        style={{width: `${(s.value / total) * 100}%`, backgroundColor: s.color}}
+                        style={{width: `${(Math.abs(s.value) / totalAbs) * 100}%`, backgroundColor: s.color}}
                         className="relative group"
                         title={`${s.label}: ${s.value.toFixed(1)}`}
                         onClick={() => onClickComponent(s.key)}
@@ -139,7 +140,7 @@ function ScoreInfluenceBar({score, isDarkMode, onClickComponent}: {
                     <span key={s.key} className="flex items-center gap-1 text-xs">
                         <span className="w-2 h-2 rounded-full inline-block" style={{backgroundColor: s.color}} />
                         <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
-                            {s.label} {s.value.toFixed(0)}
+                            {s.label} {s.value > 0 ? '+' : ''}{s.value.toFixed(0)}
                         </span>
                     </span>
                 ))}

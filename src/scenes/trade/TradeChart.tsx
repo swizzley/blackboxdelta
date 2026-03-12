@@ -2,7 +2,7 @@ import {useEffect, useRef, useState, useCallback} from 'react';
 import {createChart, ColorType, CrosshairMode, LineStyle} from 'lightweight-charts';
 import type {IChartApi, ISeriesApi, Time, LogicalRange} from 'lightweight-charts';
 import {OrderDetail, SignalRow} from '../../context/Types';
-import {findSignalDef} from './signalMapping';
+import {findSignalDef, findComponentForSignal} from './signalMapping';
 import IndicatorPanel from './IndicatorPanel';
 import SubPane from './SubPane';
 
@@ -26,6 +26,7 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
     const chartRef = useRef<IChartApi | null>(null);
     const candleRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
     const overlaySeriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
+    const baseMarkersRef = useRef<any[]>([]);
     const [zoom, setZoom] = useState<ZoomMode>('trade');
     const [panelOpen, setPanelOpen] = useState(false);
     const [activeIndicators, setActiveIndicators] = useState<Set<string>>(new Set());
@@ -203,7 +204,7 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
             });
         }
 
-        // Markers for entry and exit
+        // Entry/exit markers — set initially, will be rebuilt by pattern marker effect
         const markers: any[] = [];
         if (entryIdx >= 0) {
             const isLong = trade.direction === 'Long';
@@ -231,6 +232,7 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
             markers.sort((a, b) => (a.time as number) - (b.time as number));
             candleSeries.setMarkers(markers);
         }
+        baseMarkersRef.current = markers;
 
         // Resize observer
         const observer = new ResizeObserver(() => {
@@ -342,9 +344,77 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
             const kept = prev.filter(g => sortedGroups.includes(g));
             const newGroups = sortedGroups.filter(g => !prev.includes(g));
             const result = [...kept, ...newGroups];
-            // Max 4 sub-panes
-            return result.slice(-4);
+            return result;
         });
+    }, [activeIndicators, signals]);
+
+    // Render candle pattern markers on main chart when event-type indicators are toggled
+    useEffect(() => {
+        const candle = candleRef.current;
+        if (!candle || !signals || signals.length === 0) {
+            // No signals — just show base markers
+            if (candle && baseMarkersRef.current.length > 0) {
+                candle.setMarkers([...baseMarkersRef.current].sort((a, b) => (a.time as number) - (b.time as number)));
+            }
+            return;
+        }
+
+        // Collect active event keys
+        const activeEvents: string[] = [];
+        for (const key of activeIndicators) {
+            const def = findSignalDef(key);
+            if (def?.type === 'event') activeEvents.push(key);
+        }
+
+        if (activeEvents.length === 0) {
+            // Restore just the base markers
+            const sorted = [...baseMarkersRef.current].sort((a, b) => (a.time as number) - (b.time as number));
+            candle.setMarkers(sorted);
+            return;
+        }
+
+        // Build pattern markers from signal data
+        const patternMarkers: any[] = [];
+        for (const row of signals) {
+            const ts = (typeof row.t === 'number' ? Math.floor(row.t / 1000) : Math.floor(new Date(row.t as string).getTime() / 1000)) as Time;
+
+            const bullish: string[] = [];
+            const bearish: string[] = [];
+
+            for (const key of activeEvents) {
+                const v = row[key];
+                if (v === undefined || v === null || v === 0 || typeof v !== 'number') continue;
+                const def = findSignalDef(key);
+                const label = def?.label ?? key;
+                if (v > 0) bullish.push(label);
+                else bearish.push(label);
+            }
+
+            if (bullish.length > 0) {
+                patternMarkers.push({
+                    time: ts,
+                    position: 'belowBar',
+                    shape: 'circle',
+                    color: '#22c55e',
+                    text: bullish.join(', '),
+                    size: 1,
+                });
+            }
+            if (bearish.length > 0) {
+                patternMarkers.push({
+                    time: ts,
+                    position: 'aboveBar',
+                    shape: 'circle',
+                    color: '#ef4444',
+                    text: bearish.join(', '),
+                    size: 1,
+                });
+            }
+        }
+
+        const allMarkers = [...baseMarkersRef.current, ...patternMarkers];
+        allMarkers.sort((a, b) => (a.time as number) - (b.time as number));
+        candle.setMarkers(allMarkers);
     }, [activeIndicators, signals]);
 
     // Sub-pane range sync handler
@@ -382,6 +452,13 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
         if (!key) return group;
         const def = findSignalDef(key);
         return def?.label ?? group;
+    };
+
+    // Get the parent component color for a sub-pane group
+    const getGroupColor = (group: string): string | undefined => {
+        const key = getGroupKeys(group)[0];
+        if (!key) return undefined;
+        return findComponentForSignal(key)?.color;
     };
 
     const activeCount = activeIndicators.size;
@@ -427,15 +504,16 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
                 <div ref={containerRef} style={{height: '500px'}}/>
             </div>
 
-            {/* Oscillator Sub-Panes */}
+            {/* Oscillator Sub-Panes — scrollable so main chart stays in view */}
             {signals && subPaneGroups.length > 0 && (
-                <div className="mb-4 space-y-1">
+                <div className="mb-4 space-y-1 max-h-[50vh] overflow-y-auto">
                     {subPaneGroups.map(group => (
                         <SubPane
                             key={group}
                             signals={signals}
                             activeKeys={getGroupKeys(group)}
                             groupLabel={getGroupLabel(group)}
+                            groupColor={getGroupColor(group)}
                             isDarkMode={isDarkMode}
                             visibleRange={visibleRange}
                             onVisibleRangeChange={handleSubPaneRangeChange}
