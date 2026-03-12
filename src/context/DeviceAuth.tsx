@@ -18,61 +18,71 @@ export const useDeviceAuth = (): DeviceAuthContextProps => {
     return ctx;
 };
 
+async function fetchDeviceStatus(base: string, fp: string): Promise<{trusted: boolean; role: string} | null> {
+    try {
+        const res = await fetch(`${base}/api/devices/status?fp=${encodeURIComponent(fp)}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return {trusted: !!data.trusted, role: data.role || 'user'};
+    } catch {
+        return null;
+    }
+}
+
 export const DeviceAuthProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
     const {apiBase, apiAvailable} = useApi();
     const [fingerprint, setFingerprint] = useState('');
     const [trusted, setTrusted] = useState<boolean | null>(null);
     const [role, setRole] = useState('user');
-    const fpRef = useRef('');
+    const resolvedRef = useRef(false);
 
-    // Resolve fingerprint once on mount
-    useEffect(() => {
-        getFingerprint().then(fp => {
-            fpRef.current = fp;
-            setFingerprint(fp);
-        });
+    const doCheck = useCallback(async (base: string, fp: string) => {
+        const result = await fetchDeviceStatus(base, fp);
+        if (result) {
+            setTrusted(result.trusted);
+            setRole(result.role);
+            resolvedRef.current = true;
+        }
     }, []);
 
-    // Check device status whenever API becomes available or base changes
+    // Main effect: resolve fingerprint, then check status
     useEffect(() => {
-        if (!apiAvailable || !fpRef.current) return;
-        const fp = fpRef.current;
+        if (!apiAvailable) return;
 
-        fetch(`${apiBase}/api/devices/status?fp=${encodeURIComponent(fp)}`)
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
-                if (!data) return;
-                setTrusted(data.trusted);
-                if (data.trusted && data.role) setRole(data.role);
-            })
-            .catch(() => {});
-    }, [apiBase, apiAvailable]);
+        let active = true;
+        (async () => {
+            const fp = await getFingerprint();
+            if (!active) return;
+            setFingerprint(fp);
+            await doCheck(apiBase, fp);
+        })();
 
-    // Retry once fingerprint loads if API was already available
+        return () => { active = false; };
+    }, [apiBase, apiAvailable, doCheck]);
+
+    // Safety net: if after 3s we still haven't resolved, retry
     useEffect(() => {
-        if (!fingerprint || !apiAvailable) return;
+        const timer = setTimeout(async () => {
+            if (resolvedRef.current) return;
+            const fp = await getFingerprint();
+            if (!fp) return;
+            setFingerprint(fp);
+            // Try tunnel URL directly regardless of apiBase
+            const result = await fetchDeviceStatus('https://api.blackboxdelta.com', fp);
+            if (result) {
+                setTrusted(result.trusted);
+                setRole(result.role);
+                resolvedRef.current = true;
+            }
+        }, 3000);
 
-        fetch(`${apiBase}/api/devices/status?fp=${encodeURIComponent(fingerprint)}`)
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
-                if (!data) return;
-                setTrusted(data.trusted);
-                if (data.trusted && data.role) setRole(data.role);
-            })
-            .catch(() => {});
-    }, [fingerprint, apiBase, apiAvailable]);
+        return () => clearTimeout(timer);
+    }, []);
 
     const refresh = useCallback(async () => {
         if (!fingerprint) return;
-        try {
-            const res = await fetch(`${apiBase}/api/devices/status?fp=${encodeURIComponent(fingerprint)}`);
-            if (res.ok) {
-                const data = await res.json();
-                setTrusted(data.trusted);
-                if (data.trusted && data.role) setRole(data.role);
-            }
-        } catch {}
-    }, [apiBase, fingerprint]);
+        await doCheck(apiBase, fingerprint);
+    }, [apiBase, fingerprint, doCheck]);
 
     return (
         <DeviceAuthContext.Provider value={{
