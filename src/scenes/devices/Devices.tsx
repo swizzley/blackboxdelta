@@ -226,7 +226,7 @@ export default function Devices() {
 
     const handleRoleChange = async (id: number, newRole: string) => {
         try {
-            const res = await fetch(`${getApiBase()}/api/devices/${id}/role`, {
+            const res = await fetch(`${getApiBase()}/api/devices/role/${id}`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', ...authHeaders()},
                 body: JSON.stringify({role: newRole}),
