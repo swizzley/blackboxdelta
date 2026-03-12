@@ -352,11 +352,18 @@ function PairFreshnessGrid({pairs, isDarkMode, card, heading, iconCl}: {
     const [open, setOpen] = useState(false);
     const enabledCount = pairs.filter(p => p.enabled).length;
     const okCount = pairs.filter(p => p.status === 'ok').length;
+    const enabledPairs = pairs.filter(p => p.enabled && p.age_secs >= 0);
+    const avgDelay = enabledPairs.length > 0
+        ? Math.round(enabledPairs.reduce((sum, p) => sum + p.age_secs, 0) / enabledPairs.length)
+        : 0;
+    const delayLabel = avgDelay >= 3600 ? `${(avgDelay / 3600).toFixed(1)}h` : avgDelay >= 60 ? `${Math.round(avgDelay / 60)}m` : `${avgDelay}s`;
+    const delayColor = avgDelay > 300 ? 'text-red-400 bg-red-900/30' : avgDelay > 120 ? 'text-yellow-400 bg-yellow-900/30' : 'text-emerald-400 bg-emerald-900/30';
 
     return (
         <div className={`${card} mb-6`}>
             <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setOpen(!open)}>
                 <GlobeAltIcon className={iconCl}/>Markets ({okCount}/{enabledCount} fresh)
+                {avgDelay > 0 && <span className={`ml-2 text-xs font-mono px-1.5 py-0.5 rounded ${delayColor}`}>avg {delayLabel}</span>}
                 <span className="ml-2 text-xs opacity-50">{open ? '▼' : '▶'}</span>
             </h2>
             {!open ? null : <div className="flex flex-wrap gap-2">
@@ -391,7 +398,7 @@ function CoverageTable({entries, isDarkMode, card, heading, iconCl}: {
     entries: MonitorCoverageEntry[];
     isDarkMode: boolean; card: string; heading: string; iconCl: string;
 }) {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(true);
     const [expanded, setExpanded] = useState<string | null>(null);
     const expectedYears: Record<string, number> = {scalp: 3, intraday: 5, swing: 17};
 
