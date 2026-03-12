@@ -13,6 +13,8 @@ export default function Devices() {
     const [registering, setRegistering] = useState(false);
     const [message, setMessage] = useState<{text: string; ok: boolean} | null>(null);
 
+    const [apiError, setApiError] = useState(false);
+
     // Load fingerprint and check trust status
     useEffect(() => {
         (async () => {
@@ -24,9 +26,12 @@ export default function Devices() {
                 if (res.ok) {
                     const data = await res.json();
                     setTrusted(data.trusted);
+                } else {
+                    setTrusted(false);
                 }
             } catch {
-                setTrusted(null);
+                setApiError(true);
+                setTrusted(false);
             }
         })();
     }, []);
@@ -91,11 +96,19 @@ export default function Devices() {
                                 Status
                             </span>
                             <div className="mt-1">
-                                {trusted === null && (
+                                {trusted === null && !apiError && (
                                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm ${
                                         isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500'
                                     }`}>
                                         Checking...
+                                    </span>
+                                )}
+                                {apiError && (
+                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
+                                        isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-50 text-yellow-700'
+                                    }`}>
+                                        <span className="w-2 h-2 rounded-full bg-yellow-400"/>
+                                        API unreachable — auth not enabled yet, device can be registered after deploy
                                     </span>
                                 )}
                                 {trusted === true && (
