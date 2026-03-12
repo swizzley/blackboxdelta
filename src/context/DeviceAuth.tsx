@@ -1,5 +1,5 @@
 import React, {createContext, useContext, useEffect, useState, useCallback} from 'react';
-import {getFingerprint, getFingerprintSync} from '../api/fingerprint';
+import {getFingerprint} from '../api/fingerprint';
 import {useApi} from './Api';
 
 interface DeviceAuthContextProps {
@@ -24,37 +24,36 @@ export const DeviceAuthProvider: React.FC<{children: React.ReactNode}> = ({child
     const [trusted, setTrusted] = useState<boolean | null>(null);
     const [role, setRole] = useState('user');
 
-    const checkStatus = useCallback(async (fp?: string) => {
-        const f = fp || getFingerprintSync();
-        if (!f) return;
+    const checkStatus = useCallback(async (base: string, fp: string) => {
+        if (!fp) return;
         try {
-            const res = await fetch(`${apiBase}/api/devices/status?fp=${encodeURIComponent(f)}`);
+            const res = await fetch(`${base}/api/devices/status?fp=${encodeURIComponent(fp)}`);
             if (res.ok) {
                 const data = await res.json();
                 setTrusted(data.trusted);
                 if (data.trusted && data.role) setRole(data.role);
             }
         } catch { /* ignore */ }
-    }, [apiBase]);
-
-    const refresh = useCallback(async () => {
-        await checkStatus();
-    }, [checkStatus]);
-
-    // Initial fingerprint load
-    useEffect(() => {
-        (async () => {
-            const fp = await getFingerprint();
-            setFingerprint(fp);
-        })();
     }, []);
 
-    // Re-check device status whenever apiBase changes or API becomes available
+    // Load fingerprint once, then check status whenever apiBase/apiAvailable changes
     useEffect(() => {
         if (!apiAvailable) return;
-        const fp = getFingerprintSync();
-        if (fp) checkStatus(fp);
+        let cancelled = false;
+
+        (async () => {
+            const fp = await getFingerprint();
+            if (cancelled) return;
+            setFingerprint(fp);
+            await checkStatus(apiBase, fp);
+        })();
+
+        return () => { cancelled = true; };
     }, [apiBase, apiAvailable, checkStatus]);
+
+    const refresh = useCallback(async () => {
+        if (fingerprint) await checkStatus(apiBase, fingerprint);
+    }, [apiBase, fingerprint, checkStatus]);
 
     return (
         <DeviceAuthContext.Provider value={{
