@@ -82,6 +82,11 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
         });
     }, []);
 
+    const handleClearAll = useCallback(() => {
+        setActiveIndicators(new Set());
+        setSubPaneGroups([]);
+    }, []);
+
     // Open indicator panel — triggers signal fetch on first open
     const openPanel = useCallback(() => {
         setPanelOpen(true);
@@ -347,12 +352,16 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
 
             if (data.length === 0) continue;
 
+            const isSarDots = def.render === 'dots';
             const series = chart.addLineSeries({
                 color: def.color,
-                lineWidth: (def.lineWidth ?? 1) as 1 | 2 | 3 | 4,
+                lineWidth: isSarDots ? 0 as any : (def.lineWidth ?? 1) as 1 | 2 | 3 | 4,
                 lineStyle: def.lineStyle === 'dashed' ? LineStyle.Dashed : def.lineStyle === 'dotted' ? LineStyle.Dotted : LineStyle.Solid,
                 lastValueVisible: false,
                 priceLineVisible: false,
+                pointMarkersVisible: isSarDots,
+                pointMarkersRadius: isSarDots ? 2 : undefined,
+                crosshairMarkerVisible: !isSarDots,
             });
             series.setData(data);
             current.set(key, series);
@@ -395,13 +404,21 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
         }
 
         // Build pattern markers from signal data
-        // Tier determines visual weight: 3=large arrow, 2=medium arrow, 1=small arrow
+        // Shape varies by pattern type: arrow=single-candle, square=two-candle, circle=three+ candle
+        // Tier determines size: 3=large, 2=medium, 1=small
         const patternMarkers: any[] = [];
+
+        const resolveShape = (isBullish: boolean, shape?: string): string => {
+            if (shape === 'circle') return 'circle';
+            if (shape === 'square') return 'square';
+            return isBullish ? 'arrowUp' : 'arrowDown';
+        };
+
         for (const row of signals) {
             const ts = (typeof row.t === 'number' ? Math.floor(row.t / 1000) : Math.floor(new Date(row.t as string).getTime() / 1000)) as Time;
 
-            const bullish: {label: string; tier: number}[] = [];
-            const bearish: {label: string; tier: number}[] = [];
+            const bullish: {label: string; tier: number; shape?: string}[] = [];
+            const bearish: {label: string; tier: number; shape?: string}[] = [];
 
             for (const key of activeEvents) {
                 const v = row[key];
@@ -409,17 +426,20 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
                 const def = findSignalDef(key);
                 const label = def?.label ?? key;
                 const tier = def?.tier ?? 1;
-                if (v > 0) bullish.push({label, tier});
-                else bearish.push({label, tier});
+                const shape = def?.patternShape;
+                if (v > 0) bullish.push({label, tier, shape});
+                else bearish.push({label, tier, shape});
             }
 
             if (bullish.length > 0) {
                 const maxTier = Math.max(...bullish.map(b => b.tier));
                 const text = bullish.map(b => b.tier >= 2 ? `★ ${b.label}` : b.label).join(', ');
+                // Use the highest-tier pattern's shape, or the first one
+                const dominant = bullish.reduce((a, b) => b.tier > a.tier ? b : a);
                 patternMarkers.push({
                     time: ts,
                     position: 'belowBar',
-                    shape: 'arrowUp',
+                    shape: resolveShape(true, dominant.shape),
                     color: maxTier >= 3 ? '#16a34a' : maxTier >= 2 ? '#22c55e' : '#4ade80',
                     text,
                     size: maxTier >= 3 ? 3 : maxTier >= 2 ? 2 : 1,
@@ -428,10 +448,11 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             if (bearish.length > 0) {
                 const maxTier = Math.max(...bearish.map(b => b.tier));
                 const text = bearish.map(b => b.tier >= 2 ? `★ ${b.label}` : b.label).join(', ');
+                const dominant = bearish.reduce((a, b) => b.tier > a.tier ? b : a);
                 patternMarkers.push({
                     time: ts,
                     position: 'aboveBar',
-                    shape: 'arrowDown',
+                    shape: resolveShape(false, dominant.shape),
                     color: maxTier >= 3 ? '#dc2626' : maxTier >= 2 ? '#ef4444' : '#f87171',
                     text,
                     size: maxTier >= 3 ? 3 : maxTier >= 2 ? 2 : 1,
@@ -536,9 +557,37 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             {/* Oscillator Sub-Panes */}
             {signals && subPaneGroups.length > 0 && (
                 <div className="mb-4 space-y-1">
-                    {subPaneGroups.map(group => (
+                    {/* Sub-pane navigation */}
+                    {subPaneGroups.length > 2 && (
+                        <div className={`flex items-center justify-between px-2 py-1 rounded-md text-xs ${
+                            isDarkMode ? 'bg-slate-800 text-gray-400' : 'bg-gray-100 text-gray-500'
+                        }`}>
+                            <span>{subPaneGroups.length} oscillator panes</span>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={() => {
+                                        const el = document.getElementById('subpane-0');
+                                        el?.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                                    }}
+                                    className={`px-2 py-0.5 rounded ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-200'}`}
+                                >
+                                    &#9650; First
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const el = document.getElementById(`subpane-${subPaneGroups.length - 1}`);
+                                        el?.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                                    }}
+                                    className={`px-2 py-0.5 rounded ${isDarkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-200'}`}
+                                >
+                                    &#9660; Last
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {subPaneGroups.map((group, i) => (
+                        <div key={group} id={`subpane-${i}`}>
                         <SubPane
-                            key={group}
                             signals={signals}
                             activeKeys={getGroupKeys(group)}
                             groupLabel={getGroupLabel(group)}
@@ -548,6 +597,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
                             onVisibleRangeChange={handleSubPaneRangeChange}
                             onClose={() => closeSubPane(group)}
                         />
+                        </div>
                     ))}
                 </div>
             )}
@@ -561,6 +611,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
                 activeIndicators={activeIndicators}
                 onToggle={handleToggle}
                 onToggleAll={handleToggleAll}
+                onClearAll={handleClearAll}
                 signals={signals}
                 tradeTime={trade.created}
                 pendingComponentClick={pendingComponentClickRef}

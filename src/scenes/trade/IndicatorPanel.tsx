@@ -10,12 +10,13 @@ interface Props {
     activeIndicators: Set<string>;
     onToggle: (key: string) => void;
     onToggleAll: (keys: string[], on: boolean) => void;
+    onClearAll: () => void;
     signals?: SignalRow[] | null;
     tradeTime?: string;
     pendingComponentClick?: MutableRefObject<string | null>;
 }
 
-export default function IndicatorPanel({open, onClose, isDarkMode, score, activeIndicators, onToggle, onToggleAll, signals, tradeTime, pendingComponentClick}: Props) {
+export default function IndicatorPanel({open, onClose, isDarkMode, score, activeIndicators, onToggle, onToggleAll, onClearAll, signals, tradeTime, pendingComponentClick}: Props) {
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
     const [search, setSearch] = useState('');
 
@@ -138,9 +139,21 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
                         <h2 className="text-base font-semibold">Indicators</h2>
                         <div className="flex items-center gap-2">
                             {activeCount > 0 && (
-                                <span className="text-xs bg-cyan-600 text-white rounded-full px-2 py-0.5">
-                                    {activeCount}
-                                </span>
+                                <>
+                                    <span className="text-xs bg-cyan-600 text-white rounded-full px-2 py-0.5">
+                                        {activeCount}
+                                    </span>
+                                    <button
+                                        onClick={onClearAll}
+                                        className={`text-xs px-2 py-0.5 rounded transition-colors ${
+                                            isDarkMode
+                                                ? 'text-gray-400 hover:bg-slate-700 hover:text-gray-200'
+                                                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+                                        }`}
+                                    >
+                                        Clear All
+                                    </button>
+                                </>
                             )}
                             <button
                                 onClick={onClose}
