@@ -13,23 +13,25 @@ import dayjs from 'dayjs';
 
 export default function DayDetail() {
     const {isDarkMode} = useTheme();
-    const {apiAvailable} = useApi();
+    const {apiAvailable, checking} = useApi();
     const {year, month, day} = useParams();
     const [data, setData] = useState<DayData | null>(null);
     const [error, setError] = useState(false);
 
     useEffect(() => {
+        if (checking) return;
         if (!apiAvailable) {
             setError(true);
             return;
         }
+        setError(false);
         fetchDay(`${year}-${month}-${day}`)
             .then(r => {
                 if (r) setData(r);
                 else setError(true);
             })
             .catch(() => setError(true));
-    }, [year, month, day, apiAvailable]);
+    }, [year, month, day, apiAvailable, checking]);
 
     const dateDisplay = dayjs(`${year}-${month}-${day}`).format('dddd, MMMM D, YYYY');
 

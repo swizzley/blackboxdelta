@@ -14,18 +14,20 @@ import dayjs from 'dayjs';
 
 export default function TradeDetail() {
     const {isDarkMode} = useTheme();
-    const {apiAvailable} = useApi();
+    const {apiAvailable, checking} = useApi();
     const {id} = useParams();
     const [trade, setTrade] = useState<OrderDetail | null>(null);
     const [error, setError] = useState(false);
 
     useEffect(() => {
         if (!id) return;
+        if (checking) return; // wait for health probe to finish
         if (!apiAvailable) {
             setError(true);
             return;
         }
 
+        setError(false);
         apiFetchOrder(id).then(async apiOrder => {
             if (!apiOrder) {
                 setError(true);
@@ -70,7 +72,7 @@ export default function TradeDetail() {
                 setTrade(prev => prev ? {...prev, candles} : prev);
             }
         });
-    }, [id, apiAvailable]);
+    }, [id, apiAvailable, checking]);
 
     return (
         <>
