@@ -8,8 +8,8 @@ import TradeChart from './TradeChart';
 import {useTheme} from '../../context/Theme';
 import {formatDollar} from '../common/Util';
 import {useApi} from '../../context/Api';
-import {fetchOrder as apiFetchOrder, fetchPricesAround} from '../../api/client';
-import {OrderDetail, Score} from '../../context/Types';
+import {fetchOrder as apiFetchOrder, fetchPricesAround, fetchSignalsAround} from '../../api/client';
+import {OrderDetail, Score, SignalRow} from '../../context/Types';
 import dayjs from 'dayjs';
 
 export default function TradeDetail() {
@@ -17,6 +17,8 @@ export default function TradeDetail() {
     const {apiAvailable, checking} = useApi();
     const {id} = useParams();
     const [trade, setTrade] = useState<OrderDetail | null>(null);
+    const [signals, setSignals] = useState<SignalRow[] | null>(null);
+    const [signalsFetched, setSignalsFetched] = useState(false);
     const [error, setError] = useState(false);
 
     useEffect(() => {
@@ -54,6 +56,9 @@ export default function TradeDetail() {
                 duration_mins: null,
                 alert_id: apiOrder.alert_id,
                 risk_reward: apiOrder.risk_reward,
+                avg_spread: apiOrder.avg_spread,
+                max_spread: apiOrder.max_spread,
+                score: apiOrder.score ?? undefined,
             };
 
             // Compute duration from created/closed
@@ -73,6 +78,16 @@ export default function TradeDetail() {
             }
         });
     }, [id, apiAvailable, checking]);
+
+    // Lazy signal fetch — called on first indicator panel open
+    const loadSignals = async () => {
+        if (signalsFetched || !trade) return;
+        setSignalsFetched(true);
+        const symbol = trade.symbol.replace('_', '');
+        const aroundMs = new Date(trade.created).getTime();
+        const rows = await fetchSignalsAround(symbol, trade.timeframe, aroundMs, 200);
+        if (rows) setSignals(rows);
+    };
 
     return (
         <>
@@ -154,7 +169,12 @@ export default function TradeDetail() {
 
                             {/* Candlestick Chart */}
                             {trade.candles && trade.candles.length > 0 && (
-                                <TradeChart trade={trade} isDarkMode={isDarkMode}/>
+                                <TradeChart
+                                    trade={trade}
+                                    isDarkMode={isDarkMode}
+                                    signals={signals}
+                                    onRequestSignals={loadSignals}
+                                />
                             )}
 
                             {/* Score Section */}

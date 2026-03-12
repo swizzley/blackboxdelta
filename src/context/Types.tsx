@@ -111,6 +111,8 @@ export interface OrderDetail {
     alert_id?: number;
     risk_reward?: number;
     spread?: number;
+    avg_spread?: number;
+    max_spread?: number;
     candles?: Candle[];
     score?: Score;
     versions?: Record<string, { sha: string; message: string }>;
@@ -281,13 +283,18 @@ export interface ApiOrder {
     quantity: number;
     profit: number | null;
     close_reason?: string;
-    score: number | null;
+    score?: Score | null;
     created: string;
     closed: string | null;
     alert_id?: number;
     risk_reward?: number;
     spread?: number;
+    avg_spread?: number;
+    max_spread?: number;
 }
+
+// Dynamic signal row — all ~190 signal columns as keys
+export type SignalRow = Record<string, number | string>;
 
 export interface ApiAlertScore {
     final_score: number;

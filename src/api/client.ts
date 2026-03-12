@@ -1,7 +1,7 @@
 import {getApiBase} from './config';
 import type {
     ApiHealth, ApiSystem, ApiDashboard, ApiCalendarDay, ApiOrder,
-    ApiAlert, ApiMarket, ApiSetting,
+    ApiAlert, ApiMarket, ApiSetting, SignalRow,
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
     OptimizerBranch, OptimizerTrunkDetail, SeedRun,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
@@ -76,6 +76,10 @@ export function fetchPrices(symbol: string, timeframe: string, limit = 500): Pro
 
 export function fetchPricesAround(symbol: string, timeframe: string, aroundMs: number, limit = 200): Promise<any[] | null> {
     return apiFetch(`/api/prices/${symbol}/${timeframe}?around=${aroundMs}&limit=${limit}`);
+}
+
+export function fetchSignalsAround(symbol: string, timeframe: string, aroundMs: number, limit = 200): Promise<SignalRow[] | null> {
+    return apiFetch(`/api/signals/${symbol}/${timeframe}?around=${aroundMs}&limit=${limit}`);
 }
 
 export function fetchDay(date: string): Promise<any | null> {
