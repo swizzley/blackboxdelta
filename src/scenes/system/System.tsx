@@ -349,13 +349,17 @@ function PairFreshnessGrid({pairs, isDarkMode, card, heading, iconCl}: {
     pairs: MonitorPairFreshness[];
     isDarkMode: boolean; card: string; heading: string; iconCl: string;
 }) {
+    const [open, setOpen] = useState(false);
     const enabledCount = pairs.filter(p => p.enabled).length;
     const okCount = pairs.filter(p => p.status === 'ok').length;
 
     return (
         <div className={`${card} mb-6`}>
-            <h2 className={heading}><GlobeAltIcon className={iconCl}/>Markets ({okCount}/{enabledCount} fresh)</h2>
-            <div className="flex flex-wrap gap-2">
+            <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setOpen(!open)}>
+                <GlobeAltIcon className={iconCl}/>Markets ({okCount}/{enabledCount} fresh)
+                <span className="ml-2 text-xs opacity-50">{open ? '▼' : '▶'}</span>
+            </h2>
+            {!open ? null : <div className="flex flex-wrap gap-2">
                 {pairs.map(p => {
                     const bg = p.status === 'ok'
                         ? (isDarkMode ? 'bg-emerald-900/30 text-emerald-400 border-emerald-700/40' : 'bg-emerald-50 text-emerald-700 border-emerald-200')
@@ -378,7 +382,7 @@ function PairFreshnessGrid({pairs, isDarkMode, card, heading, iconCl}: {
                         </span>
                     );
                 })}
-            </div>
+            </div>}
         </div>
     );
 }
@@ -387,6 +391,7 @@ function CoverageTable({entries, isDarkMode, card, heading, iconCl}: {
     entries: MonitorCoverageEntry[];
     isDarkMode: boolean; card: string; heading: string; iconCl: string;
 }) {
+    const [open, setOpen] = useState(false);
     const [expanded, setExpanded] = useState<string | null>(null);
     const expectedYears: Record<string, number> = {scalp: 3, intraday: 5, swing: 17};
 
@@ -401,8 +406,11 @@ function CoverageTable({entries, isDarkMode, card, heading, iconCl}: {
 
     return (
         <div className={`${card} mb-6`}>
-            <h2 className={heading}><ChartBarIcon className={iconCl}/>Signal Data Coverage</h2>
-            <div className="overflow-x-auto">
+            <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setOpen(!open)}>
+                <ChartBarIcon className={iconCl}/>Signal Data Coverage
+                <span className="ml-2 text-xs opacity-50">{open ? '▼' : '▶'}</span>
+            </h2>
+            {!open ? null : <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
                         <tr className={`text-left ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -462,7 +470,7 @@ function CoverageTable({entries, isDarkMode, card, heading, iconCl}: {
                         ))}
                     </tbody>
                 </table>
-            </div>
+            </div>}
         </div>
     );
 }
