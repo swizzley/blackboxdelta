@@ -1,6 +1,6 @@
-import {useState} from 'react';
+import {useState, useMemo} from 'react';
 import {COMPONENTS, type ComponentDef, type SignalDef} from './signalMapping';
-import type {Score} from '../../context/Types';
+import type {Score, SignalRow} from '../../context/Types';
 
 interface Props {
     open: boolean;
@@ -10,9 +10,11 @@ interface Props {
     activeIndicators: Set<string>;
     onToggle: (key: string) => void;
     onToggleAll: (keys: string[], on: boolean) => void;
+    signals?: SignalRow[] | null;
+    tradeTime?: string;
 }
 
-export default function IndicatorPanel({open, onClose, isDarkMode, score, activeIndicators, onToggle, onToggleAll}: Props) {
+export default function IndicatorPanel({open, onClose, isDarkMode, score, activeIndicators, onToggle, onToggleAll, signals, tradeTime}: Props) {
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
     if (!open) return null;
@@ -26,6 +28,42 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
             return bVal - aVal;
         });
     }
+
+    // Compute top contributor per component from signal data at trade time
+    const topContributors = useMemo(() => {
+        const tops = new Map<string, string>(); // component key → signal key
+        if (!signals || signals.length === 0 || !tradeTime) return tops;
+
+        // Find the signal row closest to trade entry time
+        const tradeMs = new Date(tradeTime).getTime();
+        let closest = signals[0];
+        let minDiff = Infinity;
+        for (const row of signals) {
+            const t = typeof row.t === 'number' ? row.t : new Date(row.t as string).getTime();
+            const diff = Math.abs(t - tradeMs);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closest = row;
+            }
+        }
+
+        for (const comp of COMPONENTS) {
+            let bestKey = '';
+            let bestAbs = 0;
+            for (const sig of comp.signals) {
+                const v = closest[sig.key];
+                if (typeof v !== 'number' || v === 0) continue;
+                // For overlays/oscillators, use absolute value. For events, any nonzero is meaningful.
+                const magnitude = sig.type === 'event' ? Math.abs(v) : Math.abs(v);
+                if (magnitude > bestAbs) {
+                    bestAbs = magnitude;
+                    bestKey = sig.key;
+                }
+            }
+            if (bestKey) tops.set(comp.key, bestKey);
+        }
+        return tops;
+    }, [signals, tradeTime]);
 
     const toggleSection = (key: string) => {
         setExpanded(prev => {
@@ -93,6 +131,7 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
                             activeIndicators={activeIndicators}
                             onToggle={onToggle}
                             onToggleAll={onToggleAll}
+                            topContributor={topContributors.get(comp.key)}
                         />
                     ))}
                 </div>
@@ -149,7 +188,7 @@ function ScoreInfluenceBar({score, isDarkMode, onClickComponent}: {
     );
 }
 
-function ComponentSection({comp, isDarkMode, score, expanded, onToggleSection, activeIndicators, onToggle, onToggleAll}: {
+function ComponentSection({comp, isDarkMode, score, expanded, onToggleSection, activeIndicators, onToggle, onToggleAll, topContributor}: {
     comp: ComponentDef;
     isDarkMode: boolean;
     score?: Score;
@@ -158,6 +197,7 @@ function ComponentSection({comp, isDarkMode, score, expanded, onToggleSection, a
     activeIndicators: Set<string>;
     onToggle: (key: string) => void;
     onToggleAll: (keys: string[], on: boolean) => void;
+    topContributor?: string;
 }) {
     const scoreVal = score ? (score[comp.scoreKey] as number) : undefined;
     const allKeys = comp.signals.map(s => s.key);
@@ -218,6 +258,7 @@ function ComponentSection({comp, isDarkMode, score, expanded, onToggleSection, a
                                 active={activeIndicators.has(sig.key)}
                                 onToggle={() => onToggle(sig.key)}
                                 isDarkMode={isDarkMode}
+                                isTopContributor={sig.key === topContributor}
                             />
                         ))}
                     </div>
@@ -227,11 +268,12 @@ function ComponentSection({comp, isDarkMode, score, expanded, onToggleSection, a
     );
 }
 
-function SignalToggle({signal, active, onToggle, isDarkMode}: {
+function SignalToggle({signal, active, onToggle, isDarkMode, isTopContributor}: {
     signal: SignalDef;
     active: boolean;
     onToggle: () => void;
     isDarkMode: boolean;
+    isTopContributor?: boolean;
 }) {
     return (
         <button
@@ -242,13 +284,15 @@ function SignalToggle({signal, active, onToggle, isDarkMode}: {
                     : isDarkMode
                         ? 'text-gray-400 hover:bg-slate-700/50'
                         : 'text-gray-500 hover:bg-gray-100'
-            }`}
+            } ${isTopContributor ? (isDarkMode ? 'ring-1 ring-amber-500/50' : 'ring-1 ring-amber-400/60') : ''}`}
+            title={isTopContributor ? 'Strongest signal in this group at trade entry' : undefined}
         >
             <span
                 className={`w-2 h-2 rounded-full flex-shrink-0 ${active ? '' : 'opacity-40'}`}
                 style={{backgroundColor: signal.color}}
             />
             <span className="truncate">{signal.label}</span>
+            {isTopContributor && <span className="text-amber-400 flex-shrink-0 ml-auto text-[10px]">&#9733;</span>}
         </button>
     );
 }

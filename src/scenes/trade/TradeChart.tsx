@@ -27,6 +27,7 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
     const candleRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
     const overlaySeriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
     const baseMarkersRef = useRef<any[]>([]);
+    const mainSyncingRef = useRef(false);
     const [zoom, setZoom] = useState<ZoomMode>('trade');
     const [panelOpen, setPanelOpen] = useState(false);
     const [activeIndicators, setActiveIndicators] = useState<Set<string>>(new Set());
@@ -118,9 +119,11 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
         });
         chartRef.current = chart;
 
-        // Broadcast range changes for sub-pane sync
+        // Broadcast range changes for sub-pane sync (guarded to prevent feedback loop)
         chart.timeScale().subscribeVisibleLogicalRangeChange((lr) => {
-            setVisibleRange(lr);
+            if (!mainSyncingRef.current) {
+                setVisibleRange(lr);
+            }
         });
 
         // Candlestick series — hollow candles
@@ -177,30 +180,34 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
         }
 
         // Spread lines — show estimated ask-side band
+        // Spread values from API are in pips — convert to price units
+        const pipSize = isJpy ? 0.01 : 0.0001;
         if (trade.avg_spread && trade.avg_spread > 0) {
             const isShort = trade.direction === 'Short';
-            const sign = isShort ? 1 : -1; // For shorts, ask = bid + spread; for longs, impact is below
-            const avgAsk = trade.entry + sign * trade.avg_spread;
+            const sign = isShort ? 1 : -1;
+            const avgSpreadPrice = trade.avg_spread * pipSize;
+            const avgAsk = trade.entry + sign * avgSpreadPrice;
             candleSeries.createPriceLine({
                 price: avgAsk,
                 color: isDarkMode ? 'rgba(148, 163, 184, 0.35)' : 'rgba(100, 116, 139, 0.35)',
                 lineWidth: 1,
                 lineStyle: LineStyle.Dotted,
                 axisLabelVisible: false,
-                title: `Avg Spread (${(trade.avg_spread * (isJpy ? 100 : 10000)).toFixed(1)} pips)`,
+                title: `Avg Spread (${trade.avg_spread.toFixed(1)} pips)`,
             });
         }
         if (trade.max_spread && trade.max_spread > 0) {
             const isShort = trade.direction === 'Short';
             const sign = isShort ? 1 : -1;
-            const maxAsk = trade.entry + sign * trade.max_spread;
+            const maxSpreadPrice = trade.max_spread * pipSize;
+            const maxAsk = trade.entry + sign * maxSpreadPrice;
             candleSeries.createPriceLine({
                 price: maxAsk,
                 color: isDarkMode ? 'rgba(148, 163, 184, 0.2)' : 'rgba(100, 116, 139, 0.2)',
                 lineWidth: 1,
                 lineStyle: LineStyle.Dotted,
                 axisLabelVisible: false,
-                title: `Max Spread (${(trade.max_spread * (isJpy ? 100 : 10000)).toFixed(1)} pips)`,
+                title: `Max Spread (${trade.max_spread.toFixed(1)} pips)`,
             });
         }
 
@@ -417,10 +424,12 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
         candle.setMarkers(allMarkers);
     }, [activeIndicators, signals]);
 
-    // Sub-pane range sync handler
+    // Sub-pane range sync handler (guarded to prevent feedback loop)
     const handleSubPaneRangeChange = useCallback((lr: LogicalRange | null) => {
         if (!lr || !chartRef.current) return;
+        mainSyncingRef.current = true;
         chartRef.current.timeScale().setVisibleLogicalRange(lr);
+        requestAnimationFrame(() => { mainSyncingRef.current = false; });
     }, []);
 
     // Close a sub-pane group — deactivate all oscillators in that group
@@ -504,9 +513,9 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
                 <div ref={containerRef} style={{height: '500px'}}/>
             </div>
 
-            {/* Oscillator Sub-Panes — scrollable so main chart stays in view */}
+            {/* Oscillator Sub-Panes — scrollable, no wheel capture to avoid fighting chart zoom */}
             {signals && subPaneGroups.length > 0 && (
-                <div className="mb-4 space-y-1 max-h-[50vh] overflow-y-auto">
+                <div className="mb-4 space-y-1 max-h-[50vh] overflow-y-auto overscroll-contain">
                     {subPaneGroups.map(group => (
                         <SubPane
                             key={group}
@@ -532,6 +541,8 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
                 activeIndicators={activeIndicators}
                 onToggle={handleToggle}
                 onToggleAll={handleToggleAll}
+                signals={signals}
+                tradeTime={trade.created}
             />
         </>
     );

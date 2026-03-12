@@ -19,14 +19,21 @@ export interface ComponentDef {
     signals: SignalDef[];
 }
 
-// Helper to generate MA signals for a family
+// Helper to generate MA signals for a family — thin and transparent to not obscure candles
 function maFamily(prefix: string, label: string, color: string, periods: number[]): SignalDef[] {
-    return periods.map((p, i) => ({
+    // Convert hex color to rgba with low opacity
+    const toRgba = (hex: string, alpha: number): string => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r},${g},${b},${alpha})`;
+    };
+    return periods.map((p) => ({
         key: `${prefix.toLowerCase()}_${p}`,
         label: `${label} ${p}`,
         type: 'overlay' as const,
-        color,
-        lineWidth: 1 + Math.floor(i / 2),
+        color: toRgba(color, 0.35),
+        lineWidth: 1,
     }));
 }
 
