@@ -44,27 +44,42 @@ export default function Devices() {
         } catch { /* ignore */ }
     }, []);
 
-    // Load fingerprint, check status, load device list
+    const checkStatus = useCallback(async (fp: string) => {
+        try {
+            const res = await fetch(`${getApiBase()}/api/devices/status?fp=${encodeURIComponent(fp)}`);
+            if (res.ok) {
+                const data = await res.json();
+                setTrusted(data.trusted);
+                setApiError(false);
+                if (data.trusted) loadDevices();
+                return data.trusted;
+            } else {
+                setTrusted(false);
+            }
+        } catch {
+            setApiError(true);
+            setTrusted(false);
+        }
+        return false;
+    }, [loadDevices]);
+
+    // Load fingerprint, check status, poll every 10s if not yet trusted
     useEffect(() => {
+        let interval: ReturnType<typeof setInterval> | null = null;
+
         (async () => {
             const fp = await getFingerprint();
             setFingerprint(fp);
+            const isTrusted = await checkStatus(fp);
 
-            try {
-                const res = await fetch(`${getApiBase()}/api/devices/status?fp=${encodeURIComponent(fp)}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setTrusted(data.trusted);
-                    if (data.trusted) loadDevices();
-                } else {
-                    setTrusted(false);
-                }
-            } catch {
-                setApiError(true);
-                setTrusted(false);
+            // If not trusted, poll every 10s (waiting for approval from another device)
+            if (!isTrusted) {
+                interval = setInterval(() => checkStatus(fp), 10_000);
             }
         })();
-    }, [loadDevices]);
+
+        return () => { if (interval) clearInterval(interval); };
+    }, [checkStatus]);
 
     const handleRegisterSelf = async () => {
         if (!fingerprint) return;
@@ -140,10 +155,14 @@ export default function Devices() {
                     <h2 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                         This Device
                     </h2>
-                    <div className="flex items-center gap-3">
-                        <code className={`text-xs px-2 py-1 rounded ${
-                            isDarkMode ? 'bg-slate-700 text-cyan-400' : 'bg-gray-100 text-cyan-700'
-                        }`}>
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <code
+                            className={`text-xs px-2 py-1 rounded cursor-pointer select-all ${
+                                isDarkMode ? 'bg-slate-700 text-cyan-400 hover:bg-slate-600' : 'bg-gray-100 text-cyan-700 hover:bg-gray-200'
+                            }`}
+                            onClick={() => { if (fingerprint) navigator.clipboard.writeText(fingerprint); setMessage({text: 'Fingerprint copied', ok: true}); }}
+                            title="Click to copy"
+                        >
                             {fingerprint || '...'}
                         </code>
                         {trusted === true && (
@@ -156,19 +175,29 @@ export default function Devices() {
                         {trusted === false && !apiError && (
                             <>
                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                                    isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700'
+                                    isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-50 text-amber-700'
                                 }`}>
-                                    <span className="w-1.5 h-1.5 rounded-full bg-red-400"/>Not Trusted
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"/>Waiting for approval...
                                 </span>
                                 <button onClick={handleRegisterSelf} className="text-xs text-cyan-500 hover:text-cyan-400 underline">
-                                    Register
+                                    Self-register
                                 </button>
                             </>
                         )}
                         {apiError && (
-                            <span className={`text-xs ${isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
-                                API unreachable
-                            </span>
+                            <>
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                    isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-50 text-yellow-700'
+                                }`}>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"/>API unreachable
+                                </span>
+                                <button
+                                    onClick={() => { if (fingerprint) checkStatus(fingerprint); }}
+                                    className="text-xs text-cyan-500 hover:text-cyan-400 underline"
+                                >
+                                    Retry
+                                </button>
+                            </>
                         )}
                         {trusted === null && !apiError && (
                             <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Checking...</span>
