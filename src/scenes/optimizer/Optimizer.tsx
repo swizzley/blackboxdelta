@@ -7,6 +7,7 @@ import {
     fetchOptimizerStatus, fetchOptimizerGenerations,
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
+    fetchOptimizerSeedRuns,
     queueRecommendation, skipRecommendation,
     applyRecommendation, pushTrunk,
 } from '../../api/client';
@@ -14,6 +15,8 @@ import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
     OptimizerRecommendation, OptimizerResult, OptimizerBranch,
     OptimizerTrunkDetail, OptimizerParamDiff,
+    SeedRun, SeedComponentResult, SeedVariantResult,
+    SeedStageBResult, SeedStageCResult, SeedStageEResult,
 } from '../../context/Types';
 import {
     BeakerIcon, ClockIcon,
@@ -35,22 +38,26 @@ export default function Optimizer() {
     const [generations, setGenerations] = useState<OptimizerGeneration[]>([]);
     const [recommendations, setRecommendations] = useState<OptimizerRecommendation[]>([]);
     const [loading, setLoading] = useState(true);
+    const [seedRuns, setSeedRuns] = useState<SeedRun[]>([]);
+    const [showSeeds, setShowSeeds] = useState(false);
     const [showQueue, setShowQueue] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
     const [showGens, setShowGens] = useState(false);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
-        const [s, t, g, r] = await Promise.all([
+        const [s, t, g, r, sr] = await Promise.all([
             fetchOptimizerStatus(),
             fetchOptimizerTrunks(),
             fetchOptimizerGenerations(20),
             fetchOptimizerRecommendations(),
+            fetchOptimizerSeedRuns(),
         ]);
         if (s) setStatus(s);
         if (t) setTrunks(t);
         if (g) setGenerations(g);
         if (r) setRecommendations(r);
+        if (sr) setSeedRuns(sr);
         setLoading(false);
     }, [apiAvailable]);
 
@@ -176,6 +183,24 @@ export default function Optimizer() {
                                     );
                                 })}
                             </div>
+
+                            {/* Seed Calibration Runs */}
+                            {seedRuns.length > 0 && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowSeeds(s => !s)}>
+                                        <BeakerIcon className={iconCl}/>Seed Calibration
+                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{seedRuns.length}</span>
+                                        {showSeeds ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                                    </h2>
+                                    {showSeeds && (
+                                        <div className="space-y-3">
+                                            {seedRuns.map(sr => (
+                                                <SeedRunCard key={sr.id} run={sr} isDarkMode={isDarkMode} muted={muted}/>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Verification Queue (Recommendations) */}
                             <div className={`${card} mb-6`}>
@@ -323,8 +348,8 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                     <InlineStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <InlineStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <InlineStat label="WR" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
-                    <InlineStat label="AvgW" value={r.avg_win?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                    <InlineStat label="AvgL" value={r.avg_loss?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-red-500"/>
+                    <InlineStat label="AvgW" value={fmtNum(r.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                    <InlineStat label="AvgL" value={fmtNum(r.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                     <InlineStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
                     <InlineStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
                 </div>
@@ -843,8 +868,8 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
                 <ResultStat label="Sharpe" value={result.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="PF" value={result.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="Win%" value={result.win_rate ? `${result.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
-                <ResultStat label="Avg W" value={result.avg_win?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                <ResultStat label="Avg L" value={result.avg_loss?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color="text-red-500"/>
+                <ResultStat label="Avg W" value={fmtNum(result.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                <ResultStat label="Avg L" value={fmtNum(result.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                 <ResultStat label="Trades" value={String(result.total_trades)} isDarkMode={isDarkMode}/>
                 <ResultStat label="Max DD" value={result.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="P&L" value={result.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(result.total_pnl)}/>
@@ -936,7 +961,220 @@ function RecStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
     return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium flex-shrink-0 ${cls}${extra}`}>{status}</span>;
 }
 
+// --- Seed Run Components ---
+
+const SEED_STAGES = ['Stage0', 'StageA', 'StageB', 'StageC', 'StageD', 'StageE'] as const;
+const STAGE_LABELS: Record<string, string> = {
+    Stage0: '0: Component Weights',
+    StageA: 'A: Raw Signal Baseline',
+    StageB: 'B: Filter Isolation',
+    StageC: 'C: Dampener Isolation',
+    StageD: 'D: Entry Strategy Sweep',
+    StageE: 'E: Final Assembly',
+};
+
+function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolean; muted: string}) {
+    const [expanded, setExpanded] = useState(false);
+    const isRunning = run.status === 'running';
+    const currentIdx = SEED_STAGES.indexOf(run.current_stage as typeof SEED_STAGES[number]);
+
+    const statusCls = isRunning
+        ? (isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700')
+        : run.status === 'completed'
+            ? (isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700')
+            : (isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700');
+
+    const durationStr = run.completed_at
+        ? (() => { const ms = dayjs(run.completed_at).diff(dayjs(run.started_at)); return ms < 60_000 ? `${Math.round(ms/1000)}s` : ms < 3_600_000 ? `${Math.round(ms/60_000)}m` : `${Math.floor(ms/3_600_000)}h ${Math.round((ms%3_600_000)/60_000)}m`; })()
+        : isRunning ? dayjs(run.started_at).fromNow(true) : null;
+
+    return (
+        <div className={`rounded-lg ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+            <button onClick={() => setExpanded(!expanded)} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{run.id}</span>
+                    <TimeframeBadge tf={run.timeframe} isDarkMode={isDarkMode}/>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusCls}${isRunning ? ' animate-pulse' : ''}`}>{run.status}</span>
+                    <span className={`text-xs ${muted}`}>{run.trigger_reason}</span>
+                    {isRunning && <span className={`text-xs font-medium ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>{STAGE_LABELS[run.current_stage] ?? run.current_stage}</span>}
+                    {run.trunk_id && <span className={`text-xs font-mono ${muted}`}>→ trunk #{run.trunk_id}</span>}
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                    {durationStr && <span className={`text-xs ${muted}`}>{durationStr}</span>}
+                    <span className={`text-xs ${muted}`}>{dayjs(run.started_at).fromNow()}</span>
+                    {expanded ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                </div>
+            </button>
+
+            {expanded && (
+                <div className="px-4 pb-4 space-y-3">
+                    {/* Stage progress bar */}
+                    <div className="flex gap-1">
+                        {SEED_STAGES.map((stage, i) => {
+                            const done = i < currentIdx || run.status === 'completed';
+                            const active = i === currentIdx && isRunning;
+                            return (
+                                <div key={stage} className="flex-1">
+                                    <div className={`h-1.5 rounded-full ${
+                                        done ? 'bg-emerald-500'
+                                        : active ? 'bg-cyan-500 animate-pulse'
+                                        : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'
+                                    }`}/>
+                                    <p className={`text-[10px] mt-0.5 text-center ${
+                                        active ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
+                                        : done ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600')
+                                        : muted
+                                    }`}>{stage.replace('Stage', '')}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {run.error_message && (
+                        <p className="text-xs text-red-400 font-mono">{run.error_message}</p>
+                    )}
+
+                    {/* Stage 0: Component weights */}
+                    {run.stage0_results && (run.stage0_results as SeedComponentResult[]).length > 0 && (
+                        <SeedStageSection title="Stage 0: Component Weights" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-1">
+                                {(run.stage0_results as SeedComponentResult[])
+                                    .sort((a, b) => b.sharpe - a.sharpe)
+                                    .map(c => (
+                                    <span key={c.component} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                    }`}>
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{c.component}</span>
+                                        <span className={c.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(c.sharpe)}</span>
+                                        <span className={muted}>W:{fmtNum(c.weight)}</span>
+                                        <span className={muted}>{c.trades}t</span>
+                                    </span>
+                                ))}
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage A: Raw signal variants */}
+                    {run.stagea_results && (run.stagea_results as SeedVariantResult[]).length > 0 && (
+                        <SeedStageSection title="Stage A: Raw Signal Baseline" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-1">
+                                {(run.stagea_results as SeedVariantResult[]).map(v => (
+                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                    }`}>
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
+                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
+                                        <span className={muted}>{v.trades}t</span>
+                                        {v.winner && <span className="text-emerald-500">★</span>}
+                                    </span>
+                                ))}
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage B: Filter isolation */}
+                    {run.stageb_results && (
+                        <SeedStageSection title="Stage B: Filter Isolation" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="space-y-1">
+                                <p className={`text-[10px] ${muted}`}>Baseline Sharpe: {fmtNum((run.stageb_results as SeedStageBResult).baseline_sharpe)}</p>
+                                <div className="flex flex-wrap gap-1">
+                                    {(run.stageb_results as SeedStageBResult).filters?.map(f => (
+                                        <span key={f.filter} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                            f.helps ? (isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50')
+                                            : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                        }`}>
+                                            <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{f.filter}</span>
+                                            <span className={f.helps ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(f.sharpe)}</span>
+                                            <span className={f.helps ? 'text-emerald-500' : 'text-red-500'}>{f.helps ? 'kept' : 'dropped'}</span>
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage C: Dampener isolation */}
+                    {run.stagec_results && (
+                        <SeedStageSection title="Stage C: Dampeners" isDarkMode={isDarkMode} muted={muted}>
+                            <div className={`flex gap-3 text-[10px] font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                <span>With: S:{fmtNum((run.stagec_results as SeedStageCResult).with_dampeners)}</span>
+                                <span>Without: S:{fmtNum((run.stagec_results as SeedStageCResult).without_dampeners)}</span>
+                                <span className="text-emerald-500">Winner: {(run.stagec_results as SeedStageCResult).winner}</span>
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage D: Entry strategy sweep */}
+                    {run.staged_results && (run.staged_results as SeedVariantResult[]).length > 0 && (
+                        <SeedStageSection title="Stage D: Entry Strategy" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-1">
+                                {(run.staged_results as SeedVariantResult[]).map(v => (
+                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                    }`}>
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
+                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
+                                        <span className={muted}>{v.trades}t</span>
+                                        {v.winner && <span className="text-emerald-500">★</span>}
+                                    </span>
+                                ))}
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage E: Final assembly */}
+                    {run.stagee_results && (
+                        <SeedStageSection title="Stage E: Final Assembly" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p className={`text-[10px] font-medium uppercase ${muted} mb-1`}>Calibrated</p>
+                                    <div className="flex gap-2 text-[10px] font-mono">
+                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>S:{fmtNum((run.stagee_results as SeedStageEResult).calibrated_sharpe)}</span>
+                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>WR:{(run.stagee_results as SeedStageEResult).calibrated_wr.toFixed(0)}%</span>
+                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{(run.stagee_results as SeedStageEResult).calibrated_trades}t</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className={`text-[10px] font-medium uppercase ${muted} mb-1`}>Seed Default</p>
+                                    <div className="flex gap-2 text-[10px] font-mono">
+                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>S:{fmtNum((run.stagee_results as SeedStageEResult).seed_sharpe)}</span>
+                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>WR:{(run.stagee_results as SeedStageEResult).seed_wr.toFixed(0)}%</span>
+                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{(run.stagee_results as SeedStageEResult).seed_trades}t</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className={`text-[10px] font-mono mt-1 text-emerald-500`}>Winner: {(run.stagee_results as SeedStageEResult).winner}</p>
+                        </SeedStageSection>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function SeedStageSection({title, isDarkMode, muted, children}: {title: string; isDarkMode: boolean; muted: string; children: React.ReactNode}) {
+    return (
+        <div>
+            <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>{title}</p>
+            <div className={`rounded border px-2 py-1.5 ${isDarkMode ? 'border-slate-600/50 bg-slate-900/60' : 'border-gray-300 bg-gray-200/60'}`}>
+                {children}
+            </div>
+        </div>
+    );
+}
+
 // --- Helpers ---
+
+/** Format numbers smartly — use exponential notation for very small values */
+function fmtNum(n?: number): string {
+    if (n == null) return '—';
+    const abs = Math.abs(n);
+    if (abs === 0) return '0';
+    if (abs < 0.01) return n.toExponential(2);
+    return n.toFixed(2);
+}
 
 function plColor(pnl?: number): string {
     if (pnl == null) return '';

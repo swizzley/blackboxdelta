@@ -3,7 +3,7 @@ import type {
     ApiHealth, ApiSystem, ApiDashboard, ApiCalendarDay, ApiOrder,
     ApiAlert, ApiMarket, ApiSetting,
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
-    OptimizerBranch, OptimizerTrunkDetail,
+    OptimizerBranch, OptimizerTrunkDetail, SeedRun,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
 } from '../context/Types';
@@ -164,6 +164,15 @@ export function pushTrunk(id: number): Promise<any> {
 
 export function revertTrunk(id: number): Promise<any> {
     return apiPost(`/api/optimizer/trunks/${id}/revert`);
+}
+
+// Seed runs
+export function fetchOptimizerSeedRuns(timeframe?: string, status?: string, limit = 10): Promise<SeedRun[] | null> {
+    const params = new URLSearchParams();
+    if (timeframe) params.set('timeframe', timeframe);
+    if (status) params.set('status', status);
+    params.set('limit', String(limit));
+    return apiFetch(`/api/optimizer/seed-runs?${params}`);
 }
 
 // Analysis

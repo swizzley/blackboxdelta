@@ -581,6 +581,69 @@ export interface OptimizerBranch {
     completed_at?: string;
 }
 
+// Seed run types (from /api/optimizer/seed-runs)
+export interface SeedComponentResult {
+    component: string;
+    sharpe: number;
+    trades: number;
+    win_rate: number;
+    weight: number;
+}
+
+export interface SeedVariantResult {
+    label: string;
+    sharpe: number;
+    trades: number;
+    winner?: boolean;
+}
+
+export interface SeedFilterResult {
+    filter: string;
+    sharpe: number;
+    trades: number;
+    helps: boolean;
+}
+
+export interface SeedStageBResult {
+    baseline_sharpe: number;
+    filters: SeedFilterResult[];
+    kept: string[];
+}
+
+export interface SeedStageCResult {
+    with_dampeners: number;
+    without_dampeners: number;
+    winner: string;
+}
+
+export interface SeedStageEResult {
+    calibrated_sharpe: number;
+    calibrated_wr: number;
+    calibrated_trades: number;
+    seed_sharpe: number;
+    seed_wr: number;
+    seed_trades: number;
+    winner: string;
+}
+
+export interface SeedRun {
+    id: number;
+    timeframe: string;
+    trigger_reason: string;
+    status: string;
+    current_stage: string;
+    started_at: string;
+    completed_at?: string;
+    stage0_results?: SeedComponentResult[];
+    stagea_results?: SeedVariantResult[];
+    stageb_results?: SeedStageBResult;
+    stagec_results?: SeedStageCResult;
+    staged_results?: SeedVariantResult[];
+    stagee_results?: SeedStageEResult;
+    trunk_id?: number;
+    error_message?: string;
+}
+
 // Analysis API types (from /api/analysis/*)
 export interface AnalysisRunApi {
     run_id: string;
