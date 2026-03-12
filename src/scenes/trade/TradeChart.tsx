@@ -1,10 +1,14 @@
-import {useEffect, useRef, useState, useCallback} from 'react';
+import {useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef} from 'react';
 import {createChart, ColorType, CrosshairMode, LineStyle} from 'lightweight-charts';
 import type {IChartApi, ISeriesApi, Time, LogicalRange} from 'lightweight-charts';
 import {OrderDetail, SignalRow} from '../../context/Types';
 import {findSignalDef, findComponentForSignal} from './signalMapping';
 import IndicatorPanel from './IndicatorPanel';
 import SubPane from './SubPane';
+
+export interface TradeChartHandle {
+    clickComponent: (componentKey: string) => void;
+}
 
 interface Props {
     trade: OrderDetail;
@@ -21,7 +25,7 @@ function getOscillatorGroup(key: string): string {
     return def?.group ?? key;
 }
 
-export default function TradeChart({trade, isDarkMode, signals, onRequestSignals}: Props) {
+const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trade, isDarkMode, signals, onRequestSignals}, ref) {
     const containerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const candleRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
@@ -30,6 +34,8 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
     const mainSyncingRef = useRef(false);
     const [zoom, setZoom] = useState<ZoomMode>('trade');
     const [panelOpen, setPanelOpen] = useState(false);
+    // Ref for programmatic component click (used by score bar click)
+    const pendingComponentClickRef = useRef<string | null>(null);
     const [activeIndicators, setActiveIndicators] = useState<Set<string>>(new Set());
     const [subPaneGroups, setSubPaneGroups] = useState<string[]>([]);
     const [visibleRange, setVisibleRange] = useState<LogicalRange | null>(null);
@@ -81,6 +87,14 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
         setPanelOpen(true);
         if (onRequestSignals) onRequestSignals();
     }, [onRequestSignals]);
+
+    // Expose clickComponent for external callers (e.g. score bar chart click)
+    useImperativeHandle(ref, () => ({
+        clickComponent: (componentKey: string) => {
+            pendingComponentClickRef.current = componentKey;
+            openPanel();
+        },
+    }), [openPanel]);
 
     // Create chart
     useEffect(() => {
@@ -513,9 +527,9 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
                 <div ref={containerRef} style={{height: '500px'}}/>
             </div>
 
-            {/* Oscillator Sub-Panes — scrollable, no wheel capture to avoid fighting chart zoom */}
+            {/* Oscillator Sub-Panes */}
             {signals && subPaneGroups.length > 0 && (
-                <div className="mb-4 space-y-1 max-h-[50vh] overflow-y-auto overscroll-contain">
+                <div className="mb-4 space-y-1">
                     {subPaneGroups.map(group => (
                         <SubPane
                             key={group}
@@ -543,10 +557,13 @@ export default function TradeChart({trade, isDarkMode, signals, onRequestSignals
                 onToggleAll={handleToggleAll}
                 signals={signals}
                 tradeTime={trade.created}
+                pendingComponentClick={pendingComponentClickRef}
             />
         </>
     );
-}
+});
+
+export default TradeChart;
 
 function ZoomBtn({label, active, onClick, isDarkMode, pos}: {
     label: string;

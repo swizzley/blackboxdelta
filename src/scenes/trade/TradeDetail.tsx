@@ -1,15 +1,17 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useParams} from 'react-router-dom';
 import ReactECharts from 'echarts-for-react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import StatCard from '../common/StatCard';
 import TradeChart from './TradeChart';
+import type {TradeChartHandle} from './TradeChart';
 import {useTheme} from '../../context/Theme';
 import {formatDollar} from '../common/Util';
 import {useApi} from '../../context/Api';
 import {fetchOrder as apiFetchOrder, fetchPricesAround, fetchSignalsAround} from '../../api/client';
 import {OrderDetail, Score, SignalRow} from '../../context/Types';
+import {COMPONENTS} from './signalMapping';
 import dayjs from 'dayjs';
 
 export default function TradeDetail() {
@@ -20,6 +22,7 @@ export default function TradeDetail() {
     const [signals, setSignals] = useState<SignalRow[] | null>(null);
     const [signalsFetched, setSignalsFetched] = useState(false);
     const [error, setError] = useState(false);
+    const chartRef = useRef<TradeChartHandle>(null);
 
     useEffect(() => {
         if (!id) return;
@@ -170,6 +173,7 @@ export default function TradeDetail() {
                             {/* Candlestick Chart */}
                             {trade.candles && trade.candles.length > 0 && (
                                 <TradeChart
+                                    ref={chartRef}
                                     trade={trade}
                                     isDarkMode={isDarkMode}
                                     signals={signals}
@@ -178,7 +182,7 @@ export default function TradeDetail() {
                             )}
 
                             {/* Score Section */}
-                            {trade.score && <ScoreSection score={trade.score} isDarkMode={isDarkMode}/>}
+                            {trade.score && <ScoreSection score={trade.score} isDarkMode={isDarkMode} onBarClick={(key) => chartRef.current?.clickComponent(key)}/>}
 
                             {/* Price Levels + Timeline side by side */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
@@ -287,20 +291,13 @@ function Timeline({trade, isDarkMode}: { trade: OrderDetail; isDarkMode: boolean
     );
 }
 
-function ScoreSection({score, isDarkMode}: { score: Score; isDarkMode: boolean }) {
-    const components: { label: string; key: keyof Score; color: string }[] = [
-        {label: 'Trend', key: 'trend_score', color: '#6366f1'},
-        {label: 'MA', key: 'ma_score', color: '#8b5cf6'},
-        {label: 'Crossover', key: 'crossover_score', color: '#a78bfa'},
-        {label: 'Oscillator', key: 'oscillator_score', color: '#f59e0b'},
-        {label: 'Volatility', key: 'volatility_score', color: '#ef4444'},
-        {label: 'Volume', key: 'volume_score', color: '#3b82f6'},
-        {label: 'Fib Stack', key: 'fib_stack_score', color: '#14b8a6'},
-        {label: 'Momentum', key: 'momentum_projection_score', color: '#f97316'},
-        {label: 'Structure', key: 'structure_score', color: '#ec4899'},
-        {label: 'Cycle', key: 'cycle_score', color: '#84cc16'},
-        {label: 'Pattern', key: 'pattern_score', color: '#06b6d4'},
-    ];
+function ScoreSection({score, isDarkMode, onBarClick}: { score: Score; isDarkMode: boolean; onBarClick?: (componentKey: string) => void }) {
+    const components = COMPONENTS.map(c => ({
+        key: c.scoreKey,
+        componentKey: c.key,
+        label: c.label,
+        color: c.color,
+    }));
 
     const recColor = score.recommendation.includes('Buy')
         ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
@@ -342,6 +339,7 @@ function ScoreSection({score, isDarkMode}: { score: Score; isDarkMode: boolean }
                     itemStyle: {color: c.color},
                 })),
                 barWidth: '60%',
+                cursor: 'pointer',
                 label: {
                     show: true,
                     position: (p: any) => p.value >= 0 ? 'top' : 'bottom',
@@ -393,7 +391,17 @@ function ScoreSection({score, isDarkMode}: { score: Score; isDarkMode: boolean }
                     </div>
                 </div>
             </div>
-            <ReactECharts option={barOption} style={{height: '350px'}}/>
+            <ReactECharts
+                option={barOption}
+                style={{height: '350px'}}
+                onEvents={{
+                    click: (params: any) => {
+                        if (params.seriesType === 'bar' && params.dataIndex !== undefined && onBarClick) {
+                            onBarClick(components[params.dataIndex].componentKey);
+                        }
+                    },
+                }}
+            />
         </div>
     );
 }

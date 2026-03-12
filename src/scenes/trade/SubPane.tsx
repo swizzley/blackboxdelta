@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {createChart, ColorType, LineStyle} from 'lightweight-charts';
 import type {IChartApi, ISeriesApi, Time, LogicalRange} from 'lightweight-charts';
 import type {SignalRow} from '../../context/Types';
@@ -9,18 +9,24 @@ interface Props {
     activeKeys: string[];
     groupLabel: string;
     groupColor?: string;
-    range?: [number, number];
     isDarkMode: boolean;
     onVisibleRangeChange?: (range: LogicalRange | null) => void;
     visibleRange?: LogicalRange | null;
     onClose: () => void;
 }
 
-export default function SubPane({signals, activeKeys, groupLabel, groupColor, range, isDarkMode, onVisibleRangeChange, visibleRange, onClose}: Props) {
+interface LegendEntry {
+    label: string;
+    color: string;
+    value: string;
+}
+
+export default function SubPane({signals, activeKeys, groupLabel, groupColor, isDarkMode, onVisibleRangeChange, visibleRange, onClose}: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
     const syncingRef = useRef(false);
+    const [legend, setLegend] = useState<LegendEntry[]>([]);
 
     // Create chart
     useEffect(() => {
@@ -51,6 +57,26 @@ export default function SubPane({signals, activeKeys, groupLabel, groupColor, ra
             crosshair: {mode: 0},
         });
         chartRef.current = chart;
+
+        // Crosshair move — update legend with values for each series
+        chart.subscribeCrosshairMove((param) => {
+            if (!param.time || !param.seriesData) {
+                setLegend([]);
+                return;
+            }
+            const entries: LegendEntry[] = [];
+            for (const [key, series] of seriesRef.current) {
+                const data = param.seriesData.get(series) as {value?: number} | undefined;
+                if (!data || data.value === undefined) continue;
+                const def = findSignalDef(key);
+                entries.push({
+                    label: def?.label ?? key,
+                    color: def?.color ?? '#787b86',
+                    value: data.value.toFixed(4),
+                });
+            }
+            setLegend(entries);
+        });
 
         // Emit range changes for sync
         chart.timeScale().subscribeVisibleLogicalRangeChange((lr) => {
@@ -123,24 +149,29 @@ export default function SubPane({signals, activeKeys, groupLabel, groupColor, ra
                     lineWidth: (def.lineWidth ?? 1) as 1 | 2 | 3 | 4,
                     lineStyle: def.lineStyle === 'dashed' ? LineStyle.Dashed : def.lineStyle === 'dotted' ? LineStyle.Dotted : LineStyle.Solid,
                     priceScaleId: 'right',
+                    lastValueVisible: false,
+                    priceLineVisible: false,
                 });
                 series.setData(data);
                 current.set(key, series);
             }
         }
-
-        // Add reference lines for known ranges
-        if (range) {
-            // Price lines would need a series — skip for now, the range is visual from data
-        }
     }, [activeKeys, signals]);
 
     return (
         <div className={`relative rounded-lg overflow-hidden mb-2 ${isDarkMode ? 'bg-[#131722]' : 'bg-white'}`}>
-            <div className="absolute top-1 left-2 z-10 flex items-center gap-2">
+            {/* Header: group label + legend values */}
+            <div className="absolute top-1 left-2 z-10 flex items-center gap-3 pointer-events-none">
                 <span className="text-xs font-medium" style={{color: groupColor ?? (isDarkMode ? '#9ca3af' : '#6b7280')}}>
                     {groupLabel}
                 </span>
+                {legend.length > 0 && legend.map(e => (
+                    <span key={e.label} className="flex items-center gap-1 text-[10px]">
+                        <span className="w-1.5 h-1.5 rounded-full inline-block" style={{backgroundColor: e.color}} />
+                        <span style={{color: e.color}}>{e.label}</span>
+                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{e.value}</span>
+                    </span>
+                ))}
             </div>
             <button
                 onClick={onClose}

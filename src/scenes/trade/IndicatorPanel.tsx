@@ -1,4 +1,4 @@
-import {useState, useMemo} from 'react';
+import {useState, useMemo, useEffect, type MutableRefObject} from 'react';
 import {COMPONENTS, type ComponentDef, type SignalDef} from './signalMapping';
 import type {Score, SignalRow} from '../../context/Types';
 
@@ -12,9 +12,10 @@ interface Props {
     onToggleAll: (keys: string[], on: boolean) => void;
     signals?: SignalRow[] | null;
     tradeTime?: string;
+    pendingComponentClick?: MutableRefObject<string | null>;
 }
 
-export default function IndicatorPanel({open, onClose, isDarkMode, score, activeIndicators, onToggle, onToggleAll, signals, tradeTime}: Props) {
+export default function IndicatorPanel({open, onClose, isDarkMode, score, activeIndicators, onToggle, onToggleAll, signals, tradeTime, pendingComponentClick}: Props) {
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
     // Compute top contributors per component from signal data at trade time
@@ -52,6 +53,31 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
         }
         return tops;
     }, [signals, tradeTime]);
+
+    // Process pending component click from external trigger (e.g. score bar chart)
+    useEffect(() => {
+        if (!open || !pendingComponentClick?.current) return;
+        const key = pendingComponentClick.current;
+        pendingComponentClick.current = null;
+
+        // Expand the section
+        setExpanded(prev => new Set([...prev, key]));
+
+        // Toggle top contributors
+        const topKeys = topContributors.get(key);
+        if (topKeys && topKeys.size > 0) {
+            const arr = Array.from(topKeys);
+            const allActive = arr.every(k => activeIndicators.has(k));
+            onToggleAll(arr, !allActive);
+        } else {
+            const comp = COMPONENTS.find(c => c.key === key);
+            if (comp) {
+                const keys = comp.signals.slice(0, 3).map(s => s.key);
+                const allActive = keys.every(k => activeIndicators.has(k));
+                onToggleAll(keys, !allActive);
+            }
+        }
+    }, [open]);
 
     if (!open) return null;
 
@@ -175,10 +201,14 @@ function ScoreInfluenceBar({score, isDarkMode, onClickComponent}: {
                         key={s.key}
                         style={{width: `${(Math.abs(s.value) / totalAbs) * 100}%`, backgroundColor: s.color}}
                         className="relative group"
-                        title={`${s.label}: ${s.value.toFixed(1)}`}
                         onClick={() => onClickComponent(s.key)}
                     >
                         <div className="absolute inset-0 opacity-0 hover:opacity-20 bg-white transition-opacity" />
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded text-xs font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-100 pointer-events-none z-20 shadow-lg"
+                            style={{backgroundColor: s.color, color: '#fff'}}>
+                            {s.label}: {s.value > 0 ? '+' : ''}{s.value.toFixed(1)}
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent" style={{borderTopColor: s.color}} />
+                        </div>
                     </div>
                 ))}
             </div>
