@@ -39,6 +39,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
     const [activeIndicators, setActiveIndicators] = useState<Set<string>>(new Set());
     const [subPaneGroups, setSubPaneGroups] = useState<string[]>([]);
     const [visibleRange, setVisibleRange] = useState<LogicalRange | null>(null);
+    const [overlayLegend, setOverlayLegend] = useState<{label: string; color: string; value: string}[]>([]);
 
     const candles = trade.candles!;
     const isJpy = trade.symbol.includes('JPY');
@@ -143,6 +144,28 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             if (!mainSyncingRef.current) {
                 setVisibleRange(lr);
             }
+        });
+
+        // Crosshair move — update overlay legend with current values
+        chart.subscribeCrosshairMove((param) => {
+            if (!param.time || !param.seriesData) {
+                setOverlayLegend([]);
+                return;
+            }
+            const entries: {label: string; color: string; value: string}[] = [];
+            for (const [key, series] of overlaySeriesRef.current) {
+                const data = param.seriesData.get(series) as {value?: number; close?: number} | undefined;
+                if (!data) continue;
+                const val = data.value ?? data.close;
+                if (val === undefined) continue;
+                const def = findSignalDef(key);
+                entries.push({
+                    label: def?.label ?? key,
+                    color: def?.color ?? '#787b86',
+                    value: val.toFixed(decimals),
+                });
+            }
+            setOverlayLegend(entries);
         });
 
         // Candlestick series — hollow candles
@@ -619,7 +642,20 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
                         </a>
                     </div>
                 </div>
-                <div ref={containerRef} style={{height: '500px'}}/>
+                <div className="relative">
+                    <div ref={containerRef} style={{height: '500px'}}/>
+                    {overlayLegend.length > 0 && (
+                        <div className="absolute top-1 left-2 z-10 flex flex-wrap items-center gap-x-3 gap-y-0.5 pointer-events-none max-w-[80%]">
+                            {overlayLegend.map(e => (
+                                <span key={e.label} className="flex items-center gap-1 text-[10px]">
+                                    <span className="w-1.5 h-1.5 rounded-full inline-block flex-shrink-0" style={{backgroundColor: e.color}}/>
+                                    <span style={{color: e.color}}>{e.label}</span>
+                                    <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{e.value}</span>
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Oscillator Sub-Panes */}
