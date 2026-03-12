@@ -1,4 +1,5 @@
 import type {ApiOrder, ApiAlert, MonitorStatus} from '../context/Types';
+import {getFingerprintSync} from './fingerprint';
 
 interface SSEOptions<T> {
     url: string;
@@ -13,7 +14,11 @@ function connectSSE<T>({url, onMessage, eventName}: SSEOptions<T>): () => void {
 
     function connect() {
         if (stopped) return;
-        es = new EventSource(url);
+        // Append fingerprint as query param (EventSource doesn't support custom headers)
+        const fp = getFingerprintSync();
+        const sep = url.includes('?') ? '&' : '?';
+        const authUrl = fp ? `${url}${sep}fp=${encodeURIComponent(fp)}` : url;
+        es = new EventSource(authUrl);
         es.onopen = () => { backoff = 1000; };
 
         const handler = (e: MessageEvent) => {

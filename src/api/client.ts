@@ -1,4 +1,5 @@
 import {getApiBase} from './config';
+import {getFingerprintSync} from './fingerprint';
 import type {
     ApiHealth, ApiSystem, ApiDashboard, ApiCalendarDay, ApiOrder,
     ApiAlert, ApiMarket, ApiSetting, SignalRow,
@@ -10,12 +11,20 @@ import type {
 
 const TIMEOUT = 5000;
 
+function authHeaders(): Record<string, string> {
+    const fp = getFingerprintSync();
+    return fp ? {'X-Device-FP': fp} : {};
+}
+
 async function apiFetch<T>(path: string): Promise<T | null> {
     const base = getApiBase();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT);
     try {
-        const res = await fetch(`${base}${path}`, {signal: controller.signal});
+        const res = await fetch(`${base}${path}`, {
+            signal: controller.signal,
+            headers: authHeaders(),
+        });
         if (!res.ok) return null;
         return await res.json() as T;
     } catch {
@@ -136,7 +145,7 @@ export async function apiPost(path: string, body?: any): Promise<any> {
     try {
         const res = await fetch(`${base}${path}`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {'Content-Type': 'application/json', ...authHeaders()},
             body: body ? JSON.stringify(body) : undefined,
         });
         if (!res.ok) return null;

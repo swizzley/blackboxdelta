@@ -3,7 +3,12 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from './context/Theme';
 import { ApiProvider } from './context/Api';
+import { initFingerprint } from './api/fingerprint';
 import './index.css';
+
+// Eagerly initialize device fingerprint (cached for all subsequent API calls)
+initFingerprint();
+
 const rootElement = document.getElementById('root');
 
 if (rootElement) {

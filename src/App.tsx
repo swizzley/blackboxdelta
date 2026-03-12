@@ -7,6 +7,7 @@ import Analysis from './scenes/analysis/Analysis';
 import Status from './scenes/status/Status';
 import System from './scenes/system/System';
 import Optimizer from './scenes/optimizer/Optimizer';
+import Devices from './scenes/devices/Devices';
 import Error404 from './scenes/common/404';
 import ErrorBoundary from './scenes/common/ErrorBoundary';
 
@@ -23,6 +24,7 @@ export default function App() {
                     <Route path="/optimizer" element={<Optimizer/>}/>
                     <Route path="/day/:year/:month/:day" element={<DayDetail/>}/>
                     <Route path="/trade/:year/:month/:day/:id" element={<TradeDetail/>}/>
+                    <Route path="/devices" element={<Devices/>}/>
                     <Route path="*" element={<Error404/>}/>
                 </Routes>
             </Router>
