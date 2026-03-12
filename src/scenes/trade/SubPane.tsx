@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {createChart, ColorType, LineStyle} from 'lightweight-charts';
 import type {IChartApi, ISeriesApi, Time, LogicalRange} from 'lightweight-charts';
 import type {SignalRow} from '../../context/Types';
-import {findSignalDef} from './signalMapping';
+import {findSignalDef, REF_LINES} from './signalMapping';
 
 interface Props {
     signals: SignalRow[];
@@ -21,12 +21,19 @@ interface LegendEntry {
     value: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySeries = ISeriesApi<any>;
+
 export default function SubPane({signals, activeKeys, groupLabel, groupColor, isDarkMode, onVisibleRangeChange, visibleRange, onClose}: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
-    const seriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
+    const seriesRef = useRef<Map<string, AnySeries>>(new Map());
+    const refLinesAdded = useRef<Set<string>>(new Set());
     const syncingRef = useRef(false);
     const [legend, setLegend] = useState<LegendEntry[]>([]);
+
+    // Determine the oscillator group from the first active key
+    const groupKey = activeKeys.length > 0 ? (findSignalDef(activeKeys[0])?.group ?? activeKeys[0]) : '';
 
     // Create chart
     useEffect(() => {
@@ -97,6 +104,7 @@ export default function SubPane({signals, activeKeys, groupLabel, groupColor, is
             chart.remove();
             chartRef.current = null;
             seriesRef.current.clear();
+            refLinesAdded.current.clear();
         };
     }, [isDarkMode]);
 
@@ -129,34 +137,85 @@ export default function SubPane({signals, activeKeys, groupLabel, groupColor, is
             const def = findSignalDef(key);
             if (!def) continue;
 
-            const data = signals
-                .filter(row => {
-                    const v = row[key];
-                    return v !== undefined && v !== null && v !== 0 && typeof v === 'number';
-                })
-                .map(row => ({
+            const isHistogram = def.render === 'histogram';
+
+            const rawData = signals.filter(row => {
+                const v = row[key];
+                return v !== undefined && v !== null && v !== 0 && typeof v === 'number';
+            });
+
+            if (rawData.length === 0) continue;
+
+            if (isHistogram) {
+                // Histogram series — colored bars (green above 0, red below 0)
+                const data = rawData.map(row => {
+                    const v = row[key] as number;
+                    return {
+                        time: (typeof row.t === 'number' ? Math.floor(row.t / 1000) : Math.floor(new Date(row.t as string).getTime() / 1000)) as Time,
+                        value: v,
+                        color: v >= 0 ? '#26a69a' : '#ef5350',
+                    };
+                });
+
+                if (current.has(key)) {
+                    current.get(key)!.setData(data);
+                } else {
+                    const series = chart.addHistogramSeries({
+                        priceScaleId: 'right',
+                        lastValueVisible: false,
+                        priceLineVisible: false,
+                        base: 0,
+                    });
+                    series.setData(data);
+                    current.set(key, series as AnySeries);
+                }
+            } else {
+                // Line series
+                const data = rawData.map(row => ({
                     time: (typeof row.t === 'number' ? Math.floor(row.t / 1000) : Math.floor(new Date(row.t as string).getTime() / 1000)) as Time,
                     value: row[key] as number,
                 }));
 
-            if (data.length === 0) continue;
-
-            if (current.has(key)) {
-                current.get(key)!.setData(data);
-            } else {
-                const series = chart.addLineSeries({
-                    color: def.color,
-                    lineWidth: (def.lineWidth ?? 1) as 1 | 2 | 3 | 4,
-                    lineStyle: def.lineStyle === 'dashed' ? LineStyle.Dashed : def.lineStyle === 'dotted' ? LineStyle.Dotted : LineStyle.Solid,
-                    priceScaleId: 'right',
-                    lastValueVisible: false,
-                    priceLineVisible: false,
-                });
-                series.setData(data);
-                current.set(key, series);
+                if (current.has(key)) {
+                    current.get(key)!.setData(data);
+                } else {
+                    const series = chart.addLineSeries({
+                        color: def.color,
+                        lineWidth: (def.lineWidth ?? 1) as 1 | 2 | 3 | 4,
+                        lineStyle: def.lineStyle === 'dashed' ? LineStyle.Dashed : def.lineStyle === 'dotted' ? LineStyle.Dotted : LineStyle.Solid,
+                        priceScaleId: 'right',
+                        lastValueVisible: false,
+                        priceLineVisible: false,
+                    });
+                    series.setData(data);
+                    current.set(key, series as AnySeries);
+                }
             }
         }
-    }, [activeKeys, signals]);
+
+        // Add reference lines for this oscillator group (once per group)
+        const refs = REF_LINES[groupKey];
+        if (refs && !refLinesAdded.current.has(groupKey)) {
+            // Find any line series to attach price lines to
+            const lineSeries = Array.from(current.values()).find((_, idx) => {
+                const k = Array.from(current.keys())[idx];
+                const d = findSignalDef(k);
+                return d?.render !== 'histogram';
+            });
+            if (lineSeries) {
+                for (const ref of refs) {
+                    lineSeries.createPriceLine({
+                        price: ref.value,
+                        color: ref.color,
+                        lineWidth: 1,
+                        lineStyle: ref.style === 'dotted' ? LineStyle.Dotted : LineStyle.Dashed,
+                        axisLabelVisible: false,
+                    });
+                }
+                refLinesAdded.current.add(groupKey);
+            }
+        }
+    }, [activeKeys, signals, groupKey]);
 
     return (
         <div className={`relative rounded-lg overflow-hidden mb-2 ${isDarkMode ? 'bg-[#131722]' : 'bg-white'}`}>

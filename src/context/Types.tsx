@@ -124,6 +124,7 @@ export interface Candle {
     h: number;
     l: number;
     c: number;
+    v?: number;  // volume (tick count)
 }
 
 // Score from the 11-component SQL scoring pipeline

@@ -29,7 +29,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
     const containerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const candleRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
-    const overlaySeriesRef = useRef<Map<string, ISeriesApi<'Line'>>>(new Map());
+    const overlaySeriesRef = useRef<Map<string, ISeriesApi<any>>>(new Map());
     const baseMarkersRef = useRef<any[]>([]);
     const mainSyncingRef = useRef(false);
     const [zoom, setZoom] = useState<ZoomMode>('trade');
@@ -161,6 +161,28 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
         });
         candleSeries.setData(bars);
         candleRef.current = candleSeries;
+
+        // Volume histogram (on separate price scale, bottom 20% of chart)
+        const hasVolume = candles.some(c => c.v && c.v > 0);
+        if (hasVolume) {
+            const volumeSeries = chart.addHistogramSeries({
+                color: '#26a69a',
+                priceFormat: {type: 'volume'},
+                priceScaleId: 'volume',
+                lastValueVisible: false,
+                priceLineVisible: false,
+            });
+            chart.priceScale('volume').applyOptions({
+                scaleMargins: {top: 0.8, bottom: 0},
+            });
+            volumeSeries.setData(
+                candles.map(c => ({
+                    time: Math.floor(new Date(c.t).getTime() / 1000) as Time,
+                    value: c.v ?? 0,
+                    color: c.c >= c.o ? 'rgba(38, 166, 154, 0.3)' : 'rgba(239, 83, 80, 0.3)',
+                }))
+            );
+        }
 
         // Price lines: entry, SL, TP, exit
         candleSeries.createPriceLine({
@@ -352,19 +374,47 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
 
             if (data.length === 0) continue;
 
-            const isSarDots = def.render === 'dots';
-            const series = chart.addLineSeries({
-                color: def.color,
-                lineWidth: isSarDots ? 0 as any : (def.lineWidth ?? 1) as 1 | 2 | 3 | 4,
-                lineStyle: def.lineStyle === 'dashed' ? LineStyle.Dashed : def.lineStyle === 'dotted' ? LineStyle.Dotted : LineStyle.Solid,
-                lastValueVisible: false,
-                priceLineVisible: false,
-                pointMarkersVisible: isSarDots,
-                pointMarkersRadius: isSarDots ? 2 : undefined,
-                crosshairMarkerVisible: !isSarDots,
-            });
-            series.setData(data);
-            current.set(key, series);
+            if (def.render === 'dots') {
+                // SAR-style dot rendering
+                const series = chart.addLineSeries({
+                    color: def.color,
+                    lineWidth: 0 as any,
+                    lineStyle: LineStyle.Solid,
+                    lastValueVisible: false,
+                    priceLineVisible: false,
+                    pointMarkersVisible: true,
+                    pointMarkersRadius: 2,
+                    crosshairMarkerVisible: false,
+                });
+                series.setData(data);
+                current.set(key, series);
+            } else if (def.render === 'area-fill') {
+                // Bollinger Band fill — area series with transparent line, shaded fill
+                const isUpper = key === 'bollinger_top';
+                const series = chart.addAreaSeries({
+                    topColor: isUpper ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                    bottomColor: isUpper ? 'transparent' : 'rgba(59, 130, 246, 0.08)',
+                    lineColor: def.color,
+                    lineWidth: 1,
+                    lineStyle: LineStyle.Dashed,
+                    lastValueVisible: false,
+                    priceLineVisible: false,
+                    invertFilledArea: !isUpper,
+                });
+                series.setData(data);
+                current.set(key, series as any);
+            } else {
+                // Standard line series
+                const series = chart.addLineSeries({
+                    color: def.color,
+                    lineWidth: (def.lineWidth ?? 1) as 1 | 2 | 3 | 4,
+                    lineStyle: def.lineStyle === 'dashed' ? LineStyle.Dashed : def.lineStyle === 'dotted' ? LineStyle.Dotted : LineStyle.Solid,
+                    lastValueVisible: false,
+                    priceLineVisible: false,
+                });
+                series.setData(data);
+                current.set(key, series);
+            }
         }
 
         // Update sub-pane groups

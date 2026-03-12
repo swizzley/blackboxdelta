@@ -9,10 +9,28 @@ export interface SignalDef {
     color: string;
     lineWidth?: number;
     lineStyle?: 'solid' | 'dashed' | 'dotted';
-    render?: 'dots';       // special overlay render mode (SAR)
+    render?: 'dots' | 'histogram' | 'area-fill'; // special render modes
     tier?: number;         // candle pattern weight tier (1-3), higher = more significant
     patternShape?: 'arrow' | 'square' | 'circle'; // marker shape for candle patterns
 }
+
+// Reference levels for oscillator groups (key = group name or signal key)
+export const REF_LINES: Record<string, {value: number; color: string; style?: 'dashed' | 'dotted'}[]> = {
+    rsi:           [{value: 70, color: '#ef444480', style: 'dashed'}, {value: 30, color: '#22c55e80', style: 'dashed'}],
+    stoch:         [{value: 80, color: '#ef444480', style: 'dashed'}, {value: 20, color: '#22c55e80', style: 'dashed'}],
+    cci:           [{value: 100, color: '#ef444480', style: 'dashed'}, {value: -100, color: '#22c55e80', style: 'dashed'}],
+    willr:         [{value: -20, color: '#ef444480', style: 'dashed'}, {value: -80, color: '#22c55e80', style: 'dashed'}],
+    mfi:           [{value: 80, color: '#ef444480', style: 'dashed'}, {value: 20, color: '#22c55e80', style: 'dashed'}],
+    ultosc:        [{value: 70, color: '#ef444480', style: 'dashed'}, {value: 30, color: '#22c55e80', style: 'dashed'}],
+    adx:           [{value: 25, color: '#9ca3af60', style: 'dotted'}],
+    macd:          [{value: 0, color: '#9ca3af40', style: 'dotted'}],
+    macd_ext:      [{value: 0, color: '#9ca3af40', style: 'dotted'}],
+    cmo:           [{value: 0, color: '#9ca3af40', style: 'dotted'}],
+    apo:           [{value: 0, color: '#9ca3af40', style: 'dotted'}],
+    ppo:           [{value: 0, color: '#9ca3af40', style: 'dotted'}],
+    bop:           [{value: 0, color: '#9ca3af40', style: 'dotted'}],
+    ht_sine:       [{value: 0, color: '#9ca3af40', style: 'dotted'}],
+};
 
 export interface ComponentDef {
     key: string;
@@ -44,7 +62,7 @@ export const COMPONENTS: ComponentDef[] = [
     {
         key: 'trend', label: 'Trend', color: '#6366f1', scoreKey: 'trend_score',
         signals: [
-            {key: 'adx_value', label: 'ADX', type: 'oscillator', range: [0, 100], group: 'adx', color: '#a78bfa'},
+            {key: 'adx_value', label: 'ADX', type: 'oscillator', range: [0, 100], group: 'adx', color: '#a78bfa', lineWidth: 2},
             {key: 'adx_diplus', label: 'ADX +DI', type: 'oscillator', range: [0, 100], group: 'adx', color: '#22c55e'},
             {key: 'adx_diminus', label: 'ADX -DI', type: 'oscillator', range: [0, 100], group: 'adx', color: '#ef4444'},
             {key: 'aroon', label: 'Aroon', type: 'oscillator', range: [-100, 100], color: '#818cf8'},
@@ -52,7 +70,7 @@ export const COMPONENTS: ComponentDef[] = [
             {key: 'linreg_slope', label: 'LinReg Slope', type: 'oscillator', color: '#ddd6fe'},
             {key: 'macd_value', label: 'MACD', type: 'oscillator', group: 'macd', color: '#3b82f6'},
             {key: 'macd_signal', label: 'MACD Signal', type: 'oscillator', group: 'macd', color: '#f97316'},
-            {key: 'macd_histogram', label: 'MACD Hist', type: 'oscillator', group: 'macd', color: '#64748b'},
+            {key: 'macd_histogram', label: 'MACD Hist', type: 'oscillator', group: 'macd', color: '#64748b', render: 'histogram'},
             {key: 'momentum', label: 'Momentum', type: 'oscillator', color: '#8b5cf6'},
             {key: 'roc_value', label: 'ROC', type: 'oscillator', color: '#a855f7'},
             {key: 'mama', label: 'MAMA', type: 'overlay', color: '#7c3aed'},
@@ -107,16 +125,16 @@ export const COMPONENTS: ComponentDef[] = [
             {key: 'cmo', label: 'CMO', type: 'oscillator', range: [-100, 100], group: 'cmo', color: '#8b5cf6'},
             {key: 'apo', label: 'APO', type: 'oscillator', group: 'apo', color: '#ec4899'},
             {key: 'ppo', label: 'PPO', type: 'oscillator', group: 'ppo', color: '#f472b6'},
-            {key: 'bop', label: 'BOP', type: 'oscillator', range: [-1, 1], group: 'bop', color: '#14b8a6'},
+            {key: 'bop', label: 'BOP', type: 'oscillator', range: [-1, 1], group: 'bop', color: '#14b8a6', render: 'histogram'},
             {key: 'ultosc', label: 'Ultimate Osc', type: 'oscillator', range: [0, 100], group: 'ultosc', color: '#a855f7'},
         ],
     },
     {
         key: 'volatility', label: 'Volatility', color: '#ef4444', scoreKey: 'volatility_score',
         signals: [
-            {key: 'bollinger_top', label: 'BB Upper', type: 'overlay', color: '#3b82f680', lineStyle: 'dashed'},
+            {key: 'bollinger_top', label: 'BB Upper', type: 'overlay', color: '#3b82f680', lineStyle: 'dashed', render: 'area-fill'},
             {key: 'bollinger_mid', label: 'BB Mid', type: 'overlay', color: '#3b82f640', lineStyle: 'dotted'},
-            {key: 'bollinger_bottom', label: 'BB Lower', type: 'overlay', color: '#3b82f680', lineStyle: 'dashed'},
+            {key: 'bollinger_bottom', label: 'BB Lower', type: 'overlay', color: '#3b82f680', lineStyle: 'dashed', render: 'area-fill'},
             {key: 'atr', label: 'ATR', type: 'oscillator', group: 'atr', color: '#ef4444'},
             {key: 'natr', label: 'NATR', type: 'oscillator', group: 'natr', color: '#f87171'},
             {key: 'stddev', label: 'StdDev', type: 'oscillator', group: 'stddev', color: '#fca5a5'},
@@ -156,7 +174,7 @@ export const COMPONENTS: ComponentDef[] = [
             {key: 'fama', label: 'FAMA', type: 'overlay', color: '#c084fc'},
             {key: 'macdfix_value', label: 'MACD Fix', type: 'oscillator', group: 'macdfix', color: '#ea580c'},
             {key: 'macdfix_signal', label: 'MACD Fix Signal', type: 'oscillator', group: 'macdfix', color: '#fb923c'},
-            {key: 'macdfix_histogram', label: 'MACD Fix Hist', type: 'oscillator', group: 'macdfix', color: '#64748b'},
+            {key: 'macdfix_histogram', label: 'MACD Fix Hist', type: 'oscillator', group: 'macdfix', color: '#64748b', render: 'histogram'},
         ],
     },
     {
