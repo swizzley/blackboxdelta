@@ -146,6 +146,19 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
         });
 
         // Candlestick series — hollow candles
+        // autoscaleInfoProvider ensures TP/SL/spread price lines are always visible
+        const tradePrices: number[] = [trade.entry, trade.stop_loss];
+        if (trade.take_profit && trade.take_profit > 0) tradePrices.push(trade.take_profit);
+        if (trade.exit !== undefined) tradePrices.push(trade.exit);
+        if (trade.avg_spread && trade.avg_spread > 0) {
+            const sp = trade.avg_spread * (isJpy ? 0.01 : 0.0001);
+            tradePrices.push(trade.entry + sp, trade.entry - sp);
+        }
+        if (trade.max_spread && trade.max_spread > 0) {
+            const sp = trade.max_spread * (isJpy ? 0.01 : 0.0001);
+            tradePrices.push(trade.entry + sp, trade.entry - sp);
+        }
+
         const candleSeries = chart.addCandlestickSeries({
             upColor: isDarkMode ? '#131722' : '#ffffff',
             downColor: '#ef5350',
@@ -157,6 +170,22 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
                 type: 'price',
                 precision: decimals,
                 minMove: isJpy ? 0.001 : 0.00001,
+            },
+            autoscaleInfoProvider: (original: () => any) => {
+                const res = original();
+                if (res !== null && res.priceRange) {
+                    let lo = res.priceRange.minValue;
+                    let hi = res.priceRange.maxValue;
+                    for (const p of tradePrices) {
+                        if (p < lo) lo = p;
+                        if (p > hi) hi = p;
+                    }
+                    // Add a small margin so lines aren't right at the edge
+                    const margin = (hi - lo) * 0.05;
+                    res.priceRange.minValue = lo - margin;
+                    res.priceRange.maxValue = hi + margin;
+                }
+                return res;
             },
         });
         candleSeries.setData(bars);
@@ -429,10 +458,11 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
     }, [activeIndicators, signals]);
 
     // Render candle pattern markers on main chart when event-type indicators are toggled
+    // TradingView style: small markers with short abbreviation text labels
+    // Bullish = green below bar, Bearish = red above bar
     useEffect(() => {
         const candle = candleRef.current;
         if (!candle || !signals || signals.length === 0) {
-            // No signals — just show base markers
             if (candle && baseMarkersRef.current.length > 0) {
                 candle.setMarkers([...baseMarkersRef.current].sort((a, b) => (a.time as number) - (b.time as number)));
             }
@@ -447,65 +477,53 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
         }
 
         if (activeEvents.length === 0) {
-            // Restore just the base markers
             const sorted = [...baseMarkersRef.current].sort((a, b) => (a.time as number) - (b.time as number));
             candle.setMarkers(sorted);
             return;
         }
 
-        // Build pattern markers from signal data
-        // Shape varies by pattern type: arrow=single-candle, square=two-candle, circle=three+ candle
-        // Tier determines size: 3=large, 2=medium, 1=small
         const patternMarkers: any[] = [];
-
-        const resolveShape = (isBullish: boolean, shape?: string): string => {
-            if (shape === 'circle') return 'circle';
-            if (shape === 'square') return 'square';
-            return isBullish ? 'arrowUp' : 'arrowDown';
-        };
 
         for (const row of signals) {
             const ts = (typeof row.t === 'number' ? Math.floor(row.t / 1000) : Math.floor(new Date(row.t as string).getTime() / 1000)) as Time;
 
-            const bullish: {label: string; tier: number; shape?: string}[] = [];
-            const bearish: {label: string; tier: number; shape?: string}[] = [];
+            const bullish: {abbrev: string; tier: number}[] = [];
+            const bearish: {abbrev: string; tier: number}[] = [];
 
             for (const key of activeEvents) {
                 const v = row[key];
                 if (v === undefined || v === null || v === 0 || typeof v !== 'number') continue;
                 const def = findSignalDef(key);
-                const label = def?.label ?? key;
+                const abbrev = def?.abbrev ?? def?.label?.slice(0, 3) ?? key.slice(4);
                 const tier = def?.tier ?? 1;
-                const shape = def?.patternShape;
-                if (v > 0) bullish.push({label, tier, shape});
-                else bearish.push({label, tier, shape});
+                if (v > 0) bullish.push({abbrev, tier});
+                else bearish.push({abbrev, tier});
             }
 
+            // Bullish patterns: green arrow-up below bar with abbreviation text
             if (bullish.length > 0) {
                 const maxTier = Math.max(...bullish.map(b => b.tier));
-                const text = bullish.map(b => b.tier >= 2 ? `★ ${b.label}` : b.label).join(', ');
-                // Use the highest-tier pattern's shape, or the first one
-                const dominant = bullish.reduce((a, b) => b.tier > a.tier ? b : a);
+                const text = bullish.map(b => b.abbrev).join(' ');
                 patternMarkers.push({
                     time: ts,
                     position: 'belowBar',
-                    shape: resolveShape(true, dominant.shape),
+                    shape: 'arrowUp',
                     color: maxTier >= 3 ? '#16a34a' : maxTier >= 2 ? '#22c55e' : '#4ade80',
                     text,
-                    size: maxTier >= 3 ? 3 : maxTier >= 2 ? 2 : 1,
+                    size: 1,
                 });
             }
+            // Bearish patterns: red arrow-down above bar with abbreviation text
             if (bearish.length > 0) {
                 const maxTier = Math.max(...bearish.map(b => b.tier));
-                const text = bearish.map(b => b.tier >= 2 ? `★ ${b.label}` : b.label).join(', ');
-                const dominant = bearish.reduce((a, b) => b.tier > a.tier ? b : a);
+                const text = bearish.map(b => b.abbrev).join(' ');
                 patternMarkers.push({
                     time: ts,
                     position: 'aboveBar',
-                    shape: resolveShape(false, dominant.shape),
+                    shape: 'arrowDown',
                     color: maxTier >= 3 ? '#dc2626' : maxTier >= 2 ? '#ef4444' : '#f87171',
                     text,
-                    size: maxTier >= 3 ? 3 : maxTier >= 2 ? 2 : 1,
+                    size: 1,
                 });
             }
         }
