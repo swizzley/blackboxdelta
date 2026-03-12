@@ -49,10 +49,11 @@ export default function TradeChart({trade, isDarkMode}: Props) {
             candleRef.current = null;
         }
 
-        const bgColor = isDarkMode ? '#1e293b' : '#ffffff';
-        const textColor = isDarkMode ? '#9ca3af' : '#6b7280';
-        const gridColor = isDarkMode ? '#1f293780' : '#e5e7eb80';
-        const borderColor = isDarkMode ? '#374151' : '#d1d5db';
+        // TradingView native colors
+        const bgColor = isDarkMode ? '#131722' : '#ffffff';
+        const textColor = isDarkMode ? '#787b86' : '#787b86';
+        const gridColor = isDarkMode ? '#1e222d' : '#e0e3eb';
+        const borderColor = isDarkMode ? '#2a2e39' : '#e0e3eb';
 
         const chart = createChart(containerRef.current, {
             layout: {
@@ -80,12 +81,12 @@ export default function TradeChart({trade, isDarkMode}: Props) {
 
         // Candlestick series
         const candleSeries = chart.addCandlestickSeries({
-            upColor: '#22c55e',
-            downColor: '#ef4444',
-            borderDownColor: '#ef4444',
-            borderUpColor: '#22c55e',
-            wickDownColor: '#ef444490',
-            wickUpColor: '#22c55e90',
+            upColor: isDarkMode ? '#131722' : '#ffffff',
+            downColor: '#ef5350',
+            borderDownColor: '#ef5350',
+            borderUpColor: '#26a69a',
+            wickDownColor: '#ef5350',
+            wickUpColor: '#26a69a',
             priceFormat: {
                 type: 'price',
                 precision: decimals,
@@ -208,7 +209,7 @@ export default function TradeChart({trade, isDarkMode}: Props) {
     }, [zoom, trade.id, isDarkMode]);
 
     return (
-        <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow mb-6 transition-colors duration-500`}>
+        <div className={`${isDarkMode ? 'bg-[#131722]' : 'bg-white'} rounded-lg p-4 shadow mb-6 transition-colors duration-500`}>
             <div className="flex items-center justify-between mb-3">
                 <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                     {trade.symbol.replace('_', '/')} &middot; {trade.timeframe === 'scalp' ? '1m' : trade.timeframe === 'intraday' ? '15m' : 'Daily'}
@@ -230,34 +231,6 @@ export default function TradeChart({trade, isDarkMode}: Props) {
                 </div>
             </div>
             <div ref={containerRef} style={{height: '500px'}}/>
-            <div className={`flex items-center gap-5 mt-2 text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded-sm" style={{background: '#8b5cf6'}}/>
-                    Entry
-                </span>
-                {trade.exit !== undefined && (
-                    <span className="flex items-center gap-1.5">
-                        <span className="inline-block w-3 h-3 rounded-sm" style={{background: '#f59e0b'}}/>
-                        Exit
-                    </span>
-                )}
-                <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded-sm" style={{background: '#10b981'}}/>
-                    TP
-                </span>
-                <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded-sm" style={{background: '#ef4444'}}/>
-                    SL
-                </span>
-                <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded-sm" style={{background: '#22c55e'}}/>
-                    Bullish
-                </span>
-                <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded-sm" style={{background: '#ef4444'}}/>
-                    Bearish
-                </span>
-            </div>
         </div>
     );
 }
