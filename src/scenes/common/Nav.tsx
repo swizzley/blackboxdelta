@@ -3,6 +3,7 @@ import {Popover, Transition} from "@headlessui/react";
 import {Fragment, useState} from "react";
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
+import {useDeviceAuth} from '../../context/DeviceAuth';
 
 const publicNav = [
     {name: 'Dashboard', href: '/'},
@@ -10,6 +11,9 @@ const publicNav = [
 
 const vpnNav = [
     {name: 'History', href: '/history'},
+];
+
+const adminNav = [
     {name: 'Analysis', href: '/analysis'},
     {name: 'System', href: '/system'},
     {name: 'Optimizer', href: '/optimizer'},
@@ -23,7 +27,9 @@ function classNames(...classes: string[]) {
 export default function Nav() {
     const {isDarkMode, toggleDarkMode} = useTheme();
     const {apiAvailable, checking} = useApi();
+    const {isAdmin} = useDeviceAuth();
     const [currentPath] = useState(location.pathname);
+    const navItems = [...publicNav, ...(apiAvailable ? [...vpnNav, ...(isAdmin ? adminNav : [])] : [])];
 
     return (
         <Popover as="header"
@@ -83,7 +89,7 @@ export default function Nav() {
                         </div>
                         <div className="hidden border-t border-gray-300 py-5 lg:block">
                             <nav className="flex space-x-4">
-                                {[...publicNav, ...(apiAvailable ? vpnNav : [])].map((item) => (
+                                {navItems.map((item) => (
                                     <a
                                         key={item.name}
                                         href={item.href}
@@ -142,7 +148,7 @@ export default function Nav() {
                                                 </div>
                                             </div>
                                             <div className="mt-3 space-y-1 px-2">
-                                                {[...publicNav, ...(apiAvailable ? vpnNav : [])].map((item) => (
+                                                {navItems.map((item) => (
                                                     <a
                                                         key={item.name}
                                                         href={item.href}

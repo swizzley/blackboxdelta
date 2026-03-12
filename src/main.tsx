@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { ThemeProvider } from './context/Theme';
 import { ApiProvider } from './context/Api';
+import { DeviceAuthProvider } from './context/DeviceAuth';
 import { initFingerprint } from './api/fingerprint';
 import './index.css';
 
@@ -17,7 +18,9 @@ if (rootElement) {
         <React.StrictMode>
             <ThemeProvider>
                 <ApiProvider>
-                    <App/>
+                    <DeviceAuthProvider>
+                        <App/>
+                    </DeviceAuthProvider>
                 </ApiProvider>
             </ThemeProvider>
         </React.StrictMode>

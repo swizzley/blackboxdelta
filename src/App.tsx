@@ -1,4 +1,5 @@
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
+import {useDeviceAuth} from './context/DeviceAuth';
 import Dashboard from './scenes/dashboard/Dashboard';
 import History from './scenes/history/History';
 import DayDetail from './scenes/day/DayDetail';
@@ -11,6 +12,13 @@ import Devices from './scenes/devices/Devices';
 import Error404 from './scenes/common/404';
 import ErrorBoundary from './scenes/common/ErrorBoundary';
 
+function AdminRoute({children}: {children: React.ReactNode}) {
+    const {isAdmin, trusted} = useDeviceAuth();
+    if (trusted === null) return null; // still loading
+    if (!isAdmin) return <Navigate to="/" replace/>;
+    return <>{children}</>;
+}
+
 export default function App() {
     return (
         <ErrorBoundary>
@@ -18,10 +26,10 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<Dashboard/>}/>
                     <Route path="/history" element={<History/>}/>
-                    <Route path="/analysis" element={<Analysis/>}/>
-                    <Route path="/system" element={<Status/>}/>
-                    <Route path="/health" element={<System/>}/>
-                    <Route path="/optimizer" element={<Optimizer/>}/>
+                    <Route path="/analysis" element={<AdminRoute><Analysis/></AdminRoute>}/>
+                    <Route path="/system" element={<AdminRoute><Status/></AdminRoute>}/>
+                    <Route path="/health" element={<AdminRoute><System/></AdminRoute>}/>
+                    <Route path="/optimizer" element={<AdminRoute><Optimizer/></AdminRoute>}/>
                     <Route path="/day/:year/:month/:day" element={<DayDetail/>}/>
                     <Route path="/trade/:year/:month/:day/:id" element={<TradeDetail/>}/>
                     <Route path="/devices" element={<Devices/>}/>
