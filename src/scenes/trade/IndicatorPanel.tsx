@@ -17,20 +17,9 @@ interface Props {
 export default function IndicatorPanel({open, onClose, isDarkMode, score, activeIndicators, onToggle, onToggleAll, signals, tradeTime}: Props) {
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-    if (!open) return null;
-
-    // Sort components by score contribution (highest first) when score exists
-    const sorted = [...COMPONENTS];
-    if (score) {
-        sorted.sort((a, b) => {
-            const aVal = Math.abs((score[a.scoreKey] as number) ?? 0);
-            const bVal = Math.abs((score[b.scoreKey] as number) ?? 0);
-            return bVal - aVal;
-        });
-    }
-
     // Compute top contributors per component from signal data at trade time
     // Returns the top N signals (by absolute value) that had nonzero values at entry
+    // NOTE: must be before early return to avoid conditional hook call
     const topContributors = useMemo(() => {
         const tops = new Map<string, Set<string>>(); // component key → set of signal keys
         if (!signals || signals.length === 0 || !tradeTime) return tops;
@@ -63,6 +52,18 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
         }
         return tops;
     }, [signals, tradeTime]);
+
+    if (!open) return null;
+
+    // Sort components by score contribution (highest first) when score exists
+    const sorted = [...COMPONENTS];
+    if (score) {
+        sorted.sort((a, b) => {
+            const aVal = Math.abs((score[a.scoreKey] as number) ?? 0);
+            const bVal = Math.abs((score[b.scoreKey] as number) ?? 0);
+            return bVal - aVal;
+        });
+    }
 
     const toggleSection = (key: string) => {
         setExpanded(prev => {
