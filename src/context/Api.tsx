@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useEffect, useState, useCallback, useRef} from 'react';
-import {checkHealth} from '../api/client';
-import {getApiBase, setApiBase as persistApiBase} from '../api/config';
+import {checkHealth, checkHealthAt} from '../api/client';
+import {getApiBase, setApiBase as persistApiBase, DEFAULT_BASE, FALLBACK_BASE} from '../api/config';
 
 interface ApiContextProps {
     apiAvailable: boolean;
@@ -25,7 +25,22 @@ export const ApiProvider: React.FC<{children: React.ReactNode}> = ({children}) =
 
     const probe = useCallback(async () => {
         const result = await checkHealth();
-        setApiAvailable(result !== null);
+        if (result !== null) {
+            setApiAvailable(true);
+            setChecking(false);
+            return;
+        }
+        // Primary URL unreachable — try the other endpoint (handles VPN ↔ tunnel switching)
+        const current = getApiBase();
+        const alt = current === FALLBACK_BASE ? DEFAULT_BASE : FALLBACK_BASE;
+        const altResult = await checkHealthAt(alt);
+        if (altResult !== null) {
+            persistApiBase(alt);
+            setApiBaseState(alt);
+            setApiAvailable(true);
+        } else {
+            setApiAvailable(false);
+        }
         setChecking(false);
     }, []);
 

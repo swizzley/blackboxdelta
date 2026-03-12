@@ -38,6 +38,23 @@ export function checkHealth(): Promise<ApiHealth | null> {
     return apiFetch('/api/health');
 }
 
+export async function checkHealthAt(base: string): Promise<ApiHealth | null> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT);
+    try {
+        const res = await fetch(`${base}/api/health`, {
+            signal: controller.signal,
+            headers: authHeaders(),
+        });
+        if (!res.ok) return null;
+        return await res.json() as ApiHealth;
+    } catch {
+        return null;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 export function fetchDashboard(since?: string): Promise<ApiDashboard | null> {
     const qs = since ? `?since=${encodeURIComponent(since)}` : '';
     return apiFetch(`/api/dashboard${qs}`);

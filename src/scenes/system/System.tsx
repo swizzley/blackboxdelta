@@ -4,6 +4,7 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {connectMonitorStatus} from '../../api/sse';
+import {getFingerprintSync} from '../../api/fingerprint';
 import type {MonitorStatus, MonitorServiceInfo, MonitorAlertEvent, MonitorPairFreshness, MonitorCoverageEntry} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, CpuChipIcon,
@@ -46,7 +47,9 @@ export default function System() {
         let cleanup: (() => void) | null = null;
         let mounted = true;
 
-        fetch(`${apiBase}/api/monitor/status`, {signal: AbortSignal.timeout(5000)})
+        const fp = getFingerprintSync();
+        const fpParam = fp ? `?fp=${encodeURIComponent(fp)}` : '';
+        fetch(`${apiBase}/api/monitor/status${fpParam}`, {signal: AbortSignal.timeout(5000)})
             .then(res => {
                 if (!res.ok || !mounted) return;
                 setMonitorConnected(true);
@@ -63,7 +66,9 @@ export default function System() {
         if (!drawerService) return;
         setDrawerLoading(true);
         setDrawerOutput('');
-        fetch(`${apiBase}/api/monitor/service-status?host=${drawerService.host}&name=${drawerService.name}`, {signal: AbortSignal.timeout(10000)})
+        const fp2 = getFingerprintSync();
+        const fpSuffix = fp2 ? `&fp=${encodeURIComponent(fp2)}` : '';
+        fetch(`${apiBase}/api/monitor/service-status?host=${drawerService.host}&name=${drawerService.name}${fpSuffix}`, {signal: AbortSignal.timeout(10000)})
             .then(res => res.ok ? res.json() : null)
             .then(data => { if (data) setDrawerOutput(data.output ?? ''); })
             .catch(() => setDrawerOutput('Failed to load service status.'))
@@ -101,7 +106,7 @@ export default function System() {
                     {!monitorConnected && !monitor ? (
                         <div className={`${card} text-center py-16`}>
                             <SignalIcon className="w-12 h-12 mx-auto text-gray-400 mb-4"/>
-                            <p className={`text-lg ${muted}`}>API unavailable — connect to VPN to view system health</p>
+                            <p className={`text-lg ${muted}`}>Monitor unavailable — check your connection</p>
                         </div>
                     ) : (
                         <>
