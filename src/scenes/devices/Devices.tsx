@@ -1,21 +1,50 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useCallback} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {getFingerprint, getFingerprintSync} from '../../api/fingerprint';
 import {getApiBase} from '../../api/config';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
+
+interface TrustedDevice {
+    id: number;
+    fingerprint: string;
+    label: string;
+    created_at: string;
+    last_seen: string;
+}
 
 export default function Devices() {
     const {isDarkMode} = useTheme();
-    const [fingerprint, setFingerprint] = useState<string>('');
+    const [fingerprint, setFingerprint] = useState('');
     const [trusted, setTrusted] = useState<boolean | null>(null);
-    const [label, setLabel] = useState('');
-    const [registering, setRegistering] = useState(false);
+    const [apiError, setApiError] = useState(false);
+    const [devices, setDevices] = useState<TrustedDevice[]>([]);
     const [message, setMessage] = useState<{text: string; ok: boolean} | null>(null);
 
-    const [apiError, setApiError] = useState(false);
+    // Add device form
+    const [addFP, setAddFP] = useState('');
+    const [addLabel, setAddLabel] = useState('');
+    const [adding, setAdding] = useState(false);
 
-    // Load fingerprint and check trust status
+    const authHeaders = (): Record<string, string> => {
+        const fp = getFingerprintSync();
+        return fp ? {'X-Device-FP': fp} : {};
+    };
+
+    const loadDevices = useCallback(async () => {
+        try {
+            const res = await fetch(`${getApiBase()}/api/devices`, {headers: authHeaders()});
+            if (res.ok) {
+                setDevices(await res.json());
+            }
+        } catch { /* ignore */ }
+    }, []);
+
+    // Load fingerprint, check status, load device list
     useEffect(() => {
         (async () => {
             const fp = await getFingerprint();
@@ -26,6 +55,7 @@ export default function Devices() {
                 if (res.ok) {
                     const data = await res.json();
                     setTrusted(data.trusted);
+                    if (data.trusted) loadDevices();
                 } else {
                     setTrusted(false);
                 }
@@ -34,34 +64,65 @@ export default function Devices() {
                 setTrusted(false);
             }
         })();
-    }, []);
+    }, [loadDevices]);
 
-    const handleRegister = async () => {
+    const handleRegisterSelf = async () => {
         if (!fingerprint) return;
-        setRegistering(true);
         setMessage(null);
         try {
-            const headers: Record<string, string> = {'Content-Type': 'application/json'};
-            const callerFP = getFingerprintSync();
-            if (callerFP) headers['X-Device-FP'] = callerFP;
-
             const res = await fetch(`${getApiBase()}/api/devices/register`, {
                 method: 'POST',
-                headers,
-                body: JSON.stringify({fingerprint, label: label || navigator.userAgent.slice(0, 100)}),
+                headers: {'Content-Type': 'application/json', ...authHeaders()},
+                body: JSON.stringify({fingerprint, label: navigator.userAgent.slice(0, 100)}),
             });
             if (res.ok) {
                 setTrusted(true);
-                setMessage({text: 'Device registered successfully', ok: true});
+                setMessage({text: 'Device registered', ok: true});
+                loadDevices();
             } else {
-                const data = await res.json().catch(() => ({error: 'Registration failed'}));
-                setMessage({text: data.error || 'Registration failed', ok: false});
+                const data = await res.json().catch(() => ({error: 'Failed'}));
+                setMessage({text: data.error || 'Failed', ok: false});
             }
-        } catch (e) {
+        } catch {
+            setMessage({text: 'Network error', ok: false});
+        }
+    };
+
+    const handleAddDevice = async () => {
+        if (!addFP.trim()) return;
+        setAdding(true);
+        setMessage(null);
+        try {
+            const res = await fetch(`${getApiBase()}/api/devices/register`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', ...authHeaders()},
+                body: JSON.stringify({fingerprint: addFP.trim(), label: addLabel.trim() || 'unnamed'}),
+            });
+            if (res.ok) {
+                setMessage({text: `Device ${addFP.trim().slice(0, 8)}... registered`, ok: true});
+                setAddFP('');
+                setAddLabel('');
+                loadDevices();
+            } else {
+                const data = await res.json().catch(() => ({error: 'Failed'}));
+                setMessage({text: data.error || 'Failed', ok: false});
+            }
+        } catch {
             setMessage({text: 'Network error', ok: false});
         } finally {
-            setRegistering(false);
+            setAdding(false);
         }
+    };
+
+    const handleDelete = async (id: number, fp: string) => {
+        if (fp === fingerprint) return; // can't delete yourself
+        try {
+            const res = await fetch(`${getApiBase()}/api/devices/${id}`, {
+                method: 'DELETE',
+                headers: authHeaders(),
+            });
+            if (res.ok) loadDevices();
+        } catch { /* ignore */ }
     };
 
     const card = isDarkMode
@@ -72,122 +133,155 @@ export default function Devices() {
         <div className={`min-h-screen ${isDarkMode ? 'bg-slate-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
             <Nav/>
             <main className="max-w-2xl mx-auto px-4 py-8">
-                <h1 className="text-2xl font-bold mb-6">Device Registration</h1>
+                <h1 className="text-2xl font-bold mb-6">Device Management</h1>
 
+                {/* This Device */}
                 <div className={`${card} mb-6`}>
-                    <h2 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                    <h2 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
                         This Device
                     </h2>
-
-                    <div className="space-y-3">
-                        <div>
-                            <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                Fingerprint
-                            </span>
-                            <div className={`font-mono text-sm mt-1 px-3 py-2 rounded ${
-                                isDarkMode ? 'bg-slate-700 text-cyan-400' : 'bg-gray-100 text-cyan-700'
+                    <div className="flex items-center gap-3">
+                        <code className={`text-xs px-2 py-1 rounded ${
+                            isDarkMode ? 'bg-slate-700 text-cyan-400' : 'bg-gray-100 text-cyan-700'
+                        }`}>
+                            {fingerprint || '...'}
+                        </code>
+                        {trusted === true && (
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-700'
                             }`}>
-                                {fingerprint || 'Loading...'}
-                            </div>
-                        </div>
-
-                        <div>
-                            <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                Status
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"/>Trusted
                             </span>
-                            <div className="mt-1">
-                                {trusted === null && !apiError && (
-                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm ${
-                                        isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500'
-                                    }`}>
-                                        Checking...
-                                    </span>
-                                )}
-                                {apiError && (
-                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                                        isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-50 text-yellow-700'
-                                    }`}>
-                                        <span className="w-2 h-2 rounded-full bg-yellow-400"/>
-                                        API unreachable — auth not enabled yet, device can be registered after deploy
-                                    </span>
-                                )}
-                                {trusted === true && (
-                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                                        isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-700'
-                                    }`}>
-                                        <span className="w-2 h-2 rounded-full bg-emerald-400"/>
-                                        Trusted
-                                    </span>
-                                )}
-                                {trusted === false && (
-                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${
-                                        isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700'
-                                    }`}>
-                                        <span className="w-2 h-2 rounded-full bg-red-400"/>
-                                        Not Trusted
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+                        )}
+                        {trusted === false && !apiError && (
+                            <>
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                                    isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700'
+                                }`}>
+                                    <span className="w-1.5 h-1.5 rounded-full bg-red-400"/>Not Trusted
+                                </span>
+                                <button onClick={handleRegisterSelf} className="text-xs text-cyan-500 hover:text-cyan-400 underline">
+                                    Register
+                                </button>
+                            </>
+                        )}
+                        {apiError && (
+                            <span className={`text-xs ${isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                                API unreachable
+                            </span>
+                        )}
+                        {trusted === null && !apiError && (
+                            <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Checking...</span>
+                        )}
                     </div>
                 </div>
 
-                {trusted === false && (
+                {message && (
+                    <div className={`mb-4 text-sm px-4 py-2 rounded-lg ${
+                        message.ok
+                            ? (isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-700')
+                            : (isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700')
+                    }`}>
+                        {message.text}
+                    </div>
+                )}
+
+                {/* Trusted Devices List */}
+                {trusted === true && (
+                    <div className={`${card} mb-6`}>
+                        <h2 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                            Trusted Devices ({devices.length})
+                        </h2>
+                        {devices.length === 0 ? (
+                            <p className={`text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No devices found</p>
+                        ) : (
+                            <div className="space-y-2">
+                                {devices.map(d => (
+                                    <div key={d.id} className={`flex items-center justify-between rounded-lg px-3 py-2 ${
+                                        isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'
+                                    } ${d.fingerprint === fingerprint ? (isDarkMode ? 'ring-1 ring-cyan-600/50' : 'ring-1 ring-cyan-300') : ''}`}>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <code className={`text-xs ${isDarkMode ? 'text-cyan-400' : 'text-cyan-700'}`}>
+                                                    {d.fingerprint.slice(0, 12)}...
+                                                </code>
+                                                {d.fingerprint === fingerprint && (
+                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                                        isDarkMode ? 'bg-cyan-900/40 text-cyan-400' : 'bg-cyan-50 text-cyan-600'
+                                                    }`}>you</span>
+                                                )}
+                                            </div>
+                                            <div className={`text-xs mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                {d.label || 'unlabeled'}
+                                                <span className="mx-1.5">·</span>
+                                                last seen {dayjs(d.last_seen).fromNow()}
+                                            </div>
+                                        </div>
+                                        {d.fingerprint !== fingerprint && (
+                                            <button
+                                                onClick={() => handleDelete(d.id, d.fingerprint)}
+                                                className={`text-xs px-2 py-1 rounded ${
+                                                    isDarkMode
+                                                        ? 'text-red-400 hover:bg-red-900/30'
+                                                        : 'text-red-500 hover:bg-red-50'
+                                                }`}
+                                            >
+                                                Remove
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Add Another Device */}
+                {trusted === true && (
                     <div className={`${card}`}>
                         <h2 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                            Register This Device
+                            Add Another Device
                         </h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    Device Label (optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={label}
-                                    onChange={e => setLabel(e.target.value)}
-                                    placeholder="e.g. MacBook Pro, iPhone, etc."
-                                    className={`mt-1 w-full px-3 py-2 rounded text-sm ${
-                                        isDarkMode
-                                            ? 'bg-slate-700 border-slate-600 text-gray-200 placeholder-gray-500'
-                                            : 'bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400'
-                                    } border focus:outline-none focus:ring-1 focus:ring-cyan-500`}
-                                />
-                            </div>
+                        <p className={`text-xs mb-3 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                            Open <code>/devices</code> on the other device to see its fingerprint, then paste it here.
+                        </p>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={addFP}
+                                onChange={e => setAddFP(e.target.value)}
+                                placeholder="Fingerprint"
+                                className={`flex-1 px-3 py-2 rounded text-xs font-mono ${
+                                    isDarkMode
+                                        ? 'bg-slate-700 border-slate-600 text-gray-200 placeholder-gray-500'
+                                        : 'bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400'
+                                } border focus:outline-none focus:ring-1 focus:ring-cyan-500`}
+                            />
+                            <input
+                                type="text"
+                                value={addLabel}
+                                onChange={e => setAddLabel(e.target.value)}
+                                placeholder="Label"
+                                className={`w-36 px-3 py-2 rounded text-xs ${
+                                    isDarkMode
+                                        ? 'bg-slate-700 border-slate-600 text-gray-200 placeholder-gray-500'
+                                        : 'bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400'
+                                } border focus:outline-none focus:ring-1 focus:ring-cyan-500`}
+                            />
                             <button
-                                onClick={handleRegister}
-                                disabled={registering || !fingerprint}
-                                className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
-                                    registering
+                                onClick={handleAddDevice}
+                                disabled={adding || !addFP.trim()}
+                                className={`px-4 py-2 rounded text-xs font-medium whitespace-nowrap ${
+                                    adding || !addFP.trim()
                                         ? 'opacity-50 cursor-not-allowed'
                                         : isDarkMode
                                             ? 'bg-cyan-600 hover:bg-cyan-500 text-white'
                                             : 'bg-cyan-600 hover:bg-cyan-700 text-white'
                                 }`}
                             >
-                                {registering ? 'Registering...' : 'Register Device'}
+                                {adding ? '...' : 'Add'}
                             </button>
-                            {message && (
-                                <div className={`text-sm px-3 py-2 rounded ${
-                                    message.ok
-                                        ? (isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-50 text-emerald-700')
-                                        : (isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700')
-                                }`}>
-                                    {message.text}
-                                </div>
-                            )}
                         </div>
-                        <p className={`mt-4 text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                            First device registered automatically. Additional devices require registration from an already-trusted device.
-                        </p>
-                    </div>
-                )}
-
-                {trusted === true && (
-                    <div className={`${card}`}>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            This device is already trusted. All API requests from this browser will include the device fingerprint automatically.
-                        </p>
                     </div>
                 )}
             </main>
