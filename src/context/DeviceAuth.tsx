@@ -25,24 +25,29 @@ export const DeviceAuthProvider: React.FC<{children: React.ReactNode}> = ({child
     const [role, setRole] = useState('user');
 
     const checkStatus = useCallback(async (base: string, fp: string) => {
-        if (!fp) return;
+        if (!fp) { console.log('[DeviceAuth] checkStatus: no fingerprint'); return; }
+        console.log(`[DeviceAuth] checkStatus: base=${base} fp=${fp.slice(0,8)}...`);
         try {
             const res = await fetch(`${base}/api/devices/status?fp=${encodeURIComponent(fp)}`);
+            console.log(`[DeviceAuth] response: status=${res.status}`);
             if (res.ok) {
                 const data = await res.json();
+                console.log(`[DeviceAuth] data:`, data);
                 setTrusted(data.trusted);
                 if (data.trusted && data.role) setRole(data.role);
             }
-        } catch { /* ignore */ }
+        } catch (e) { console.log('[DeviceAuth] error:', e); }
     }, []);
 
     // Load fingerprint once, then check status whenever apiBase/apiAvailable changes
     useEffect(() => {
+        console.log(`[DeviceAuth] effect: apiAvailable=${apiAvailable} apiBase=${apiBase}`);
         if (!apiAvailable) return;
         let cancelled = false;
 
         (async () => {
             const fp = await getFingerprint();
+            console.log(`[DeviceAuth] fingerprint resolved: ${fp.slice(0,8)}... cancelled=${cancelled}`);
             if (cancelled) return;
             setFingerprint(fp);
             await checkStatus(apiBase, fp);
