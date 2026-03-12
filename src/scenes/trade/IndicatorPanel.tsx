@@ -29,9 +29,10 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
         });
     }
 
-    // Compute top contributor per component from signal data at trade time
+    // Compute top contributors per component from signal data at trade time
+    // Returns the top N signals (by absolute value) that had nonzero values at entry
     const topContributors = useMemo(() => {
-        const tops = new Map<string, string>(); // component key → signal key
+        const tops = new Map<string, Set<string>>(); // component key → set of signal keys
         if (!signals || signals.length === 0 || !tradeTime) return tops;
 
         // Find the signal row closest to trade entry time
@@ -48,19 +49,17 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
         }
 
         for (const comp of COMPONENTS) {
-            let bestKey = '';
-            let bestAbs = 0;
+            const ranked: {key: string; mag: number}[] = [];
             for (const sig of comp.signals) {
                 const v = closest[sig.key];
                 if (typeof v !== 'number' || v === 0) continue;
-                // For overlays/oscillators, use absolute value. For events, any nonzero is meaningful.
-                const magnitude = sig.type === 'event' ? Math.abs(v) : Math.abs(v);
-                if (magnitude > bestAbs) {
-                    bestAbs = magnitude;
-                    bestKey = sig.key;
-                }
+                ranked.push({key: sig.key, mag: Math.abs(v)});
             }
-            if (bestKey) tops.set(comp.key, bestKey);
+            if (ranked.length === 0) continue;
+            ranked.sort((a, b) => b.mag - a.mag);
+            // Top 3 or top 25%, whichever is larger
+            const topN = Math.max(3, Math.ceil(ranked.length * 0.25));
+            tops.set(comp.key, new Set(ranked.slice(0, topN).map(r => r.key)));
         }
         return tops;
     }, [signals, tradeTime]);
@@ -108,13 +107,21 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
 
                 {/* Score Influence Bar */}
                 {score && <ScoreInfluenceBar score={score} isDarkMode={isDarkMode} onClickComponent={(key) => {
-                    // Expand and toggle all for that component
+                    // Expand and toggle top contributors for that component
                     setExpanded(prev => new Set([...prev, key]));
-                    const comp = COMPONENTS.find(c => c.key === key);
-                    if (comp) {
-                        const keys = comp.signals.map(s => s.key);
-                        const allActive = keys.every(k => activeIndicators.has(k));
-                        onToggleAll(keys, !allActive);
+                    const topKeys = topContributors.get(key);
+                    if (topKeys && topKeys.size > 0) {
+                        const arr = Array.from(topKeys);
+                        const allActive = arr.every(k => activeIndicators.has(k));
+                        onToggleAll(arr, !allActive);
+                    } else {
+                        // No signal data — fall back to first 3 signals
+                        const comp = COMPONENTS.find(c => c.key === key);
+                        if (comp) {
+                            const keys = comp.signals.slice(0, 3).map(s => s.key);
+                            const allActive = keys.every(k => activeIndicators.has(k));
+                            onToggleAll(keys, !allActive);
+                        }
                     }
                 }}/>}
 
@@ -131,7 +138,7 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
                             activeIndicators={activeIndicators}
                             onToggle={onToggle}
                             onToggleAll={onToggleAll}
-                            topContributor={topContributors.get(comp.key)}
+                            topContributors={topContributors.get(comp.key)}
                         />
                     ))}
                 </div>
@@ -188,7 +195,7 @@ function ScoreInfluenceBar({score, isDarkMode, onClickComponent}: {
     );
 }
 
-function ComponentSection({comp, isDarkMode, score, expanded, onToggleSection, activeIndicators, onToggle, onToggleAll, topContributor}: {
+function ComponentSection({comp, isDarkMode, score, expanded, onToggleSection, activeIndicators, onToggle, onToggleAll, topContributors}: {
     comp: ComponentDef;
     isDarkMode: boolean;
     score?: Score;
@@ -197,7 +204,7 @@ function ComponentSection({comp, isDarkMode, score, expanded, onToggleSection, a
     activeIndicators: Set<string>;
     onToggle: (key: string) => void;
     onToggleAll: (keys: string[], on: boolean) => void;
-    topContributor?: string;
+    topContributors?: Set<string>;
 }) {
     const scoreVal = score ? (score[comp.scoreKey] as number) : undefined;
     const allKeys = comp.signals.map(s => s.key);
@@ -258,7 +265,7 @@ function ComponentSection({comp, isDarkMode, score, expanded, onToggleSection, a
                                 active={activeIndicators.has(sig.key)}
                                 onToggle={() => onToggle(sig.key)}
                                 isDarkMode={isDarkMode}
-                                isTopContributor={sig.key === topContributor}
+                                isTopContributor={topContributors?.has(sig.key) ?? false}
                             />
                         ))}
                     </div>
