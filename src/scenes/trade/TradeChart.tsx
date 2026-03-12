@@ -375,11 +375,10 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             if (data.length === 0) continue;
 
             if (def.render === 'dots') {
-                // SAR-style dot rendering
+                // SAR-style dot rendering — hide line, show only point markers
                 const series = chart.addLineSeries({
                     color: def.color,
-                    lineWidth: 0 as any,
-                    lineStyle: LineStyle.Solid,
+                    lineVisible: false,
                     lastValueVisible: false,
                     priceLineVisible: false,
                     pointMarkersVisible: true,
