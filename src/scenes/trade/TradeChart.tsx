@@ -230,10 +230,10 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             const avgAsk = trade.entry + sign * avgSpreadPrice;
             candleSeries.createPriceLine({
                 price: avgAsk,
-                color: isDarkMode ? 'rgba(148, 163, 184, 0.35)' : 'rgba(100, 116, 139, 0.35)',
+                color: isDarkMode ? 'rgba(251, 191, 36, 0.5)' : 'rgba(245, 158, 11, 0.5)',
                 lineWidth: 1,
-                lineStyle: LineStyle.Dotted,
-                axisLabelVisible: false,
+                lineStyle: LineStyle.Dashed,
+                axisLabelVisible: true,
                 title: `Avg Spread (${trade.avg_spread.toFixed(1)} pips)`,
             });
         }
@@ -244,7 +244,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             const maxAsk = trade.entry + sign * maxSpreadPrice;
             candleSeries.createPriceLine({
                 price: maxAsk,
-                color: isDarkMode ? 'rgba(148, 163, 184, 0.2)' : 'rgba(100, 116, 139, 0.2)',
+                color: isDarkMode ? 'rgba(251, 191, 36, 0.3)' : 'rgba(245, 158, 11, 0.3)',
                 lineWidth: 1,
                 lineStyle: LineStyle.Dotted,
                 axisLabelVisible: false,
