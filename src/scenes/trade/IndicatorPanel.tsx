@@ -17,6 +17,7 @@ interface Props {
 
 export default function IndicatorPanel({open, onClose, isDarkMode, score, activeIndicators, onToggle, onToggleAll, signals, tradeTime, pendingComponentClick}: Props) {
     const [expanded, setExpanded] = useState<Set<string>>(new Set());
+    const [search, setSearch] = useState('');
 
     // Compute top contributors per component from signal data at trade time
     // Returns the top N signals (by absolute value) that had nonzero values at entry
@@ -79,6 +80,25 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
         }
     }, [open]);
 
+    // Compute search results — matches signal labels and component labels
+    const searchResults = useMemo(() => {
+        const q = search.trim().toLowerCase();
+        if (!q) return null;
+        const results: {comp: ComponentDef; signals: SignalDef[]}[] = [];
+        for (const comp of COMPONENTS) {
+            const matched = comp.signals.filter(s =>
+                s.label.toLowerCase().includes(q) || s.key.toLowerCase().includes(q)
+            );
+            // Also match if the component label matches
+            if (comp.label.toLowerCase().includes(q) && matched.length === 0) {
+                results.push({comp, signals: comp.signals.slice(0, 5)});
+            } else if (matched.length > 0) {
+                results.push({comp, signals: matched});
+            }
+        }
+        return results;
+    }, [search]);
+
     if (!open) return null;
 
     // Sort components by score contribution (highest first) when score exists
@@ -130,6 +150,30 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
                             </button>
                         </div>
                     </div>
+                    {/* Search */}
+                    <div className="mt-2 relative">
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            placeholder="Search indicators..."
+                            className={`w-full text-sm px-3 py-1.5 rounded-md border outline-none transition-colors ${
+                                isDarkMode
+                                    ? 'bg-slate-800 border-slate-600 text-gray-200 placeholder-gray-500 focus:border-cyan-500'
+                                    : 'bg-gray-50 border-gray-300 text-gray-800 placeholder-gray-400 focus:border-cyan-500'
+                            }`}
+                        />
+                        {search && (
+                            <button
+                                onClick={() => setSearch('')}
+                                className={`absolute right-2 top-1/2 -translate-y-1/2 text-xs px-1 rounded ${
+                                    isDarkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'
+                                }`}
+                            >
+                                &times;
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* Score Influence Bar */}
@@ -152,23 +196,55 @@ export default function IndicatorPanel({open, onClose, isDarkMode, score, active
                     }
                 }}/>}
 
-                {/* Component Sections */}
-                <div className="px-3 py-2 space-y-1">
-                    {sorted.map(comp => (
-                        <ComponentSection
-                            key={comp.key}
-                            comp={comp}
-                            isDarkMode={isDarkMode}
-                            score={score}
-                            expanded={expanded.has(comp.key)}
-                            onToggleSection={() => toggleSection(comp.key)}
-                            activeIndicators={activeIndicators}
-                            onToggle={onToggle}
-                            onToggleAll={onToggleAll}
-                            topContributors={topContributors.get(comp.key)}
-                        />
-                    ))}
-                </div>
+                {/* Search Results or Component Sections */}
+                {searchResults ? (
+                    <div className="px-3 py-2 space-y-2">
+                        {searchResults.length === 0 ? (
+                            <p className={`text-sm py-4 text-center ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                No indicators matching &ldquo;{search}&rdquo;
+                            </p>
+                        ) : (
+                            searchResults.map(({comp, signals: matched}) => (
+                                <div key={comp.key} className={`rounded-lg overflow-hidden ${isDarkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`}>
+                                    <div className="px-3 py-2 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{backgroundColor: comp.color}} />
+                                        <span className={`text-xs font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                            {comp.label}
+                                        </span>
+                                    </div>
+                                    <div className="px-3 pb-2 grid grid-cols-2 gap-1">
+                                        {matched.map(sig => (
+                                            <SignalToggle
+                                                key={sig.key}
+                                                signal={sig}
+                                                active={activeIndicators.has(sig.key)}
+                                                onToggle={() => onToggle(sig.key)}
+                                                isDarkMode={isDarkMode}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                ) : (
+                    <div className="px-3 py-2 space-y-1">
+                        {sorted.map(comp => (
+                            <ComponentSection
+                                key={comp.key}
+                                comp={comp}
+                                isDarkMode={isDarkMode}
+                                score={score}
+                                expanded={expanded.has(comp.key)}
+                                onToggleSection={() => toggleSection(comp.key)}
+                                activeIndicators={activeIndicators}
+                                onToggle={onToggle}
+                                onToggleAll={onToggleAll}
+                                topContributors={topContributors.get(comp.key)}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

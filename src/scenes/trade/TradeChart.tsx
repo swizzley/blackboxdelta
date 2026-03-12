@@ -395,40 +395,46 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
         }
 
         // Build pattern markers from signal data
+        // Tier determines visual weight: 3=large arrow, 2=medium arrow, 1=small arrow
         const patternMarkers: any[] = [];
         for (const row of signals) {
             const ts = (typeof row.t === 'number' ? Math.floor(row.t / 1000) : Math.floor(new Date(row.t as string).getTime() / 1000)) as Time;
 
-            const bullish: string[] = [];
-            const bearish: string[] = [];
+            const bullish: {label: string; tier: number}[] = [];
+            const bearish: {label: string; tier: number}[] = [];
 
             for (const key of activeEvents) {
                 const v = row[key];
                 if (v === undefined || v === null || v === 0 || typeof v !== 'number') continue;
                 const def = findSignalDef(key);
                 const label = def?.label ?? key;
-                if (v > 0) bullish.push(label);
-                else bearish.push(label);
+                const tier = def?.tier ?? 1;
+                if (v > 0) bullish.push({label, tier});
+                else bearish.push({label, tier});
             }
 
             if (bullish.length > 0) {
+                const maxTier = Math.max(...bullish.map(b => b.tier));
+                const text = bullish.map(b => b.tier >= 2 ? `★ ${b.label}` : b.label).join(', ');
                 patternMarkers.push({
                     time: ts,
                     position: 'belowBar',
-                    shape: 'circle',
-                    color: '#22c55e',
-                    text: bullish.join(', '),
-                    size: 1,
+                    shape: 'arrowUp',
+                    color: maxTier >= 3 ? '#16a34a' : maxTier >= 2 ? '#22c55e' : '#4ade80',
+                    text,
+                    size: maxTier >= 3 ? 3 : maxTier >= 2 ? 2 : 1,
                 });
             }
             if (bearish.length > 0) {
+                const maxTier = Math.max(...bearish.map(b => b.tier));
+                const text = bearish.map(b => b.tier >= 2 ? `★ ${b.label}` : b.label).join(', ');
                 patternMarkers.push({
                     time: ts,
                     position: 'aboveBar',
-                    shape: 'circle',
-                    color: '#ef4444',
-                    text: bearish.join(', '),
-                    size: 1,
+                    shape: 'arrowDown',
+                    color: maxTier >= 3 ? '#dc2626' : maxTier >= 2 ? '#ef4444' : '#f87171',
+                    text,
+                    size: maxTier >= 3 ? 3 : maxTier >= 2 ? 2 : 1,
                 });
             }
         }
