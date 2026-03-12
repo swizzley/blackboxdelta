@@ -9,7 +9,7 @@ const publicNav = [
     {name: 'Dashboard', href: '/'},
 ];
 
-const vpnNav = [
+const authedNav = [
     {name: 'History', href: '/history'},
 ];
 
@@ -29,7 +29,8 @@ export default function Nav() {
     const {apiAvailable, checking} = useApi();
     const {isAdmin} = useDeviceAuth();
     const [currentPath] = useState(location.pathname);
-    const navItems = [...publicNav, ...(apiAvailable ? [...vpnNav, ...(isAdmin ? adminNav : [])] : [])];
+    const {trusted} = useDeviceAuth();
+    const navItems = [...publicNav, ...(apiAvailable && trusted ? [...authedNav, ...(isAdmin ? adminNav : [])] : [])];
 
     return (
         <Popover as="header"
