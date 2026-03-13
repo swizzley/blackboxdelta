@@ -1225,7 +1225,7 @@ function computeDraftWorkers(
         perTF[tf] = workers;
     }
 
-    // Trim if over memory budget (lowest priority, highest cost first)
+    // Trim pass 1: enforce total memory budget (lowest priority, highest cost first)
     for (;;) {
         let totalCost = 0;
         for (const tf of enabledTFs) totalCost += perTF[tf] * (MEM_COST[tf] ?? 1);
@@ -1237,6 +1237,26 @@ function computeDraftWorkers(
             if (perTF[tf] > 1 && (draft[tf].priority < trimPri || (draft[tf].priority === trimPri && (MEM_COST[tf] ?? 1) > trimCost))) {
                 trimPri = draft[tf].priority;
                 trimCost = MEM_COST[tf] ?? 1;
+                trimTF = tf;
+            }
+        }
+        if (!trimTF) break;
+        perTF[trimTF]--;
+    }
+
+    // Trim pass 2: enforce total CPU budget (lowest priority, cheapest mem cost first)
+    for (;;) {
+        let total = 0;
+        for (const tf of enabledTFs) total += perTF[tf];
+        if (total <= maxPerTF) break;
+        let trimTF = '';
+        let trimPri = 999;
+        let trimCost = Infinity;
+        for (const tf of enabledTFs) {
+            const cost = MEM_COST[tf] ?? 1;
+            if (perTF[tf] > 1 && (draft[tf].priority < trimPri || (draft[tf].priority === trimPri && cost < trimCost))) {
+                trimPri = draft[tf].priority;
+                trimCost = cost;
                 trimTF = tf;
             }
         }
