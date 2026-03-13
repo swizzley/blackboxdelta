@@ -17,7 +17,7 @@ import {useApi} from '../../context/Api';
 import {formatDollar} from '../common/Util';
 import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar, fetchLive} from '../../api/client';
 import type {LiveData} from '../../api/client';
-import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, TimeframeStats, TimeframeRow, ApiCalendarDay, DayData} from '../../context/Types';
+import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, TimeframeStats, TimeframeRow, ApiCalendarDay, DayData} from '../../context/Types';
 
 function breakevenLine(label: string, avgWin: number | null, avgLoss: number | null) {
     if (!avgWin || !avgLoss || avgLoss === 0) return null;
@@ -310,11 +310,6 @@ export default function Dashboard() {
         });
     }, [dashboard, dateCutoff]);
 
-    const filteredDirection = useMemo<DirectionDataPoint[]>(() => {
-        if (!dashboard?.direction_series) return [];
-        return filterByDate(dashboard.direction_series, dateCutoff);
-    }, [dashboard, dateCutoff]);
-
     const filteredScores = useMemo<ScoreDataPoint[]>(() => {
         if (!dashboard?.score_series) return [];
         return filterByDate(dashboard.score_series, dateCutoff);
@@ -478,7 +473,7 @@ export default function Dashboard() {
 
                     {/* Win Rate Chart — full width, most prominent */}
                     {filteredCalendar && Object.keys(filteredCalendar).length > 0 && (
-                        <WinRateChart data={filteredCalendar} direction={filteredDirection} period={period} breakevenTooltip={stats.avg_win && stats.avg_loss ? <BreakevenTooltipContent stats={stats} byTimeframe={activeByTimeframe} selectedTimeframe={selectedTimeframe}/> : undefined}/>
+                        <WinRateChart data={filteredCalendar} period={period} breakevenTooltip={stats.avg_win && stats.avg_loss ? <BreakevenTooltipContent stats={stats} byTimeframe={activeByTimeframe} selectedTimeframe={selectedTimeframe}/> : undefined}/>
                     )}
 
                     {/* Stat Cards */}

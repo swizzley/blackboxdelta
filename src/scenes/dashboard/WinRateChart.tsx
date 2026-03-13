@@ -4,16 +4,15 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import {useTheme} from '../../context/Theme';
 import Tooltip from '../common/Tooltip';
-import {CalendarData, CalendarDay, DirectionDataPoint, DayData} from '../../context/Types';
+import {CalendarData, CalendarDay, DayData} from '../../context/Types';
 
 interface WinRateChartProps {
     data: CalendarData;
-    direction?: DirectionDataPoint[];
     period?: string;
     breakevenTooltip?: ReactNode;
 }
 
-export default function WinRateChart({data, direction, period, breakevenTooltip}: WinRateChartProps) {
+export default function WinRateChart({data, period, breakevenTooltip}: WinRateChartProps) {
     const {isDarkMode} = useTheme();
     const [hourlyData, setHourlyData] = useState<{labels: string[], entries: CalendarDay[]} | null>(null);
 
@@ -94,12 +93,6 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
 
     const rawDates = Object.keys(data).sort();
 
-    // Index direction data by date for quick lookup
-    const dirMap = new Map<string, DirectionDataPoint>();
-    if (direction) {
-        for (const d of direction) dirMap.set(d.date, d);
-    }
-
     // Compute rolling win rates and cumulative breakeven
     let cumWins = 0, cumTotal = 0;
     let cumWinPL = 0, cumLossPL = 0;
@@ -137,50 +130,6 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
 
     const hasBreakeven = breakevenWR.some(v => v !== null);
 
-    // Direction breakdown (only for daily mode)
-    let cumLongWins = 0, cumLongTotal = 0;
-    let cumShortWins = 0, cumShortTotal = 0;
-    const rollingLongWR: (number | null)[] = [];
-    const rollingShortWR: (number | null)[] = [];
-    const longTrades: number[] = [];
-    const shortTrades: number[] = [];
-
-    const hasDirection = dirMap.size > 0;
-
-    if (useHourly) {
-        // Aggregate all direction data into a single long/short win rate for the period
-        let totalLongWins = 0, totalLongTotal = 0;
-        let totalShortWins = 0, totalShortTotal = 0;
-        for (const dir of dirMap.values()) {
-            totalLongWins += dir.long_wins;
-            totalLongTotal += dir.long_wins + dir.long_losses;
-            totalShortWins += dir.short_wins;
-            totalShortTotal += dir.short_wins + dir.short_losses;
-        }
-        const longWR = totalLongTotal > 0 ? Math.round(totalLongWins / totalLongTotal * 1000) / 10 : null;
-        const shortWR = totalShortTotal > 0 ? Math.round(totalShortWins / totalShortTotal * 1000) / 10 : null;
-        for (let i = 0; i < labels.length; i++) {
-            rollingLongWR.push(longWR);
-            rollingShortWR.push(shortWR);
-        }
-    } else {
-        for (const d of rawDates) {
-            const dir = dirMap.get(d);
-            const dayLong = dir ? dir.long_wins + dir.long_losses : 0;
-            const dayShort = dir ? dir.short_wins + dir.short_losses : 0;
-            longTrades.push(dayLong);
-            shortTrades.push(dayShort);
-            if (dir) {
-                cumLongWins += dir.long_wins;
-                cumLongTotal += dayLong;
-                cumShortWins += dir.short_wins;
-                cumShortTotal += dayShort;
-            }
-            rollingLongWR.push(cumLongTotal > 0 ? Math.round(cumLongWins / cumLongTotal * 1000) / 10 : null);
-            rollingShortWR.push(cumShortTotal > 0 ? Math.round(cumShortWins / cumShortTotal * 1000) / 10 : null);
-        }
-    }
-
     const labelCount = labels.length;
     const pointLabel = useHourly ? 'Hourly Win Rate' : 'Daily Win Rate';
 
@@ -195,9 +144,7 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
                 for (const p of params) {
                     if (p.value === null || p.value === undefined) continue;
                     const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};margin-right:4px;"></span>`;
-                    if (p.seriesName === 'Long' || p.seriesName === 'Short') {
-                        html += `<br/>${marker}${p.seriesName}: <b>${Math.abs(p.value)}</b>`;
-                    } else if (p.seriesName === 'Winners' || p.seriesName === 'Losers') {
+                    if (p.seriesName === 'Winners' || p.seriesName === 'Losers') {
                         html += `<br/>${marker}${p.seriesName}: <b>${p.value}</b>`;
                     } else {
                         html += `<br/>${marker}${p.seriesName}: <b>${p.value}%</b>`;
@@ -210,7 +157,6 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
             type: 'scroll',
             data: [
                 pointLabel, 'Cumulative', ...(hasBreakeven ? ['Breakeven'] : []), 'Winners', 'Losers',
-                ...(hasDirection ? ['Long WR', 'Short WR'] : []),
             ],
             textStyle: {color: isDarkMode ? '#9ca3af' : '#374151', fontSize: 11},
             pageTextStyle: {color: isDarkMode ? '#9ca3af' : '#374151'},
@@ -325,30 +271,6 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
                 smooth: true,
                 lineStyle: {width: 2, color: '#f97316', type: 'dotted' as const},
                 itemStyle: {color: '#f97316'},
-                symbol: 'none',
-                z: 1,
-                connectNulls: true,
-            }] : []),
-            // Long cumulative win rate
-            ...(hasDirection ? [{
-                name: 'Long WR',
-                type: 'line',
-                data: rollingLongWR,
-                smooth: true,
-                lineStyle: {width: 2, color: '#10b981', type: 'dashed' as const},
-                itemStyle: {color: '#10b981'},
-                symbol: 'none',
-                z: 1,
-                connectNulls: true,
-            }] : []),
-            // Short cumulative win rate
-            ...(hasDirection ? [{
-                name: 'Short WR',
-                type: 'line',
-                data: rollingShortWR,
-                smooth: true,
-                lineStyle: {width: 2, color: '#f59e0b', type: 'dashed' as const},
-                itemStyle: {color: '#f59e0b'},
                 symbol: 'none',
                 z: 1,
                 connectNulls: true,
