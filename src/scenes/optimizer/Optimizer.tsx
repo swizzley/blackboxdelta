@@ -207,7 +207,7 @@ export default function Optimizer() {
                                     {(() => {
                                         const budget = workerConfig.max_memory_units;
                                         const cores = workerConfig.cpu_cores || 16;
-                                        const preview = computeDraftWorkers(budget, workerDraft);
+                                        const preview = computeDraftWorkers(budget, cores, workerDraft);
                                         return (<>
                                             <WorkerGauge workers={preview.totalWorkers} cores={cores} memUsed={preview.memUsed} memBudget={budget} isDarkMode={isDarkMode}/>
                                             <div className="space-y-3">
@@ -1196,10 +1196,10 @@ function genDuration(g: OptimizerGeneration): string {
 
 // Memory cost per worker by timeframe (mirrors backend memoryCost map)
 const MEM_COST: Record<string, number> = {scalp: 1.0, intraday: 0.29, swing: 0.02};
-const MAX_PER_TF = 20;
 
 function computeDraftWorkers(
     budget: number,
+    maxPerTF: number,
     draft: Record<string, {enabled: boolean; priority: number}>,
 ): {totalWorkers: number; memUsed: number; perTF: Record<string, number>} {
     const tfs = ['scalp', 'intraday', 'swing'];
@@ -1221,7 +1221,7 @@ function computeDraftWorkers(
         const cost = MEM_COST[tf] ?? 1;
         let workers = Math.floor(share / cost);
         if (workers < 1) workers = 1;
-        if (workers > MAX_PER_TF) workers = MAX_PER_TF;
+        if (workers > maxPerTF) workers = maxPerTF;
         perTF[tf] = workers;
     }
 
