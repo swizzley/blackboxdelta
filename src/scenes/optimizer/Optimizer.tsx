@@ -960,12 +960,12 @@ function RecStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
 
 const SEED_STAGES = ['Stage0', 'StageA', 'StageB', 'StageC', 'StageD', 'StageE'] as const;
 const STAGE_LABELS: Record<string, string> = {
-    Stage0: '0: Component Weights',
-    StageA: 'A: Raw Signal Baseline',
-    StageB: 'B: Filter Isolation',
-    StageC: 'C: Dampener Isolation',
-    StageD: 'D: Entry Strategy Sweep',
-    StageE: 'E: Final Assembly',
+    Stage0: 'Weights',
+    StageA: 'Baseline',
+    StageB: 'Filters',
+    StageC: 'Dampeners',
+    StageD: 'Entry',
+    StageE: 'Assembly',
 };
 
 function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolean; muted: string}) {
@@ -1019,7 +1019,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                         active ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
                                         : done ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600')
                                         : muted
-                                    }`}>{stage.replace('Stage', '')}</p>
+                                    }`}>{STAGE_LABELS[stage] ?? stage}</p>
                                 </div>
                             );
                         })}
@@ -1031,7 +1031,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {/* Stage 0: Component weights */}
                     {run.stage0_results && (run.stage0_results as SeedComponentResult[]).length > 0 && (
-                        <SeedStageSection title="Stage 0: Component Weights" isDarkMode={isDarkMode} muted={muted}>
+                        <SeedStageSection title="Weights — Component Ranking" isDarkMode={isDarkMode} muted={muted}>
                             <div className="flex flex-wrap gap-1">
                                 {(run.stage0_results as SeedComponentResult[])
                                     .sort((a, b) => b.sharpe - a.sharpe)
@@ -1051,7 +1051,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {/* Stage A: Raw signal variants */}
                     {run.stagea_results && (run.stagea_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="Stage A: Raw Signal Baseline" isDarkMode={isDarkMode} muted={muted}>
+                        <SeedStageSection title="Baseline — Raw Signal Variants" isDarkMode={isDarkMode} muted={muted}>
                             <div className="flex flex-wrap gap-1">
                                 {(run.stagea_results as SeedVariantResult[]).map(v => (
                                     <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
@@ -1070,7 +1070,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {/* Stage B: Filter isolation */}
                     {run.stageb_results && (
-                        <SeedStageSection title="Stage B: Filter Isolation" isDarkMode={isDarkMode} muted={muted}>
+                        <SeedStageSection title="Filters — Isolation Sweep" isDarkMode={isDarkMode} muted={muted}>
                             <div className="space-y-1">
                                 <p className={`text-[10px] ${muted}`}>Baseline Sharpe: {fmtNum((run.stageb_results as SeedStageBResult).baseline_sharpe)}</p>
                                 <div className="flex flex-wrap gap-1">
@@ -1091,7 +1091,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {/* Stage C: Dampener isolation */}
                     {run.stagec_results && (
-                        <SeedStageSection title="Stage C: Dampeners" isDarkMode={isDarkMode} muted={muted}>
+                        <SeedStageSection title="Dampeners — With vs Without" isDarkMode={isDarkMode} muted={muted}>
                             <div className={`flex gap-3 text-[10px] font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                                 <span>With: S:{fmtNum((run.stagec_results as SeedStageCResult).with_dampeners)}</span>
                                 <span>Without: S:{fmtNum((run.stagec_results as SeedStageCResult).without_dampeners)}</span>
@@ -1102,7 +1102,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {/* Stage D: Entry strategy sweep */}
                     {run.staged_results && (run.staged_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="Stage D: Entry Strategy" isDarkMode={isDarkMode} muted={muted}>
+                        <SeedStageSection title="Entry — Strategy Sweep" isDarkMode={isDarkMode} muted={muted}>
                             <div className="flex flex-wrap gap-1">
                                 {(run.staged_results as SeedVariantResult[]).map(v => (
                                     <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
@@ -1121,7 +1121,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {/* Stage E: Final assembly */}
                     {run.stagee_results && (
-                        <SeedStageSection title="Stage E: Final Assembly" isDarkMode={isDarkMode} muted={muted}>
+                        <SeedStageSection title="Assembly — Final Calibration" isDarkMode={isDarkMode} muted={muted}>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <p className={`text-[10px] font-medium uppercase ${muted} mb-1`}>Calibrated</p>

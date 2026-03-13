@@ -5,15 +5,9 @@ import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {useDeviceAuth} from '../../context/DeviceAuth';
 
-const publicNav = [
-    {name: 'Dashboard', href: '/'},
-];
-
-const authedNav = [
-    {name: 'History', href: '/history'},
-];
-
 const adminNav = [
+    {name: 'Dashboard', href: '/'},
+    {name: 'History', href: '/history'},
     {name: 'Analysis', href: '/analysis'},
     {name: 'System', href: '/system'},
     {name: 'Optimizer', href: '/optimizer'},
@@ -29,8 +23,7 @@ export default function Nav() {
     const {apiAvailable, checking} = useApi();
     const {isAdmin} = useDeviceAuth();
     const [currentPath] = useState(location.pathname);
-    const {trusted} = useDeviceAuth();
-    const navItems = [...publicNav, ...(apiAvailable && trusted ? [...authedNav, ...(isAdmin ? adminNav : [])] : [])];
+    const navItems = apiAvailable && isAdmin ? adminNav : [];
 
     return (
         <Popover as="header"
@@ -75,6 +68,7 @@ export default function Nav() {
                                 </button>
                             </div>
 
+                            {navItems.length > 0 && (
                             <div className="absolute right-0 flex-shrink-0 lg:hidden">
                                 <Popover.Button
                                     className="relative inline-flex items-center justify-center bg-transparent p-2 text-white hover:bg-white hover:bg-opacity-10 hover:text-white rounded-full focus:outline-none focus:ring-2 focus:ring-white">
@@ -87,8 +81,9 @@ export default function Nav() {
                                     )}
                                 </Popover.Button>
                             </div>
+                            )}
                         </div>
-                        <div className="hidden border-t border-gray-300 py-5 lg:block">
+                        {navItems.length > 0 && <div className="hidden border-t border-gray-300 py-5 lg:block">
                             <nav className="flex space-x-4">
                                 {navItems.map((item) => (
                                     <a
@@ -103,7 +98,7 @@ export default function Nav() {
                                     </a>
                                 ))}
                             </nav>
-                        </div>
+                        </div>}
                     </div>
                     <Transition.Root as={Fragment}>
                         <div className="lg:hidden">
