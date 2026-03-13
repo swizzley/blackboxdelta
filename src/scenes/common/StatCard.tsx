@@ -6,9 +6,10 @@ interface StatCardProps {
     subtitle?: string;
     color?: 'green' | 'red' | 'default';
     live?: boolean;
+    tooltip?: string;
 }
 
-export default function StatCard({label, value, subtitle, color = 'default', live}: StatCardProps) {
+export default function StatCard({label, value, subtitle, color = 'default', live, tooltip}: StatCardProps) {
     const {isDarkMode} = useTheme();
 
     const valueColor =
@@ -18,7 +19,8 @@ export default function StatCard({label, value, subtitle, color = 'default', liv
 
     return (
         <div
-            className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`}>
+            className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`}
+            title={tooltip}>
             <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 {label}
                 {live && <span className="ml-1.5 inline-flex items-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">LIVE</span>}

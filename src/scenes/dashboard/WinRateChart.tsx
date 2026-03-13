@@ -9,9 +9,10 @@ interface WinRateChartProps {
     data: CalendarData;
     direction?: DirectionDataPoint[];
     period?: string;
+    breakevenTooltip?: string;
 }
 
-export default function WinRateChart({data, direction, period}: WinRateChartProps) {
+export default function WinRateChart({data, direction, period, breakevenTooltip}: WinRateChartProps) {
     const {isDarkMode} = useTheme();
     const [hourlyData, setHourlyData] = useState<{labels: string[], entries: CalendarDay[]} | null>(null);
 
@@ -325,7 +326,7 @@ export default function WinRateChart({data, direction, period}: WinRateChartProp
 
     return (
         <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow mb-6 transition-colors duration-500`}>
-            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`} title={breakevenTooltip}>
                 Win Rate
             </h3>
             <ReactECharts option={option} style={{height: '300px'}}/>

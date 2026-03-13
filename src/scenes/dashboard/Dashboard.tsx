@@ -433,7 +433,7 @@ export default function Dashboard() {
 
                     {/* Win Rate Chart — full width, most prominent */}
                     {filteredCalendar && Object.keys(filteredCalendar).length > 0 && (
-                        <WinRateChart data={filteredCalendar} direction={filteredDirection} period={period}/>
+                        <WinRateChart data={filteredCalendar} direction={filteredDirection} period={period} breakevenTooltip={stats.avg_win && stats.avg_loss ? `R:R ${Math.abs(stats.avg_win / stats.avg_loss).toFixed(2)}:1 · Breakeven WR: ${((1 / (1 + Math.abs(stats.avg_win / stats.avg_loss))) * 100).toFixed(1)}%` : undefined}/>
                     )}
 
                     {/* Stat Cards */}
@@ -444,6 +444,7 @@ export default function Dashboard() {
                             value={stats.win_rate_pct != null ? `${Number(stats.win_rate_pct).toFixed(2)}%` : 'N/A'}
                             subtitle={`${stats.winners}W / ${stats.losers}L / ${stats.breakeven}BE`}
                             live={liveStats && !selectedTimeframe && period === 'All'}
+                            tooltip={stats.avg_win && stats.avg_loss ? `R:R ${Math.abs(stats.avg_win / stats.avg_loss).toFixed(2)}:1 · Breakeven WR: ${((1 / (1 + Math.abs(stats.avg_win / stats.avg_loss))) * 100).toFixed(1)}%` : undefined}
                         />
                         <StatCard
                             label="Total Trades"

@@ -347,7 +347,7 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                 <div className="grid grid-cols-4 gap-1.5">
                     <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="WR" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
+                    <ResultStat label="WR" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode} tooltip={breakevenTooltip(r.avg_win, r.avg_loss)}/>
                     <ResultStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
                     <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="T/Day" value={trunk.oos_days && r.total_trades ? (r.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
@@ -595,7 +595,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
                     <span className={`text-xs ${muted}`}>Gen {t.generation}</span>
                     {r && r.total_trades > 0 ? (
                         <span className={`text-xs ${muted} hidden sm:inline`}>
-                            {r.total_trades} trades · {r.win_rate?.toFixed(0)}% WR · PF {r.profit_factor?.toFixed(2)} · Sharpe {r.sharpe_ratio?.toFixed(3)} · <span className={plColor(r.total_pnl)}>P&L {r.total_pnl?.toFixed(2)}</span>
+                            {r.total_trades} trades · <span title={breakevenTooltip(r.avg_win, r.avg_loss)}>{r.win_rate?.toFixed(0)}% WR</span> · PF {r.profit_factor?.toFixed(2)} · Sharpe {r.sharpe_ratio?.toFixed(3)} · <span className={plColor(r.total_pnl)}>P&L {r.total_pnl?.toFixed(2)}</span>
                         </span>
                     ) : (
                         <span className={`text-xs ${muted} hidden sm:inline`}>No OOS data</span>
@@ -629,7 +629,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
                             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                 <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                                 <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="Win%" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="Win%" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode} tooltip={breakevenTooltip(r.avg_win, r.avg_loss)}/>
                                 <ResultStat label="Trades" value={String(r.total_trades)} isDarkMode={isDarkMode}/>
                                 <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                                 <ResultStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
@@ -708,7 +708,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
                 </td>
                 <td className={`text-xs font-medium py-1.5 pr-3 ${statusCls}`}>{b.status}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{trades || '—'}</td>
-                <td className={`${tdCl} py-1.5 pr-3`}>{winRate ? `${winRate.toFixed(0)}%` : '—'}</td>
+                <td className={`${tdCl} py-1.5 pr-3`} title={breakevenTooltip(r?.avg_win, r?.avg_loss)}>{winRate ? `${winRate.toFixed(0)}%` : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{pf ? pf.toFixed(2) : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{sharpe ? sharpe.toFixed(2) : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{dd ? dd.toFixed(4) : '—'}</td>
@@ -868,7 +868,7 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
             <div className="flex flex-wrap gap-2">
                 <ResultStat label="Sharpe" value={result.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="PF" value={result.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                <ResultStat label="Win%" value={result.win_rate ? `${result.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
+                <ResultStat label="Win%" value={result.win_rate ? `${result.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode} tooltip={breakevenTooltip(result.avg_win, result.avg_loss)}/>
                 <ResultStat label="Avg W" value={fmtNum(result.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
                 <ResultStat label="Avg L" value={fmtNum(result.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                 <ResultStat label="Trades" value={String(result.total_trades)} isDarkMode={isDarkMode}/>
@@ -879,9 +879,9 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
     );
 }
 
-function ResultStat({label, value, isDarkMode, color}: {label: string; value: string; isDarkMode: boolean; color?: string}) {
+function ResultStat({label, value, isDarkMode, color, tooltip}: {label: string; value: string; isDarkMode: boolean; color?: string; tooltip?: string}) {
     return (
-        <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`}>
+        <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`} title={tooltip}>
             <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{label}</p>
             <p className={`text-sm font-semibold ${color ?? (isDarkMode ? 'text-gray-200' : 'text-gray-700')}`}>{value}</p>
         </div>
@@ -1166,6 +1166,14 @@ function fmtNum(n?: number): string {
     if (abs === 0) return '0';
     if (abs < 0.01) return n.toExponential(2);
     return n.toFixed(2);
+}
+
+/** Compute breakeven WR tooltip from avg_win/avg_loss. */
+function breakevenTooltip(avgWin?: number, avgLoss?: number): string | undefined {
+    if (!avgWin || !avgLoss || avgLoss === 0) return undefined;
+    const rr = Math.abs(avgWin / avgLoss);
+    const be = (1 / (1 + rr)) * 100;
+    return `R:R ${rr.toFixed(2)}:1 · Breakeven WR: ${be.toFixed(1)}%`;
 }
 
 function plColor(pnl?: number): string {

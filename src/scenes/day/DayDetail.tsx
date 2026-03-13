@@ -79,6 +79,7 @@ export default function DayDetail() {
                                     label="Win Rate"
                                     value={data.summary.win_rate_pct !== null ? `${data.summary.win_rate_pct}%` : 'N/A'}
                                     subtitle={`${data.summary.winners}W / ${data.summary.losers}L`}
+                                    tooltip={data.summary.avg_win && data.summary.avg_loss ? `R:R ${Math.abs(data.summary.avg_win / data.summary.avg_loss).toFixed(2)}:1 · Breakeven WR: ${((1 / (1 + Math.abs(data.summary.avg_win / data.summary.avg_loss))) * 100).toFixed(1)}%` : undefined}
                                 />
                                 <StatCard
                                     label="Total Trades"
