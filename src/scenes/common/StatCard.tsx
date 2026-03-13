@@ -1,4 +1,6 @@
+import type {ReactNode} from 'react';
 import {useTheme} from '../../context/Theme';
+import Tooltip from './Tooltip';
 
 interface StatCardProps {
     label: string;
@@ -6,7 +8,7 @@ interface StatCardProps {
     subtitle?: string;
     color?: 'green' | 'red' | 'default';
     live?: boolean;
-    tooltip?: string;
+    tooltip?: ReactNode;
 }
 
 export default function StatCard({label, value, subtitle, color = 'default', live, tooltip}: StatCardProps) {
@@ -17,10 +19,8 @@ export default function StatCard({label, value, subtitle, color = 'default', liv
             color === 'red' ? 'text-red-500' :
                 isDarkMode ? 'text-white' : 'text-gray-900';
 
-    return (
-        <div
-            className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`}
-            title={tooltip}>
+    const card = (
+        <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`}>
             <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 {label}
                 {live && <span className="ml-1.5 inline-flex items-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">LIVE</span>}
@@ -31,4 +31,10 @@ export default function StatCard({label, value, subtitle, color = 'default', liv
             )}
         </div>
     );
+
+    if (tooltip) {
+        return <Tooltip content={tooltip}>{card}</Tooltip>;
+    }
+
+    return card;
 }

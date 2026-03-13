@@ -1,6 +1,7 @@
 import {useEffect, useState, useCallback} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
+import Tooltip from '../common/Tooltip';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {
@@ -595,7 +596,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
                     <span className={`text-xs ${muted}`}>Gen {t.generation}</span>
                     {r && r.total_trades > 0 ? (
                         <span className={`text-xs ${muted} hidden sm:inline`}>
-                            {r.total_trades} trades · <span title={breakevenTooltip(r.avg_win, r.avg_loss)}>{r.win_rate?.toFixed(0)}% WR</span> · PF {r.profit_factor?.toFixed(2)} · Sharpe {r.sharpe_ratio?.toFixed(3)} · <span className={plColor(r.total_pnl)}>P&L {r.total_pnl?.toFixed(2)}</span>
+                            {r.total_trades} trades · {breakevenTooltip(r.avg_win, r.avg_loss) ? <Tooltip content={breakevenTooltip(r.avg_win, r.avg_loss)!}><span>{r.win_rate?.toFixed(0)}% WR</span></Tooltip> : <span>{r.win_rate?.toFixed(0)}% WR</span>} · PF {r.profit_factor?.toFixed(2)} · Sharpe {r.sharpe_ratio?.toFixed(3)} · <span className={plColor(r.total_pnl)}>P&L {r.total_pnl?.toFixed(2)}</span>
                         </span>
                     ) : (
                         <span className={`text-xs ${muted} hidden sm:inline`}>No OOS data</span>
@@ -708,7 +709,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
                 </td>
                 <td className={`text-xs font-medium py-1.5 pr-3 ${statusCls}`}>{b.status}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{trades || '—'}</td>
-                <td className={`${tdCl} py-1.5 pr-3`} title={breakevenTooltip(r?.avg_win, r?.avg_loss)}>{winRate ? `${winRate.toFixed(0)}%` : '—'}</td>
+                <td className={`${tdCl} py-1.5 pr-3`}>{winRate ? (breakevenTooltip(r?.avg_win, r?.avg_loss) ? <Tooltip content={breakevenTooltip(r?.avg_win, r?.avg_loss)!}><span>{winRate.toFixed(0)}%</span></Tooltip> : `${winRate.toFixed(0)}%`) : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{pf ? pf.toFixed(2) : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{sharpe ? sharpe.toFixed(2) : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{dd ? dd.toFixed(4) : '—'}</td>
@@ -880,12 +881,14 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
 }
 
 function ResultStat({label, value, isDarkMode, color, tooltip}: {label: string; value: string; isDarkMode: boolean; color?: string; tooltip?: string}) {
-    return (
-        <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`} title={tooltip}>
+    const inner = (
+        <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`}>
             <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{label}</p>
             <p className={`text-sm font-semibold ${color ?? (isDarkMode ? 'text-gray-200' : 'text-gray-700')}`}>{value}</p>
         </div>
     );
+    if (tooltip) return <Tooltip content={tooltip}>{inner}</Tooltip>;
+    return inner;
 }
 
 function MiniStat({label, value, isDarkMode, warn}: {label: string; value: string; isDarkMode: boolean; warn?: boolean}) {

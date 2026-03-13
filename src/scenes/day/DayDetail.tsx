@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, type ReactNode} from 'react';
 import {useParams} from 'react-router-dom';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
@@ -6,10 +6,38 @@ import StatCard from '../common/StatCard';
 import HourBlock from './HourBlock';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
-import {DayData} from '../../context/Types';
+import {DayData, TimeframeRow} from '../../context/Types';
 import {formatDollar} from '../common/Util';
 import {fetchDay} from '../../api/client';
 import dayjs from 'dayjs';
+
+function dayBreakevenTooltip(avgWin: number | null, avgLoss: number | null, byTimeframe?: TimeframeRow[]): ReactNode | undefined {
+    if (!avgWin || !avgLoss || avgLoss === 0) return undefined;
+    const rr = Math.abs(avgWin / avgLoss);
+    const be = (1 / (1 + rr)) * 100;
+    const tfLines = (byTimeframe ?? [])
+        .map(tf => {
+            if (!tf.avg_win || !tf.avg_loss || tf.avg_loss === 0) return null;
+            const r = Math.abs(tf.avg_win / tf.avg_loss);
+            return {label: tf.timeframe, rr: r.toFixed(2), be: ((1 / (1 + r)) * 100).toFixed(1)};
+        })
+        .filter(Boolean) as {label: string; rr: string; be: string}[];
+
+    return (
+        <div className="whitespace-nowrap space-y-0.5">
+            <div className="font-semibold border-b border-gray-600 pb-0.5 mb-0.5">
+                R:R {rr.toFixed(2)}:1 · BE {be.toFixed(1)}%
+            </div>
+            {tfLines.map(tf => (
+                <div key={tf.label} className="text-gray-400">
+                    <span className="capitalize">{tf.label}</span>
+                    <span className="mx-1.5">·</span>
+                    R:R {tf.rr}:1 · BE {tf.be}%
+                </div>
+            ))}
+        </div>
+    );
+}
 
 export default function DayDetail() {
     const {isDarkMode} = useTheme();
@@ -79,7 +107,7 @@ export default function DayDetail() {
                                     label="Win Rate"
                                     value={data.summary.win_rate_pct !== null ? `${data.summary.win_rate_pct}%` : 'N/A'}
                                     subtitle={`${data.summary.winners}W / ${data.summary.losers}L`}
-                                    tooltip={data.summary.avg_win && data.summary.avg_loss ? `R:R ${Math.abs(data.summary.avg_win / data.summary.avg_loss).toFixed(2)}:1 · Breakeven WR: ${((1 / (1 + Math.abs(data.summary.avg_win / data.summary.avg_loss))) * 100).toFixed(1)}%` : undefined}
+                                    tooltip={dayBreakevenTooltip(data.summary.avg_win, data.summary.avg_loss, data.summary.by_timeframe)}
                                 />
                                 <StatCard
                                     label="Total Trades"

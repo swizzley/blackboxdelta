@@ -1,15 +1,16 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, type ReactNode} from 'react';
 import ReactECharts from 'echarts-for-react';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import {useTheme} from '../../context/Theme';
+import Tooltip from '../common/Tooltip';
 import {CalendarData, CalendarDay, DirectionDataPoint, DayData} from '../../context/Types';
 
 interface WinRateChartProps {
     data: CalendarData;
     direction?: DirectionDataPoint[];
     period?: string;
-    breakevenTooltip?: string;
+    breakevenTooltip?: ReactNode;
 }
 
 export default function WinRateChart({data, direction, period, breakevenTooltip}: WinRateChartProps) {
@@ -326,8 +327,8 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
 
     return (
         <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow mb-6 transition-colors duration-500`}>
-            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`} title={breakevenTooltip}>
-                Win Rate
+            <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                {breakevenTooltip ? <Tooltip content={breakevenTooltip}><span>Win Rate</span></Tooltip> : 'Win Rate'}
             </h3>
             <ReactECharts option={option} style={{height: '300px'}}/>
         </div>

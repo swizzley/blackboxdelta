@@ -19,6 +19,51 @@ import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar, 
 import type {LiveData} from '../../api/client';
 import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, DirectionDataPoint, TimeframeStats, TimeframeRow, ApiCalendarDay, DayData} from '../../context/Types';
 
+function breakevenLine(label: string, avgWin: number | null, avgLoss: number | null) {
+    if (!avgWin || !avgLoss || avgLoss === 0) return null;
+    const rr = Math.abs(avgWin / avgLoss);
+    const be = (1 / (1 + rr)) * 100;
+    return {label, rr: rr.toFixed(2), be: be.toFixed(1)};
+}
+
+function BreakevenTooltipContent({stats, byTimeframe, selectedTimeframe}: {stats: TimeframeStats; byTimeframe: TimeframeRow[]; selectedTimeframe: string | null}) {
+    const combined = breakevenLine('Combined', stats.avg_win, stats.avg_loss);
+    if (!combined) return null;
+
+    // Single timeframe selected — just show that one
+    if (selectedTimeframe) {
+        return (
+            <div className="whitespace-nowrap">
+                <span className="capitalize font-semibold">{selectedTimeframe}</span>
+                <span className="mx-1.5">·</span>
+                R:R {combined.rr}:1
+                <span className="mx-1.5">·</span>
+                BE {combined.be}%
+            </div>
+        );
+    }
+
+    // Combined view — show combined + per-timeframe breakdown
+    const tfLines = byTimeframe
+        .map(tf => breakevenLine(tf.timeframe, tf.avg_win, tf.avg_loss))
+        .filter(Boolean) as {label: string; rr: string; be: string}[];
+
+    return (
+        <div className="whitespace-nowrap space-y-0.5">
+            <div className="font-semibold border-b border-gray-600 pb-0.5 mb-0.5">
+                R:R {combined.rr}:1 · BE {combined.be}%
+            </div>
+            {tfLines.map(tf => (
+                <div key={tf.label} className="text-gray-400">
+                    <span className="capitalize">{tf.label}</span>
+                    <span className="mx-1.5">·</span>
+                    R:R {tf.rr}:1 · BE {tf.be}%
+                </div>
+            ))}
+        </div>
+    );
+}
+
 type Period = '1H' | '4H' | '12H' | '1D' | '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'All';
 
 const PERIODS: Period[] = ['1H', '4H', '12H', '1D', '1W', '1M', '3M', 'YTD', '1Y', 'All'];
@@ -433,7 +478,7 @@ export default function Dashboard() {
 
                     {/* Win Rate Chart — full width, most prominent */}
                     {filteredCalendar && Object.keys(filteredCalendar).length > 0 && (
-                        <WinRateChart data={filteredCalendar} direction={filteredDirection} period={period} breakevenTooltip={stats.avg_win && stats.avg_loss ? `R:R ${Math.abs(stats.avg_win / stats.avg_loss).toFixed(2)}:1 · Breakeven WR: ${((1 / (1 + Math.abs(stats.avg_win / stats.avg_loss))) * 100).toFixed(1)}%` : undefined}/>
+                        <WinRateChart data={filteredCalendar} direction={filteredDirection} period={period} breakevenTooltip={stats.avg_win && stats.avg_loss ? <BreakevenTooltipContent stats={stats} byTimeframe={activeByTimeframe} selectedTimeframe={selectedTimeframe}/> : undefined}/>
                     )}
 
                     {/* Stat Cards */}
@@ -444,7 +489,7 @@ export default function Dashboard() {
                             value={stats.win_rate_pct != null ? `${Number(stats.win_rate_pct).toFixed(2)}%` : 'N/A'}
                             subtitle={`${stats.winners}W / ${stats.losers}L / ${stats.breakeven}BE`}
                             live={liveStats && !selectedTimeframe && period === 'All'}
-                            tooltip={stats.avg_win && stats.avg_loss ? `R:R ${Math.abs(stats.avg_win / stats.avg_loss).toFixed(2)}:1 · Breakeven WR: ${((1 / (1 + Math.abs(stats.avg_win / stats.avg_loss))) * 100).toFixed(1)}%` : undefined}
+                            tooltip={stats.avg_win && stats.avg_loss ? <BreakevenTooltipContent stats={stats} byTimeframe={activeByTimeframe} selectedTimeframe={selectedTimeframe}/> : undefined}
                         />
                         <StatCard
                             label="Total Trades"
