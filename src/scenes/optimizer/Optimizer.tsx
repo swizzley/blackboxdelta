@@ -352,6 +352,9 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                     <InlineStat label="AvgL" value={fmtNum(r.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                     <InlineStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
                     <InlineStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                    {trunk.oos_days && r.total_trades ? (
+                        <InlineStat label="T/Day" value={(r.total_trades / trunk.oos_days).toFixed(2)} isDarkMode={isDarkMode}/>
+                    ) : null}
                 </div>
             ) : (
                 <p className={`text-sm ${muted}`}>No OOS result available</p>

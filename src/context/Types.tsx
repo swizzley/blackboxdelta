@@ -500,6 +500,7 @@ export interface OptimizerTrunk {
     timeframe: string;
     param_count?: number;
     oos_result?: OptimizerResult;
+    oos_days?: number;
     ai_score: number;
     promoted_at: string;
     pushed_at?: string;
