@@ -100,11 +100,14 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
         for (const d of direction) dirMap.set(d.date, d);
     }
 
-    // Compute rolling win rates
+    // Compute rolling win rates and cumulative breakeven
     let cumWins = 0, cumTotal = 0;
+    let cumWinPL = 0, cumLossPL = 0;
+    let cumWinners = 0, cumLosers = 0;
 
     const pointWinRate: (number | null)[] = [];
     const rollingWinRate: (number | null)[] = [];
+    const breakevenWR: (number | null)[] = [];
     const winCounts: number[] = [];
     const lossCounts: number[] = [];
 
@@ -112,11 +115,27 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
         const closed = entry.winners + entry.losers;
         cumWins += entry.winners;
         cumTotal += closed;
+        cumWinners += entry.winners;
+        cumLosers += entry.losers;
+        cumWinPL += entry.win_pl ?? 0;
+        cumLossPL += entry.loss_pl ?? 0;
         winCounts.push(entry.winners);
         lossCounts.push(entry.losers);
         pointWinRate.push(closed > 0 ? Math.round(entry.winners / closed * 1000) / 10 : null);
         rollingWinRate.push(cumTotal > 0 ? Math.round(cumWins / cumTotal * 1000) / 10 : null);
+
+        // Breakeven WR = 1 / (1 + R:R) * 100, where R:R = avg_win / |avg_loss|
+        if (cumWinners > 0 && cumLosers > 0 && cumLossPL !== 0) {
+            const avgWin = cumWinPL / cumWinners;
+            const avgLoss = Math.abs(cumLossPL / cumLosers);
+            const rr = avgWin / avgLoss;
+            breakevenWR.push(Math.round((1 / (1 + rr)) * 1000) / 10);
+        } else {
+            breakevenWR.push(null);
+        }
     }
+
+    const hasBreakeven = breakevenWR.some(v => v !== null);
 
     // Direction breakdown (only for daily mode)
     let cumLongWins = 0, cumLongTotal = 0;
@@ -190,7 +209,7 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
         legend: {
             type: 'scroll',
             data: [
-                pointLabel, 'Cumulative', 'Winners', 'Losers',
+                pointLabel, 'Cumulative', ...(hasBreakeven ? ['Breakeven'] : []), 'Winners', 'Losers',
                 ...(hasDirection ? ['Long WR', 'Short WR'] : []),
             ],
             textStyle: {color: isDarkMode ? '#9ca3af' : '#374151', fontSize: 11},
@@ -298,6 +317,18 @@ export default function WinRateChart({data, direction, period, breakevenTooltip}
                     data: [{yAxis: 50, label: {formatter: '50%', position: 'insideEndTop', color: isDarkMode ? '#64748b' : '#94a3b8'}}],
                 },
             },
+            // Cumulative breakeven win rate
+            ...(hasBreakeven ? [{
+                name: 'Breakeven',
+                type: 'line',
+                data: breakevenWR,
+                smooth: true,
+                lineStyle: {width: 2, color: '#f97316', type: 'dotted' as const},
+                itemStyle: {color: '#f97316'},
+                symbol: 'none',
+                z: 1,
+                connectNulls: true,
+            }] : []),
             // Long cumulative win rate
             ...(hasDirection ? [{
                 name: 'Long WR',
