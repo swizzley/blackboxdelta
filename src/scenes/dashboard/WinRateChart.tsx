@@ -156,7 +156,7 @@ export default function WinRateChart({data, period, breakevenTooltip}: WinRateCh
         legend: {
             type: 'scroll',
             data: [
-                {name: pointLabel, itemStyle: {color: '#94a3b8'}},
+                {name: pointLabel, itemStyle: {color: {type: 'linear', x: 0, y: 0, x2: 1, y2: 0, colorStops: [{offset: 0, color: '#10b981'}, {offset: 0.5, color: '#10b981'}, {offset: 0.5, color: '#ef4444'}, {offset: 1, color: '#ef4444'}]}}},
                 'Cumulative', ...(hasBreakeven ? ['Breakeven'] : []), 'Winners', 'Losers',
             ],
             textStyle: {color: isDarkMode ? '#9ca3af' : '#374151', fontSize: 11},
@@ -233,7 +233,9 @@ export default function WinRateChart({data, period, breakevenTooltip}: WinRateCh
                 itemStyle: {
                     color: (params: any) => {
                         if (params.value === null) return 'transparent';
-                        return params.value >= 50 ? '#10b981' : '#ef4444';
+                        const be = breakevenWR[params.dataIndex];
+                        const threshold = be ?? 50;
+                        return params.value >= threshold ? '#10b981' : '#ef4444';
                     },
                 },
                 z: 2,
