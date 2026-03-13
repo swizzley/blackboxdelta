@@ -203,87 +203,84 @@ export default function Optimizer() {
                                 <div className={`${card} mb-6`}>
                                     <h2 className={heading}>
                                         <BeakerIcon className={iconCl}/>Worker Allocation
-                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{workerConfig.total_workers} total</span>
                                     </h2>
-                                    <div className="space-y-3">
-                                        {['scalp', 'intraday', 'swing'].map(tf => {
-                                            const draft = workerDraft[tf];
-                                            const live = workerConfig.timeframes[tf];
-                                            const activeGen = status?.active_generations?.find(g => g.timeframe === tf);
-                                            if (!draft || !live) return null;
+                                    {(() => {
+                                        const budget = workerConfig.max_memory_units;
+                                        const cores = workerConfig.cpu_cores || 16;
+                                        const preview = computeDraftWorkers(budget, workerDraft);
+                                        return (<>
+                                            <WorkerGauge workers={preview.totalWorkers} cores={cores} memUsed={preview.memUsed} memBudget={budget} isDarkMode={isDarkMode}/>
+                                            <div className="space-y-3">
+                                                {['scalp', 'intraday', 'swing'].map(tf => {
+                                                    const draft = workerDraft[tf];
+                                                    const live = workerConfig.timeframes[tf];
+                                                    const activeGen = status?.active_generations?.find(g => g.timeframe === tf);
+                                                    if (!draft || !live) return null;
+                                                    const tfWorkers = preview.perTF[tf] ?? 0;
 
-                                            // Compute preview allocation
-                                            const previewAllocs = computePreviewAllocations(workerConfig.total_workers, workerDraft);
-                                            const previewWorkers = previewAllocs[tf] ?? 0;
+                                                    return (
+                                                        <div key={tf} className={`flex items-center gap-4 p-3 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                            <div className="flex items-center gap-2 w-24">
+                                                                <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
+                                                            </div>
 
-                                            return (
-                                                <div key={tf} className={`flex items-center gap-4 p-3 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                                    <div className="flex items-center gap-2 w-24">
-                                                        <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
-                                                    </div>
+                                                            {/* Enable/Disable toggle */}
+                                                            <button
+                                                                onClick={() => {
+                                                                    setWorkerDraft(prev => ({...prev, [tf]: {...prev[tf], enabled: !prev[tf].enabled}}));
+                                                                    setWorkerDirty(true);
+                                                                }}
+                                                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                                                                    draft.enabled ? 'bg-cyan-600' : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'
+                                                                }`}
+                                                            >
+                                                                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                                    draft.enabled ? 'translate-x-5' : 'translate-x-0'
+                                                                }`}/>
+                                                            </button>
 
-                                                    {/* Enable/Disable toggle */}
-                                                    <button
-                                                        onClick={() => {
-                                                            setWorkerDraft(prev => ({...prev, [tf]: {...prev[tf], enabled: !prev[tf].enabled}}));
-                                                            setWorkerDirty(true);
-                                                        }}
-                                                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                                                            draft.enabled ? 'bg-cyan-600' : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'
-                                                        }`}
-                                                    >
-                                                        <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                                                            draft.enabled ? 'translate-x-5' : 'translate-x-0'
-                                                        }`}/>
-                                                    </button>
+                                                            {/* Priority selector */}
+                                                            <div className="flex gap-1">
+                                                                {([1, 2, 3] as const).map(p => {
+                                                                    const labels = {1: 'Low', 2: 'Med', 3: 'High'} as const;
+                                                                    const isActive = draft.priority === p;
+                                                                    return (
+                                                                        <button
+                                                                            key={p}
+                                                                            disabled={!draft.enabled}
+                                                                            onClick={() => {
+                                                                                setWorkerDraft(prev => ({...prev, [tf]: {...prev[tf], priority: p}}));
+                                                                                setWorkerDirty(true);
+                                                                            }}
+                                                                            className={`px-2 py-0.5 text-xs rounded font-medium transition-colors ${
+                                                                                !draft.enabled
+                                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                                    : isActive
+                                                                                        ? 'bg-cyan-600 text-white'
+                                                                                        : isDarkMode ? 'bg-slate-600 text-gray-300 hover:bg-slate-500' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                                                            }`}
+                                                                        >
+                                                                            {labels[p]}
+                                                                        </button>
+                                                                    );
+                                                                })}
+                                                            </div>
 
-                                                    {/* Priority selector */}
-                                                    <div className="flex gap-1">
-                                                        {([1, 2, 3] as const).map(p => {
-                                                            const labels = {1: 'Low', 2: 'Med', 3: 'High'} as const;
-                                                            const isActive = draft.priority === p;
-                                                            return (
-                                                                <button
-                                                                    key={p}
-                                                                    disabled={!draft.enabled}
-                                                                    onClick={() => {
-                                                                        setWorkerDraft(prev => ({...prev, [tf]: {...prev[tf], priority: p}}));
-                                                                        setWorkerDirty(true);
-                                                                    }}
-                                                                    className={`px-2 py-0.5 text-xs rounded font-medium transition-colors ${
-                                                                        !draft.enabled
-                                                                            ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                            : isActive
-                                                                                ? 'bg-cyan-600 text-white'
-                                                                                : isDarkMode ? 'bg-slate-600 text-gray-300 hover:bg-slate-500' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                                                                    }`}
-                                                                >
-                                                                    {labels[p]}
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
+                                                            {/* Per-TF worker count */}
+                                                            <span className={`ml-auto text-xs font-mono ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                                                {tfWorkers > 0 ? `${tfWorkers}w` : '—'}
+                                                            </span>
 
-                                                    {/* Worker count */}
-                                                    <div className="flex items-center gap-2 ml-auto">
-                                                        <span className={`text-sm font-mono font-bold ${
-                                                            draft.enabled
-                                                                ? isDarkMode ? 'text-white' : 'text-gray-900'
-                                                                : muted
-                                                        }`}>
-                                                            {previewWorkers}
-                                                        </span>
-                                                        <span className={`text-xs ${muted}`}>workers</span>
-                                                    </div>
-
-                                                    {/* Active generation indicator */}
-                                                    {activeGen && (
-                                                        <span className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 animate-pulse" title={`Gen ${activeGen.id} active`}/>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+                                                            {/* Active generation indicator */}
+                                                            {activeGen && (
+                                                                <span className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 animate-pulse" title={`Gen ${activeGen.id} active`}/>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </>);
+                                    })()}
 
                                     {/* Apply button */}
                                     <div className="mt-4 flex items-center gap-3">
@@ -1197,62 +1194,108 @@ function genDuration(g: OptimizerGeneration): string {
     return `${h}h ${m}m`;
 }
 
-// Client-side preview of worker allocation algorithm (mirrors backend)
-function computePreviewAllocations(
-    totalWorkers: number,
+// Memory cost per worker by timeframe (mirrors backend memoryCost map)
+const MEM_COST: Record<string, number> = {scalp: 1.0, intraday: 0.29, swing: 0.02};
+const MAX_PER_TF = 20;
+
+function computeDraftWorkers(
+    budget: number,
     draft: Record<string, {enabled: boolean; priority: number}>,
-): Record<string, number> {
-    const tfs = ['intraday', 'scalp', 'swing'];
-    const allocs: Record<string, number> = {};
+): {totalWorkers: number; memUsed: number; perTF: Record<string, number>} {
+    const tfs = ['scalp', 'intraday', 'swing'];
+    const perTF: Record<string, number> = {};
     const enabledTFs: string[] = [];
     let prioritySum = 0;
 
     for (const tf of tfs) {
-        allocs[tf] = 0;
+        perTF[tf] = 0;
         if (draft[tf]?.enabled) {
             enabledTFs.push(tf);
             prioritySum += draft[tf].priority;
         }
     }
+    if (enabledTFs.length === 0 || prioritySum === 0) return {totalWorkers: 0, memUsed: 0, perTF};
 
-    if (enabledTFs.length === 0 || prioritySum === 0) return allocs;
-
-    let allocated = 0;
     for (const tf of enabledTFs) {
-        let w = Math.floor(totalWorkers * draft[tf].priority / prioritySum);
-        if (w < 1) w = 1;
-        allocs[tf] = w;
-        allocated += w;
+        const share = budget * draft[tf].priority / prioritySum;
+        const cost = MEM_COST[tf] ?? 1;
+        let workers = Math.floor(share / cost);
+        if (workers < 1) workers = 1;
+        if (workers > MAX_PER_TF) workers = MAX_PER_TF;
+        perTF[tf] = workers;
     }
 
-    let remainder = totalWorkers - allocated;
-    if (remainder > 0) {
-        const sorted = [...enabledTFs].sort((a, b) => {
-            if (draft[b].priority !== draft[a].priority) return draft[b].priority - draft[a].priority;
-            return a.localeCompare(b);
-        });
-        for (let i = 0; remainder > 0; i++) {
-            allocs[sorted[i % sorted.length]]++;
-            remainder--;
-        }
-    }
-
-    // Trim if over-allocated
+    // Trim if over memory budget (lowest priority, highest cost first)
     for (;;) {
-        allocated = 0;
-        for (const tf of enabledTFs) allocated += allocs[tf];
-        if (allocated <= totalWorkers) break;
+        let totalCost = 0;
+        for (const tf of enabledTFs) totalCost += perTF[tf] * (MEM_COST[tf] ?? 1);
+        if (totalCost <= budget) break;
         let trimTF = '';
         let trimPri = 999;
+        let trimCost = 0;
         for (const tf of enabledTFs) {
-            if (allocs[tf] > 1 && draft[tf].priority < trimPri) {
+            if (perTF[tf] > 1 && (draft[tf].priority < trimPri || (draft[tf].priority === trimPri && (MEM_COST[tf] ?? 1) > trimCost))) {
                 trimPri = draft[tf].priority;
+                trimCost = MEM_COST[tf] ?? 1;
                 trimTF = tf;
             }
         }
         if (!trimTF) break;
-        allocs[trimTF]--;
+        perTF[trimTF]--;
     }
 
-    return allocs;
+    let totalWorkers = 0;
+    let memUsed = 0;
+    for (const tf of enabledTFs) {
+        totalWorkers += perTF[tf];
+        memUsed += perTF[tf] * (MEM_COST[tf] ?? 1);
+    }
+    return {totalWorkers, memUsed, perTF};
 }
+
+function WorkerGauge({workers, cores, memUsed, memBudget, isDarkMode}: {
+    workers: number; cores: number; memUsed: number; memBudget: number; isDarkMode: boolean;
+}) {
+    // CPU gauge: workers vs cores
+    const cpuPct = cores > 0 ? Math.min(workers / cores, 1) : 0;
+    const cpuDisplay = Math.round(cpuPct * 100);
+    const cpuBar = cpuPct <= 0.60 ? 'bg-emerald-500' : cpuPct <= 0.85 ? 'bg-amber-500' : 'bg-red-500';
+    const cpuGlow = cpuPct <= 0.60 ? 'shadow-emerald-500/30' : cpuPct <= 0.85 ? 'shadow-amber-500/30' : 'shadow-red-500/30';
+    const cpuText = cpuPct > 0.85 ? 'text-red-400 font-semibold' : cpuPct > 0.60 ? 'text-amber-400' : isDarkMode ? 'text-gray-400' : 'text-gray-500';
+
+    // Memory gauge: always fits, but show utilization
+    const memPct = memBudget > 0 ? Math.min(memUsed / memBudget, 1) : 0;
+    const memDisplay = Math.round(memPct * 100);
+    const memBar = memPct <= 0.60 ? 'bg-emerald-500' : memPct <= 0.85 ? 'bg-amber-500' : 'bg-red-500';
+    const memGlow = memPct <= 0.60 ? 'shadow-emerald-500/30' : memPct <= 0.85 ? 'shadow-amber-500/30' : 'shadow-red-500/30';
+    const memText = memPct > 0.85 ? 'text-red-400 font-semibold' : memPct > 0.60 ? 'text-amber-400' : isDarkMode ? 'text-gray-400' : 'text-gray-500';
+
+    const labelCl = `text-xs font-medium w-10 text-right ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`;
+    const trackCl = `flex-1 h-2 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`;
+
+    return (
+        <div className="space-y-1.5 mb-3">
+            <div className="flex items-center gap-3">
+                <span className={labelCl}>CPU</span>
+                <div className={trackCl}>
+                    <div className={`h-full rounded-full transition-all duration-500 ease-out shadow-sm ${cpuBar} ${cpuGlow}`}
+                        style={{width: `${cpuDisplay}%`}}/>
+                </div>
+                <span className={`text-xs font-mono whitespace-nowrap ${cpuText}`}>
+                    {workers}/{cores} workers ({cpuDisplay}%)
+                </span>
+            </div>
+            <div className="flex items-center gap-3">
+                <span className={labelCl}>RAM</span>
+                <div className={trackCl}>
+                    <div className={`h-full rounded-full transition-all duration-500 ease-out shadow-sm ${memBar} ${memGlow}`}
+                        style={{width: `${memDisplay}%`}}/>
+                </div>
+                <span className={`text-xs font-mono whitespace-nowrap ${memText}`}>
+                    {memUsed.toFixed(1)}/{memBudget} units ({memDisplay}%)
+                </span>
+            </div>
+        </div>
+    );
+}
+

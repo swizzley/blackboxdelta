@@ -596,9 +596,13 @@ export interface OptimizerWorkerTimeframe {
     priority: number;
     label: string;
     workers: number;
+    mem_cost: number;
 }
 
 export interface OptimizerWorkerConfig {
+    max_memory_units: number;
+    memory_used: number;
+    cpu_cores: number;
     total_workers: number;
     timeframes: Record<string, OptimizerWorkerTimeframe>;
 }
