@@ -156,7 +156,8 @@ export default function WinRateChart({data, period, breakevenTooltip}: WinRateCh
         legend: {
             type: 'scroll',
             data: [
-                pointLabel, 'Cumulative', ...(hasBreakeven ? ['Breakeven'] : []), 'Winners', 'Losers',
+                {name: pointLabel, itemStyle: {color: '#94a3b8'}},
+                'Cumulative', ...(hasBreakeven ? ['Breakeven'] : []), 'Winners', 'Losers',
             ],
             textStyle: {color: isDarkMode ? '#9ca3af' : '#374151', fontSize: 11},
             pageTextStyle: {color: isDarkMode ? '#9ca3af' : '#374151'},
