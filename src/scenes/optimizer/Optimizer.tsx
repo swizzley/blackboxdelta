@@ -879,15 +879,6 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
     );
 }
 
-function InlineStat({label, value, isDarkMode, color}: {label: string; value: string; isDarkMode: boolean; color?: string}) {
-    return (
-        <span>
-            <span className={isDarkMode ? 'text-gray-500' : 'text-gray-400'}>{label}</span>{' '}
-            <span className={color ?? (isDarkMode ? 'text-gray-200' : 'text-gray-700')}>{value}</span>
-        </span>
-    );
-}
-
 function ResultStat({label, value, isDarkMode, color}: {label: string; value: string; isDarkMode: boolean; color?: string}) {
     return (
         <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`}>
