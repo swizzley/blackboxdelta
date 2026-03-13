@@ -25,7 +25,7 @@ export default function Tooltip({content, children, className}: TooltipProps) {
     return (
         <div
             ref={triggerRef}
-            className={`relative inline-flex ${className ?? ''}`}
+            className={`relative ${className ?? 'inline-flex'}`}
             onMouseEnter={() => setVisible(true)}
             onMouseLeave={() => setVisible(false)}
         >

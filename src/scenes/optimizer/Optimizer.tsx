@@ -881,14 +881,14 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
 }
 
 function ResultStat({label, value, isDarkMode, color, tooltip}: {label: string; value: string; isDarkMode: boolean; color?: string; tooltip?: string}) {
-    const inner = (
+    const box = (
         <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`}>
             <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{label}</p>
             <p className={`text-sm font-semibold ${color ?? (isDarkMode ? 'text-gray-200' : 'text-gray-700')}`}>{value}</p>
         </div>
     );
-    if (tooltip) return <Tooltip content={tooltip} className="w-full">{inner}</Tooltip>;
-    return inner;
+    if (tooltip) return <Tooltip content={tooltip} className="">{box}</Tooltip>;
+    return box;
 }
 
 function MiniStat({label, value, isDarkMode, warn}: {label: string; value: string; isDarkMode: boolean; warn?: boolean}) {
