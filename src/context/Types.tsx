@@ -535,6 +535,7 @@ export interface OptimizerResult {
     avg_loss: number;
     max_drawdown: number;
     sharpe_ratio: number;
+    breakeven_wr: number;
 }
 
 export interface OptimizerGeneration {
