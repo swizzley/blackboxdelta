@@ -344,17 +344,17 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                 </div>
             </div>
             {r ? (
-                <div className={`flex items-center gap-3 text-xs font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                <div className={`grid grid-cols-4 gap-x-3 gap-y-1 text-xs font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                     <InlineStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <InlineStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <InlineStat label="WR" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
-                    <InlineStat label="AvgW" value={fmtNum(r.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                    <InlineStat label="AvgL" value={fmtNum(r.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                     <InlineStat label="P&L" value={r.total_pnl?.toFixed(2) ?? '—'} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
                     <InlineStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
                     {trunk.oos_days && r.total_trades ? (
                         <InlineStat label="T/Day" value={(r.total_trades / trunk.oos_days).toFixed(2)} isDarkMode={isDarkMode}/>
-                    ) : null}
+                    ) : <span/>}
+                    <InlineStat label="AvgW" value={fmtNum(r.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                    <InlineStat label="AvgL" value={fmtNum(r.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                 </div>
             ) : (
                 <p className={`text-sm ${muted}`}>No OOS result available</p>
