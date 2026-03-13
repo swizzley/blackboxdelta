@@ -887,7 +887,7 @@ function ResultStat({label, value, isDarkMode, color, tooltip}: {label: string; 
             <p className={`text-sm font-semibold ${color ?? (isDarkMode ? 'text-gray-200' : 'text-gray-700')}`}>{value}</p>
         </div>
     );
-    if (tooltip) return <Tooltip content={tooltip}>{inner}</Tooltip>;
+    if (tooltip) return <Tooltip content={tooltip} className="w-full">{inner}</Tooltip>;
     return inner;
 }
 

@@ -4,9 +4,10 @@ import {useTheme} from '../../context/Theme';
 interface TooltipProps {
     content: ReactNode;
     children: ReactNode;
+    className?: string;
 }
 
-export default function Tooltip({content, children}: TooltipProps) {
+export default function Tooltip({content, children, className}: TooltipProps) {
     const {isDarkMode} = useTheme();
     const [visible, setVisible] = useState(false);
     const [pos, setPos] = useState<'top' | 'bottom'>('top');
@@ -24,7 +25,7 @@ export default function Tooltip({content, children}: TooltipProps) {
     return (
         <div
             ref={triggerRef}
-            className="relative inline-flex"
+            className={`relative inline-flex ${className ?? ''}`}
             onMouseEnter={() => setVisible(true)}
             onMouseLeave={() => setVisible(false)}
         >
