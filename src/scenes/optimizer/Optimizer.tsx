@@ -8,14 +8,13 @@ import {
     fetchOptimizerStatus, fetchOptimizerGenerations,
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
-    fetchOptimizerSeedRuns,
-    queueRecommendation, skipRecommendation,
-    applyRecommendation, pushTrunk,
+    fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
+    pushTrunk,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
     OptimizerRecommendation, OptimizerResult, OptimizerBranch,
-    OptimizerTrunkDetail, OptimizerParamDiff,
+    OptimizerTrunkDetail, OptimizerParamDiff, OptimizerWorkerConfig,
     SeedRun, SeedComponentResult, SeedVariantResult,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
 } from '../../context/Types';
@@ -40,27 +39,41 @@ export default function Optimizer() {
     const [recommendations, setRecommendations] = useState<OptimizerRecommendation[]>([]);
     const [loading, setLoading] = useState(true);
     const [seedRuns, setSeedRuns] = useState<SeedRun[]>([]);
+    const [workerConfig, setWorkerConfig] = useState<OptimizerWorkerConfig | null>(null);
+    const [workerDraft, setWorkerDraft] = useState<Record<string, {enabled: boolean; priority: number}>>({});
+    const [workerDirty, setWorkerDirty] = useState(false);
     const [showSeeds, setShowSeeds] = useState(false);
-    const [showQueue, setShowQueue] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
     const [showGens, setShowGens] = useState(false);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
-        const [s, t, g, r, sr] = await Promise.all([
+        const [s, t, g, r, sr, wc] = await Promise.all([
             fetchOptimizerStatus(),
             fetchOptimizerTrunks(),
             fetchOptimizerGenerations(20),
             fetchOptimizerRecommendations(),
             fetchOptimizerSeedRuns(),
+            fetchOptimizerWorkers(),
         ]);
         if (s) setStatus(s);
         if (t) setTrunks(t);
         if (g) setGenerations(g);
         if (r) setRecommendations(r);
         if (sr) setSeedRuns(sr);
+        if (wc) {
+            setWorkerConfig(wc);
+            if (!workerDirty) {
+                const draft: Record<string, {enabled: boolean; priority: number}> = {};
+                for (const tf of ['scalp', 'intraday', 'swing']) {
+                    const info = wc.timeframes[tf];
+                    if (info) draft[tf] = {enabled: info.enabled, priority: info.priority};
+                }
+                setWorkerDraft(draft);
+            }
+        }
         setLoading(false);
-    }, [apiAvailable]);
+    }, [apiAvailable, workerDirty]);
 
     useEffect(() => {
         loadData();
@@ -185,6 +198,137 @@ export default function Optimizer() {
                                 })}
                             </div>
 
+                            {/* Worker Allocation */}
+                            {workerConfig && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}>
+                                        <BeakerIcon className={iconCl}/>Worker Allocation
+                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{workerConfig.total_workers} total</span>
+                                    </h2>
+                                    <div className="space-y-3">
+                                        {['scalp', 'intraday', 'swing'].map(tf => {
+                                            const draft = workerDraft[tf];
+                                            const live = workerConfig.timeframes[tf];
+                                            const activeGen = status?.active_generations?.find(g => g.timeframe === tf);
+                                            if (!draft || !live) return null;
+
+                                            // Compute preview allocation
+                                            const previewAllocs = computePreviewAllocations(workerConfig.total_workers, workerDraft);
+                                            const previewWorkers = previewAllocs[tf] ?? 0;
+
+                                            return (
+                                                <div key={tf} className={`flex items-center gap-4 p-3 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                    <div className="flex items-center gap-2 w-24">
+                                                        <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
+                                                    </div>
+
+                                                    {/* Enable/Disable toggle */}
+                                                    <button
+                                                        onClick={() => {
+                                                            setWorkerDraft(prev => ({...prev, [tf]: {...prev[tf], enabled: !prev[tf].enabled}}));
+                                                            setWorkerDirty(true);
+                                                        }}
+                                                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                                                            draft.enabled ? 'bg-cyan-600' : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'
+                                                        }`}
+                                                    >
+                                                        <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                                            draft.enabled ? 'translate-x-5' : 'translate-x-0'
+                                                        }`}/>
+                                                    </button>
+
+                                                    {/* Priority selector */}
+                                                    <div className="flex gap-1">
+                                                        {([1, 2, 3] as const).map(p => {
+                                                            const labels = {1: 'Low', 2: 'Med', 3: 'High'} as const;
+                                                            const isActive = draft.priority === p;
+                                                            return (
+                                                                <button
+                                                                    key={p}
+                                                                    disabled={!draft.enabled}
+                                                                    onClick={() => {
+                                                                        setWorkerDraft(prev => ({...prev, [tf]: {...prev[tf], priority: p}}));
+                                                                        setWorkerDirty(true);
+                                                                    }}
+                                                                    className={`px-2 py-0.5 text-xs rounded font-medium transition-colors ${
+                                                                        !draft.enabled
+                                                                            ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                            : isActive
+                                                                                ? 'bg-cyan-600 text-white'
+                                                                                : isDarkMode ? 'bg-slate-600 text-gray-300 hover:bg-slate-500' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                                                    }`}
+                                                                >
+                                                                    {labels[p]}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    {/* Worker count */}
+                                                    <div className="flex items-center gap-2 ml-auto">
+                                                        <span className={`text-sm font-mono font-bold ${
+                                                            draft.enabled
+                                                                ? isDarkMode ? 'text-white' : 'text-gray-900'
+                                                                : muted
+                                                        }`}>
+                                                            {previewWorkers}
+                                                        </span>
+                                                        <span className={`text-xs ${muted}`}>workers</span>
+                                                    </div>
+
+                                                    {/* Active generation indicator */}
+                                                    {activeGen && (
+                                                        <span className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 animate-pulse" title={`Gen ${activeGen.id} active`}/>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Apply button */}
+                                    <div className="mt-4 flex items-center gap-3">
+                                        <button
+                                            disabled={!workerDirty}
+                                            onClick={async () => {
+                                                const cfg: Record<string, {enabled: boolean; priority: number}> = {};
+                                                for (const tf of ['scalp', 'intraday', 'swing']) {
+                                                    if (workerDraft[tf]) cfg[tf] = workerDraft[tf];
+                                                }
+                                                await updateOptimizerWorkers(cfg);
+                                                setWorkerDirty(false);
+                                                loadData();
+                                            }}
+                                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                                workerDirty
+                                                    ? 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
+                                                    : isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            Apply
+                                        </button>
+                                        {workerDirty && (
+                                            <button
+                                                onClick={() => {
+                                                    if (workerConfig) {
+                                                        const draft: Record<string, {enabled: boolean; priority: number}> = {};
+                                                        for (const tf of ['scalp', 'intraday', 'swing']) {
+                                                            const info = workerConfig.timeframes[tf];
+                                                            if (info) draft[tf] = {enabled: info.enabled, priority: info.priority};
+                                                        }
+                                                        setWorkerDraft(draft);
+                                                    }
+                                                    setWorkerDirty(false);
+                                                }}
+                                                className={`text-xs ${muted} hover:underline cursor-pointer`}
+                                            >
+                                                Reset
+                                            </button>
+                                        )}
+                                        <span className={`text-xs ${muted} ml-auto`}>Changes take effect at next generation boundary</span>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Seed Calibration Runs */}
                             {seedRuns.length > 0 && (
                                 <div className={`${card} mb-6`}>
@@ -203,34 +347,23 @@ export default function Optimizer() {
                                 </div>
                             )}
 
-                            {/* Verification Queue (Recommendations) */}
-                            <div className={`${card} mb-6`}>
-                                <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowQueue(q => !q)}>
-                                    <LightBulbIcon className={iconCl}/>Verification Queue
-                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{recommendations.length}</span>
-                                    {showQueue ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
-                                </h2>
-                                {showQueue && (recommendations.length === 0 ? (
+                            {/* Verification Queue (Recommendations) — disabled */}
+                            <div className={`${card} mb-6 relative`}>
+                                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black/20 backdrop-blur-[1px]">
+                                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase ${
+                                        isDarkMode ? 'bg-slate-800/90 text-slate-400 border border-slate-600/50' : 'bg-white/90 text-gray-400 border border-gray-300'
+                                    }`}>Coming Soon</span>
+                                </div>
+                                <div className="opacity-40 pointer-events-none">
+                                    <h2 className={heading}>
+                                        <LightBulbIcon className={iconCl}/>Verification Queue
+                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{recommendations.length}</span>
+                                    </h2>
                                     <div className={`text-center py-6 ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'} rounded-lg`}>
                                         <LightBulbIcon className={`w-8 h-8 mx-auto mb-2 ${isDarkMode ? 'text-gray-600' : 'text-gray-300'}`}/>
-                                        <p className={`text-sm ${muted}`}>No pending recommendations</p>
-                                        <p className={`text-xs ${muted} mt-1`}>Analysis TODOs with parameter mutations will appear here for verification</p>
+                                        <p className={`text-sm ${muted}`}>Recommendations disabled while system stabilizes</p>
                                     </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {recommendations.map(rec => (
-                                            <RecommendationRow
-                                                key={rec.id}
-                                                rec={rec}
-                                                isDarkMode={isDarkMode}
-                                                muted={muted}
-                                                onQueue={async () => { await queueRecommendation(rec.id); loadData(); }}
-                                                onSkip={async () => { await skipRecommendation(rec.id); loadData(); }}
-                                                onApply={async () => { await applyRecommendation(rec.id); loadData(); }}
-                                            />
-                                        ))}
-                                    </div>
-                                ))}
+                                </div>
                             </div>
 
                             {/* Trunk History */}
@@ -765,103 +898,6 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
     );
 }
 
-function RecommendationRow({rec, isDarkMode, muted, onQueue, onSkip, onApply}: {
-    rec: OptimizerRecommendation; isDarkMode: boolean; muted: string;
-    onQueue: () => void; onSkip: () => void; onApply: () => void;
-}) {
-    const [expanded, setExpanded] = useState(false);
-    const isPending = rec.status === 'pending';
-    const isPassed = rec.status === 'passed';
-    const canApply = isPassed;
-
-    return (
-        <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <RecStatusBadge status={rec.status} isDarkMode={isDarkMode}/>
-                    {rec.timeframe && <TimeframeBadge tf={rec.timeframe} isDarkMode={isDarkMode}/>}
-                    <span className={`text-sm font-medium truncate ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                        {rec.source}{rec.source_id ? ` #${rec.source_id}` : ''}
-                    </span>
-                    {rec.trunk_id && <span className={`text-xs font-mono ${muted} hidden sm:inline`}>trunk #{rec.trunk_id}</span>}
-                    <span className={`text-xs ${muted} hidden sm:inline`}>{dayjs(rec.created_at).fromNow()}</span>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                    {isPending && (
-                        <>
-                            <button onClick={onQueue}
-                                    className="px-2.5 py-1 text-xs font-medium rounded bg-cyan-600 hover:bg-cyan-500 text-white transition-colors">
-                                Run
-                            </button>
-                            <button onClick={onSkip}
-                                    className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
-                                        isDarkMode ? 'bg-slate-600 hover:bg-slate-500 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
-                                    }`}>
-                                Skip
-                            </button>
-                        </>
-                    )}
-                    <button onClick={canApply ? onApply : undefined}
-                            disabled={!canApply}
-                            className={`px-2.5 py-1 text-xs font-medium rounded transition-colors ${
-                                canApply
-                                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer'
-                                    : isDarkMode
-                                        ? 'bg-slate-700 text-gray-600 cursor-not-allowed'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            }`}>
-                        Apply to Trunk
-                    </button>
-                    <button onClick={() => setExpanded(!expanded)}
-                            className={`p-1 rounded ${isDarkMode ? 'hover:bg-slate-600' : 'hover:bg-gray-200'}`}>
-                        {expanded
-                            ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/>
-                            : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>
-                        }
-                    </button>
-                </div>
-            </div>
-
-            {expanded && (
-                <div className="mt-3 space-y-3">
-                    {rec.rationale && (
-                        <p className={`text-sm ${muted}`}>{rec.rationale}</p>
-                    )}
-
-                    {/* Mutations */}
-                    {rec.mutations && Object.keys(rec.mutations).filter(k => k !== 'check.trunk_winrate').length > 0 && (
-                        <div>
-                            <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>Mutations</p>
-                            <div className={`rounded border px-2 py-1.5 overflow-hidden flex flex-wrap gap-1 ${
-                                isDarkMode ? 'border-slate-600/50 bg-slate-900/60' : 'border-gray-300 bg-gray-200/60'
-                            }`}>
-                                {Object.entries(rec.mutations).filter(([k]) => k !== 'check.trunk_winrate').sort(([a],[b]) => a.localeCompare(b)).map(([k, v]) => (
-                                    <span key={k} className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{k}:</span>
-                                        <span className="text-emerald-400">{v}</span>
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Results */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {rec.is_result && (
-                            <ResultBlock label="In-Sample" result={rec.is_result} isDarkMode={isDarkMode} muted={muted}/>
-                        )}
-                        {rec.oos_result && (
-                            <ResultBlock label="Out-of-Sample" result={rec.oos_result} isDarkMode={isDarkMode} muted={muted}/>
-                        )}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-}
-
 function ResultBlock({label, result, isDarkMode, muted}: {label: string; result: OptimizerResult; isDarkMode: boolean; muted: string}) {
     return (
         <div>
@@ -921,39 +957,6 @@ function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
                 : (isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500');
     const pulse = (s === 'running' || s === 'active') ? ' animate-pulse' : '';
     return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${cls}${pulse}`}>{status}</span>;
-}
-
-function RecStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boolean}) {
-    const s = status?.toLowerCase();
-    let cls: string;
-    let extra = '';
-    switch (s) {
-        case 'pending':
-            cls = isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500';
-            break;
-        case 'queued':
-            cls = isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700';
-            break;
-        case 'running':
-            cls = isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700';
-            extra = ' animate-pulse';
-            break;
-        case 'passed':
-            cls = isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700';
-            break;
-        case 'failed':
-            cls = isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700';
-            break;
-        case 'skipped':
-            cls = isDarkMode ? 'bg-slate-700 text-gray-500 line-through' : 'bg-gray-100 text-gray-400 line-through';
-            break;
-        case 'applied':
-            cls = isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-100 text-cyan-700';
-            break;
-        default:
-            cls = isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500';
-    }
-    return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium flex-shrink-0 ${cls}${extra}`}>{status}</span>;
 }
 
 // --- Seed Run Components ---
@@ -1192,4 +1195,64 @@ function genDuration(g: OptimizerGeneration): string {
     const h = Math.floor(ms / 3_600_000);
     const m = Math.round((ms % 3_600_000) / 60_000);
     return `${h}h ${m}m`;
+}
+
+// Client-side preview of worker allocation algorithm (mirrors backend)
+function computePreviewAllocations(
+    totalWorkers: number,
+    draft: Record<string, {enabled: boolean; priority: number}>,
+): Record<string, number> {
+    const tfs = ['intraday', 'scalp', 'swing'];
+    const allocs: Record<string, number> = {};
+    const enabledTFs: string[] = [];
+    let prioritySum = 0;
+
+    for (const tf of tfs) {
+        allocs[tf] = 0;
+        if (draft[tf]?.enabled) {
+            enabledTFs.push(tf);
+            prioritySum += draft[tf].priority;
+        }
+    }
+
+    if (enabledTFs.length === 0 || prioritySum === 0) return allocs;
+
+    let allocated = 0;
+    for (const tf of enabledTFs) {
+        let w = Math.floor(totalWorkers * draft[tf].priority / prioritySum);
+        if (w < 1) w = 1;
+        allocs[tf] = w;
+        allocated += w;
+    }
+
+    let remainder = totalWorkers - allocated;
+    if (remainder > 0) {
+        const sorted = [...enabledTFs].sort((a, b) => {
+            if (draft[b].priority !== draft[a].priority) return draft[b].priority - draft[a].priority;
+            return a.localeCompare(b);
+        });
+        for (let i = 0; remainder > 0; i++) {
+            allocs[sorted[i % sorted.length]]++;
+            remainder--;
+        }
+    }
+
+    // Trim if over-allocated
+    for (;;) {
+        allocated = 0;
+        for (const tf of enabledTFs) allocated += allocs[tf];
+        if (allocated <= totalWorkers) break;
+        let trimTF = '';
+        let trimPri = 999;
+        for (const tf of enabledTFs) {
+            if (allocs[tf] > 1 && draft[tf].priority < trimPri) {
+                trimPri = draft[tf].priority;
+                trimTF = tf;
+            }
+        }
+        if (!trimTF) break;
+        allocs[trimTF]--;
+    }
+
+    return allocs;
 }

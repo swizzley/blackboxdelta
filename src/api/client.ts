@@ -4,7 +4,7 @@ import type {
     ApiHealth, ApiSystem, ApiDashboard, ApiCalendarDay, ApiOrder,
     ApiAlert, ApiMarket, ApiSetting, SignalRow,
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
-    OptimizerBranch, OptimizerTrunkDetail, SeedRun,
+    OptimizerBranch, OptimizerTrunkDetail, OptimizerWorkerConfig, SeedRun,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
 } from '../context/Types';
@@ -194,6 +194,26 @@ export function pushTrunk(id: number): Promise<any> {
 
 export function revertTrunk(id: number): Promise<any> {
     return apiPost(`/api/optimizer/trunks/${id}/revert`);
+}
+
+// Worker allocation
+export function fetchOptimizerWorkers(): Promise<OptimizerWorkerConfig | null> {
+    return apiFetch('/api/optimizer/workers');
+}
+
+export async function updateOptimizerWorkers(config: Record<string, {enabled?: boolean; priority?: number}>): Promise<any> {
+    const base = getApiBase();
+    try {
+        const res = await fetch(`${base}/api/optimizer/workers`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json', ...authHeaders()},
+            body: JSON.stringify(config),
+        });
+        if (!res.ok) return null;
+        return await res.json();
+    } catch {
+        return null;
+    }
 }
 
 // Seed runs

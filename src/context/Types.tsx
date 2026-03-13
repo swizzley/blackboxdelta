@@ -590,6 +590,19 @@ export interface OptimizerBranch {
     completed_at?: string;
 }
 
+// Worker allocation types (from /api/optimizer/workers)
+export interface OptimizerWorkerTimeframe {
+    enabled: boolean;
+    priority: number;
+    label: string;
+    workers: number;
+}
+
+export interface OptimizerWorkerConfig {
+    total_workers: number;
+    timeframes: Record<string, OptimizerWorkerTimeframe>;
+}
+
 // Seed run types (from /api/optimizer/seed-runs)
 export interface SeedComponentResult {
     component: string;
