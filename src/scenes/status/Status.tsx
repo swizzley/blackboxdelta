@@ -6,7 +6,7 @@ import {useApi} from '../../context/Api';
 import {fetchSettings, fetchSystem, fetchSentimentPairs, fetchSentimentFeeds} from '../../api/client';
 import {formatPct} from '../common/Util';
 import {connectOrders, connectAlerts} from '../../api/sse';
-import type {ApiSetting, ApiSystem, MonitorOllamaStatus, MonitorSentimentStatus, ApiSentimentPair, ApiSentimentFeed, ApiOrder, ApiAlert} from '../../context/Types';
+import type {ApiSetting, ApiSystem, MonitorOllamaStatus, ApiSentimentPair, ApiSentimentFeed, ApiOrder, ApiAlert} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, Cog6ToothIcon,
     GlobeAltIcon, CheckCircleIcon, ClockIcon,
@@ -28,7 +28,6 @@ export default function Status() {
     const [system, setSystem] = useState<ApiSystem | null>(null);
     const [settings, setSettings] = useState<ApiSetting[] | null>(null);
     const [ollama, setOllama] = useState<MonitorOllamaStatus | null>(null);
-    const [sentimentSummary, setSentimentSummary] = useState<MonitorSentimentStatus | null>(null);
     const [sentimentPairs, setSentimentPairs] = useState<ApiSentimentPair[] | null>(null);
     const [sentimentFeeds, setSentimentFeeds] = useState<ApiSentimentFeed[] | null>(null);
     const [liveOrders, setLiveOrders] = useState<ApiOrder[]>([]);
@@ -59,7 +58,7 @@ export default function Status() {
         fetchSentimentFeeds().then(setSentimentFeeds);
         fetch(`${apiBase}/api/monitor/status`, {signal: AbortSignal.timeout(5000)})
             .then(res => res.ok ? res.json() : null)
-            .then(data => { if (data?.ollama) setOllama(data.ollama); if (data?.sentiment) setSentimentSummary(data.sentiment); })
+            .then(data => { if (data?.ollama) setOllama(data.ollama); })
             .catch(() => {});
         const interval = setInterval(() => fetchSystem().then(setSystem), 30_000);
         return () => clearInterval(interval);
@@ -331,24 +330,15 @@ export default function Status() {
                             )}
 
                             {/* Sentiment Pipeline */}
-                            {sentimentSummary?.message && (
+                            {system?.sentiment && (
                                 <div className={`${card} mb-6`}>
                                     <h2 className={heading}><NewspaperIcon className={iconCl}/>Sentiment Pipeline</h2>
-                                    <div className={`flex items-center gap-3 rounded-lg px-4 py-3 mb-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                        <span className={`inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                                            sentimentSummary.status === 'ok' ? 'bg-emerald-400' :
-                                            sentimentSummary.status === 'warn' ? 'bg-yellow-400' : 'bg-red-500'
-                                        }`}/>
-                                        <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                            {sentimentSummary.message}
-                                        </span>
-                                    </div>
                                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                                         {[
-                                            {label: 'Total Articles', value: String(sentimentSummary.total_articles)},
-                                            {label: 'Recent (24h)', value: String(sentimentSummary.recent_articles)},
-                                            {label: 'Pairs Covered', value: String(sentimentSummary.pairs_covered)},
-                                            {label: 'Avg Score', value: sentimentSummary.avg_score?.toFixed(3) ?? '—'},
+                                            {label: 'Total Articles', value: String(system.sentiment.total_articles)},
+                                            {label: 'Recent (24h)', value: String(system.sentiment.recent_articles)},
+                                            {label: 'Pairs Covered', value: String(system.sentiment.pairs_covered)},
+                                            {label: 'Avg Score', value: system.sentiment.avg_score?.toFixed(3) ?? '—'},
                                         ].map(s => (
                                             <div key={s.label} className={`rounded-lg px-4 py-3 text-center ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
                                                 <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mb-1`}>{s.label}</div>
