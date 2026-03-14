@@ -4,7 +4,7 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
-import {formatPct} from '../common/Util';
+import {formatDollar} from '../common/Util';
 import {fetchOrders as apiFetchOrders} from '../../api/client';
 import {connectOrders} from '../../api/sse';
 import {OrderSummary, ApiOrder} from '../../context/Types';
@@ -219,7 +219,7 @@ export default function History() {
                                                                 {dayjs(day).format('ddd, MMM D YYYY')}
                                                             </span>
                                                             <span className={`text-xs font-bold ${dayPL > 0 ? 'text-emerald-500' : dayPL < 0 ? 'text-red-500' : isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                                {formatPct(dayPL)}
+                                                                {formatDollar(dayPL)}
                                                             </span>
                                                             {closed.length > 0 && (
                                                                 <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
@@ -268,7 +268,7 @@ export default function History() {
                                                         o.profit > 0 ? 'text-emerald-500' :
                                                             o.profit < 0 ? 'text-red-500' : ''
                                                 }`}>
-                                                    {o.profit !== null ? formatPct(o.profit) : '-'}
+                                                    {o.profit !== null ? formatDollar(o.profit) : '-'}
                                                 </td>
                                             </tr>
                                         );
