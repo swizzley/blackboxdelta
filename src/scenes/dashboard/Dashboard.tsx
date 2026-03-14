@@ -14,7 +14,7 @@ import CloseReasonChart from './CloseReasonChart';
 import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
-import {formatDollar} from '../common/Util';
+import {formatDollar, formatPct} from '../common/Util';
 import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar, fetchLive} from '../../api/client';
 import type {LiveData} from '../../api/client';
 import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, TimeframeStats, TimeframeRow, ApiCalendarDay, DayData} from '../../context/Types';
@@ -536,12 +536,12 @@ export default function Dashboard() {
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <StatCard
                             label="Avg Win"
-                            value={stats.avg_win != null ? formatDollar(stats.avg_win) : 'N/A'}
+                            value={stats.avg_win != null ? formatPct(stats.avg_win) : 'N/A'}
                             color="green"
                         />
                         <StatCard
                             label="Avg Loss"
-                            value={stats.avg_loss != null ? formatDollar(stats.avg_loss) : 'N/A'}
+                            value={stats.avg_loss != null ? formatPct(stats.avg_loss) : 'N/A'}
                             color="red"
                         />
                         <StatCard

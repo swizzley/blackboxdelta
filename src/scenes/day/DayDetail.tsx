@@ -7,7 +7,7 @@ import HourBlock from './HourBlock';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {DayData, TimeframeRow} from '../../context/Types';
-import {formatPct} from '../common/Util';
+import {formatDollar} from '../common/Util';
 import {fetchDay} from '../../api/client';
 import dayjs from 'dayjs';
 
@@ -100,7 +100,7 @@ export default function DayDetail() {
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                                 <StatCard
                                     label="Day P&L"
-                                    value={formatPct(data.summary.total_pl)}
+                                    value={formatDollar(data.summary.total_pl)}
                                     color={data.summary.total_pl >= 0 ? 'green' : 'red'}
                                 />
                                 <StatCard
@@ -128,7 +128,7 @@ export default function DayDetail() {
                                             <div key={tf.timeframe}>
                                                 <p className={`text-xs uppercase ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{tf.timeframe}</p>
                                                 <p className={`text-lg font-semibold ${tf.total_pl >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                    {formatPct(tf.total_pl)}
+                                                    {formatDollar(tf.total_pl)}
                                                 </p>
                                                 <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                                                     {tf.total_orders} trades | {tf.win_rate_pct ?? 0}% WR
