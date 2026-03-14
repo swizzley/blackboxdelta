@@ -608,6 +608,8 @@ export interface OptimizerWorkerConfig {
     memory_used: number;
     cpu_cores: number;
     total_workers: number;
+    active_hosts?: string[];
+    host_count?: number;
     timeframes: Record<string, OptimizerWorkerTimeframe>;
 }
 

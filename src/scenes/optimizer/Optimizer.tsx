@@ -220,6 +220,15 @@ export default function Optimizer() {
                                 <div className={`${card} mb-6`}>
                                     <h2 className={heading}>
                                         <BeakerIcon className={iconCl}/>Worker Allocation
+                                        {workerConfig.host_count != null && workerConfig.host_count > 0 && (
+                                            <Tooltip content={workerConfig.active_hosts?.join(', ') ?? ''}>
+                                                <span className={`ml-2 text-xs font-normal px-1.5 py-0.5 rounded ${
+                                                    isDarkMode ? 'bg-cyan-900/40 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
+                                                }`}>
+                                                    {workerConfig.host_count} host{workerConfig.host_count > 1 ? 's' : ''}
+                                                </span>
+                                            </Tooltip>
+                                        )}
                                     </h2>
                                     {(() => {
                                         const budget = workerConfig.max_memory_units;
