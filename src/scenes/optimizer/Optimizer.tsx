@@ -9,7 +9,7 @@ import {
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
-    pushTrunk,
+    pushTrunk, revertTrunk,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -45,6 +45,8 @@ export default function Optimizer() {
     const [showSeeds, setShowSeeds] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
     const [showGens, setShowGens] = useState(false);
+    const [revertTarget, setRevertTarget] = useState<number | null>(null);
+    const [revertReason, setRevertReason] = useState('overfit');
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -80,6 +82,21 @@ export default function Optimizer() {
         const iv = setInterval(loadData, 10_000);
         return () => clearInterval(iv);
     }, [loadData]);
+
+    const REVERT_REASONS = [
+        { value: 'overfit', label: 'Overfitting (trade count collapse / curve fit)' },
+        { value: 'regression', label: 'Performance regression' },
+        { value: 'regime_change', label: 'Market regime change' },
+        { value: 'bad_push', label: 'Bad push (wrong params)' },
+        { value: 'manual_override', label: 'Manual override' },
+    ];
+
+    const handleRevert = async (trunkId: number) => {
+        await revertTrunk(trunkId, revertReason);
+        setRevertTarget(null);
+        setRevertReason('overfit');
+        loadData();
+    };
 
     const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
     const heading = `text-lg font-semibold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
@@ -393,7 +410,10 @@ export default function Optimizer() {
                                             });
                                             return sorted.map(t => (
                                                 <TrunkRow key={t.id} trunk={t} isDarkMode={isDarkMode} muted={muted}
-                                                          isLive={liveIdByTf.get(t.timeframe) === t.id}/>
+                                                          isLive={liveIdByTf.get(t.timeframe) === t.id}
+                                                          revertTarget={revertTarget} setRevertTarget={setRevertTarget}
+                                                          revertReason={revertReason} setRevertReason={setRevertReason}
+                                                          revertReasons={REVERT_REASONS} onRevert={handleRevert}/>
                                             ));
                                         })()}
                                     </div>
@@ -694,8 +714,11 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
     );
 }
 
-function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
+function TrunkRow({trunk: t, isDarkMode, muted, isLive, revertTarget, setRevertTarget, revertReason, setRevertReason, revertReasons, onRevert}: {
     trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; isLive: boolean;
+    revertTarget: number | null; setRevertTarget: (id: number | null) => void;
+    revertReason: string; setRevertReason: (r: string) => void;
+    revertReasons: {value: string; label: string}[]; onRevert: (id: number) => void;
 }) {
     const [expanded, setExpanded] = useState(false);
     const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
@@ -741,6 +764,11 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
                             isDarkMode ? 'bg-slate-600 text-gray-400' : 'bg-gray-200 text-gray-500'
                         }`}>previously pushed</span>
                     )}
+                    {t.reverted_to_trunk_id && (
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-100 text-amber-700'
+                        }`}>reverted from #{t.reverted_to_trunk_id}{t.revert_reason ? `: ${t.revert_reason}` : ''}</span>
+                    )}
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                     <span className={`text-xs ${muted}`}>{dayjs(t.promoted_at).fromNow()}</span>
@@ -783,6 +811,46 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive}: {
 
                     {detail && (!detail.diffs || detail.diffs.length === 0) && (
                         <p className={`text-sm ${muted}`}>No parameter changes (initial trunk or identical params)</p>
+                    )}
+
+                    {/* Revert to this trunk */}
+                    {r && !isLive && (
+                        <div className="pt-2 border-t border-slate-600/30">
+                            {revertTarget === t.id ? (
+                                <div className="flex items-center gap-2 flex-wrap" onClick={e => e.stopPropagation()}>
+                                    <select
+                                        value={revertReason}
+                                        onChange={e => setRevertReason(e.target.value)}
+                                        className={`text-xs rounded px-2 py-1.5 ${
+                                            isDarkMode ? 'bg-slate-700 text-gray-200 border-slate-600' : 'bg-white text-gray-700 border-gray-300'
+                                        } border`}>
+                                        {revertReasons.map(r => (
+                                            <option key={r.value} value={r.value}>{r.label}</option>
+                                        ))}
+                                    </select>
+                                    <button
+                                        onClick={() => onRevert(t.id)}
+                                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-500 text-white transition-colors">
+                                        Confirm Revert
+                                    </button>
+                                    <button
+                                        onClick={() => setRevertTarget(null)}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                                            isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                        }`}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setRevertTarget(t.id); }}
+                                    className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+                                        isDarkMode ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-900/50' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                    }`}>
+                                    Revert to #{t.id}
+                                </button>
+                            )}
+                        </div>
                     )}
                 </div>
             )}

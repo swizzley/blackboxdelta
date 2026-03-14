@@ -508,6 +508,8 @@ export interface OptimizerTrunk {
     promoted_from_branch_id?: number;
     promoted_from_recommendation_id?: number;
     promoted_rec_source?: string;
+    revert_reason?: string;
+    reverted_to_trunk_id?: number;
 }
 
 export interface OptimizerTrunkDetail {

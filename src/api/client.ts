@@ -192,8 +192,8 @@ export function pushTrunk(id: number): Promise<any> {
     return apiPost(`/api/optimizer/trunks/${id}/push`);
 }
 
-export function revertTrunk(id: number): Promise<any> {
-    return apiPost(`/api/optimizer/trunks/${id}/revert`);
+export function revertTrunk(id: number, reason: string): Promise<any> {
+    return apiPost(`/api/optimizer/trunks/${id}/revert`, { reason });
 }
 
 // Worker allocation
