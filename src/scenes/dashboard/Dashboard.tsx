@@ -14,7 +14,7 @@ import CloseReasonChart from './CloseReasonChart';
 import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
-import {formatPct} from '../common/Util';
+import {formatDollar} from '../common/Util';
 import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar, fetchLive} from '../../api/client';
 import type {LiveData} from '../../api/client';
 import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, TimeframeStats, TimeframeRow, ApiCalendarDay, DayData} from '../../context/Types';
@@ -426,7 +426,7 @@ export default function Dashboard() {
 
     const stats = filteredStats;
     const plColor = stats.total_pl >= 0 ? 'green' : 'red';
-    const plDisplay = formatPct(stats.total_pl);
+    const plDisplay = formatDollar(stats.total_pl);
 
     return (
         <>
