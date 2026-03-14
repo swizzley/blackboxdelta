@@ -10,6 +10,13 @@ export function formatDollar(value: number): string {
     return `${sign}$${abs.toExponential(1)}`;
 }
 
+// Format a P&L value as a per-trade percentage (value × 100).
+export function formatPct(value: number): string {
+    const pct = value * 100;
+    if (pct === 0) return '0%';
+    return (pct >= 0 ? '+' : '') + pct.toFixed(3) + '%';
+}
+
 export function exchangeName(exchange: string) {
     switch (exchange) {
         case "NEW YORK STOCK EXCHANGE, INC.":

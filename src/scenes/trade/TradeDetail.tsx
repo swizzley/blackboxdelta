@@ -7,7 +7,7 @@ import StatCard from '../common/StatCard';
 import TradeChart from './TradeChart';
 import type {TradeChartHandle} from './TradeChart';
 import {useTheme} from '../../context/Theme';
-import {formatDollar} from '../common/Util';
+import {formatPct} from '../common/Util';
 import {useApi} from '../../context/Api';
 import {fetchOrder as apiFetchOrder, fetchPricesAround, fetchSignalsAround} from '../../api/client';
 import {OrderDetail, Score, SignalRow} from '../../context/Types';
@@ -156,7 +156,7 @@ export default function TradeDetail() {
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                                 <StatCard
                                     label="P&L"
-                                    value={trade.profit !== null ? formatDollar(trade.profit) : 'Open'}
+                                    value={trade.profit !== null ? formatPct(trade.profit) : 'Open'}
                                     color={trade.profit !== null ? (trade.profit >= 0 ? 'green' : 'red') : 'default'}
                                 />
                                 <StatCard label="Quantity" value={`${trade.quantity > 0 ? '+' : ''}${trade.quantity}`}/>

@@ -2,7 +2,7 @@ import {useRef, useCallback} from 'react';
 import ReactECharts from 'echarts-for-react';
 import {useTheme} from '../../context/Theme';
 import {TimeframeRow} from '../../context/Types';
-import {formatDollar} from '../common/Util';
+import {formatPct} from '../common/Util';
 
 interface TimeframeBreakdownProps {
     data: TimeframeRow[];
@@ -38,10 +38,10 @@ export default function TimeframeBreakdown({data, selectedTimeframe, onTimeframe
                 for (const p of params) {
                     if (p.value === 0) continue;
                     const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};margin-right:4px;"></span>`;
-                    html += `<br/>${marker}${p.seriesName}: <b>${formatDollar(p.value)}</b>`;
+                    html += `<br/>${marker}${p.seriesName}: <b>${formatPct(p.value)}</b>`;
                     total += p.value;
                 }
-                html += `<br/><b>Total: ${formatDollar(total)}</b>`;
+                html += `<br/><b>Total: ${formatPct(total)}</b>`;
                 return html;
             },
         },

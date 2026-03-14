@@ -1,7 +1,7 @@
 import {useNavigate} from 'react-router-dom';
 import {useTheme} from '../../context/Theme';
 import {CalendarData} from '../../context/Types';
-import {formatDollar} from '../common/Util';
+import {formatPct} from '../common/Util';
 import dayjs from 'dayjs';
 
 interface CalendarHeatmapProps {
@@ -72,7 +72,7 @@ export default function CalendarHeatmap({data}: CalendarHeatmapProps) {
                                     ${getCellColor(dateStr)}
                                     ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}
                                 `}
-                                title={entry ? `${dateStr}: ${formatDollar(entry.pl)} (${entry.winners}W/${entry.losers}L)` : dateStr}
+                                title={entry ? `${dateStr}: ${formatPct(entry.pl)} (${entry.winners}W/${entry.losers}L)` : dateStr}
                             >
                                 {day.date()}
                             </div>

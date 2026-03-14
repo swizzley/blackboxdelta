@@ -2,7 +2,7 @@ import {useEffect, useState, useRef, useCallback} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
-import {formatDollar} from '../common/Util';
+import {formatPct} from '../common/Util';
 import {useApi} from '../../context/Api';
 import {fetchSettings, fetchSystem, fetchSentimentPairs, fetchSentimentFeeds} from '../../api/client';
 import {connectOrders, connectAlerts} from '../../api/sse';
@@ -272,7 +272,7 @@ export default function Status() {
                                                     }`}>{o.status}</span>
                                                     {o.profit != null && (
                                                         <span className={Number(o.profit) >= 0 ? 'text-emerald-500' : 'text-red-500'}>
-                                                            {formatDollar(Number(o.profit))}
+                                                            {formatPct(Number(o.profit))}
                                                         </span>
                                                     )}
                                                 </div>
