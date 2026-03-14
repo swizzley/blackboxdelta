@@ -10,7 +10,7 @@ import {
     ServerStackIcon, CircleStackIcon, SignalIcon, CpuChipIcon,
     ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon,
     ClockIcon, BoltIcon, ArrowPathIcon, ChartBarIcon,
-    GlobeAltIcon, BeakerIcon, NewspaperIcon,
+    GlobeAltIcon, NewspaperIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -295,19 +295,6 @@ export default function System() {
                                                      isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} subtitle="replica"/>
                                     <ServerResources title="Sage" res={monitor.resources?.sage}
                                                      isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
-                                </div>
-                            )}
-
-                            {/* Optimization */}
-                            {monitor?.optimization?.message && (
-                                <div className={`${card} mb-6`}>
-                                    <h2 className={heading}><BeakerIcon className={iconCl}/>Optimization Engine</h2>
-                                    <div className={`flex items-center gap-3 rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                        <StatusBadge status={monitor.optimization.status} isDarkMode={isDarkMode}/>
-                                        <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                            {monitor.optimization.message}
-                                        </span>
-                                    </div>
                                 </div>
                             )}
 
