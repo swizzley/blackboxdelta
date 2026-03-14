@@ -233,7 +233,7 @@ export default function Optimizer() {
                                     {(() => {
                                         const budget = workerConfig.max_memory_units;
                                         const cores = workerConfig.cpu_cores || 16;
-                                        const preview = computeDraftWorkers(budget, cores, workerDraft);
+                                        const preview = computeDraftWorkers(budget, cores, workerDraft, workerConfig.host_count || 1);
                                         return (<>
                                             <WorkerGauge workers={preview.totalWorkers} cores={cores} memUsed={preview.memUsed} memBudget={budget} isDarkMode={isDarkMode}/>
                                             <div className="space-y-3">
@@ -1297,11 +1297,17 @@ function computeDraftWorkers(
     budget: number,
     maxPerTF: number,
     draft: Record<string, {enabled: boolean; priority: number}>,
+    hostCount: number = 1,
 ): {totalWorkers: number; memUsed: number; perTF: Record<string, number>} {
     const tfs = ['scalp', 'intraday', 'swing'];
     const perTF: Record<string, number> = {};
     const enabledTFs: string[] = [];
     let prioritySum = 0;
+    const hosts = hostCount > 0 ? hostCount : 1;
+
+    // Compute per-host budget (each host runs its own allocation independently)
+    const perHostBudget = Math.max(1, Math.floor(budget / hosts));
+    const perHostCores = Math.max(2, Math.floor(maxPerTF / hosts));
 
     for (const tf of tfs) {
         perTF[tf] = 0;
@@ -1313,19 +1319,19 @@ function computeDraftWorkers(
     if (enabledTFs.length === 0 || prioritySum === 0) return {totalWorkers: 0, memUsed: 0, perTF};
 
     for (const tf of enabledTFs) {
-        const share = budget * draft[tf].priority / prioritySum;
+        const share = perHostBudget * draft[tf].priority / prioritySum;
         const cost = MEM_COST[tf] ?? 1;
         let workers = Math.floor(share / cost);
         if (workers < 1) workers = 1;
-        if (workers > maxPerTF) workers = maxPerTF;
+        if (workers > perHostCores) workers = perHostCores;
         perTF[tf] = workers;
     }
 
-    // Trim pass 1: enforce total memory budget (lowest priority, highest cost first)
+    // Trim pass 1: enforce per-host memory budget (lowest priority, highest cost first)
     for (;;) {
         let totalCost = 0;
         for (const tf of enabledTFs) totalCost += perTF[tf] * (MEM_COST[tf] ?? 1);
-        if (totalCost <= budget) break;
+        if (totalCost <= perHostBudget) break;
         let trimTF = '';
         let trimPri = 999;
         let trimCost = 0;
@@ -1340,11 +1346,11 @@ function computeDraftWorkers(
         perTF[trimTF]--;
     }
 
-    // Trim pass 2: enforce total CPU budget (lowest priority, cheapest mem cost first)
+    // Trim pass 2: enforce per-host CPU budget (lowest priority, cheapest mem cost first)
     for (;;) {
         let total = 0;
         for (const tf of enabledTFs) total += perTF[tf];
-        if (total <= maxPerTF) break;
+        if (total <= perHostCores) break;
         let trimTF = '';
         let trimPri = 999;
         let trimCost = Infinity;
@@ -1360,9 +1366,11 @@ function computeDraftWorkers(
         perTF[trimTF]--;
     }
 
+    // Multiply by host count to get pool-wide totals
     let totalWorkers = 0;
     let memUsed = 0;
     for (const tf of enabledTFs) {
+        perTF[tf] *= hosts;
         totalWorkers += perTF[tf];
         memUsed += perTF[tf] * (MEM_COST[tf] ?? 1);
     }
