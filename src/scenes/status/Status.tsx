@@ -1,16 +1,14 @@
-import {useEffect, useState, useRef, useCallback} from 'react';
+import {useEffect, useState, useCallback} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
-import {formatPct} from '../common/Util';
 import {useApi} from '../../context/Api';
 import {fetchSettings, fetchSystem, fetchSentimentPairs, fetchSentimentFeeds} from '../../api/client';
-import {connectOrders, connectAlerts} from '../../api/sse';
-import type {ApiSetting, ApiOrder, ApiAlert, ApiSystem, MonitorOllamaStatus, MonitorSentimentStatus, ApiSentimentPair, ApiSentimentFeed} from '../../context/Types';
+import type {ApiSetting, ApiSystem, MonitorOllamaStatus, MonitorSentimentStatus, ApiSentimentPair, ApiSentimentFeed} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, Cog6ToothIcon,
-    GlobeAltIcon, CheckCircleIcon, ClockIcon, ArrowTrendingUpIcon,
-    ArrowTrendingDownIcon, BellAlertIcon, ChartBarSquareIcon, CpuChipIcon,
+    GlobeAltIcon, CheckCircleIcon, ClockIcon,
+    ChartBarSquareIcon, CpuChipIcon,
     ChevronRightIcon, NewspaperIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
@@ -18,7 +16,6 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(relativeTime);
 
-const MAX_FEED = 20;
 
 export default function Status() {
     const {isDarkMode} = useTheme();
@@ -27,15 +24,11 @@ export default function Status() {
 
     const [system, setSystem] = useState<ApiSystem | null>(null);
     const [settings, setSettings] = useState<ApiSetting[] | null>(null);
-    const [liveOrders, setLiveOrders] = useState<ApiOrder[]>([]);
-    const [liveAlerts, setLiveAlerts] = useState<ApiAlert[]>([]);
     const [ollama, setOllama] = useState<MonitorOllamaStatus | null>(null);
     const [sentimentSummary, setSentimentSummary] = useState<MonitorSentimentStatus | null>(null);
     const [sentimentPairs, setSentimentPairs] = useState<ApiSentimentPair[] | null>(null);
     const [sentimentFeeds, setSentimentFeeds] = useState<ApiSentimentFeed[] | null>(null);
     const [sentimentOpen, setSentimentOpen] = useState(false);
-    const ordersEndRef = useRef<HTMLDivElement>(null);
-    const alertsEndRef = useRef<HTMLDivElement>(null);
 
     // Fetch REST data when API becomes available
     useEffect(() => {
@@ -56,21 +49,6 @@ export default function Status() {
         return () => clearInterval(interval);
     }, [apiAvailable]);
 
-    // SSE connections
-    useEffect(() => {
-        if (!apiAvailable) return;
-        const cleanupOrders = connectOrders(apiBase, (order) => {
-            setLiveOrders(prev => [...prev.slice(-(MAX_FEED - 1)), order]);
-        });
-        const cleanupAlerts = connectAlerts(apiBase, (alert) => {
-            setLiveAlerts(prev => [...prev.slice(-(MAX_FEED - 1)), alert]);
-        });
-        return () => { cleanupOrders(); cleanupAlerts(); };
-    }, [apiAvailable, apiBase]);
-
-    // Auto-scroll feeds
-    useEffect(() => { ordersEndRef.current?.scrollIntoView({behavior: 'smooth', block: 'nearest'}); }, [liveOrders]);
-    useEffect(() => { alertsEndRef.current?.scrollIntoView({behavior: 'smooth', block: 'nearest'}); }, [liveAlerts]);
 
     const handleSaveUrl = useCallback(() => {
         setApiBase(urlInput.trim());
@@ -263,86 +241,6 @@ export default function Status() {
                                     </div>
                                 </div>
                             )}
-
-                            {/* Live Feeds */}
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                {/* Live Orders */}
-                                <div className={card}>
-                                    <h2 className={heading}>
-                                        <ChartBarSquareIcon className={iconCl}/>Live Orders
-                                        <span className="text-xs font-normal text-cyan-500 animate-pulse ml-1">SSE</span>
-                                    </h2>
-                                    <div className="max-h-96 overflow-y-auto space-y-1.5">
-                                        {liveOrders.length === 0 && (
-                                            <p className={`text-sm ${muted}`}>Waiting for orders...</p>
-                                        )}
-                                        {liveOrders.map((o, i) => (
-                                            <div key={`${o.id}-${i}`} className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs ${
-                                                isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'
-                                            }`}>
-                                                <div className="flex items-center gap-2">
-                                                    {o.direction === 'Long' ? (
-                                                        <ArrowTrendingUpIcon className="w-4 h-4 text-emerald-500"/>
-                                                    ) : (
-                                                        <ArrowTrendingDownIcon className="w-4 h-4 text-red-500"/>
-                                                    )}
-                                                    <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{o.symbol.replace('_', '/')}</span>
-                                                    <span className={muted}>{o.timeframe}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${
-                                                        o.status === 'CLOSED' ? (isDarkMode ? 'bg-slate-600 text-gray-300' : 'bg-gray-100 text-gray-600') :
-                                                        o.status === 'FILLED' ? 'bg-blue-900/30 text-blue-400' :
-                                                        'bg-cyan-900/30 text-cyan-400'
-                                                    }`}>{o.status}</span>
-                                                    {o.profit != null && (
-                                                        <span className={Number(o.profit) >= 0 ? 'text-emerald-500' : 'text-red-500'}>
-                                                            {formatPct(Number(o.profit))}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                        <div ref={ordersEndRef}/>
-                                    </div>
-                                </div>
-
-                                {/* Live Alerts */}
-                                <div className={card}>
-                                    <h2 className={heading}>
-                                        <BellAlertIcon className={iconCl}/>Live Alerts
-                                        <span className="text-xs font-normal text-cyan-500 animate-pulse ml-1">SSE</span>
-                                    </h2>
-                                    <div className="max-h-96 overflow-y-auto space-y-1.5">
-                                        {liveAlerts.length === 0 && (
-                                            <p className={`text-sm ${muted}`}>Waiting for alerts...</p>
-                                        )}
-                                        {liveAlerts.map((a, i) => (
-                                            <div key={`${a.id}-${i}`} className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs ${
-                                                isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'
-                                            }`}>
-                                                <div className="flex items-center gap-2">
-                                                    {a.direction === 'Long' ? (
-                                                        <ArrowTrendingUpIcon className="w-4 h-4 text-emerald-500"/>
-                                                    ) : (
-                                                        <ArrowTrendingDownIcon className="w-4 h-4 text-red-500"/>
-                                                    )}
-                                                    <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{a.symbol.replace('_', '/')}</span>
-                                                    <span className={muted}>{a.timeframe}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className={muted}>{a.strategy}</span>
-                                                    <span className={`font-medium ${
-                                                        (a.score?.final_score ?? 0) >= 70 ? 'text-emerald-500' :
-                                                        (a.score?.final_score ?? 0) >= 50 ? 'text-yellow-500' : 'text-red-500'
-                                                    }`}>{(a.score?.final_score ?? 0).toFixed(1)}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        <div ref={alertsEndRef}/>
-                                    </div>
-                                </div>
-                            </div>
 
                             {/* Sentiment Pipeline Summary */}
                             {sentimentSummary?.message && (
