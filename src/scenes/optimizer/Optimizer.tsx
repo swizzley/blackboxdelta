@@ -499,7 +499,7 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                     <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <WRFractionStat wr={r.win_rate} breakevenWR={r.breakeven_wr} isDarkMode={isDarkMode}/>
-                    <ResultStat label="P&L" value={fmtPct(r.total_pnl)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
+                    <ResultStat label="Avg P&L" value={avgPnl(r)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
                     <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="T/Day" value={trunk.oos_days && r.total_trades ? (r.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="AvgW" value={fmtPct(r.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
@@ -749,7 +749,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, revertTarget, setRevertT
                     <span className={`text-xs ${muted}`}>Gen {t.generation}</span>
                     {r && r.total_trades > 0 ? (
                         <span className={`text-xs ${muted} hidden sm:inline`}>
-                            {r.total_trades} trades · <span>{r.win_rate?.toFixed(0)}% WR</span> · PF {r.profit_factor?.toFixed(2)} · Sharpe {r.sharpe_ratio?.toFixed(3)} · <span className={plColor(r.total_pnl)}>P&L {fmtPct(r.total_pnl)}</span>
+                            {r.total_trades} trades · <span>{r.win_rate?.toFixed(0)}% WR</span> · PF {r.profit_factor?.toFixed(2)} · Sharpe {r.sharpe_ratio?.toFixed(3)} · <span className={plColor(r.total_pnl)}>Avg P&L {avgPnl(r)}</span>
                         </span>
                     ) : (
                         <span className={`text-xs ${muted} hidden sm:inline`}>No OOS data</span>
@@ -791,7 +791,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, revertTarget, setRevertT
                                 <ResultStat label="Win%" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
                                 <ResultStat label="Trades" value={String(r.total_trades)} isDarkMode={isDarkMode}/>
                                 <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="P&L" value={fmtPct(r.total_pnl)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
+                                <ResultStat label="Avg P&L" value={avgPnl(r)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
                             </div>
                         </div>
                     )}
@@ -975,7 +975,7 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
                 <ResultStat label="Avg L" value={fmtPct(result.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                 <ResultStat label="Trades" value={String(result.total_trades)} isDarkMode={isDarkMode}/>
                 <ResultStat label="Max DD" value={result.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                <ResultStat label="P&L" value={fmtPct(result.total_pnl)} isDarkMode={isDarkMode} color={plColor(result.total_pnl)}/>
+                <ResultStat label="Avg P&L" value={avgPnl(result)} isDarkMode={isDarkMode} color={plColor(result.total_pnl)}/>
             </div>
         </div>
     );
@@ -1258,6 +1258,11 @@ function fmtPct(n?: number): string {
     const pct = n * 100;
     if (pct === 0) return '0%';
     return (pct >= 0 ? '+' : '') + pct.toFixed(3) + '%';
+}
+
+function avgPnl(r: {total_pnl?: number; total_trades?: number}): string {
+    if (r.total_pnl == null || !r.total_trades) return '—';
+    return fmtPct(r.total_pnl / r.total_trades);
 }
 
 
