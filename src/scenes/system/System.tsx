@@ -10,7 +10,7 @@ import {
     ServerStackIcon, CircleStackIcon, SignalIcon, CpuChipIcon,
     ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon,
     ClockIcon, BoltIcon, ArrowPathIcon, ChartBarIcon,
-    GlobeAltIcon, NewspaperIcon,
+    GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -298,25 +298,6 @@ export default function System() {
                                 </div>
                             )}
 
-                            {/* Sentiment */}
-                            {monitor?.sentiment?.message && (
-                                <div className={`${card} mb-6`}>
-                                    <h2 className={heading}><NewspaperIcon className={iconCl}/>Sentiment Pipeline</h2>
-                                    <div className={`flex items-center gap-3 rounded-lg px-4 py-3 mb-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                        <StatusBadge status={monitor.sentiment.status} isDarkMode={isDarkMode}/>
-                                        <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                            {monitor.sentiment.message}
-                                        </span>
-                                    </div>
-                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                                        <MiniStat label="Total Articles" value={String(monitor.sentiment.total_articles)} isDarkMode={isDarkMode}/>
-                                        <MiniStat label="Recent (24h)" value={String(monitor.sentiment.recent_articles)} isDarkMode={isDarkMode}/>
-                                        <MiniStat label="Pairs Covered" value={String(monitor.sentiment.pairs_covered)} isDarkMode={isDarkMode}/>
-                                        <MiniStat label="Avg Score" value={monitor.sentiment.avg_score?.toFixed(3) ?? '—'} isDarkMode={isDarkMode}/>
-                                    </div>
-                                </div>
-                            )}
-
                             {/* Footer timestamp */}
                             {monitor?.timestamp && (
                                 <p className={`text-center text-xs ${muted} flex items-center justify-center gap-1.5`}>
@@ -501,18 +482,6 @@ function KPICard({label, value, color, icon, isDarkMode}: {label: string; value:
 function StatusDot({status}: {status: StatusColor | string}) {
     const bg = status === 'ok' ? 'bg-emerald-400' : status === 'warn' ? 'bg-yellow-400' : status === 'critical' ? 'bg-red-500' : 'bg-gray-400';
     return <span className={`inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 ${bg}`}/>;
-}
-
-function StatusBadge({status, isDarkMode}: {status: string; isDarkMode: boolean}) {
-    const s = statusColor(status);
-    const cls = s === 'ok'
-        ? (isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700')
-        : s === 'warn'
-            ? (isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700')
-            : s === 'critical'
-                ? (isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700')
-                : (isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500');
-    return <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>{status}</span>;
 }
 
 function ProgressBar({pct, isDarkMode}: {pct: number; isDarkMode: boolean}) {
@@ -766,15 +735,6 @@ function metricColor(part: string): string {
         return 'text-emerald-500';
     }
     return 'text-emerald-500';
-}
-
-function MiniStat({label, value, isDarkMode}: {label: string; value: string; isDarkMode: boolean}) {
-    return (
-        <div className={`rounded-lg px-3 py-2 text-center ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-            <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p>
-            <p className={`text-lg font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{value}</p>
-        </div>
-    );
 }
 
 function ServiceDrawer({service, output, loading, onClose}: {

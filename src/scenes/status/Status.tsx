@@ -6,12 +6,12 @@ import {formatPct} from '../common/Util';
 import {useApi} from '../../context/Api';
 import {fetchSettings, fetchSystem, fetchSentimentPairs, fetchSentimentFeeds} from '../../api/client';
 import {connectOrders, connectAlerts} from '../../api/sse';
-import type {ApiSetting, ApiOrder, ApiAlert, ApiSystem, MonitorOllamaStatus, ApiSentimentPair, ApiSentimentFeed} from '../../context/Types';
+import type {ApiSetting, ApiOrder, ApiAlert, ApiSystem, MonitorOllamaStatus, MonitorSentimentStatus, ApiSentimentPair, ApiSentimentFeed} from '../../context/Types';
 import {
     ServerStackIcon, CircleStackIcon, SignalIcon, Cog6ToothIcon,
     GlobeAltIcon, CheckCircleIcon, ClockIcon, ArrowTrendingUpIcon,
     ArrowTrendingDownIcon, BellAlertIcon, ChartBarSquareIcon, CpuChipIcon,
-    ChevronRightIcon,
+    ChevronRightIcon, NewspaperIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -30,6 +30,7 @@ export default function Status() {
     const [liveOrders, setLiveOrders] = useState<ApiOrder[]>([]);
     const [liveAlerts, setLiveAlerts] = useState<ApiAlert[]>([]);
     const [ollama, setOllama] = useState<MonitorOllamaStatus | null>(null);
+    const [sentimentSummary, setSentimentSummary] = useState<MonitorSentimentStatus | null>(null);
     const [sentimentPairs, setSentimentPairs] = useState<ApiSentimentPair[] | null>(null);
     const [sentimentFeeds, setSentimentFeeds] = useState<ApiSentimentFeed[] | null>(null);
     const [sentimentOpen, setSentimentOpen] = useState(false);
@@ -49,7 +50,7 @@ export default function Status() {
         fetchSentimentFeeds().then(setSentimentFeeds);
         fetch(`${apiBase}/api/monitor/status`, {signal: AbortSignal.timeout(5000)})
             .then(res => res.ok ? res.json() : null)
-            .then(data => { if (data?.ollama) setOllama(data.ollama); })
+            .then(data => { if (data?.ollama) setOllama(data.ollama); if (data?.sentiment) setSentimentSummary(data.sentiment); })
             .catch(() => {});
         const interval = setInterval(() => fetchSystem().then(setSystem), 30_000);
         return () => clearInterval(interval);
@@ -82,6 +83,26 @@ export default function Status() {
 
     // Group settings by prefix
     const settingsGroups = settings ? groupSettings(settings) : {};
+
+    const commitUrl = (service: string, sha: string) => {
+        const gl = 'http://gambit.aspendenver.local/dmorgan';
+        const gh = 'https://github.com/swizzley';
+        const repoMap: Record<string, string> = {
+            'collection-engine': `${gl}/massive-market/commit/${sha}`,
+            'alerts-engine': `${gl}/finmon/commit/${sha}`,
+            'trading-engine': `${gl}/swizzley-trader/commit/${sha}`,
+            'optimization-engine': `${gl}/swizzley-backtest/commit/${sha}`,
+            'api': `${gl}/swizzley-api/commit/${sha}`,
+            'analysis-engine': `${gl}/swizzley-analyzer/commit/${sha}`,
+            'monitoring-service': `${gl}/swizzley-monitoring/commit/${sha}`,
+            'sentdex-engine': `${gl}/swizzley-sentdex/commit/${sha}`,
+            'signals-lib': `${gl}/gotrade/commit/${sha}`,
+            'common-lib': `${gl}/swizzley-common/commit/${sha}`,
+            'ai-lib': `${gh}/langchaingo/commit/${sha}`,
+            'reporting-frontend': `${gh}/blackboxdelta/commit/${sha}`,
+        };
+        return repoMap[service];
+    };
 
     return (
         <>
@@ -148,7 +169,11 @@ export default function Status() {
                                                         <CheckCircleIcon className="w-4 h-4 text-emerald-500 flex-shrink-0"/>
                                                         {s.service}
                                                     </td>
-                                                    <td className="py-2 px-2 font-mono text-cyan-500 text-xs">{s.sha.slice(0, 8)}</td>
+                                                    <td className="py-2 px-2 font-mono text-cyan-500 text-xs">
+                                                        {commitUrl(s.service, s.sha)
+                                                            ? <a href={commitUrl(s.service, s.sha)} target="_blank" rel="noopener noreferrer" className="hover:underline">{s.sha.slice(0, 8)}</a>
+                                                            : s.sha.slice(0, 8)}
+                                                    </td>
                                                     <td className={`py-2 px-2 text-xs truncate max-w-xs ${muted}`}>{s.message}</td>
                                                     <td className={`py-2 px-2 text-xs ${muted}`}>
                                                         <span className="flex items-center gap-1">
@@ -318,6 +343,35 @@ export default function Status() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Sentiment Pipeline Summary */}
+                            {sentimentSummary?.message && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}><NewspaperIcon className={iconCl}/>Sentiment Pipeline</h2>
+                                    <div className={`flex items-center gap-3 rounded-lg px-4 py-3 mb-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                        <span className={`inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                                            sentimentSummary.status === 'ok' ? 'bg-emerald-400' :
+                                            sentimentSummary.status === 'warn' ? 'bg-yellow-400' : 'bg-red-500'
+                                        }`}/>
+                                        <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                            {sentimentSummary.message}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                        {[
+                                            {label: 'Total Articles', value: String(sentimentSummary.total_articles)},
+                                            {label: 'Recent (24h)', value: String(sentimentSummary.recent_articles)},
+                                            {label: 'Pairs Covered', value: String(sentimentSummary.pairs_covered)},
+                                            {label: 'Avg Score', value: sentimentSummary.avg_score?.toFixed(3) ?? '—'},
+                                        ].map(s => (
+                                            <div key={s.label} className={`rounded-lg px-4 py-3 text-center ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                <div className={`text-xs ${muted} mb-1`}>{s.label}</div>
+                                                <div className={`text-lg font-bold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{s.value}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Sentiment (collapsed by default) */}
                             {(sentimentPairs?.length || sentimentFeeds?.length) ? (
