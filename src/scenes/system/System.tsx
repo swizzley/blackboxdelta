@@ -81,7 +81,7 @@ export default function System() {
     const iconCl = 'w-5 h-5 text-cyan-500';
 
     const allServices = monitor
-        ? [...(monitor.services?.cipher || []), ...(monitor.services?.genesis || []), ...(monitor.services?.sage || [])]
+        ? [...(monitor.services?.cipher || []), ...(monitor.services?.genesis || []), ...(monitor.services?.match || []), ...(monitor.services?.sage || [])]
         : [];
     const countedServices = allServices.filter(s => s.type !== 'cli');
     const activeCount = countedServices.filter(s => s.status === 'active').length;
@@ -707,7 +707,7 @@ function ServerResources({title, res, db, isDarkMode, muted, card, heading, icon
 
     return (
         <div className={card}>
-            <h2 className={heading}><CpuChipIcon className={iconCl}/>{title} Infrastructure{subtitle && <span className={`text-xs font-normal ${isDarkMode ? 'text-gray-500' : 'text-gray-400'} ml-1`}>({subtitle})</span>}</h2>
+            <h2 className={heading}><CpuChipIcon className={iconCl}/>{title}{subtitle && <span className={`text-xs font-normal ${isDarkMode ? 'text-gray-500' : 'text-gray-400'} ml-1`}>({subtitle})</span>}</h2>
             <div className="space-y-4">
                 {parts.length > 0 && (
                     <div className="grid grid-cols-1 gap-3">
