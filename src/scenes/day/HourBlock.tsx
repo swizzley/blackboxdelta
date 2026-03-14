@@ -137,8 +137,8 @@ export default function HourBlock({data}: HourBlockProps) {
                     {/* Mini stats row */}
                     <div className={`grid grid-cols-4 gap-2 p-3 text-center text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                         <div>Win Rate: <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{s.win_rate_pct !== null ? `${s.win_rate_pct}%` : 'N/A'}</span></div>
-                        <div>Avg Win: <span className="text-emerald-500">{s.avg_win !== null ? s.avg_win.toFixed(5) : 'N/A'}</span></div>
-                        <div>Avg Loss: <span className="text-red-500">{s.avg_loss !== null ? s.avg_loss.toFixed(5) : 'N/A'}</span></div>
+                        <div>Avg Win: <span className="text-emerald-500">{s.avg_win !== null ? formatDollar(s.avg_win) : 'N/A'}</span></div>
+                        <div>Avg Loss: <span className="text-red-500">{s.avg_loss !== null ? formatDollar(s.avg_loss) : 'N/A'}</span></div>
                         <div>Duration: <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{minDur !== null ? `${minDur}/${medDur}/${maxDur}m` : 'N/A'}</span></div>
                     </div>
 
