@@ -10,7 +10,7 @@ import {
     ServerStackIcon, CircleStackIcon, SignalIcon, CpuChipIcon,
     ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon,
     ClockIcon, BoltIcon, ArrowPathIcon, ChartBarIcon,
-    GlobeAltIcon,
+    GlobeAltIcon, NewspaperIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -282,6 +282,35 @@ export default function System() {
                             {/* Replication Visualization */}
                             {monitor && (
                                 <ReplicationViz replication={monitor.replication} database={monitor.database} isDarkMode={isDarkMode} card={card} heading={heading} iconCl={iconCl}/>
+                            )}
+
+                            {/* Sentiment Pipeline */}
+                            {monitor?.sentiment?.message && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}><NewspaperIcon className={iconCl}/>Sentiment Pipeline</h2>
+                                    <div className={`flex items-center gap-3 rounded-lg px-4 py-3 mb-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                        <span className={`inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                                            monitor.sentiment.status === 'ok' ? 'bg-emerald-400' :
+                                            monitor.sentiment.status === 'warn' ? 'bg-yellow-400' : 'bg-red-500'
+                                        }`}/>
+                                        <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                            {monitor.sentiment.message}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                        {[
+                                            {label: 'Total Articles', value: String(monitor.sentiment.total_articles)},
+                                            {label: 'Recent (24h)', value: String(monitor.sentiment.recent_articles)},
+                                            {label: 'Pairs Covered', value: String(monitor.sentiment.pairs_covered)},
+                                            {label: 'Avg Score', value: monitor.sentiment.avg_score?.toFixed(3) ?? '—'},
+                                        ].map(s => (
+                                            <div key={s.label} className={`rounded-lg px-4 py-3 text-center ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                <div className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mb-1`}>{s.label}</div>
+                                                <div className={`text-lg font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{s.value}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             )}
 
                             {/* Infrastructure */}
