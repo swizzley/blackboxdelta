@@ -360,7 +360,7 @@ export interface MonitorStatus {
     pair_freshness: MonitorPairFreshness[];
     coverage: MonitorCoverageEntry[];
     database: Record<string, MonitorDBHealth>;
-    replication: MonitorReplicationStatus;
+    replication: Record<string, MonitorReplicationStatus>;
     oanda: MonitorOandaStatus;
     ollama: MonitorOllamaStatus;
     resources: Record<string, MonitorResourceInfo>;
@@ -403,6 +403,7 @@ export interface MonitorReplicationStatus {
     sql_running: boolean;
     status: string;
     message?: string;
+    label?: string;
 }
 
 export interface MonitorOandaStatus {

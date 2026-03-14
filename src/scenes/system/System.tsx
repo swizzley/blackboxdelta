@@ -146,9 +146,10 @@ export default function System() {
 
                             {/* Services */}
                             {monitor && (
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
                                     <ServerServices title="Cipher" host="cipher" services={monitor.services?.cipher || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} onServiceClick={(host, name) => setDrawerService({host, name})}/>
                                     <ServerServices title="Genesis" host="genesis" services={monitor.services?.genesis || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} subtitle="replica" onServiceClick={(host, name) => setDrawerService({host, name})}/>
+                                    <ServerServices title="Match" host="match" services={monitor.services?.match || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} subtitle="replica" onServiceClick={(host, name) => setDrawerService({host, name})}/>
                                     <ServerServices title="Sage" host="sage" services={monitor.services?.sage || []} isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} onServiceClick={(host, name) => setDrawerService({host, name})}/>
                                 </div>
                             )}
@@ -285,10 +286,12 @@ export default function System() {
 
                             {/* Infrastructure */}
                             {monitor && (
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
                                     <ServerResources title="Cipher" res={monitor.resources?.cipher} db={monitor.database?.cipher}
                                                      isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
                                     <ServerResources title="Genesis" res={monitor.resources?.genesis} db={monitor.database?.genesis}
+                                                     isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} subtitle="replica"/>
+                                    <ServerResources title="Match" res={monitor.resources?.match} db={monitor.database?.match}
                                                      isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl} subtitle="replica"/>
                                     <ServerResources title="Sage" res={monitor.resources?.sage}
                                                      isDarkMode={isDarkMode} muted={muted} card={card} heading={heading} iconCl={iconCl}/>
@@ -578,117 +581,116 @@ function ServerServices({title, host, services, isDarkMode, muted, card, heading
 }
 
 function ReplicationViz({replication, database, isDarkMode, card, heading, iconCl}: {
-    replication?: {status?: string; message?: string; io_running?: boolean; sql_running?: boolean; seconds_behind_source?: number};
+    replication?: Record<string, {status?: string; message?: string; io_running?: boolean; sql_running?: boolean; seconds_behind_source?: number}>;
     database?: Record<string, {status?: string}>;
     isDarkMode: boolean; card: string; heading: string; iconCl: string;
 }) {
-    const isOk = replication?.status === 'ok';
-    const isBroken = replication?.status === 'critical';
-    const lineColor = isOk ? 'stroke-emerald-500' : isBroken ? 'stroke-red-500' : 'stroke-yellow-500';
-    const dotColor = isOk ? 'fill-emerald-400' : isBroken ? 'fill-red-500' : 'fill-yellow-400';
-    const glowColor = isOk ? 'text-emerald-500' : isBroken ? 'text-red-500' : 'text-yellow-500';
-
+    const replicas = Object.entries(replication || {});
     const cipherDbOk = database?.cipher?.status === 'ok';
-    const genesisDbOk = database?.genesis?.status === 'ok' || replication?.status === 'ok';
 
     return (
         <div className={`${card} mb-6`}>
             <h2 className={heading}><ArrowPathIcon className={iconCl}/>Database Replication</h2>
-            <div className="flex items-center justify-center gap-0 py-4">
-                {/* Cipher DB (master) */}
-                <div className="flex flex-col items-center gap-2 w-28">
-                    <div className={`relative rounded-xl p-3 ${isDarkMode ? 'bg-slate-700/70' : 'bg-gray-100'}`}>
-                        <CircleStackIcon className={`w-10 h-10 ${cipherDbOk ? 'text-cyan-500' : 'text-red-500 animate-pulse'}`}/>
-                        <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${cipherDbOk ? 'bg-emerald-400' : 'bg-red-500 animate-ping'}`}/>
-                    </div>
-                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Cipher</span>
-                    <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>master</span>
-                </div>
+            <div className="flex flex-col gap-6 py-4">
+                {replicas.map(([label, rep]) => {
+                    const isOk = rep?.status === 'ok';
+                    const isBroken = rep?.status === 'critical';
+                    const lineColor = isOk ? 'stroke-emerald-500' : isBroken ? 'stroke-red-500' : 'stroke-yellow-500';
+                    const dotColor = isOk ? 'fill-emerald-400' : isBroken ? 'fill-red-500' : 'fill-yellow-400';
+                    const glowColor = isOk ? 'text-emerald-500' : isBroken ? 'text-red-500' : 'text-yellow-500';
+                    const replicaDbOk = database?.[label]?.status === 'ok' || rep?.status === 'ok';
+                    const filterId = `glow-${label}`;
 
-                {/* Animated connection line */}
-                <div className="flex-1 max-w-xs mx-4 relative">
-                    <svg viewBox="0 0 200 40" className="w-full h-10 overflow-visible">
-                        {/* Base line */}
-                        <line x1="0" y1="20" x2="200" y2="20" className={`${lineColor} ${isBroken ? 'opacity-30' : 'opacity-40'}`} strokeWidth="2" strokeDasharray={isBroken ? '4 4' : 'none'}/>
+                    return (
+                        <div key={label}>
+                            <div className="flex items-center justify-center gap-0">
+                                {/* Cipher DB (master) */}
+                                <div className="flex flex-col items-center gap-2 w-28">
+                                    <div className={`relative rounded-xl p-3 ${isDarkMode ? 'bg-slate-700/70' : 'bg-gray-100'}`}>
+                                        <CircleStackIcon className={`w-10 h-10 ${cipherDbOk ? 'text-cyan-500' : 'text-red-500 animate-pulse'}`}/>
+                                        <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${cipherDbOk ? 'bg-emerald-400' : 'bg-red-500 animate-ping'}`}/>
+                                    </div>
+                                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Cipher</span>
+                                    <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>master</span>
+                                </div>
 
-                        {isOk && (
-                            <>
-                                {/* Pulse line overlay */}
-                                <line x1="0" y1="20" x2="200" y2="20" className={lineColor} strokeWidth="2" opacity="0.7"/>
+                                {/* Animated connection line */}
+                                <div className="flex-1 max-w-xs mx-4 relative">
+                                    <svg viewBox="0 0 200 40" className="w-full h-10 overflow-visible">
+                                        <line x1="0" y1="20" x2="200" y2="20" className={`${lineColor} ${isBroken ? 'opacity-30' : 'opacity-40'}`} strokeWidth="2" strokeDasharray={isBroken ? '4 4' : 'none'}/>
 
-                                {/* Animated data dots traveling right */}
-                                <circle r="4" className={dotColor} opacity="0.9">
-                                    <animate attributeName="cx" from="0" to="200" dur="2s" repeatCount="indefinite"/>
-                                    <animate attributeName="opacity" values="0;0.9;0.9;0" dur="2s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle r="4" className={dotColor} opacity="0.9">
-                                    <animate attributeName="cx" from="0" to="200" dur="2s" begin="0.7s" repeatCount="indefinite"/>
-                                    <animate attributeName="opacity" values="0;0.9;0.9;0" dur="2s" begin="0.7s" repeatCount="indefinite"/>
-                                </circle>
-                                <circle r="4" className={dotColor} opacity="0.9">
-                                    <animate attributeName="cx" from="0" to="200" dur="2s" begin="1.4s" repeatCount="indefinite"/>
-                                    <animate attributeName="opacity" values="0;0.9;0.9;0" dur="2s" begin="1.4s" repeatCount="indefinite"/>
-                                </circle>
+                                        {isOk && (
+                                            <>
+                                                <line x1="0" y1="20" x2="200" y2="20" className={lineColor} strokeWidth="2" opacity="0.7"/>
+                                                <circle r="4" className={dotColor} opacity="0.9">
+                                                    <animate attributeName="cx" from="0" to="200" dur="2s" repeatCount="indefinite"/>
+                                                    <animate attributeName="opacity" values="0;0.9;0.9;0" dur="2s" repeatCount="indefinite"/>
+                                                </circle>
+                                                <circle r="4" className={dotColor} opacity="0.9">
+                                                    <animate attributeName="cx" from="0" to="200" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+                                                    <animate attributeName="opacity" values="0;0.9;0.9;0" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+                                                </circle>
+                                                <circle r="4" className={dotColor} opacity="0.9">
+                                                    <animate attributeName="cx" from="0" to="200" dur="2s" begin="1.4s" repeatCount="indefinite"/>
+                                                    <animate attributeName="opacity" values="0;0.9;0.9;0" dur="2s" begin="1.4s" repeatCount="indefinite"/>
+                                                </circle>
+                                                <circle r="6" className={dotColor} opacity="0.3" filter={`url(#${filterId})`}>
+                                                    <animate attributeName="cx" from="0" to="200" dur="2s" repeatCount="indefinite"/>
+                                                    <animate attributeName="opacity" values="0;0.3;0.3;0" dur="2s" repeatCount="indefinite"/>
+                                                </circle>
+                                                <defs>
+                                                    <filter id={filterId}>
+                                                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                                                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                                    </filter>
+                                                </defs>
+                                            </>
+                                        )}
 
-                                {/* Glow effect */}
-                                <circle r="6" className={dotColor} opacity="0.3" filter="url(#glow)">
-                                    <animate attributeName="cx" from="0" to="200" dur="2s" repeatCount="indefinite"/>
-                                    <animate attributeName="opacity" values="0;0.3;0.3;0" dur="2s" repeatCount="indefinite"/>
-                                </circle>
-                                <defs>
-                                    <filter id="glow">
-                                        <feGaussianBlur stdDeviation="3" result="blur"/>
-                                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                                    </filter>
-                                </defs>
-                            </>
-                        )}
+                                        {isBroken && (
+                                            <>
+                                                <line x1="90" y1="10" x2="110" y2="30" className="stroke-red-500" strokeWidth="3" strokeLinecap="round"/>
+                                                <line x1="110" y1="10" x2="90" y2="30" className="stroke-red-500" strokeWidth="3" strokeLinecap="round"/>
+                                            </>
+                                        )}
 
-                        {isBroken && (
-                            <>
-                                {/* X mark in the middle */}
-                                <line x1="90" y1="10" x2="110" y2="30" className="stroke-red-500" strokeWidth="3" strokeLinecap="round"/>
-                                <line x1="110" y1="10" x2="90" y2="30" className="stroke-red-500" strokeWidth="3" strokeLinecap="round"/>
-                            </>
-                        )}
+                                        {!isOk && !isBroken && (
+                                            <circle r="4" className="fill-yellow-400" opacity="0.7">
+                                                <animate attributeName="cx" from="0" to="200" dur="4s" repeatCount="indefinite"/>
+                                                <animate attributeName="opacity" values="0;0.7;0.7;0" dur="4s" repeatCount="indefinite"/>
+                                            </circle>
+                                        )}
+                                    </svg>
+                                    <p className={`text-center text-[10px] mt-0.5 ${glowColor}`}>
+                                        {isOk ? 'replicating' : isBroken ? 'BROKEN' : 'degraded'}
+                                    </p>
+                                </div>
 
-                        {!isOk && !isBroken && (
-                            <>
-                                {/* Slow warning dots */}
-                                <circle r="4" className="fill-yellow-400" opacity="0.7">
-                                    <animate attributeName="cx" from="0" to="200" dur="4s" repeatCount="indefinite"/>
-                                    <animate attributeName="opacity" values="0;0.7;0.7;0" dur="4s" repeatCount="indefinite"/>
-                                </circle>
-                            </>
-                        )}
-                    </svg>
-                    {/* Label under line */}
-                    <p className={`text-center text-[10px] mt-0.5 ${glowColor}`}>
-                        {isOk ? 'replicating' : isBroken ? 'BROKEN' : 'degraded'}
-                    </p>
-                </div>
+                                {/* Replica DB */}
+                                <div className="flex flex-col items-center gap-2 w-28">
+                                    <div className={`relative rounded-xl p-3 ${isDarkMode ? 'bg-slate-700/70' : 'bg-gray-100'}`}>
+                                        <CircleStackIcon className={`w-10 h-10 ${replicaDbOk ? 'text-cyan-500' : 'text-red-500 animate-pulse'}`}/>
+                                        <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${replicaDbOk ? 'bg-emerald-400' : 'bg-red-500 animate-ping'}`}/>
+                                    </div>
+                                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{label.charAt(0).toUpperCase() + label.slice(1)}</span>
+                                    <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>replica</span>
+                                </div>
+                            </div>
 
-                {/* Genesis DB (replica) */}
-                <div className="flex flex-col items-center gap-2 w-28">
-                    <div className={`relative rounded-xl p-3 ${isDarkMode ? 'bg-slate-700/70' : 'bg-gray-100'}`}>
-                        <CircleStackIcon className={`w-10 h-10 ${genesisDbOk ? 'text-cyan-500' : 'text-red-500 animate-pulse'}`}/>
-                        <span className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${genesisDbOk ? 'bg-emerald-400' : 'bg-red-500 animate-ping'}`}/>
-                    </div>
-                    <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Genesis</span>
-                    <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>replica</span>
-                </div>
+                            {/* Status detail */}
+                            {rep?.message && (
+                                <div className={`flex items-center justify-center gap-2 text-sm mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    <StatusDot status={statusColor(rep.status)}/>
+                                    <span>{rep.message}</span>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+                {replicas.length === 0 && (
+                    <p className={`text-center text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No replication data available</p>
+                )}
             </div>
-
-            {/* Status detail */}
-            {replication?.message && (
-                <div className={`flex items-center justify-center gap-2 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    <StatusDot status={statusColor(replication.status)}/>
-                    <span>{replication.message}</span>
-                </div>
-            )}
-            {!replication?.message && (
-                <p className={`text-center text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>No replication data available</p>
-            )}
         </div>
     );
 }
