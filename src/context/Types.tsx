@@ -659,6 +659,70 @@ export interface SeedStageEResult {
     winner: string;
 }
 
+export interface Tier2Summary {
+    rounds: number;
+    improvements: number;
+    start_sharpe: number;
+    end_sharpe: number;
+    best_trades: number;
+}
+
+export interface Tier3Summary {
+    window_tests: number;
+    random_tests: number;
+    best_cal_sharpe: number;
+    best_random_sharpe: number;
+    random_beat_calibrated: boolean;
+    best_trades: number;
+}
+
+export interface SymbolDiag {
+    s: string;
+    n: number;
+    w: number;
+    pnl: number;
+    sr: number;
+}
+
+export interface HourDiag {
+    h: number;
+    n: number;
+    w: number;
+    pnl: number;
+}
+
+export interface DirectionDiag {
+    d: string;
+    n: number;
+    w: number;
+    pf: number;
+    pnl: number;
+}
+
+export interface ExitReasonDiag {
+    r: string;
+    n: number;
+    avg: number;
+}
+
+export interface SeedDiagnostics {
+    best_sharpe: number;
+    best_trades: number;
+    configs_tested: number;
+    tier1_sharpe: number;
+    tier2_sharpe: number;
+    tier3_sharpe: number;
+    random_beat_calibrated: boolean;
+    is_vs_oos_gap: number;
+    per_symbol: SymbolDiag[];
+    per_hour: HourDiag[];
+    per_direction: DirectionDiag[];
+    per_exit: ExitReasonDiag[];
+    score_dist: Record<string, number>;
+    conf_dist: Record<string, number>;
+    components: { component: string; signal: number; }[];
+}
+
 export interface SeedRun {
     id: number;
     timeframe: string;
@@ -675,6 +739,16 @@ export interface SeedRun {
     stagee_results?: SeedStageEResult;
     trunk_id?: number;
     error_message?: string;
+    staged2_results?: SeedVariantResult[];
+    staged3_results?: SeedVariantResult[];
+    staged4_results?: SeedVariantResult[];
+    tier: number;
+    tier2_results?: Tier2Summary;
+    tier3_results?: Tier3Summary;
+    diagnostics?: SeedDiagnostics;
+    configs_tested: number;
+    best_sharpe?: number;
+    claimed_by?: string;
 }
 
 // Analysis API types (from /api/analysis/*)

@@ -17,6 +17,7 @@ import type {
     OptimizerTrunkDetail, OptimizerParamDiff, OptimizerWorkerConfig,
     SeedRun, SeedComponentResult, SeedVariantResult,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
+    Tier2Summary, Tier3Summary, SeedDiagnostics,
 } from '../../context/Types';
 import {
     BeakerIcon, ClockIcon,
@@ -1221,14 +1222,20 @@ function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
 
 // --- Seed Run Components ---
 
-const SEED_STAGES = ['Stage0', 'StageA', 'StageB', 'StageC', 'StageD', 'StageE'] as const;
+const SEED_STAGES = ['Stage0', 'StageA', 'StageB', 'StageC', 'StageD', 'StageD2', 'StageD3', 'StageD4', 'StageE', 'Tier2', 'Tier3', 'Diagnostics'] as const;
 const STAGE_LABELS: Record<string, string> = {
     Stage0: 'Weights',
     StageA: 'Baseline',
     StageB: 'Filters',
     StageC: 'Dampeners',
     StageD: 'Entry',
+    StageD2: 'R:R',
+    StageD3: 'Hours',
+    StageD4: 'Trail',
     StageE: 'Assembly',
+    Tier2: 'Hill Climb',
+    Tier3: 'Random',
+    Diagnostics: 'Diag',
 };
 
 function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolean; muted: string}) {
@@ -1249,15 +1256,18 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
     return (
         <div className={`rounded-lg ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
             <button onClick={() => setExpanded(!expanded)} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{run.id}</span>
                     <TimeframeBadge tf={run.timeframe} isDarkMode={isDarkMode}/>
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusCls}${isRunning ? ' animate-pulse' : ''}`}>{run.status}</span>
                     <span className={`text-xs ${muted}`}>{run.trigger_reason}</span>
                     {isRunning && <span className={`text-xs font-medium ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>{STAGE_LABELS[run.current_stage] ?? run.current_stage}</span>}
                     {run.trunk_id && <span className={`text-xs font-mono ${muted}`}>→ trunk #{run.trunk_id}</span>}
+                    {run.best_sharpe !== undefined && <span className={`text-xs font-mono ${run.best_sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>S:{fmtNum(run.best_sharpe)}</span>}
+                    {run.configs_tested > 0 && <span className={`text-xs ${muted}`}>{run.configs_tested} configs</span>}
+                    {run.claimed_by && <span className={`text-xs ${muted}`}>@{run.claimed_by}</span>}
                 </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0">
                     {durationStr && <span className={`text-xs ${muted}`}>{durationStr}</span>}
                     <span className={`text-xs ${muted}`}>{dayjs(run.started_at).fromNow()}</span>
                     {expanded ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
@@ -1267,12 +1277,12 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
             {expanded && (
                 <div className="px-4 pb-4 space-y-3">
                     {/* Stage progress bar */}
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 overflow-x-auto pb-1">
                         {SEED_STAGES.map((stage, i) => {
                             const done = i < currentIdx || run.status === 'completed';
                             const active = i === currentIdx && isRunning;
                             return (
-                                <div key={stage} className="flex-1">
+                                <div key={stage} className="flex-1 min-w-[40px]">
                                     <div className={`h-1.5 rounded-full ${
                                         done ? 'bg-emerald-500'
                                         : active ? 'bg-cyan-500 animate-pulse'
@@ -1404,6 +1414,203 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 </div>
                             </div>
                             <p className={`text-[10px] font-mono mt-1 text-emerald-500`}>Winner: {(run.stagee_results as SeedStageEResult).winner}</p>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage D2: R:R Sweep */}
+                    {run.staged2_results && (run.staged2_results as SeedVariantResult[]).length > 0 && (
+                        <SeedStageSection title="R:R Threshold — Min Risk:Reward" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-1">
+                                {(run.staged2_results as SeedVariantResult[]).map(v => (
+                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                    }`}>
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
+                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
+                                        <span className={muted}>{v.trades}t</span>
+                                        {v.winner && <span className="text-emerald-500">★</span>}
+                                    </span>
+                                ))}
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage D3: Hour Exclusion */}
+                    {run.staged3_results && (run.staged3_results as SeedVariantResult[]).length > 0 && (
+                        <SeedStageSection title="Hours — Trading Hour Exclusion" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-1">
+                                {(run.staged3_results as SeedVariantResult[]).map(v => (
+                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                    }`}>
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
+                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
+                                        <span className={muted}>{v.trades}t</span>
+                                        {v.winner && <span className="text-emerald-500">★</span>}
+                                    </span>
+                                ))}
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage D4: Trailing Stop */}
+                    {run.staged4_results && (run.staged4_results as SeedVariantResult[]).length > 0 && (
+                        <SeedStageSection title="Trail — Trailing Stop Sweep" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-1">
+                                {(run.staged4_results as SeedVariantResult[]).map(v => (
+                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                    }`}>
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
+                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
+                                        <span className={muted}>{v.trades}t</span>
+                                        {v.winner && <span className="text-emerald-500">★</span>}
+                                    </span>
+                                ))}
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Tier 2: Hill Climbing */}
+                    {run.tier2_results && (
+                        <SeedStageSection title="Tier 2 — Hill Climbing" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-3 text-[10px] font-mono">
+                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Rounds: {(run.tier2_results as Tier2Summary).rounds}</span>
+                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Improvements: {(run.tier2_results as Tier2Summary).improvements}</span>
+                                <span className={(run.tier2_results as Tier2Summary).start_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>
+                                    Start: {fmtNum((run.tier2_results as Tier2Summary).start_sharpe)}
+                                </span>
+                                <span className={(run.tier2_results as Tier2Summary).end_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>
+                                    End: {fmtNum((run.tier2_results as Tier2Summary).end_sharpe)}
+                                </span>
+                                <span className={muted}>{(run.tier2_results as Tier2Summary).best_trades}t</span>
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Tier 3: Random Exploration */}
+                    {run.tier3_results && (
+                        <SeedStageSection title="Tier 3 — Random Exploration" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-3 text-[10px] font-mono">
+                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Window Tests: {(run.tier3_results as Tier3Summary).window_tests}</span>
+                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Random Tests: {(run.tier3_results as Tier3Summary).random_tests}</span>
+                                <span className={(run.tier3_results as Tier3Summary).best_cal_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>
+                                    Cal Best: {fmtNum((run.tier3_results as Tier3Summary).best_cal_sharpe)}
+                                </span>
+                                <span className={(run.tier3_results as Tier3Summary).best_random_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>
+                                    Rand Best: {fmtNum((run.tier3_results as Tier3Summary).best_random_sharpe)}
+                                </span>
+                                {(run.tier3_results as Tier3Summary).random_beat_calibrated && (
+                                    <span className="text-amber-400">Random beat calibrated!</span>
+                                )}
+                                <span className={muted}>{(run.tier3_results as Tier3Summary).best_trades}t</span>
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Diagnostics: Failure Analysis */}
+                    {run.diagnostics && (
+                        <SeedStageSection title="Diagnostics — Failure Analysis" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="space-y-2">
+                                {/* Summary stats */}
+                                <div className="flex flex-wrap gap-3 text-[10px] font-mono">
+                                    <span className="text-red-400">Best Sharpe: {fmtNum((run.diagnostics as SeedDiagnostics).best_sharpe)}</span>
+                                    <span className={muted}>Configs: {(run.diagnostics as SeedDiagnostics).configs_tested}</span>
+                                    <span className={muted}>IS/OOS Gap: {fmtNum((run.diagnostics as SeedDiagnostics).is_vs_oos_gap)}</span>
+                                    {(run.diagnostics as SeedDiagnostics).random_beat_calibrated && (
+                                        <span className="text-amber-400">Random &gt; Calibrated</span>
+                                    )}
+                                </div>
+
+                                {/* Per-direction */}
+                                {(run.diagnostics as SeedDiagnostics).per_direction?.length > 0 && (
+                                    <div>
+                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Direction</p>
+                                        <div className="flex gap-2">
+                                            {(run.diagnostics as SeedDiagnostics).per_direction.map(d => (
+                                                <span key={d.d} className={`text-[10px] font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                    {d.d}: {d.w}/{d.n} wins, PF:{fmtNum(d.pf)}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Per-exit reason */}
+                                {(run.diagnostics as SeedDiagnostics).per_exit?.length > 0 && (
+                                    <div>
+                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Exit Reasons</p>
+                                        <div className="flex flex-wrap gap-1">
+                                            {(run.diagnostics as SeedDiagnostics).per_exit.map(e => (
+                                                <span key={e.r} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
+                                                    <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{e.r}</span>
+                                                    <span className={muted}>{e.n}x</span>
+                                                    <span className={e.avg >= 0 ? 'text-emerald-400' : 'text-red-400'}>avg:{fmtNum(e.avg)}</span>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Score distribution */}
+                                {(run.diagnostics as SeedDiagnostics).score_dist && Object.keys((run.diagnostics as SeedDiagnostics).score_dist).length > 0 && (
+                                    <div>
+                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Score Distribution</p>
+                                        <div className="flex flex-wrap gap-1">
+                                            {Object.entries((run.diagnostics as SeedDiagnostics).score_dist)
+                                                .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                                                .map(([bucket, count]) => (
+                                                <span key={bucket} className={`text-[10px] font-mono px-1 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
+                                                    <span className={muted}>{bucket}:</span> <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{count}</span>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Top symbols */}
+                                {(run.diagnostics as SeedDiagnostics).per_symbol?.length > 0 && (
+                                    <div>
+                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Top Symbols (by trades)</p>
+                                        <div className="flex flex-wrap gap-1">
+                                            {(run.diagnostics as SeedDiagnostics).per_symbol.slice(0, 10).map(s => (
+                                                <span key={s.s} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
+                                                    <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{s.s}</span>
+                                                    <span className={s.sr > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(s.sr)}</span>
+                                                    <span className={muted}>{s.w}/{s.n}</span>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Per-hour heatmap-style */}
+                                {(run.diagnostics as SeedDiagnostics).per_hour?.length > 0 && (
+                                    <div>
+                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Hourly Performance</p>
+                                        <div className="flex flex-wrap gap-0.5">
+                                            {(run.diagnostics as SeedDiagnostics).per_hour
+                                                .sort((a, b) => a.h - b.h)
+                                                .map(h => {
+                                                    const wr = h.n > 0 ? h.w / h.n : 0;
+                                                    const bg = h.n === 0 ? (isDarkMode ? 'bg-slate-800' : 'bg-gray-300')
+                                                        : wr >= 0.6 ? 'bg-emerald-600/40'
+                                                        : wr >= 0.4 ? 'bg-yellow-600/40'
+                                                        : 'bg-red-600/40';
+                                                    return (
+                                                        <span key={h.h} className={`text-[9px] font-mono px-1 py-0.5 rounded ${bg}`}
+                                                              title={`${h.h}:00 — ${h.n} trades, ${h.w} wins, PnL: ${h.pnl.toFixed(2)}`}>
+                                                            {h.h.toString().padStart(2, '0')}
+                                                        </span>
+                                                    );
+                                                })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </SeedStageSection>
                     )}
                 </div>
