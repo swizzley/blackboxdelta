@@ -482,18 +482,7 @@ export default function Optimizer() {
                                                         </div>
                                                         <div className="flex gap-1.5 flex-shrink-0">
                                                             {rec.status === 'pending' && (
-                                                                <>
-                                                                    <button
-                                                                        disabled={recActionLoading === rec.id}
-                                                                        onClick={async () => { setRecActionLoading(rec.id); await queueRecommendation(rec.id); loadData(); setRecActionLoading(null); }}
-                                                                        className="px-2 py-1 text-xs rounded bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50"
-                                                                    >Queue</button>
-                                                                    <button
-                                                                        disabled={recActionLoading === rec.id}
-                                                                        onClick={async () => { setRecActionLoading(rec.id); await skipRecommendation(rec.id); loadData(); setRecActionLoading(null); }}
-                                                                        className={`px-2 py-1 text-xs rounded ${isDarkMode ? 'bg-slate-600 hover:bg-slate-500 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'} disabled:opacity-50`}
-                                                                    >Skip</button>
-                                                                </>
+                                                                <span className={`text-xs ${muted} italic`}>pending pickup</span>
                                                             )}
                                                             {rec.status === 'passed' && (
                                                                 <button
