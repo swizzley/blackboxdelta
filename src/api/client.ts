@@ -200,6 +200,10 @@ export function revertTrunk(id: number, reason: string): Promise<any> {
     return apiPost(`/api/optimizer/trunks/${id}/revert`, { reason });
 }
 
+export function unrevertTrunk(id: number): Promise<any> {
+    return apiPost(`/api/optimizer/trunks/${id}/unrevert`, {});
+}
+
 // Worker allocation
 export function fetchOptimizerWorkers(): Promise<OptimizerWorkerConfig | null> {
     return apiFetch('/api/optimizer/workers');
