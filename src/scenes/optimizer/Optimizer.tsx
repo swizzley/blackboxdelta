@@ -45,7 +45,7 @@ export default function Optimizer() {
     const [workerDirty, setWorkerDirty] = useState(false);
     const [showSeeds, setShowSeeds] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
-    const [showRecs, setShowRecs] = useState(true);
+    const [showRecs, setShowRecs] = useState(false);
     const [recActionLoading, setRecActionLoading] = useState<number | null>(null);
     const [showGens, setShowGens] = useState(false);
     const [revertTarget, setRevertTarget] = useState<number | null>(null);
@@ -437,6 +437,7 @@ export default function Optimizer() {
                             <div className={`${card} mb-6`}>
                                 <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowRecs(r => !r)}>
                                     <LightBulbIcon className={iconCl}/>Verification Queue
+                                    {(() => { const active = recommendations.filter(r => r.status === 'running' || r.status === 'queued').length; return active > 0 ? <span className={`text-xs font-medium ml-2 ${isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>{active} active</span> : null; })()}
                                     <span className={`text-xs font-normal ${muted} ml-auto`}>{recommendations.length}</span>
                                     {showRecs ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
                                 </h2>
