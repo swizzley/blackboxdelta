@@ -545,6 +545,10 @@ export default function Optimizer() {
                                                     .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime());
                                                 if (pushed.length > 0) liveIdByTf.set(tf, pushed[0].id);
                                             }
+                                            const currentIdByTf = new Map<string, number>();
+                                            for (const ct of (status?.current_trunks ?? [])) {
+                                                currentIdByTf.set(ct.timeframe, ct.id);
+                                            }
                                             const liveIds = new Set(liveIdByTf.values());
                                             const tfOrder: Record<string, number> = {scalp: 0, intraday: 1, swing: 2};
                                             const sorted = [...trunks].sort((a, b) => {
@@ -561,6 +565,7 @@ export default function Optimizer() {
                                             return sorted.map(t => (
                                                 <TrunkRow key={t.id} trunk={t} isDarkMode={isDarkMode} muted={muted}
                                                           isLive={liveIdByTf.get(t.timeframe) === t.id}
+                                                          isCurrent={currentIdByTf.get(t.timeframe) === t.id}
                                                           revertTarget={revertTarget} setRevertTarget={setRevertTarget}
                                                           revertReason={revertReason} setRevertReason={setRevertReason}
                                                           revertReasons={REVERT_REASONS} onRevert={handleRevert} onUnrevert={handleUnrevert}/>
@@ -884,8 +889,8 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
     );
 }
 
-function TrunkRow({trunk: t, isDarkMode, muted, isLive, revertTarget, setRevertTarget, revertReason, setRevertReason, revertReasons, onRevert, onUnrevert}: {
-    trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; isLive: boolean;
+function TrunkRow({trunk: t, isDarkMode, muted, isLive, isCurrent, revertTarget, setRevertTarget, revertReason, setRevertReason, revertReasons, onRevert, onUnrevert}: {
+    trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; isLive: boolean; isCurrent: boolean;
     revertTarget: number | null; setRevertTarget: (id: number | null) => void;
     revertReason: string; setRevertReason: (r: string) => void;
     revertReasons: {value: string; label: string}[]; onRevert: (id: number) => void;
@@ -958,7 +963,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, revertTarget, setRevertT
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                     {/* Revert button — inline in row header for easy access */}
-                    {r && !isLive && !t.revert_reason && revertTarget !== t.id && (
+                    {r && !isLive && !isCurrent && !t.revert_reason && revertTarget !== t.id && (
                         <button
                             onClick={e => { e.stopPropagation(); setRevertTarget(t.id); }}
                             className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-colors ${
