@@ -736,13 +736,11 @@ function GenerationCard({gen, isDarkMode, muted}: {gen: OptimizerGeneration; isD
             </div>
             {noBranches ? (
                 <p className={`text-xs ${muted}`}>
-                    {failures >= 20
-                        ? 'Deep stall — seed reset + cooldown pause active'
-                        : failures >= 10
-                            ? 'Stalling — escalated exploration with broader mutations and relaxed verifier'
-                            : phaseBadge?.label === 'AI Planning'
-                                ? 'AI is planning branch explorations for this generation...'
-                                : 'Generation is waiting — may be paused for replication lag, OOS data coverage, or post-reset cooldown'}
+                    {failures >= 10
+                        ? `Stalling (${failures} consecutive failures) — escalated exploration with broader mutations and relaxed verifier`
+                        : phaseBadge?.label === 'AI Planning'
+                            ? 'AI is planning branch explorations for this generation...'
+                            : 'Generation is waiting — may be paused for replication lag, OOS data coverage, or post-reset cooldown'}
                 </p>
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
