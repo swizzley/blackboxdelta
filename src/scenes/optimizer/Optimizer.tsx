@@ -841,6 +841,11 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, revertTarget, setRevertT
                             isDarkMode ? 'bg-slate-600 text-gray-400' : 'bg-gray-200 text-gray-500'
                         }`}>previously pushed</span>
                     )}
+                    {t.revert_reason && !t.reverted_to_trunk_id && (
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700'
+                        }`}>{t.revert_reason}</span>
+                    )}
                     {t.reverted_to_trunk_id && (
                         <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                             isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-100 text-amber-700'
@@ -890,8 +895,8 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, revertTarget, setRevertT
                         <p className={`text-sm ${muted}`}>No parameter changes (initial trunk or identical params)</p>
                     )}
 
-                    {/* Revert to this trunk */}
-                    {r && !isLive && (
+                    {/* Revert to this trunk (hide for already-reverted trunks) */}
+                    {r && !isLive && !t.revert_reason && (
                         <div className="pt-2 border-t border-slate-600/30">
                             {revertTarget === t.id ? (
                                 <div className="flex items-center gap-2 flex-wrap" onClick={e => e.stopPropagation()}>
