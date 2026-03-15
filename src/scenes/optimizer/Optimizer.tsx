@@ -1367,8 +1367,8 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                     {run.stagec_results && (
                         <SeedStageSection title="Dampeners — With vs Without" isDarkMode={isDarkMode} muted={muted}>
                             <div className={`flex gap-3 text-[10px] font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                <span>With: S:{fmtNum((run.stagec_results as SeedStageCResult).with_dampeners)}</span>
-                                <span>Without: S:{fmtNum((run.stagec_results as SeedStageCResult).without_dampeners)}</span>
+                                <span>With: S:{fmtNum((run.stagec_results as SeedStageCResult).with_dampeners)} T:{(run.stagec_results as SeedStageCResult).with_trades ?? '?'} WR:{((run.stagec_results as SeedStageCResult).with_wr ?? 0).toFixed(1)}%</span>
+                                <span>Without: S:{fmtNum((run.stagec_results as SeedStageCResult).without_dampeners)} T:{(run.stagec_results as SeedStageCResult).without_trades ?? '?'} WR:{((run.stagec_results as SeedStageCResult).without_wr ?? 0).toFixed(1)}%</span>
                                 <span className="text-emerald-500">Winner: {(run.stagec_results as SeedStageCResult).winner}</span>
                             </div>
                         </SeedStageSection>

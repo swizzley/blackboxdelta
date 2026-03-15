@@ -646,6 +646,10 @@ export interface SeedStageBResult {
 export interface SeedStageCResult {
     with_dampeners: number;
     without_dampeners: number;
+    with_trades: number;
+    without_trades: number;
+    with_wr: number;
+    without_wr: number;
     winner: string;
 }
 
