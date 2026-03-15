@@ -1315,7 +1315,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                     }`}>
                                         <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{c.component}</span>
                                         <span className={c.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(c.sharpe)}</span>
-                                        <span className={muted}>W:{fmtNum(c.weight)}</span>
+                                        <span className={muted}>WR:{c.win_rate ? `${c.win_rate.toFixed(0)}%` : '—'}</span>
                                         <span className={muted}>{c.trades}t</span>
                                     </span>
                                 ))}
