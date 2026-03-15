@@ -204,6 +204,10 @@ export function unrevertTrunk(id: number): Promise<any> {
     return apiPost(`/api/optimizer/trunks/${id}/unrevert`, {});
 }
 
+export function triggerSeed(timeframe: string): Promise<any> {
+    return apiPost(`/api/optimizer/seed/${timeframe}`, {});
+}
+
 // Worker allocation
 export function fetchOptimizerWorkers(): Promise<OptimizerWorkerConfig | null> {
     return apiFetch('/api/optimizer/workers');

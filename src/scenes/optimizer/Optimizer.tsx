@@ -9,7 +9,7 @@ import {
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
-    pushTrunk, revertTrunk, unrevertTrunk, applyRecommendation, queueRecommendation, skipRecommendation,
+    pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation, queueRecommendation, skipRecommendation,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -49,6 +49,7 @@ export default function Optimizer() {
     const [showGens, setShowGens] = useState(false);
     const [revertTarget, setRevertTarget] = useState<number | null>(null);
     const [revertReason, setRevertReason] = useState('overfit');
+    const [seedConfirm, setSeedConfirm] = useState<string | null>(null);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -307,6 +308,35 @@ export default function Optimizer() {
                                                             {/* Active generation indicator */}
                                                             {activeGen && (
                                                                 <span className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 animate-pulse" title={`Gen ${activeGen.id} active`}/>
+                                                            )}
+
+                                                            {/* Re-seed button */}
+                                                            {seedConfirm === tf ? (
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <button
+                                                                        onClick={async () => {
+                                                                            await triggerSeed(tf);
+                                                                            setSeedConfirm(null);
+                                                                            loadData();
+                                                                        }}
+                                                                        className="px-2 py-0.5 text-xs font-medium rounded bg-red-600 hover:bg-red-500 text-white transition-colors">
+                                                                        Confirm
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => setSeedConfirm(null)}
+                                                                        className={`px-2 py-0.5 text-xs rounded ${isDarkMode ? 'bg-slate-600 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
+                                                                        Cancel
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => setSeedConfirm(tf)}
+                                                                    className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+                                                                        isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'
+                                                                    }`}
+                                                                    title="Start from scratch — runs full seed calibration pipeline">
+                                                                    Re-seed
+                                                                </button>
                                                             )}
                                                         </div>
                                                     );
