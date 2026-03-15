@@ -9,7 +9,7 @@ import {
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
-    pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation, queueRecommendation, skipRecommendation,
+    pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
