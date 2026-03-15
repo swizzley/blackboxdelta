@@ -562,6 +562,7 @@ export interface OptimizerRecommendation {
     source_id?: string;
     timeframe?: string;
     rationale?: string;
+    prompt?: string;
     mutations: Record<string, string>;
     status: string;
     is_result?: OptimizerResult;

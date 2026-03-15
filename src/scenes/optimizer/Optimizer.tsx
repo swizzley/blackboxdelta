@@ -9,7 +9,7 @@ import {
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
-    pushTrunk, revertTrunk,
+    pushTrunk, revertTrunk, applyRecommendation, queueRecommendation, skipRecommendation,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -44,6 +44,8 @@ export default function Optimizer() {
     const [workerDirty, setWorkerDirty] = useState(false);
     const [showSeeds, setShowSeeds] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
+    const [showRecs, setShowRecs] = useState(true);
+    const [recActionLoading, setRecActionLoading] = useState<number | null>(null);
     const [showGens, setShowGens] = useState(false);
     const [revertTarget, setRevertTarget] = useState<number | null>(null);
     const [revertReason, setRevertReason] = useState('overfit');
@@ -370,23 +372,89 @@ export default function Optimizer() {
                                 </div>
                             )}
 
-                            {/* Verification Queue (Recommendations) — disabled */}
-                            <div className={`${card} mb-6 relative`}>
-                                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-black/20 backdrop-blur-[1px]">
-                                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase ${
-                                        isDarkMode ? 'bg-slate-800/90 text-slate-400 border border-slate-600/50' : 'bg-white/90 text-gray-400 border border-gray-300'
-                                    }`}>Coming Soon</span>
-                                </div>
-                                <div className="opacity-40 pointer-events-none">
-                                    <h2 className={heading}>
-                                        <LightBulbIcon className={iconCl}/>Verification Queue
-                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{recommendations.length}</span>
-                                    </h2>
-                                    <div className={`text-center py-6 ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'} rounded-lg`}>
-                                        <LightBulbIcon className={`w-8 h-8 mx-auto mb-2 ${isDarkMode ? 'text-gray-600' : 'text-gray-300'}`}/>
-                                        <p className={`text-sm ${muted}`}>Recommendations disabled while system stabilizes</p>
+                            {/* Verification Queue (Recommendations) */}
+                            <div className={`${card} mb-6`}>
+                                <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowRecs(r => !r)}>
+                                    <LightBulbIcon className={iconCl}/>Verification Queue
+                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{recommendations.length}</span>
+                                    {showRecs ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                                </h2>
+                                {showRecs && (recommendations.length === 0 ? (
+                                    <p className={`text-sm ${muted}`}>No recommendations queued. Submit hypotheses from the Analysis page.</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {recommendations.map(rec => {
+                                            const statusColors: Record<string, string> = {
+                                                queued: 'text-yellow-400',
+                                                running: 'text-blue-400',
+                                                passed: 'text-emerald-400',
+                                                failed: 'text-red-400',
+                                                applied: 'text-purple-400',
+                                                skipped: 'text-gray-500',
+                                                pending: 'text-gray-400',
+                                            };
+                                            const mutCount = Object.keys(rec.mutations || {}).length;
+                                            return (
+                                                <div key={rec.id} className={`rounded-lg p-3 text-sm ${isDarkMode ? 'bg-slate-700/40' : 'bg-gray-50'}`}>
+                                                    <div className="flex items-start gap-2">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <span className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>#{rec.id}</span>
+                                                                <span className={`text-xs font-medium ${statusColors[rec.status] || muted}`}>{rec.status}</span>
+                                                                <span className={`text-xs ${muted}`}>{rec.timeframe}</span>
+                                                                <span className={`text-xs px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-600/50 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>{rec.source}</span>
+                                                                {mutCount > 0 && <span className={`text-xs ${muted}`}>{mutCount} mutations</span>}
+                                                            </div>
+                                                            {rec.prompt && (
+                                                                <p className={`text-xs italic ${muted} mb-1 truncate`} title={rec.prompt}>&ldquo;{rec.prompt}&rdquo;</p>
+                                                            )}
+                                                            {!rec.prompt && rec.rationale && (
+                                                                <p className={`text-xs ${muted} mb-1 truncate`} title={rec.rationale}>{rec.rationale}</p>
+                                                            )}
+                                                            {rec.oos_result && (
+                                                                <div className={`text-xs ${muted} flex gap-3`}>
+                                                                    <span>Sharpe: {rec.oos_result.sharpe_ratio.toFixed(4)}</span>
+                                                                    <span>PF: {rec.oos_result.profit_factor.toFixed(2)}</span>
+                                                                    <span>WR: {rec.oos_result.win_rate.toFixed(0)}%</span>
+                                                                    <span>Trades: {rec.oos_result.total_trades}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex gap-1.5 flex-shrink-0">
+                                                            {rec.status === 'pending' && (
+                                                                <>
+                                                                    <button
+                                                                        disabled={recActionLoading === rec.id}
+                                                                        onClick={async () => { setRecActionLoading(rec.id); await queueRecommendation(rec.id); loadData(); setRecActionLoading(null); }}
+                                                                        className="px-2 py-1 text-xs rounded bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50"
+                                                                    >Queue</button>
+                                                                    <button
+                                                                        disabled={recActionLoading === rec.id}
+                                                                        onClick={async () => { setRecActionLoading(rec.id); await skipRecommendation(rec.id); loadData(); setRecActionLoading(null); }}
+                                                                        className={`px-2 py-1 text-xs rounded ${isDarkMode ? 'bg-slate-600 hover:bg-slate-500 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'} disabled:opacity-50`}
+                                                                    >Skip</button>
+                                                                </>
+                                                            )}
+                                                            {rec.status === 'passed' && (
+                                                                <button
+                                                                    disabled={recActionLoading === rec.id}
+                                                                    onClick={async () => {
+                                                                        if (!confirm(`Apply recommendation #${rec.id} to ${rec.timeframe} trunk?`)) return;
+                                                                        setRecActionLoading(rec.id);
+                                                                        await applyRecommendation(rec.id);
+                                                                        loadData();
+                                                                        setRecActionLoading(null);
+                                                                    }}
+                                                                    className="px-2 py-1 text-xs rounded bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50"
+                                                                >Apply to Trunk</button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                </div>
+                                ))}
                             </div>
 
                             {/* Trunk History */}

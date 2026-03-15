@@ -184,6 +184,10 @@ export function createRecommendation(mutations: Record<string, string>, rational
     return apiPost('/api/optimizer/recommendations', {mutations, rationale, timeframe});
 }
 
+export function createPromptRecommendation(prompt: string, timeframe: string): Promise<any> {
+    return apiPost('/api/optimizer/recommendations', {prompt, timeframe});
+}
+
 export function applyRecommendation(id: number): Promise<any> {
     return apiPost(`/api/optimizer/recommendations/${id}/apply`);
 }
