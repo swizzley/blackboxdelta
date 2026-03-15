@@ -1446,7 +1446,7 @@ function fmtPct(n?: number): string {
     if (pct === 0) return '0%';
     const sign = pct >= 0 ? '+' : '';
     const abs = Math.abs(pct);
-    const dec = abs >= 10 ? 1 : abs >= 1 ? 2 : 3;
+    const dec = abs >= 100 ? 0 : abs >= 10 ? 1 : abs >= 1 ? 2 : 3;
     return sign + pct.toFixed(dec) + '%';
 }
 
