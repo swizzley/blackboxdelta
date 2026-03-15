@@ -1223,7 +1223,7 @@ function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
 
 // --- Seed Run Components ---
 
-const SEED_STAGES = ['Stage0', 'StageA', 'StageB', 'StageC', 'StageD', 'StageD2', 'StageD3', 'StageD4', 'StageE', 'Tier2', 'Tier3', 'Diagnostics'] as const;
+const SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageB', 'StageC', 'StageD3', 'StageE', 'Tier2', 'Tier3', 'Diagnostics'] as const;
 const STAGE_LABELS: Record<string, string> = {
     Stage0: 'Weights',
     StageA: 'Baseline',
@@ -1342,6 +1342,63 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                         </SeedStageSection>
                     )}
 
+                    {/* Stage D: Entry strategy sweep */}
+                    {run.staged_results && (run.staged_results as SeedVariantResult[]).length > 0 && (
+                        <SeedStageSection title="Entry — Strategy Sweep" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-1">
+                                {(run.staged_results as SeedVariantResult[]).map(v => (
+                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                    }`}>
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
+                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
+                                        <span className={muted}>{v.trades}t</span>
+                                        {v.winner && <span className="text-emerald-500">★</span>}
+                                    </span>
+                                ))}
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage D2: R:R Sweep */}
+                    {run.staged2_results && (run.staged2_results as SeedVariantResult[]).length > 0 && (
+                        <SeedStageSection title="R:R Threshold — Min Risk:Reward" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-1">
+                                {(run.staged2_results as SeedVariantResult[]).map(v => (
+                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                    }`}>
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
+                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
+                                        <span className={muted}>{v.trades}t</span>
+                                        {v.winner && <span className="text-emerald-500">★</span>}
+                                    </span>
+                                ))}
+                            </div>
+                        </SeedStageSection>
+                    )}
+
+                    {/* Stage D4: Trailing Stop */}
+                    {run.staged4_results && (run.staged4_results as SeedVariantResult[]).length > 0 && (
+                        <SeedStageSection title="Trail — Trailing Stop Sweep" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="flex flex-wrap gap-1">
+                                {(run.staged4_results as SeedVariantResult[]).map(v => (
+                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                    }`}>
+                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
+                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
+                                        <span className={muted}>{v.trades}t</span>
+                                        {v.winner && <span className="text-emerald-500">★</span>}
+                                    </span>
+                                ))}
+                            </div>
+                        </SeedStageSection>
+                    )}
+
                     {/* Stage B: Filter isolation */}
                     {run.stageb_results && (
                         <SeedStageSection title="Filters — Isolation Sweep" isDarkMode={isDarkMode} muted={muted}>
@@ -1374,11 +1431,11 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                         </SeedStageSection>
                     )}
 
-                    {/* Stage D: Entry strategy sweep */}
-                    {run.staged_results && (run.staged_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="Entry — Strategy Sweep" isDarkMode={isDarkMode} muted={muted}>
+                    {/* Stage D3: Hour Exclusion */}
+                    {run.staged3_results && (run.staged3_results as SeedVariantResult[]).length > 0 && (
+                        <SeedStageSection title="Hours — Trading Hour Exclusion" isDarkMode={isDarkMode} muted={muted}>
                             <div className="flex flex-wrap gap-1">
-                                {(run.staged_results as SeedVariantResult[]).map(v => (
+                                {(run.staged3_results as SeedVariantResult[]).map(v => (
                                     <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
                                         v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
                                         : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
@@ -1415,63 +1472,6 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 </div>
                             </div>
                             <p className={`text-[10px] font-mono mt-1 text-emerald-500`}>Winner: {(run.stagee_results as SeedStageEResult).winner}</p>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage D2: R:R Sweep */}
-                    {run.staged2_results && (run.staged2_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="R:R Threshold — Min Risk:Reward" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-1">
-                                {(run.staged2_results as SeedVariantResult[]).map(v => (
-                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
-                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
-                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
-                                        <span className={muted}>{v.trades}t</span>
-                                        {v.winner && <span className="text-emerald-500">★</span>}
-                                    </span>
-                                ))}
-                            </div>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage D3: Hour Exclusion */}
-                    {run.staged3_results && (run.staged3_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="Hours — Trading Hour Exclusion" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-1">
-                                {(run.staged3_results as SeedVariantResult[]).map(v => (
-                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
-                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
-                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
-                                        <span className={muted}>{v.trades}t</span>
-                                        {v.winner && <span className="text-emerald-500">★</span>}
-                                    </span>
-                                ))}
-                            </div>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage D4: Trailing Stop */}
-                    {run.staged4_results && (run.staged4_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="Trail — Trailing Stop Sweep" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-1">
-                                {(run.staged4_results as SeedVariantResult[]).map(v => (
-                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
-                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
-                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
-                                        <span className={muted}>{v.trades}t</span>
-                                        {v.winner && <span className="text-emerald-500">★</span>}
-                                    </span>
-                                ))}
-                            </div>
                         </SeedStageSection>
                     )}
 
