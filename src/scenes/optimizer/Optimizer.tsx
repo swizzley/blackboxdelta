@@ -1,4 +1,4 @@
-import {useEffect, useState, useCallback} from 'react';
+import {useEffect, useState, useCallback, useRef} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import Tooltip from '../common/Tooltip';
@@ -50,6 +50,10 @@ export default function Optimizer() {
     const [revertTarget, setRevertTarget] = useState<number | null>(null);
     const [revertReason, setRevertReason] = useState('overfit');
     const [seedConfirm, setSeedConfirm] = useState<string | null>(null);
+    const [trunkSort, setTrunkSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
+    const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
+    const [seedCountdown, setSeedCountdown] = useState(0);
+    const seedCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -253,8 +257,8 @@ export default function Optimizer() {
                                                     const tfWorkers = preview.perTF[tf] ?? 0;
 
                                                     return (
-                                                        <div key={tf} className={`flex items-center gap-4 p-3 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                                            <div className="flex items-center gap-2 w-24">
+                                                        <div key={tf} className={`flex flex-wrap items-center gap-2 p-3 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                            <div className="flex items-center gap-2 w-20 flex-shrink-0">
                                                                 <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
                                                             </div>
 
@@ -301,7 +305,7 @@ export default function Optimizer() {
                                                             </div>
 
                                                             {/* Per-TF worker count */}
-                                                            <span className={`ml-auto text-xs font-mono ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                                            <span className={`text-xs font-mono ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                                                                 {tfWorkers > 0 ? `${tfWorkers}w` : '—'}
                                                             </span>
 
@@ -314,23 +318,44 @@ export default function Optimizer() {
                                                             {seedConfirm === tf ? (
                                                                 <div className="flex items-center gap-1.5">
                                                                     <button
+                                                                        disabled={seedCountdown > 0}
                                                                         onClick={async () => {
                                                                             await triggerSeed(tf);
                                                                             setSeedConfirm(null);
+                                                                            setSeedCountdown(0);
+                                                                            if (seedCountdownRef.current) clearInterval(seedCountdownRef.current);
                                                                             loadData();
                                                                         }}
-                                                                        className="px-2 py-0.5 text-xs font-medium rounded bg-red-600 hover:bg-red-500 text-white transition-colors">
-                                                                        Confirm
+                                                                        className={`px-2 py-0.5 text-xs font-medium rounded transition-colors min-w-[4rem] text-center ${
+                                                                            seedCountdown > 0
+                                                                                ? isDarkMode ? 'bg-slate-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                                : 'bg-red-600 hover:bg-red-500 text-white cursor-pointer'
+                                                                        }`}>
+                                                                        {seedCountdown > 0 ? `${seedCountdown}s` : 'Confirm'}
                                                                     </button>
                                                                     <button
-                                                                        onClick={() => setSeedConfirm(null)}
+                                                                        onClick={() => {
+                                                                            setSeedConfirm(null);
+                                                                            setSeedCountdown(0);
+                                                                            if (seedCountdownRef.current) clearInterval(seedCountdownRef.current);
+                                                                        }}
                                                                         className={`px-2 py-0.5 text-xs rounded ${isDarkMode ? 'bg-slate-600 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
                                                                         Cancel
                                                                     </button>
                                                                 </div>
                                                             ) : (
                                                                 <button
-                                                                    onClick={() => setSeedConfirm(tf)}
+                                                                    onClick={() => {
+                                                                        setSeedConfirm(tf);
+                                                                        setSeedCountdown(60);
+                                                                        if (seedCountdownRef.current) clearInterval(seedCountdownRef.current);
+                                                                        seedCountdownRef.current = setInterval(() => {
+                                                                            setSeedCountdown(n => {
+                                                                                if (n <= 1) { clearInterval(seedCountdownRef.current!); return 0; }
+                                                                                return n - 1;
+                                                                            });
+                                                                        }, 1000);
+                                                                    }}
                                                                     className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
                                                                         isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'
                                                                     }`}
@@ -502,9 +527,17 @@ export default function Optimizer() {
                                 {showTrunks && (trunks.length === 0 ? (
                                     <p className={`text-sm ${muted}`}>No trunks recorded</p>
                                 ) : (
-                                    <div className="space-y-1">
+                                    <>
+                                        <div className="flex gap-1.5 mb-3" onClick={e => e.stopPropagation()}>
+                                            {(['id', 'timeframe'] as const).map(field => (
+                                                <button key={field} onClick={() => setTrunkSort(s => ({field, dir: s.field === field && s.dir === 'desc' ? 'asc' : 'desc'}))}
+                                                    className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded transition-colors ${trunkSort.field === field ? 'bg-cyan-600 text-white' : isDarkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                                                    {field}{trunkSort.field === field ? (trunkSort.dir === 'asc' ? ' ↑' : ' ↓') : ''}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="space-y-1">
                                         {(() => {
-                                            // Find the live trunk per timeframe — most recently pushed for each tf
                                             const liveIdByTf = new Map<string, number>();
                                             for (const tf of ['scalp', 'intraday', 'swing']) {
                                                 const pushed = trunks
@@ -512,13 +545,18 @@ export default function Optimizer() {
                                                     .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime());
                                                 if (pushed.length > 0) liveIdByTf.set(tf, pushed[0].id);
                                             }
-                                            // Sort: live trunks first (by tf order), then by ID descending
                                             const liveIds = new Set(liveIdByTf.values());
+                                            const tfOrder: Record<string, number> = {scalp: 0, intraday: 1, swing: 2};
                                             const sorted = [...trunks].sort((a, b) => {
                                                 const aLive = liveIds.has(a.id) ? 1 : 0;
                                                 const bLive = liveIds.has(b.id) ? 1 : 0;
                                                 if (aLive !== bLive) return bLive - aLive;
-                                                return b.id - a.id;
+                                                if (trunkSort.field === 'timeframe') {
+                                                    const cmp = (tfOrder[a.timeframe] ?? 3) - (tfOrder[b.timeframe] ?? 3);
+                                                    if (cmp !== 0) return trunkSort.dir === 'asc' ? cmp : -cmp;
+                                                    return b.id - a.id;
+                                                }
+                                                return trunkSort.dir === 'asc' ? a.id - b.id : b.id - a.id;
                                             });
                                             return sorted.map(t => (
                                                 <TrunkRow key={t.id} trunk={t} isDarkMode={isDarkMode} muted={muted}
@@ -528,7 +566,8 @@ export default function Optimizer() {
                                                           revertReasons={REVERT_REASONS} onRevert={handleRevert} onUnrevert={handleUnrevert}/>
                                             ));
                                         })()}
-                                    </div>
+                                        </div>
+                                    </>
                                 ))}
                             </div>
 
@@ -542,11 +581,32 @@ export default function Optimizer() {
                                 {showGens && (generations.length === 0 ? (
                                     <p className={`text-sm ${muted}`}>No generations recorded</p>
                                 ) : (
-                                    <div className="space-y-1">
-                                        {generations.map(g => (
-                                            <GenerationRow key={g.id} gen={g} isDarkMode={isDarkMode} muted={muted} thCl={thCl} tdCl={tdCl}/>
-                                        ))}
-                                    </div>
+                                    <>
+                                        <div className="flex gap-1.5 mb-3" onClick={e => e.stopPropagation()}>
+                                            {(['id', 'timeframe'] as const).map(field => (
+                                                <button key={field} onClick={() => setGenSort(s => ({field, dir: s.field === field && s.dir === 'desc' ? 'asc' : 'desc'}))}
+                                                    className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded transition-colors ${genSort.field === field ? 'bg-cyan-600 text-white' : isDarkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                                                    {field}{genSort.field === field ? (genSort.dir === 'asc' ? ' ↑' : ' ↓') : ''}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="space-y-1">
+                                            {(() => {
+                                                const tfOrder: Record<string, number> = {scalp: 0, intraday: 1, swing: 2};
+                                                const sorted = [...generations].sort((a, b) => {
+                                                    if (genSort.field === 'timeframe') {
+                                                        const cmp = (tfOrder[a.timeframe] ?? 3) - (tfOrder[b.timeframe] ?? 3);
+                                                        if (cmp !== 0) return genSort.dir === 'asc' ? cmp : -cmp;
+                                                        return b.id - a.id;
+                                                    }
+                                                    return genSort.dir === 'asc' ? a.id - b.id : b.id - a.id;
+                                                });
+                                                return sorted.map(g => (
+                                                    <GenerationRow key={g.id} gen={g} isDarkMode={isDarkMode} muted={muted} thCl={thCl} tdCl={tdCl}/>
+                                                ));
+                                            })()}
+                                        </div>
+                                    </>
                                 ))}
                             </div>
 
@@ -607,7 +667,7 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                 </div>
             </div>
             {r ? (
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                     <WRFractionStat wr={r.win_rate} breakevenWR={r.breakeven_wr} isDarkMode={isDarkMode}/>
@@ -850,8 +910,8 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, revertTarget, setRevertT
             ? (isDarkMode ? 'bg-cyan-900/20 ring-1 ring-cyan-700/50' : 'bg-cyan-50 ring-1 ring-cyan-200')
             : (isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50')
         }`}>
-            <div className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors cursor-pointer`} onClick={toggle}>
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className={`w-full flex items-start justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors cursor-pointer gap-2`} onClick={toggle}>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                         <TrunkSourceDot trunk={t}/>
                         <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{t.id}</span>
@@ -1126,7 +1186,7 @@ function ResultStat({label, value, isDarkMode, color, tooltip}: {label: string; 
     const box = (
         <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`}>
             <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{label}</p>
-            <p className={`text-sm font-semibold ${color ?? (isDarkMode ? 'text-gray-200' : 'text-gray-700')}`}>{value}</p>
+            <p className={`text-sm font-semibold truncate ${color ?? (isDarkMode ? 'text-gray-200' : 'text-gray-700')}`} title={value}>{value}</p>
         </div>
     );
     if (tooltip) return <Tooltip content={tooltip} className="">{box}</Tooltip>;
@@ -1384,7 +1444,10 @@ function fmtPct(n?: number): string {
     if (n == null) return '—';
     const pct = n * 100;
     if (pct === 0) return '0%';
-    return (pct >= 0 ? '+' : '') + pct.toFixed(3) + '%';
+    const sign = pct >= 0 ? '+' : '';
+    const abs = Math.abs(pct);
+    const dec = abs >= 10 ? 1 : abs >= 1 ? 2 : 3;
+    return sign + pct.toFixed(dec) + '%';
 }
 
 function avgPnl(r: {total_pnl?: number; total_trades?: number}): string {
@@ -1523,9 +1586,10 @@ function WorkerGauge({workers, cores, memUsed, memBudget, isDarkMode}: {
                     <div className={`h-full rounded-full transition-all duration-500 ease-out shadow-sm ${cpuBar} ${cpuGlow}`}
                         style={{width: `${cpuDisplay}%`}}/>
                 </div>
-                <span className={`text-xs font-mono whitespace-nowrap ${cpuText}`}>
+                <span className={`text-xs font-mono whitespace-nowrap ${cpuText} hidden sm:inline`}>
                     {workers}/{cores} workers ({cpuDisplay}%)
                 </span>
+                <span className={`text-xs font-mono ${cpuText} sm:hidden`}>{cpuDisplay}%</span>
             </div>
             <div className="flex items-center gap-3">
                 <span className={labelCl}>RAM</span>
@@ -1533,9 +1597,10 @@ function WorkerGauge({workers, cores, memUsed, memBudget, isDarkMode}: {
                     <div className={`h-full rounded-full transition-all duration-500 ease-out shadow-sm ${memBar} ${memGlow}`}
                         style={{width: `${memDisplay}%`}}/>
                 </div>
-                <span className={`text-xs font-mono whitespace-nowrap ${memText}`}>
+                <span className={`text-xs font-mono whitespace-nowrap ${memText} hidden sm:inline`}>
                     {memUsed.toFixed(1)}/{memBudget} units ({memDisplay}%)
                 </span>
+                <span className={`text-xs font-mono ${memText} sm:hidden`}>{memDisplay}%</span>
             </div>
         </div>
     );
