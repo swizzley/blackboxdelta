@@ -878,6 +878,7 @@ function GenerationCard({gen, isDarkMode, muted}: {gen: OptimizerGeneration; isD
                 <div className="flex items-center gap-2">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Gen #{gen.id}</span>
                     <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
+                    {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
                     {phaseBadge
                         ? <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium animate-pulse ${phaseBadge.cls}`}>{phaseBadge.label}</span>
                         : <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>

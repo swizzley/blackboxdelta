@@ -547,6 +547,7 @@ export interface OptimizerGeneration {
     trunk_id: number;
     timeframe: string;
     status: string;
+    claimed_by?: string;
     branch_count: number;
     started_at: string;
     completed_at?: string;
