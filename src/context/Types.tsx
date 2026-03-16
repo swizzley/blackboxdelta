@@ -539,6 +539,7 @@ export interface OptimizerResult {
     max_drawdown: number;
     sharpe_ratio: number;
     breakeven_wr: number;
+    ProfileBreakdown?: Record<string, OptimizerResult>;
 }
 
 export interface OptimizerGeneration {

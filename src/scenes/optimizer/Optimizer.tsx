@@ -1160,6 +1160,21 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
                 <ResultStat label="Max DD" value={result.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="Avg P&L" value={avgPnl(result)} isDarkMode={isDarkMode} color={plColor(result.total_pnl)}/>
             </div>
+            {result.ProfileBreakdown && Object.keys(result.ProfileBreakdown).length > 0 && (
+                <div className="mt-2 space-y-1.5">
+                    {Object.entries(result.ProfileBreakdown).sort().map(([name, pr]) => (
+                        <div key={name} className={`pl-3 border-l-2 ${isDarkMode ? 'border-slate-500/50' : 'border-gray-300/70'}`}>
+                            <p className={`text-[10px] font-medium uppercase tracking-wider mb-0.5 ${muted}`}>{name}</p>
+                            <div className="flex flex-wrap gap-1.5">
+                                <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="Win%" value={pr.win_rate ? `${pr.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="Trades" value={String(pr.total_trades)} isDarkMode={isDarkMode}/>
+                                <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
