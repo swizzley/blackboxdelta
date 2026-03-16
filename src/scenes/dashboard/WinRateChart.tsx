@@ -1,9 +1,9 @@
 import {useEffect, useState, type ReactNode} from 'react';
 import ReactECharts from 'echarts-for-react';
-import axios from 'axios';
 import dayjs from 'dayjs';
 import {useTheme} from '../../context/Theme';
 import Tooltip from '../common/Tooltip';
+import {fetchDay} from '../../api/client';
 import {CalendarData, CalendarDay, DayData} from '../../context/Types';
 
 interface WinRateChartProps {
@@ -32,20 +32,18 @@ export default function WinRateChart({data, period, breakevenTooltip}: WinRateCh
         else if (period === '12H') hoursBack = 12;
 
         const cutoff = now.subtract(hoursBack, 'hour');
-        const today = now.format('YYYY/MM/DD');
-        const yesterday = now.subtract(1, 'day').format('YYYY/MM/DD');
         const needYesterday = cutoff.format('YYYY-MM-DD') < now.format('YYYY-MM-DD');
 
         const fetches: Promise<DayData | null>[] = [];
-        if (needYesterday) fetches.push(axios.get<DayData>(`/data/days/${yesterday}.json`).then(r => r.data).catch(() => null));
-        fetches.push(axios.get<DayData>(`/data/days/${today}.json`).then(r => r.data).catch(() => null));
+        if (needYesterday) fetches.push(fetchDay(now.subtract(1, 'day').format('YYYY-MM-DD')) as Promise<DayData | null>);
+        fetches.push(fetchDay(now.format('YYYY-MM-DD')) as Promise<DayData | null>);
 
         Promise.all(fetches).then(results => {
             interface HourEntry { dayLabel: string; hour: number; summary: typeof results[0] extends DayData | null ? NonNullable<typeof results[0]>['hours'][0]['summary'] : never }
             const allHours: HourEntry[] = [];
 
             for (const dayData of results) {
-                if (!dayData?.hours) continue;
+                if (!dayData || !Array.isArray(dayData.hours)) continue;
                 for (const h of dayData.hours) {
                     const hourTime = dayjs(`${dayData.date}T${String(h.hour).padStart(2, '0')}:00:00`);
                     if (hourTime.isBefore(cutoff) || hourTime.isAfter(now)) continue;
@@ -69,6 +67,8 @@ export default function WinRateChart({data, period, breakevenTooltip}: WinRateCh
                 winners: h.summary.winners,
                 losers: h.summary.losers,
                 total: h.summary.total_orders,
+                win_pl: (h.summary.avg_win ?? 0) * h.summary.winners,
+                loss_pl: (h.summary.avg_loss ?? 0) * h.summary.losers,
             }));
             setHourlyData({labels, entries});
         });

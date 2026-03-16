@@ -15,7 +15,7 @@ import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {formatDollar} from '../common/Util';
-import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar, fetchLive} from '../../api/client';
+import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar, fetchLive, fetchDay} from '../../api/client';
 import type {LiveData} from '../../api/client';
 import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, TimeframeStats, TimeframeRow, ApiCalendarDay, DayData} from '../../context/Types';
 
@@ -577,14 +577,9 @@ const dayFileCache = new Map<string, DayData>();
 
 async function fetchDayFile(date: string): Promise<DayData | null> {
     if (dayFileCache.has(date)) return dayFileCache.get(date)!;
-    try {
-        const [year, month, day] = date.split('-');
-        const resp = await axios.get<DayData>(`/data/days/${year}/${month}/${day}.json`);
-        dayFileCache.set(date, resp.data);
-        return resp.data;
-    } catch {
-        return null;
-    }
+    const data = await fetchDay(date) as DayData | null;
+    if (data) dayFileCache.set(date, data);
+    return data;
 }
 
 // Synchronous version that returns cached data or null (used in useMemo).
@@ -612,7 +607,7 @@ function computeStatsFromDayFiles(dateCutoff: string | null, period: string, anc
             fetchDayFile(date);
             return null;
         }
-        for (const hour of dayData.hours) {
+        for (const hour of (dayData.hours ?? [])) {
             for (const o of hour.orders) {
                 // For sub-day precision: filter by created timestamp
                 if (isoCutoff && o.created < isoCutoff) continue;
@@ -634,6 +629,13 @@ function computeStatsFromDayFiles(dateCutoff: string | null, period: string, anc
 function LiveActivity({apiAvailable, isDarkMode}: {apiAvailable: boolean; isDarkMode: boolean}) {
     const [liveData, setLiveData] = useState<LiveData | null>(null);
     const [ordersExpanded, setOrdersExpanded] = useState(false);
+    const [sortCol, setSortCol] = useState<'symbol' | 'direction' | 'timeframe' | 'status' | 'price' | 'opened'>('opened');
+    const [sortAsc, setSortAsc] = useState(true);
+
+    const toggleSort = (col: typeof sortCol) => {
+        if (sortCol === col) { setSortAsc(a => !a); }
+        else { setSortCol(col); setSortAsc(true); }
+    };
 
     useEffect(() => {
         if (!apiAvailable) return;
@@ -710,16 +712,21 @@ function LiveActivity({apiAvailable, isDarkMode}: {apiAvailable: boolean; isDark
                             <table className="w-full text-xs">
                                 <thead>
                                     <tr className={`${muted} border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                                        <th className="text-left py-1.5 pr-3 font-medium">Symbol</th>
-                                        <th className="text-left py-1.5 pr-3 font-medium">Direction</th>
-                                        <th className="text-left py-1.5 pr-3 font-medium">Timeframe</th>
-                                        <th className="text-left py-1.5 pr-3 font-medium">Status</th>
-                                        <th className="text-right py-1.5 pr-3 font-medium">Price</th>
-                                        <th className="text-left py-1.5 font-medium">Opened</th>
+                                        {([['symbol', 'Symbol', 'text-left'], ['direction', 'Direction', 'text-left'], ['timeframe', 'Timeframe', 'text-left'], ['status', 'Status', 'text-left'], ['price', 'Price', 'text-right'], ['opened', 'Opened', 'text-left']] as const).map(([col, label, align]) => (
+                                            <th key={col} className={`${align} py-1.5 ${col === 'opened' ? '' : 'pr-3'} font-medium cursor-pointer select-none hover:${isDarkMode ? 'text-gray-200' : 'text-gray-900'}`} onClick={() => toggleSort(col)}>
+                                                {label}{sortCol === col ? (sortAsc ? ' ▲' : ' ▼') : ''}
+                                            </th>
+                                        ))}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {liveData.open_orders.map(o => (
+                                    {[...liveData.open_orders].sort((a, b) => {
+                                        let cmp = 0;
+                                        if (sortCol === 'price') cmp = a.price - b.price;
+                                        else if (sortCol === 'opened') cmp = a.opened.localeCompare(b.opened);
+                                        else cmp = (a[sortCol] ?? '').localeCompare(b[sortCol] ?? '');
+                                        return sortAsc ? cmp : -cmp;
+                                    }).map(o => (
                                         <tr key={o.id} className={`border-b ${isDarkMode ? 'border-slate-700/50' : 'border-gray-100'}`}>
                                             <td className={`py-1.5 pr-3 font-mono font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{o.symbol.replace('_', '/')}</td>
                                             <td className={`py-1.5 pr-3 font-medium ${o.direction === 'Long' ? 'text-emerald-400' : 'text-rose-400'}`}>{o.direction}</td>
