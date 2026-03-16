@@ -1,20 +1,20 @@
 {
-  "generated": "2026-03-16T17:00:01Z",
+  "generated": "2026-03-16T18:00:01Z",
   "all_time": {
-    "total_orders": 1951,
-    "pending": 135,
-    "open_positions": 12,
-    "closed_orders": 1804,
-    "total_pl": -15.29,
-    "winners": 433,
-    "losers": 1126,
-    "breakeven": 242,
-    "win_loss_ratio": 0.38,
+    "total_orders": 1976,
+    "pending": 144,
+    "open_positions": 11,
+    "closed_orders": 1821,
+    "total_pl": -15.32,
+    "winners": 435,
+    "losers": 1129,
+    "breakeven": 254,
+    "win_loss_ratio": 0.39,
     "win_rate_pct": 0.24,
     "avg_win": 0.02,
     "avg_loss": -0.02,
     "avg_time_in_trade_mins": 54,
-    "long_pl": -5.16,
+    "long_pl": -5.19,
     "short_pl": -10.13
   },
   "by_timeframe": [
@@ -38,20 +38,20 @@
     },
     {
       "timeframe": "intraday",
-      "total_orders": 496,
-      "pending": 135,
-      "open_positions": 12,
-      "closed_orders": 349,
-      "total_pl": 0.09,
-      "winners": 24,
-      "losers": 142,
-      "breakeven": 181,
-      "win_loss_ratio": 0.17,
+      "total_orders": 521,
+      "pending": 144,
+      "open_positions": 11,
+      "closed_orders": 366,
+      "total_pl": 0.07,
+      "winners": 26,
+      "losers": 145,
+      "breakeven": 193,
+      "win_loss_ratio": 0.18,
       "win_rate_pct": 0.07,
       "avg_win": 0.1,
       "avg_loss": -0.02,
-      "avg_time_in_trade_mins": 182,
-      "long_pl": 0.7,
+      "avg_time_in_trade_mins": 180,
+      "long_pl": 0.67,
       "short_pl": -0.61
     },
     {
@@ -121,8 +121,8 @@
     },
     {
       "date": "2026-03-16",
-      "cumulative_pl": -15.3,
-      "daily_pl": -0.8
+      "cumulative_pl": -15.33,
+      "daily_pl": -0.83
     }
   ],
   "direction_series": [
@@ -209,11 +209,11 @@
     },
     {
       "date": "2026-03-16",
-      "long_wins": 17,
-      "long_losses": 56,
+      "long_wins": 19,
+      "long_losses": 59,
       "short_wins": 11,
       "short_losses": 102,
-      "long_pl": -0.22,
+      "long_pl": -0.25,
       "short_pl": -0.58
     }
   ],
@@ -384,31 +384,31 @@
       "date": "2026-03-16",
       "avg_final_score": 8.65,
       "avg_confidence": 0.72,
-      "avg_trend": 0.45,
-      "avg_ma": 5.98,
-      "avg_crossover": 0.78,
-      "avg_oscillator": -0.72,
+      "avg_trend": 0.47,
+      "avg_ma": 6.22,
+      "avg_crossover": 0.86,
+      "avg_oscillator": -0.69,
       "avg_volatility": 1.53,
-      "avg_volume": 1.71,
-      "avg_fib_stack": 5.17,
+      "avg_volume": 1.67,
+      "avg_fib_stack": 5.24,
       "avg_momentum_projection": 0.57,
-      "avg_structure": 3.69,
+      "avg_structure": 3.68,
       "avg_cycle": 0.73,
-      "avg_pattern": -0.17,
-      "avg_sentiment": 0.117,
-      "count": 37512
+      "avg_pattern": -0.18,
+      "avg_sentiment": 0.118,
+      "count": 40169
     }
   ],
   "recommendation_counts": {
-    "Buy": 4495,
-    "Minimal Buy": 1907,
-    "Minimal Sell": 3350,
-    "Moderate Buy": 23598,
-    "Moderate Sell": 8567,
+    "Buy": 4534,
+    "Minimal Buy": 2090,
+    "Minimal Sell": 3597,
+    "Moderate Buy": 24522,
+    "Moderate Sell": 8726,
     "Sell": 1992,
     "Strong Buy": 29,
     "Strong Sell": 1,
-    "Weak Buy": 10062,
-    "Weak Sell": 10275
+    "Weak Buy": 10648,
+    "Weak Sell": 10794
   }
 }
