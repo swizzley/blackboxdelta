@@ -33,7 +33,7 @@ export default function StatCard({label, value, subtitle, color = 'default', liv
     );
 
     if (tooltip) {
-        return <Tooltip content={tooltip}>{card}</Tooltip>;
+        return <Tooltip content={tooltip} className="block">{card}</Tooltip>;
     }
 
     return card;

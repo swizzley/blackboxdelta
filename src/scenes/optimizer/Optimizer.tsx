@@ -9,6 +9,7 @@ import {
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
+    fetchOptimizerProfiles, enableProfile, disableProfile, reseedProfile,
     pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation,
 } from '../../api/client';
 import type {
@@ -18,6 +19,7 @@ import type {
     SeedRun, SeedComponentResult, SeedVariantResult,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
+    OptimizerProfilesResponse,
 } from '../../context/Types';
 import {
     BeakerIcon, ClockIcon,
@@ -42,6 +44,8 @@ export default function Optimizer() {
     const [seedRuns, setSeedRuns] = useState<SeedRun[]>([]);
     const [workerConfig, setWorkerConfig] = useState<OptimizerWorkerConfig | null>(null);
     const [workerDraft, setWorkerDraft] = useState<Record<string, {enabled: boolean; priority: number}>>({});
+    const [profileData, setProfileData] = useState<OptimizerProfilesResponse | null>(null);
+    const [profileActionLoading, setProfileActionLoading] = useState<string | null>(null);
     const [workerDirty, setWorkerDirty] = useState(false);
     const [showSeeds, setShowSeeds] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
@@ -58,19 +62,21 @@ export default function Optimizer() {
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
-        const [s, t, g, r, sr, wc] = await Promise.all([
+        const [s, t, g, r, sr, wc, pd] = await Promise.all([
             fetchOptimizerStatus(),
             fetchOptimizerTrunks(),
             fetchOptimizerGenerations(20),
             fetchOptimizerRecommendations(),
             fetchOptimizerSeedRuns(),
             fetchOptimizerWorkers(),
+            fetchOptimizerProfiles(),
         ]);
         if (s) setStatus(s);
         if (t) setTrunks(t);
         if (g) setGenerations(g);
         if (r) setRecommendations(r);
         if (sr) setSeedRuns(sr);
+        if (pd) setProfileData(pd);
         if (wc) {
             setWorkerConfig(wc);
             if (!workerDirty) {
@@ -412,6 +418,95 @@ export default function Optimizer() {
                                         )}
                                         <span className={`text-xs ${muted} ml-auto`}>Changes take effect at next generation boundary</span>
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Profile Management */}
+                            {profileData && profileData.profiles.length > 0 && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}>
+                                        <BeakerIcon className={iconCl}/>Scalp Profile Management
+                                    </h2>
+                                    <div className="space-y-2">
+                                        {profileData.profiles.map(p => (
+                                            <div key={p.name} className={`flex flex-wrap items-center gap-3 p-3 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                <span className={`font-mono text-sm font-medium w-20 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                                                    {p.name}
+                                                </span>
+                                                <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                                                    p.enabled
+                                                        ? isDarkMode ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700'
+                                                        : isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700'
+                                                }`}>
+                                                    {p.enabled ? 'ENABLED' : 'DISABLED'}
+                                                </span>
+                                                {p.stats && (
+                                                    <div className={`flex gap-3 text-xs ${muted}`}>
+                                                        <span>S:{p.stats.sharpe_ratio.toFixed(2)}</span>
+                                                        <span>WR:{p.stats.win_rate.toFixed(0)}%</span>
+                                                        <span>{p.stats.total_trades}t</span>
+                                                        <span>PF:{p.stats.profit_factor.toFixed(2)}</span>
+                                                    </div>
+                                                )}
+                                                <div className="ml-auto flex gap-1.5">
+                                                    <button
+                                                        disabled={profileActionLoading === p.name}
+                                                        onClick={async () => {
+                                                            setProfileActionLoading(p.name);
+                                                            if (p.enabled) {
+                                                                await disableProfile(p.name);
+                                                            } else {
+                                                                await enableProfile(p.name);
+                                                            }
+                                                            setProfileActionLoading(null);
+                                                            loadData();
+                                                        }}
+                                                        className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+                                                            profileActionLoading === p.name
+                                                                ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                : p.enabled
+                                                                    ? isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'
+                                                                    : isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
+                                                        }`}
+                                                    >
+                                                        {p.enabled ? 'Disable' : 'Enable'}
+                                                    </button>
+                                                    {!p.enabled && (
+                                                        <button
+                                                            disabled={profileActionLoading === p.name}
+                                                            onClick={async () => {
+                                                                setProfileActionLoading(p.name);
+                                                                await reseedProfile(p.name);
+                                                                setProfileActionLoading(null);
+                                                                loadData();
+                                                            }}
+                                                            className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+                                                                isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
+                                                            }`}
+                                                        >
+                                                            Re-seed
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {profileData.aggregate && (
+                                        <div className={`mt-3 pt-3 border-t ${isDarkMode ? 'border-slate-600' : 'border-gray-200'}`}>
+                                            <div className={`flex gap-4 text-xs ${muted}`}>
+                                                <span className="font-medium">Aggregate:</span>
+                                                <span>S:{profileData.aggregate.sharpe_ratio.toFixed(2)}</span>
+                                                <span>WR:{profileData.aggregate.win_rate.toFixed(0)}%</span>
+                                                <span>{profileData.aggregate.total_trades}t</span>
+                                                <span>PF:{profileData.aggregate.profit_factor.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {profileData.probe_history && profileData.probe_history.length > 0 && (
+                                        <div className={`mt-2 text-xs ${muted}`}>
+                                            Last probe: {profileData.probe_history[0].profile} (gen {profileData.probe_history[0].generation_id}) — {profileData.probe_history[0].status.toUpperCase()}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -1316,6 +1411,32 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {run.error_message && (
                         <p className="text-xs text-red-400 font-mono">{run.error_message}</p>
+                    )}
+
+                    {/* Per-profile seed results */}
+                    {run.profile_results && (run.profile_results as any[]).length > 0 && (
+                        <SeedStageSection title="Per-Profile Results" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="space-y-1">
+                                {(run.profile_results as any[]).map((p: any) => (
+                                    <div key={p.profile} className={`flex items-center gap-2 text-xs font-mono`}>
+                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{p.profile}</span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                                            p.passed
+                                                ? isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+                                                : isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'
+                                        }`}>
+                                            {p.passed ? 'PASSED' : 'FAILED'}
+                                        </span>
+                                        {p.tier > 0 && <span className={muted}>Tier {p.tier}</span>}
+                                        <span className={p.sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(p.sharpe)}</span>
+                                        {p.trades > 0 && <span className={muted}>{p.trades}t</span>}
+                                        {p.win_rate > 0 && <span className={muted}>WR:{p.win_rate.toFixed(0)}%</span>}
+                                        {p.configs_tested > 0 && <span className={muted}>{p.configs_tested} configs</span>}
+                                        {p.error && <span className="text-red-400">{p.error}</span>}
+                                    </div>
+                                ))}
+                            </div>
+                        </SeedStageSection>
                     )}
 
                     {/* Stage 0: Component weights */}

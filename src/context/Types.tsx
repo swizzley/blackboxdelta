@@ -754,6 +754,53 @@ export interface SeedRun {
     configs_tested: number;
     best_sharpe?: number;
     claimed_by?: string;
+    staged5_results?: SeedVariantResult[];
+    profile_results?: SeedProfileResult[];
+}
+
+// Per-profile seed result
+export interface SeedProfileResult {
+    profile: string;
+    passed: boolean;
+    tier: number;
+    sharpe: number;
+    trades: number;
+    win_rate: number;
+    configs_tested: number;
+    error?: string;
+}
+
+// Profile management types (from /api/optimizer/profiles)
+export interface OptimizerProfileStats {
+    total_trades: number;
+    wins: number;
+    losses: number;
+    win_rate: number;
+    total_pnl: number;
+    profit_factor: number;
+    avg_win: number;
+    avg_loss: number;
+    max_drawdown: number;
+    sharpe_ratio: number;
+    breakeven_wr: number;
+}
+
+export interface OptimizerProfileState {
+    name: string;
+    enabled: boolean;
+    stats?: OptimizerProfileStats;
+}
+
+export interface ProfileProbeEntry {
+    profile: string;
+    status: string;
+    generation_id: number;
+}
+
+export interface OptimizerProfilesResponse {
+    profiles: OptimizerProfileState[];
+    aggregate?: OptimizerProfileStats;
+    probe_history?: ProfileProbeEntry[];
 }
 
 // Analysis API types (from /api/analysis/*)

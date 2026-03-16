@@ -5,6 +5,7 @@ import type {
     ApiAlert, ApiMarket, ApiSetting, SignalRow,
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
     OptimizerBranch, OptimizerTrunkDetail, OptimizerWorkerConfig, SeedRun,
+    OptimizerProfilesResponse,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
 } from '../context/Types';
@@ -206,6 +207,27 @@ export function unrevertTrunk(id: number): Promise<any> {
 
 export function triggerSeed(timeframe: string): Promise<any> {
     return apiPost(`/api/optimizer/seed/${timeframe}`, {});
+}
+
+// Profile management
+export function fetchOptimizerProfiles(): Promise<OptimizerProfilesResponse | null> {
+    return apiFetch('/api/optimizer/profiles');
+}
+
+export function enableProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/enable`, {});
+}
+
+export function disableProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/disable`, {});
+}
+
+export function revertProfile(name: string, trunkId: number): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/revert`, {trunk_id: trunkId});
+}
+
+export function reseedProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/reseed`, {});
 }
 
 // Worker allocation
