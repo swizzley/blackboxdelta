@@ -1228,7 +1228,7 @@ const STAGE_LABELS: Record<string, string> = {
     Stage0: 'Weights',
     StageA: 'Baseline',
     StageB: 'Filters',
-    StageC: 'Dampeners',
+    StageC: 'Damp',
     StageD: 'Entry',
     StageD2: 'R:R',
     StageD3: 'Hours',
