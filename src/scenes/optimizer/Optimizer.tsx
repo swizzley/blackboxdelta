@@ -1477,7 +1477,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {/* Tier 2: Hill Climbing */}
                     {run.tier2_results && (
-                        <SeedStageSection title="Tier 2 — Hill Climbing" isDarkMode={isDarkMode} muted={muted}>
+                        <SeedStageSection title="Tier 2 — Hill Climbing (fresh OOS windows)" isDarkMode={isDarkMode} muted={muted}>
                             <div className="flex flex-wrap gap-3 text-[10px] font-mono">
                                 <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Rounds: {(run.tier2_results as Tier2Summary).rounds}</span>
                                 <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Improvements: {(run.tier2_results as Tier2Summary).improvements}</span>
@@ -1494,7 +1494,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {/* Tier 3: Random Exploration */}
                     {run.tier3_results && (
-                        <SeedStageSection title="Tier 3 — Random Exploration" isDarkMode={isDarkMode} muted={muted}>
+                        <SeedStageSection title="Tier 3 — Random Exploration (fresh OOS windows)" isDarkMode={isDarkMode} muted={muted}>
                             <div className="flex flex-wrap gap-3 text-[10px] font-mono">
                                 <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Window Tests: {(run.tier3_results as Tier3Summary).window_tests}</span>
                                 <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Random Tests: {(run.tier3_results as Tier3Summary).random_tests}</span>
