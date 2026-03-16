@@ -1,20 +1,20 @@
 {
-  "generated": "2026-03-16T20:23:42Z",
+  "generated": "2026-03-16T21:00:01Z",
   "all_time": {
     "total_orders": 2089,
-    "pending": 178,
-    "open_positions": 16,
-    "closed_orders": 1895,
-    "total_pl": -15.45,
-    "winners": 436,
-    "losers": 1147,
+    "pending": 174,
+    "open_positions": 9,
+    "closed_orders": 1906,
+    "total_pl": -15.51,
+    "winners": 440,
+    "losers": 1154,
     "breakeven": 307,
     "win_loss_ratio": 0.38,
     "win_rate_pct": 0.23,
     "avg_win": 0.02,
     "avg_loss": -0.02,
-    "avg_time_in_trade_mins": 56,
-    "long_pl": -5.3,
+    "avg_time_in_trade_mins": 58,
+    "long_pl": -5.36,
     "short_pl": -10.15
   },
   "by_timeframe": [
@@ -39,20 +39,20 @@
     {
       "timeframe": "intraday",
       "total_orders": 634,
-      "pending": 178,
-      "open_positions": 16,
-      "closed_orders": 440,
-      "total_pl": -0.06,
-      "winners": 27,
-      "losers": 163,
+      "pending": 174,
+      "open_positions": 9,
+      "closed_orders": 451,
+      "total_pl": -0.13,
+      "winners": 31,
+      "losers": 170,
       "breakeven": 246,
-      "win_loss_ratio": 0.17,
-      "win_rate_pct": 0.06,
-      "avg_win": 0.09,
+      "win_loss_ratio": 0.18,
+      "win_rate_pct": 0.07,
+      "avg_win": 0.08,
       "avg_loss": -0.02,
-      "avg_time_in_trade_mins": 185,
-      "long_pl": 0.56,
-      "short_pl": -0.63
+      "avg_time_in_trade_mins": 189,
+      "long_pl": 0.5,
+      "short_pl": -0.62
     },
     {
       "timeframe": "scalp",
@@ -121,8 +121,8 @@
     },
     {
       "date": "2026-03-16",
-      "cumulative_pl": -15.46,
-      "daily_pl": -0.96
+      "cumulative_pl": -15.52,
+      "daily_pl": -1.02
     }
   ],
   "direction_series": [
@@ -209,11 +209,11 @@
     },
     {
       "date": "2026-03-16",
-      "long_wins": 20,
-      "long_losses": 72,
-      "short_wins": 11,
+      "long_wins": 21,
+      "long_losses": 79,
+      "short_wins": 14,
       "short_losses": 107,
-      "long_pl": -0.36,
+      "long_pl": -0.43,
       "short_pl": -0.6
     }
   ],
