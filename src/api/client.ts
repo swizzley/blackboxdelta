@@ -5,7 +5,7 @@ import type {
     ApiAlert, ApiMarket, ApiSetting, SignalRow,
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
     OptimizerBranch, OptimizerTrunkDetail, OptimizerWorkerConfig, SeedRun,
-    OptimizerProfilesResponse,
+    OptimizerAllProfilesResponse,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
 } from '../context/Types';
@@ -210,24 +210,24 @@ export function triggerSeed(timeframe: string): Promise<any> {
 }
 
 // Profile management
-export function fetchOptimizerProfiles(): Promise<OptimizerProfilesResponse | null> {
+export function fetchOptimizerAllProfiles(): Promise<OptimizerAllProfilesResponse | null> {
     return apiFetch('/api/optimizer/profiles');
 }
 
-export function enableProfile(name: string): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/enable`, {});
+export function enableProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/enable?timeframe=${timeframe}`, {});
 }
 
-export function disableProfile(name: string): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/disable`, {});
+export function disableProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/disable?timeframe=${timeframe}`, {});
 }
 
-export function revertProfile(name: string, trunkId: number): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/revert`, {trunk_id: trunkId});
+export function revertProfile(name: string, trunkId: number, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/revert?timeframe=${timeframe}`, {trunk_id: trunkId});
 }
 
-export function reseedProfile(name: string): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/reseed`, {});
+export function reseedProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/reseed?timeframe=${timeframe}`, {});
 }
 
 // Worker allocation

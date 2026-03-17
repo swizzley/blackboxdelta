@@ -809,6 +809,8 @@ export interface OptimizerProfilesResponse {
     probe_history?: ProfileProbeEntry[];
 }
 
+export type OptimizerAllProfilesResponse = Record<string, OptimizerProfilesResponse>;
+
 // Analysis API types (from /api/analysis/*)
 export interface AnalysisRunApi {
     run_id: string;

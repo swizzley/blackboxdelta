@@ -9,7 +9,7 @@ import {
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
-    fetchOptimizerProfiles, enableProfile, disableProfile, reseedProfile,
+    fetchOptimizerAllProfiles, enableProfile, disableProfile, reseedProfile,
     pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation,
 } from '../../api/client';
 import type {
@@ -19,7 +19,7 @@ import type {
     SeedRun, SeedComponentResult, SeedVariantResult,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
-    OptimizerProfilesResponse,
+    OptimizerAllProfilesResponse,
 } from '../../context/Types';
 import {
     BeakerIcon, ClockIcon,
@@ -44,10 +44,10 @@ export default function Optimizer() {
     const [seedRuns, setSeedRuns] = useState<SeedRun[]>([]);
     const [workerConfig, setWorkerConfig] = useState<OptimizerWorkerConfig | null>(null);
     const [workerDraft, setWorkerDraft] = useState<Record<string, {enabled: boolean; priority: number}>>({});
-    const [profileData, setProfileData] = useState<OptimizerProfilesResponse | null>(null);
+    const [allProfileData, setAllProfileData] = useState<OptimizerAllProfilesResponse | null>(null);
     const [profileActionLoading, setProfileActionLoading] = useState<string | null>(null);
     const [workerDirty, setWorkerDirty] = useState(false);
-    const [showProfiles, setShowProfiles] = useState(false);
+    const [showProfiles, setShowProfiles] = useState<Record<string, boolean>>({});
     const [showSeeds, setShowSeeds] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
     const [showRecs, setShowRecs] = useState(false);
@@ -70,14 +70,14 @@ export default function Optimizer() {
             fetchOptimizerRecommendations(),
             fetchOptimizerSeedRuns(),
             fetchOptimizerWorkers(),
-            fetchOptimizerProfiles(),
+            fetchOptimizerAllProfiles(),
         ]);
         if (s) setStatus(s);
         if (t) setTrunks(t);
         if (g) setGenerations(g);
         if (r) setRecommendations(r);
         if (sr) setSeedRuns(sr);
-        if (pd) setProfileData(pd);
+        if (pd) setAllProfileData(pd);
         if (wc) {
             setWorkerConfig(wc);
             if (!workerDirty) {
@@ -422,14 +422,18 @@ export default function Optimizer() {
                                 </div>
                             )}
 
-                            {/* Profile Management */}
-                            {profileData && profileData.profiles.length > 0 && (() => {
+                            {/* Profile Management — scalp + intraday */}
+                            {allProfileData && (['scalp', 'intraday'] as const).map(tf => {
+                                const profileData = allProfileData[tf];
+                                if (!profileData || !profileData.profiles || profileData.profiles.length === 0) return null;
                                 const enabledCount = profileData.profiles.filter(p => p.enabled).length;
                                 const disabledCount = profileData.profiles.length - enabledCount;
+                                const isOpen = showProfiles[tf] || false;
+                                const tfLabel = tf.charAt(0).toUpperCase() + tf.slice(1);
                                 return (
-                                <div className={`${card} mb-6`}>
-                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowProfiles(s => !s)}>
-                                        <BeakerIcon className={iconCl}/>Scalp Profiles
+                                <div key={tf} className={`${card} mb-6`}>
+                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowProfiles(s => ({...s, [tf]: !s[tf]}))}>
+                                        <BeakerIcon className={iconCl}/>{tfLabel} Profiles
                                         <span className={`text-xs font-normal font-mono ${muted} ml-1`}>
                                             {enabledCount}/{profileData.profiles.length} active
                                         </span>
@@ -442,10 +446,10 @@ export default function Optimizer() {
                                             <span className={`text-xs font-normal font-mono ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{disabledCount} disabled</span>
                                         )}
                                         <span className="ml-auto flex-shrink-0">
-                                            {showProfiles ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                                            {isOpen ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
                                         </span>
                                     </h2>
-                                    {showProfiles && (
+                                    {isOpen && (
                                         <>
                                         <div className="space-y-1.5">
                                             {profileData.profiles.map(p => (
@@ -471,9 +475,9 @@ export default function Optimizer() {
                                                                 e.stopPropagation();
                                                                 setProfileActionLoading(p.name);
                                                                 if (p.enabled) {
-                                                                    await disableProfile(p.name);
+                                                                    await disableProfile(p.name, tf);
                                                                 } else {
-                                                                    await enableProfile(p.name);
+                                                                    await enableProfile(p.name, tf);
                                                                 }
                                                                 setProfileActionLoading(null);
                                                                 loadData();
@@ -494,7 +498,7 @@ export default function Optimizer() {
                                                                 onClick={async (e) => {
                                                                     e.stopPropagation();
                                                                     setProfileActionLoading(p.name);
-                                                                    await reseedProfile(p.name);
+                                                                    await reseedProfile(p.name, tf);
                                                                     setProfileActionLoading(null);
                                                                     loadData();
                                                                 }}
@@ -518,7 +522,7 @@ export default function Optimizer() {
                                     )}
                                 </div>
                                 );
-                            })()}
+                            })}
 
                             {/* Seed Calibration Runs */}
                             {seedRuns.length > 0 && (
