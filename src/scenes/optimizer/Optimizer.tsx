@@ -1439,6 +1439,7 @@ function formatStageLabel(raw: string): string {
 
 function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolean; muted: string}) {
     const [expanded, setExpanded] = useState(false);
+    const [profileDetailsOpen, setProfileDetailsOpen] = useState(false);
     const isRunning = run.status === 'running';
     const parsed = parseProfileStage(run.current_stage);
     const stages = seedStagesForTf(run.timeframe);
@@ -1633,8 +1634,16 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                         );
                     })()}
 
-                    {/* Per-profile stage results — iterate profiles for concurrent scalp, or just "default" */}
-                    {(() => {
+                    {/* Per-profile stage details — collapsed by default */}
+                    <div>
+                        <button
+                            onClick={() => setProfileDetailsOpen(!profileDetailsOpen)}
+                            className={`flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider mt-1 mb-2 ${isDarkMode ? 'text-slate-400 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
+                        >
+                            <span className={`transform transition-transform ${profileDetailsOpen ? 'rotate-90' : ''}`}>▶</span>
+                            Profile stage details
+                        </button>
+                    {profileDetailsOpen && (() => {
                         const profiles = isConcurrentProfile
                             ? (run.profile_stages ? Object.keys(run.profile_stages) : getStageProfiles(run.stagea_results))
                             : ['default'];
@@ -1873,6 +1882,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                             );
                         });
                     })()}
+                    </div>
                 </div>
             )}
         </div>
