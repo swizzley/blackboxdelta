@@ -927,6 +927,7 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{gen.id}</span>
                     <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
                     <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
+                    {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
                     <span className={`text-xs ${muted} hidden sm:inline`}>
                         {gen.branch_count} branches
                         {gen.passed ? ` · ${gen.passed} passed` : ''}
