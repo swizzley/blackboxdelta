@@ -146,7 +146,7 @@ export default function Optimizer() {
                             {/* Per-Timeframe OOS Trade Totals */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-4">
                                 {['scalp', 'intraday', 'swing'].map(tf => {
-                                    const tfTrunks = trunks.filter(t => t.timeframe === tf);
+                                    const tfTrunks = trunks.filter(t => t.timeframe === tf && !t.revert_reason);
                                     const totalTrades = tfTrunks.reduce((sum, t) => sum + (t.oos_result?.total_trades ?? 0), 0);
                                     return (
                                         <div key={tf} className={`rounded-lg px-4 py-2 flex items-center justify-between gap-3 ${isDarkMode ? 'bg-slate-800' : 'bg-white'} shadow`}>
@@ -1434,7 +1434,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
     const parsed = parseProfileStage(run.current_stage);
     const currentIdx = SEED_STAGES.indexOf(parsed.stage as typeof SEED_STAGES[number]);
     const hasProfileStages = run.profile_stages != null && Object.keys(run.profile_stages).length > 0;
-    const isConcurrentScalp = run.timeframe === 'scalp' && (hasProfileStages || run.current_stage.startsWith('concurrent:') || parsed.profile !== null);
+    const isConcurrentProfile = (run.timeframe === 'scalp' || run.timeframe === 'intraday') && (hasProfileStages || run.current_stage.startsWith('concurrent:') || parsed.profile !== null);
 
     const statusCls = isRunning
         ? (isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700')
@@ -1454,7 +1454,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                     <TimeframeBadge tf={run.timeframe} isDarkMode={isDarkMode}/>
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusCls}${isRunning ? ' animate-pulse' : ''}`}>{run.status}</span>
                     <span className={`text-xs ${muted}`}>{run.trigger_reason}</span>
-                    {isRunning && !isConcurrentScalp && <span className={`text-xs font-medium ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>{formatStageLabel(run.current_stage)}</span>}
+                    {isRunning && !isConcurrentProfile && <span className={`text-xs font-medium ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>{formatStageLabel(run.current_stage)}</span>}
                     {run.trunk_id && <span className={`text-xs font-mono ${muted}`}>→ trunk #{run.trunk_id}</span>}
                     {run.best_sharpe !== undefined && <span className={`text-xs font-mono ${run.best_sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>S:{fmtNum(run.best_sharpe)}</span>}
                     {run.configs_tested > 0 && <span className={`text-xs ${muted}`}>{run.configs_tested} configs</span>}
@@ -1470,7 +1470,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
             {expanded && (
                 <div className="px-4 pb-4 space-y-3">
                     {/* Stage progress bar — concurrent profile view for scalp, linear for others */}
-                    {isConcurrentScalp ? (
+                    {isConcurrentProfile ? (
                         <div className="space-y-2">
                             <p className={`text-[10px] font-medium uppercase ${muted}`}>Concurrent Profile Seeding</p>
                             {/* Stage labels row */}
@@ -1625,7 +1625,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                     {/* Per-profile stage results — iterate profiles for concurrent scalp, or just "default" */}
                     {(() => {
-                        const profiles = isConcurrentScalp
+                        const profiles = isConcurrentProfile
                             ? (run.profile_stages ? Object.keys(run.profile_stages) : getStageProfiles(run.stagea_results))
                             : ['default'];
                         return profiles.map(prf => {
@@ -1643,7 +1643,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                             const t3 = getProfileStageData<Tier3Summary>(run.tier3_results, prf);
                             const diag = getProfileStageData<SeedDiagnostics>(run.diagnostics, prf);
                             // Detect fast-fail from profile_stages value
-                            const profileStageVal = isConcurrentScalp ? (run.profile_stages?.[prf] ?? '') : '';
+                            const profileStageVal = isConcurrentProfile ? (run.profile_stages?.[prf] ?? '') : '';
                             const isFastFail = profileStageVal.includes('fast-fail');
 
                             const hasAny = s0 || sA || sD || sD2 || sD4 || sD5 || sB || sC || sD3 || sE || t2 || t3 || diag || isFastFail;
