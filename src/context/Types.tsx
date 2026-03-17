@@ -757,6 +757,7 @@ export interface SeedRun {
     claimed_by?: string;
     staged5_results?: SeedVariantResult[];
     profile_results?: SeedProfileResult[];
+    profile_stages?: Record<string, string>;
 }
 
 // Per-profile seed result

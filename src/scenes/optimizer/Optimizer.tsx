@@ -1377,7 +1377,8 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
     const isRunning = run.status === 'running';
     const parsed = parseProfileStage(run.current_stage);
     const currentIdx = SEED_STAGES.indexOf(parsed.stage as typeof SEED_STAGES[number]);
-    const isConcurrentScalp = run.timeframe === 'scalp' && isRunning && (run.current_stage.startsWith('concurrent:') || parsed.profile !== null);
+    const hasProfileStages = run.profile_stages != null && Object.keys(run.profile_stages).length > 0;
+    const isConcurrentScalp = run.timeframe === 'scalp' && (hasProfileStages || run.current_stage.startsWith('concurrent:') || parsed.profile !== null);
 
     const statusCls = isRunning
         ? (isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700')
@@ -1417,34 +1418,49 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                         <div className="space-y-1.5">
                             <p className={`text-[10px] font-medium uppercase ${muted}`}>Concurrent Profile Seeding</p>
                             {['meanrev', 'breakout', 'stochrev'].map(pName => {
-                                const isActiveProfile = parsed.profile === pName;
-                                const profileDone = run.profile_results && (run.profile_results as any[]).some((p: any) => p.profile === pName);
-                                const profileResult = run.profile_results && (run.profile_results as any[]).find((p: any) => p.profile === pName);
-                                const profileStageIdx = isActiveProfile ? currentIdx : -1;
+                                // Get this profile's stage from profile_stages JSON (real-time per-profile tracking)
+                                const pStageRaw = run.profile_stages?.[pName] ?? '';
+                                const isDone = pStageRaw.startsWith('PASSED:') || pStageRaw.startsWith('FAILED:');
+                                const isPassed = pStageRaw.startsWith('PASSED:');
+                                const pStageIdx = isDone ? SEED_STAGES.length : SEED_STAGES.indexOf(pStageRaw as typeof SEED_STAGES[number]);
+                                const pStageLabel = isDone ? pStageRaw : (STAGE_LABELS[pStageRaw] ?? pStageRaw);
+                                const isActive = isRunning && !isDone && pStageRaw !== '';
+                                // Extract sharpe from "PASSED:T1:S0.1234" or "FAILED:T3:S-0.0500"
+                                const sharpeMatch = isDone ? pStageRaw.match(/S(-?\d+\.\d+)/) : null;
+                                const tierMatch = isDone ? pStageRaw.match(/T(\d)/) : null;
+
+                                // Fall back to profile_results for completed seeds
+                                const profileResult = run.profile_results?.find((p: any) => p.profile === pName);
+                                const showResult = isDone || (profileResult && !isRunning);
+
                                 return (
                                     <div key={pName} className="flex items-center gap-2">
-                                        <span className={`text-[10px] font-mono w-16 ${isActiveProfile ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600') : muted}`}>{pName}</span>
+                                        <span className={`text-[10px] font-mono w-16 ${
+                                            isDone ? (isPassed ? 'text-emerald-400' : 'text-red-400')
+                                            : isActive ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
+                                            : muted
+                                        }`}>{pName}</span>
                                         <div className="flex gap-0.5 flex-1">
                                             {SEED_STAGES.map((stage, i) => (
                                                 <div key={stage} className={`h-1 flex-1 rounded-full ${
-                                                    profileDone && profileResult
-                                                        ? (profileResult.passed ? 'bg-emerald-500' : 'bg-red-500/50')
-                                                        : i < profileStageIdx ? 'bg-emerald-500'
-                                                        : i === profileStageIdx && isActiveProfile ? 'bg-cyan-500 animate-pulse'
+                                                    showResult
+                                                        ? (isPassed || profileResult?.passed ? 'bg-emerald-500' : 'bg-red-500/40')
+                                                        : i < pStageIdx ? 'bg-emerald-500'
+                                                        : i === pStageIdx && isActive ? 'bg-cyan-500 animate-pulse'
                                                         : isDarkMode ? 'bg-slate-700' : 'bg-gray-300'
                                                 }`}/>
                                             ))}
                                         </div>
-                                        <span className={`text-[10px] font-mono w-20 text-right ${
-                                            profileDone && profileResult
-                                                ? (profileResult.passed ? 'text-emerald-400' : 'text-red-400')
-                                                : isActiveProfile ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
+                                        <span className={`text-[10px] font-mono w-28 text-right ${
+                                            showResult
+                                                ? (isPassed || profileResult?.passed ? 'text-emerald-400' : 'text-red-400')
+                                                : isActive ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
                                                 : muted
                                         }`}>
-                                            {profileDone && profileResult
-                                                ? (profileResult.passed ? `S:${fmtNum(profileResult.sharpe)}` : 'FAILED')
-                                                : isActiveProfile ? (STAGE_LABELS[parsed.stage] ?? parsed.stage)
-                                                : 'running'}
+                                            {showResult
+                                                ? `${isPassed || profileResult?.passed ? 'PASS' : 'FAIL'} T${tierMatch?.[1] ?? profileResult?.tier ?? '?'} S:${sharpeMatch ? fmtNum(parseFloat(sharpeMatch[1])) : profileResult ? fmtNum(profileResult.sharpe) : '?'}`
+                                                : isActive ? pStageLabel
+                                                : pStageRaw === '' ? 'queued' : pStageLabel}
                                         </span>
                                     </div>
                                 );
