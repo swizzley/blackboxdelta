@@ -738,25 +738,27 @@ export interface SeedRun {
     current_stage: string;
     started_at: string;
     completed_at?: string;
-    stage0_results?: SeedComponentResult[];
-    stagea_results?: SeedVariantResult[];
-    stageb_results?: SeedStageBResult;
-    stagec_results?: SeedStageCResult;
-    staged_results?: SeedVariantResult[];
-    stagee_results?: SeedStageEResult;
+    // Stage results are profile-keyed: {"profileName": data, ...}
+    // For old (pre-profile) runs, data is flat (legacy compat handled by getProfileStageData helper)
+    stage0_results?: Record<string, SeedComponentResult[]>;
+    stagea_results?: Record<string, SeedVariantResult[]>;
+    stageb_results?: Record<string, SeedStageBResult>;
+    stagec_results?: Record<string, SeedStageCResult>;
+    staged_results?: Record<string, SeedVariantResult[]>;
+    stagee_results?: Record<string, SeedStageEResult>;
     trunk_id?: number;
     error_message?: string;
-    staged2_results?: SeedVariantResult[];
-    staged3_results?: SeedVariantResult[];
-    staged4_results?: SeedVariantResult[];
+    staged2_results?: Record<string, SeedVariantResult[]>;
+    staged3_results?: Record<string, SeedVariantResult[]>;
+    staged4_results?: Record<string, SeedVariantResult[]>;
     tier: number;
-    tier2_results?: Tier2Summary;
-    tier3_results?: Tier3Summary;
-    diagnostics?: SeedDiagnostics;
+    tier2_results?: Record<string, Tier2Summary>;
+    tier3_results?: Record<string, Tier3Summary>;
+    diagnostics?: Record<string, SeedDiagnostics>;
     configs_tested: number;
     best_sharpe?: number;
     claimed_by?: string;
-    staged5_results?: SeedVariantResult[];
+    staged5_results?: Record<string, SeedVariantResult[]>;
     profile_results?: SeedProfileResult[];
     profile_stages?: Record<string, string>;
 }

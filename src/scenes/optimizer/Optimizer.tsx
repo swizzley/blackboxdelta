@@ -1387,6 +1387,27 @@ function parseProfileStage(raw: string): {profile: string | null; stage: string}
     return {profile: null, stage: raw};
 }
 
+// Extract per-profile stage data from profile-keyed JSON columns.
+// New format: {"meanrev": [...], "breakout": [...]}
+// Old format (legacy): [...] — returned for profile "default" only
+function getProfileStageData<T>(data: any, profile: string): T | null {
+    if (!data) return null;
+    if (Array.isArray(data)) return profile === 'default' ? data as T : null;
+    // Check for non-array legacy objects (e.g. SeedStageBResult stored flat)
+    if (typeof data === 'object' && !data[profile] && !Array.isArray(Object.values(data)[0]) && typeof Object.values(data)[0] !== 'object') {
+        return profile === 'default' ? data as T : null;
+    }
+    return data[profile] ?? null;
+}
+
+// Get all profile names that have data in a stage result column
+function getStageProfiles(data: any): string[] {
+    if (!data) return [];
+    if (Array.isArray(data)) return ['default'];
+    if (typeof data === 'object') return Object.keys(data);
+    return [];
+}
+
 function formatStageLabel(raw: string): string {
     const {profile, stage} = parseProfileStage(raw);
     const label = STAGE_LABELS[stage] ?? stage;
@@ -1538,343 +1559,285 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                         <p className="text-xs text-red-400 font-mono">{run.error_message}</p>
                     )}
 
-                    {/* Per-profile seed results */}
-                    {run.profile_results && (run.profile_results as any[]).length > 0 && (
-                        <SeedStageSection title="Per-Profile Results" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="space-y-1">
-                                {(run.profile_results as any[]).map((p: any) => (
-                                    <div key={p.profile} className={`flex items-center gap-2 text-xs font-mono`}>
-                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{p.profile}</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                                            p.passed
-                                                ? isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
-                                                : isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'
-                                        }`}>
-                                            {p.passed ? 'PASSED' : 'FAILED'}
-                                        </span>
-                                        {p.tier > 0 && <span className={muted}>Tier {p.tier}</span>}
-                                        <span className={p.sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(p.sharpe)}</span>
-                                        {p.trades > 0 && <span className={muted}>{p.trades}t</span>}
-                                        {p.win_rate > 0 && <span className={muted}>WR:{p.win_rate.toFixed(0)}%</span>}
-                                        {p.configs_tested > 0 && <span className={muted}>{p.configs_tested} configs</span>}
-                                        {p.error && <span className="text-red-400">{p.error}</span>}
-                                    </div>
-                                ))}
-                            </div>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage 0: Component weights */}
-                    {run.stage0_results && (run.stage0_results as SeedComponentResult[]).length > 0 && (
-                        <SeedStageSection title="Weights — Component Ranking" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-1">
-                                {(run.stage0_results as SeedComponentResult[])
-                                    .sort((a, b) => b.sharpe - a.sharpe)
-                                    .map(c => (
-                                    <span key={c.component} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{c.component}</span>
-                                        <span className={c.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(c.sharpe)}</span>
-                                        <span className={muted}>WR:{c.win_rate ? `${c.win_rate.toFixed(0)}%` : '—'}</span>
-                                        <span className={muted}>{c.trades}t</span>
-                                    </span>
-                                ))}
-                            </div>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage A: Raw signal variants */}
-                    {run.stagea_results && (run.stagea_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="Baseline — Raw Signal Variants" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-1">
-                                {(run.stagea_results as SeedVariantResult[]).map(v => (
-                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
-                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
-                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
-                                        <span className={muted}>{v.trades}t</span>
-                                        {v.winner && <span className="text-emerald-500">★</span>}
-                                    </span>
-                                ))}
-                            </div>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage D: Entry strategy sweep */}
-                    {run.staged_results && (run.staged_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="Entry — Strategy Sweep" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-1">
-                                {(run.staged_results as SeedVariantResult[]).map(v => (
-                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
-                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
-                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
-                                        <span className={muted}>{v.trades}t</span>
-                                        {v.winner && <span className="text-emerald-500">★</span>}
-                                    </span>
-                                ))}
-                            </div>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage D2: R:R Sweep */}
-                    {run.staged2_results && (run.staged2_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="R:R Threshold — Min Risk:Reward" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-1">
-                                {(run.staged2_results as SeedVariantResult[]).map(v => (
-                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
-                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
-                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
-                                        <span className={muted}>{v.trades}t</span>
-                                        {v.winner && <span className="text-emerald-500">★</span>}
-                                    </span>
-                                ))}
-                            </div>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage D4: Trailing Stop */}
-                    {run.staged4_results && (run.staged4_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="Trail — Trailing Stop Sweep" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-1">
-                                {(run.staged4_results as SeedVariantResult[]).map(v => (
-                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
-                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
-                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
-                                        <span className={muted}>{v.trades}t</span>
-                                        {v.winner && <span className="text-emerald-500">★</span>}
-                                    </span>
-                                ))}
-                            </div>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage B: Filter isolation */}
-                    {run.stageb_results && (
-                        <SeedStageSection title="Filters — Isolation Sweep" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="space-y-1">
-                                <p className={`text-[10px] ${muted}`}>Baseline Sharpe: {fmtNum((run.stageb_results as SeedStageBResult).baseline_sharpe)}</p>
-                                <div className="flex flex-wrap gap-1">
-                                    {(run.stageb_results as SeedStageBResult).filters?.map(f => (
-                                        <span key={f.filter} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                            f.helps ? (isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50')
-                                            : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                        }`}>
-                                            <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{f.filter}</span>
-                                            <span className={f.helps ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(f.sharpe)}</span>
-                                            <span className={f.helps ? 'text-emerald-500' : 'text-red-500'}>{f.helps ? 'kept' : 'dropped'}</span>
-                                        </span>
+                    {/* Per-profile seed results with ALL summary */}
+                    {run.profile_results && (run.profile_results as any[]).length > 0 && (() => {
+                        const pr = run.profile_results as any[];
+                        const passed = pr.filter(p => p.passed).length;
+                        const failed = pr.length - passed;
+                        const avgSharpe = pr.reduce((s, p) => s + (p.sharpe ?? 0), 0) / pr.length;
+                        const totalTrades = pr.reduce((s, p) => s + (p.trades ?? 0), 0);
+                        const totalConfigs = pr.reduce((s, p) => s + (p.configs_tested ?? 0), 0);
+                        const avgWR = pr.filter(p => p.win_rate > 0).length > 0
+                            ? pr.filter(p => p.win_rate > 0).reduce((s, p) => s + p.win_rate, 0) / pr.filter(p => p.win_rate > 0).length
+                            : 0;
+                        return (
+                        <SeedStageSection title="Profile Results" isDarkMode={isDarkMode} muted={muted}>
+                            <div className="space-y-2">
+                                {/* ALL summary row */}
+                                <div className={`flex items-center gap-3 text-xs font-mono pb-1.5 border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-300'}`}>
+                                    <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>ALL ({pr.length})</span>
+                                    <span className="text-emerald-400">{passed} passed</span>
+                                    {failed > 0 && <span className="text-red-400">{failed} failed</span>}
+                                    <span className={avgSharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}>avg S:{fmtNum(avgSharpe)}</span>
+                                    {totalTrades > 0 && <span className={muted}>{totalTrades}t</span>}
+                                    {avgWR > 0 && <span className={muted}>avg WR:{avgWR.toFixed(0)}%</span>}
+                                    {totalConfigs > 0 && <span className={muted}>{totalConfigs} configs</span>}
+                                </div>
+                                {/* Individual profile rows */}
+                                <div className="space-y-1">
+                                    {pr.map((p: any) => (
+                                        <div key={p.profile} className={`flex items-center gap-2 text-xs font-mono`}>
+                                            <span className={isDarkMode ? 'text-gray-300' : 'text-gray-700'}>{p.profile}</span>
+                                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                                                p.passed
+                                                    ? isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+                                                    : isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'
+                                            }`}>
+                                                {p.passed ? 'PASSED' : 'FAILED'}
+                                            </span>
+                                            {p.tier > 0 && <span className={muted}>Tier {p.tier}</span>}
+                                            <span className={p.sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(p.sharpe)}</span>
+                                            {p.trades > 0 && <span className={muted}>{p.trades}t</span>}
+                                            {p.win_rate > 0 && <span className={muted}>WR:{p.win_rate.toFixed(0)}%</span>}
+                                            {p.configs_tested > 0 && <span className={muted}>{p.configs_tested} configs</span>}
+                                            {p.error && <span className="text-red-400">{p.error}</span>}
+                                        </div>
                                     ))}
                                 </div>
                             </div>
                         </SeedStageSection>
-                    )}
+                        );
+                    })()}
 
-                    {/* Stage C: Dampener isolation */}
-                    {run.stagec_results && (
-                        <SeedStageSection title="Dampeners — With vs Without" isDarkMode={isDarkMode} muted={muted}>
-                            <div className={`flex gap-3 text-[10px] font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                <span>With: S:{fmtNum((run.stagec_results as SeedStageCResult).with_dampeners)} T:{(run.stagec_results as SeedStageCResult).with_trades ?? '?'} WR:{((run.stagec_results as SeedStageCResult).with_wr ?? 0).toFixed(1)}%</span>
-                                <span>Without: S:{fmtNum((run.stagec_results as SeedStageCResult).without_dampeners)} T:{(run.stagec_results as SeedStageCResult).without_trades ?? '?'} WR:{((run.stagec_results as SeedStageCResult).without_wr ?? 0).toFixed(1)}%</span>
-                                <span className="text-emerald-500">Winner: {(run.stagec_results as SeedStageCResult).winner}</span>
-                            </div>
-                        </SeedStageSection>
-                    )}
+                    {/* Per-profile stage results — iterate profiles for concurrent scalp, or just "default" */}
+                    {(() => {
+                        const profiles = isConcurrentScalp
+                            ? (run.profile_stages ? Object.keys(run.profile_stages) : getStageProfiles(run.stagea_results))
+                            : ['default'];
+                        return profiles.map(prf => {
+                            const s0 = getProfileStageData<SeedComponentResult[]>(run.stage0_results, prf);
+                            const sA = getProfileStageData<SeedVariantResult[]>(run.stagea_results, prf);
+                            const sD = getProfileStageData<SeedVariantResult[]>(run.staged_results, prf);
+                            const sD2 = getProfileStageData<SeedVariantResult[]>(run.staged2_results, prf);
+                            const sD4 = getProfileStageData<SeedVariantResult[]>(run.staged4_results, prf);
+                            const sD5 = getProfileStageData<SeedVariantResult[]>(run.staged5_results, prf);
+                            const sB = getProfileStageData<SeedStageBResult>(run.stageb_results, prf);
+                            const sC = getProfileStageData<SeedStageCResult>(run.stagec_results, prf);
+                            const sD3 = getProfileStageData<SeedVariantResult[]>(run.staged3_results, prf);
+                            const sE = getProfileStageData<SeedStageEResult>(run.stagee_results, prf);
+                            const t2 = getProfileStageData<Tier2Summary>(run.tier2_results, prf);
+                            const t3 = getProfileStageData<Tier3Summary>(run.tier3_results, prf);
+                            const diag = getProfileStageData<SeedDiagnostics>(run.diagnostics, prf);
+                            const hasAny = s0 || sA || sD || sD2 || sD4 || sD5 || sB || sC || sD3 || sE || t2 || t3 || diag;
+                            if (!hasAny) return null;
 
-                    {/* Stage D3: Hour Exclusion */}
-                    {run.staged3_results && (run.staged3_results as SeedVariantResult[]).length > 0 && (
-                        <SeedStageSection title="Hours — Trading Hour Exclusion" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-1">
-                                {(run.staged3_results as SeedVariantResult[]).map(v => (
-                                    <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                        v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
-                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                                    }`}>
-                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
-                                        <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
-                                        <span className={muted}>{v.trades}t</span>
-                                        {v.winner && <span className="text-emerald-500">★</span>}
-                                    </span>
-                                ))}
-                            </div>
-                        </SeedStageSection>
-                    )}
-
-                    {/* Stage E: Final assembly */}
-                    {run.stagee_results && (
-                        <SeedStageSection title="Assembly — Final Calibration" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <p className={`text-[10px] font-medium uppercase ${muted} mb-1`}>Calibrated</p>
-                                    <div className="flex gap-2 text-[10px] font-mono">
-                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>S:{fmtNum((run.stagee_results as SeedStageEResult).calibrated_sharpe)}</span>
-                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>WR:{(run.stagee_results as SeedStageEResult).calibrated_wr.toFixed(0)}%</span>
-                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{(run.stagee_results as SeedStageEResult).calibrated_trades}t</span>
-                                    </div>
+                            const variantChips = (variants: SeedVariantResult[]) => (
+                                <div className="flex flex-wrap gap-1">
+                                    {variants.map(v => (
+                                        <span key={v.label} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                            v.winner ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                            : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                        }`}>
+                                            <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{v.label}</span>
+                                            <span className={v.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(v.sharpe)}</span>
+                                            <span className={muted}>{v.trades}t</span>
+                                            {v.winner && <span className="text-emerald-500">★</span>}
+                                        </span>
+                                    ))}
                                 </div>
-                                <div>
-                                    <p className={`text-[10px] font-medium uppercase ${muted} mb-1`}>Seed Default</p>
-                                    <div className="flex gap-2 text-[10px] font-mono">
-                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>S:{fmtNum((run.stagee_results as SeedStageEResult).seed_sharpe)}</span>
-                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>WR:{(run.stagee_results as SeedStageEResult).seed_wr.toFixed(0)}%</span>
-                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{(run.stagee_results as SeedStageEResult).seed_trades}t</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <p className={`text-[10px] font-mono mt-1 text-emerald-500`}>Winner: {(run.stagee_results as SeedStageEResult).winner}</p>
-                        </SeedStageSection>
-                    )}
+                            );
 
-                    {/* Tier 2: Hill Climbing */}
-                    {run.tier2_results && (
-                        <SeedStageSection title="Tier 2 — Hill Climbing (fresh OOS windows)" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-3 text-[10px] font-mono">
-                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Rounds: {(run.tier2_results as Tier2Summary).rounds}</span>
-                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Improvements: {(run.tier2_results as Tier2Summary).improvements}</span>
-                                <span className={(run.tier2_results as Tier2Summary).start_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>
-                                    Start: {fmtNum((run.tier2_results as Tier2Summary).start_sharpe)}
-                                </span>
-                                <span className={(run.tier2_results as Tier2Summary).end_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>
-                                    End: {fmtNum((run.tier2_results as Tier2Summary).end_sharpe)}
-                                </span>
-                                <span className={muted}>{(run.tier2_results as Tier2Summary).best_trades}t</span>
-                            </div>
-                        </SeedStageSection>
-                    )}
+                            return (
+                                <div key={prf} className="space-y-3">
+                                    {prf !== 'default' && (
+                                        <p className={`text-xs font-mono font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'} border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-300'} pb-1`}>{prf}</p>
+                                    )}
 
-                    {/* Tier 3: Random Exploration */}
-                    {run.tier3_results && (
-                        <SeedStageSection title="Tier 3 — Random Exploration (fresh OOS windows)" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="flex flex-wrap gap-3 text-[10px] font-mono">
-                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Window Tests: {(run.tier3_results as Tier3Summary).window_tests}</span>
-                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Random Tests: {(run.tier3_results as Tier3Summary).random_tests}</span>
-                                <span className={(run.tier3_results as Tier3Summary).best_cal_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>
-                                    Cal Best: {fmtNum((run.tier3_results as Tier3Summary).best_cal_sharpe)}
-                                </span>
-                                <span className={(run.tier3_results as Tier3Summary).best_random_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>
-                                    Rand Best: {fmtNum((run.tier3_results as Tier3Summary).best_random_sharpe)}
-                                </span>
-                                {(run.tier3_results as Tier3Summary).random_beat_calibrated && (
-                                    <span className="text-amber-400">Random beat calibrated!</span>
-                                )}
-                                <span className={muted}>{(run.tier3_results as Tier3Summary).best_trades}t</span>
-                            </div>
-                        </SeedStageSection>
-                    )}
+                                    {s0 && s0.length > 0 && (
+                                        <SeedStageSection title="Weights — Component Ranking" isDarkMode={isDarkMode} muted={muted}>
+                                            <div className="flex flex-wrap gap-1">
+                                                {s0.sort((a, b) => b.sharpe - a.sharpe).map(c => (
+                                                    <span key={c.component} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
+                                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{c.component}</span>
+                                                        <span className={c.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(c.sharpe)}</span>
+                                                        <span className={muted}>WR:{c.win_rate ? `${c.win_rate.toFixed(0)}%` : '—'}</span>
+                                                        <span className={muted}>{c.trades}t</span>
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </SeedStageSection>
+                                    )}
 
-                    {/* Diagnostics: Failure Analysis */}
-                    {run.diagnostics && (
-                        <SeedStageSection title="Diagnostics — Failure Analysis" isDarkMode={isDarkMode} muted={muted}>
-                            <div className="space-y-2">
-                                {/* Summary stats */}
-                                <div className="flex flex-wrap gap-3 text-[10px] font-mono">
-                                    <span className="text-red-400">Best Sharpe: {fmtNum((run.diagnostics as SeedDiagnostics).best_sharpe)}</span>
-                                    <span className={muted}>Configs: {(run.diagnostics as SeedDiagnostics).configs_tested}</span>
-                                    <span className={muted}>IS/OOS Gap: {fmtNum((run.diagnostics as SeedDiagnostics).is_vs_oos_gap)}</span>
-                                    {(run.diagnostics as SeedDiagnostics).random_beat_calibrated && (
-                                        <span className="text-amber-400">Random &gt; Calibrated</span>
+                                    {sA && sA.length > 0 && <SeedStageSection title="Baseline — Raw Signal Variants" isDarkMode={isDarkMode} muted={muted}>{variantChips(sA)}</SeedStageSection>}
+                                    {sD && sD.length > 0 && <SeedStageSection title="Entry — Strategy Sweep" isDarkMode={isDarkMode} muted={muted}>{variantChips(sD)}</SeedStageSection>}
+                                    {sD2 && sD2.length > 0 && <SeedStageSection title="R:R Threshold — Min Risk:Reward" isDarkMode={isDarkMode} muted={muted}>{variantChips(sD2)}</SeedStageSection>}
+                                    {sD4 && sD4.length > 0 && <SeedStageSection title="Trail — Trailing Stop Sweep" isDarkMode={isDarkMode} muted={muted}>{variantChips(sD4)}</SeedStageSection>}
+                                    {sD5 && sD5.length > 0 && <SeedStageSection title="Mkt/Lim — Market Order Sweep" isDarkMode={isDarkMode} muted={muted}>{variantChips(sD5)}</SeedStageSection>}
+
+                                    {sB && (
+                                        <SeedStageSection title="Filters — Isolation Sweep" isDarkMode={isDarkMode} muted={muted}>
+                                            <div className="space-y-1">
+                                                <p className={`text-[10px] ${muted}`}>Baseline Sharpe: {fmtNum(sB.baseline_sharpe)}</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {sB.filters?.map(f => (
+                                                        <span key={f.filter} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                                            f.helps ? (isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50') : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                                        }`}>
+                                                            <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{f.filter}</span>
+                                                            <span className={f.helps ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(f.sharpe)}</span>
+                                                            <span className={f.helps ? 'text-emerald-500' : 'text-red-500'}>{f.helps ? 'kept' : 'dropped'}</span>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </SeedStageSection>
+                                    )}
+
+                                    {sC && (
+                                        <SeedStageSection title="Dampeners — With vs Without" isDarkMode={isDarkMode} muted={muted}>
+                                            <div className={`flex gap-3 text-[10px] font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                <span>With: S:{fmtNum(sC.with_dampeners)} T:{sC.with_trades ?? '?'} WR:{(sC.with_wr ?? 0).toFixed(1)}%</span>
+                                                <span>Without: S:{fmtNum(sC.without_dampeners)} T:{sC.without_trades ?? '?'} WR:{(sC.without_wr ?? 0).toFixed(1)}%</span>
+                                                <span className="text-emerald-500">Winner: {sC.winner}</span>
+                                            </div>
+                                        </SeedStageSection>
+                                    )}
+
+                                    {sD3 && sD3.length > 0 && <SeedStageSection title="Hours — Trading Hour Exclusion" isDarkMode={isDarkMode} muted={muted}>{variantChips(sD3)}</SeedStageSection>}
+
+                                    {sE && (
+                                        <SeedStageSection title="Assembly — Final Calibration" isDarkMode={isDarkMode} muted={muted}>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <p className={`text-[10px] font-medium uppercase ${muted} mb-1`}>Calibrated</p>
+                                                    <div className="flex gap-2 text-[10px] font-mono">
+                                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>S:{fmtNum(sE.calibrated_sharpe)}</span>
+                                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>WR:{sE.calibrated_wr.toFixed(0)}%</span>
+                                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{sE.calibrated_trades}t</span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p className={`text-[10px] font-medium uppercase ${muted} mb-1`}>Seed Default</p>
+                                                    <div className="flex gap-2 text-[10px] font-mono">
+                                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>S:{fmtNum(sE.seed_sharpe)}</span>
+                                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>WR:{sE.seed_wr.toFixed(0)}%</span>
+                                                        <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{sE.seed_trades}t</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p className={`text-[10px] font-mono mt-1 text-emerald-500`}>Winner: {sE.winner}</p>
+                                        </SeedStageSection>
+                                    )}
+
+                                    {t2 && (
+                                        <SeedStageSection title="Tier 2 — Hill Climbing" isDarkMode={isDarkMode} muted={muted}>
+                                            <div className="flex flex-wrap gap-3 text-[10px] font-mono">
+                                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Rounds: {t2.rounds}</span>
+                                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Improvements: {t2.improvements}</span>
+                                                <span className={t2.start_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>Start: {fmtNum(t2.start_sharpe)}</span>
+                                                <span className={t2.end_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>End: {fmtNum(t2.end_sharpe)}</span>
+                                                <span className={muted}>{t2.best_trades}t</span>
+                                            </div>
+                                        </SeedStageSection>
+                                    )}
+
+                                    {t3 && (
+                                        <SeedStageSection title="Tier 3 — Random Exploration" isDarkMode={isDarkMode} muted={muted}>
+                                            <div className="flex flex-wrap gap-3 text-[10px] font-mono">
+                                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Window Tests: {t3.window_tests}</span>
+                                                <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Random Tests: {t3.random_tests}</span>
+                                                <span className={t3.best_cal_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>Cal Best: {fmtNum(t3.best_cal_sharpe)}</span>
+                                                <span className={t3.best_random_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>Rand Best: {fmtNum(t3.best_random_sharpe)}</span>
+                                                {t3.random_beat_calibrated && <span className="text-amber-400">Random beat calibrated!</span>}
+                                                <span className={muted}>{t3.best_trades}t</span>
+                                            </div>
+                                        </SeedStageSection>
+                                    )}
+
+                                    {diag && (
+                                        <SeedStageSection title="Diagnostics — Failure Analysis" isDarkMode={isDarkMode} muted={muted}>
+                                            <div className="space-y-2">
+                                                <div className="flex flex-wrap gap-3 text-[10px] font-mono">
+                                                    <span className="text-red-400">Best Sharpe: {fmtNum(diag.best_sharpe)}</span>
+                                                    <span className={muted}>Configs: {diag.configs_tested}</span>
+                                                    <span className={muted}>IS/OOS Gap: {fmtNum(diag.is_vs_oos_gap)}</span>
+                                                    {diag.random_beat_calibrated && <span className="text-amber-400">Random &gt; Calibrated</span>}
+                                                </div>
+                                                {diag.per_direction?.length > 0 && (
+                                                    <div>
+                                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Direction</p>
+                                                        <div className="flex gap-2">
+                                                            {diag.per_direction.map(d => (
+                                                                <span key={d.d} className={`text-[10px] font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{d.d}: {d.w}/{d.n} wins, PF:{fmtNum(d.pf)}</span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {diag.per_exit?.length > 0 && (
+                                                    <div>
+                                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Exit Reasons</p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {diag.per_exit.map(e => (
+                                                                <span key={e.r} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
+                                                                    <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{e.r}</span>
+                                                                    <span className={muted}>{e.n}x</span>
+                                                                    <span className={e.avg >= 0 ? 'text-emerald-400' : 'text-red-400'}>avg:{fmtNum(e.avg)}</span>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {diag.score_dist && Object.keys(diag.score_dist).length > 0 && (
+                                                    <div>
+                                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Score Distribution</p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {Object.entries(diag.score_dist).sort(([a], [b]) => parseInt(a) - parseInt(b)).map(([bucket, count]) => (
+                                                                <span key={bucket} className={`text-[10px] font-mono px-1 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
+                                                                    <span className={muted}>{bucket}:</span> <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{count}</span>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {diag.per_symbol?.length > 0 && (
+                                                    <div>
+                                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Top Symbols (by trades)</p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {diag.per_symbol.slice(0, 10).map(s => (
+                                                                <span key={s.s} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
+                                                                    <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{s.s}</span>
+                                                                    <span className={s.sr > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(s.sr)}</span>
+                                                                    <span className={muted}>{s.w}/{s.n}</span>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {diag.per_hour?.length > 0 && (
+                                                    <div>
+                                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Hourly Performance</p>
+                                                        <div className="flex flex-wrap gap-0.5">
+                                                            {diag.per_hour.sort((a, b) => a.h - b.h).map(h => {
+                                                                const wr = h.n > 0 ? h.w / h.n : 0;
+                                                                const bg = h.n === 0 ? (isDarkMode ? 'bg-slate-800' : 'bg-gray-300')
+                                                                    : wr >= 0.6 ? 'bg-emerald-600/40' : wr >= 0.4 ? 'bg-yellow-600/40' : 'bg-red-600/40';
+                                                                return (
+                                                                    <span key={h.h} className={`text-[9px] font-mono px-1 py-0.5 rounded ${bg}`}
+                                                                          title={`${h.h}:00 — ${h.n} trades, ${h.w} wins, PnL: ${h.pnl.toFixed(2)}`}>
+                                                                        {h.h.toString().padStart(2, '0')}
+                                                                    </span>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </SeedStageSection>
                                     )}
                                 </div>
-
-                                {/* Per-direction */}
-                                {(run.diagnostics as SeedDiagnostics).per_direction?.length > 0 && (
-                                    <div>
-                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Direction</p>
-                                        <div className="flex gap-2">
-                                            {(run.diagnostics as SeedDiagnostics).per_direction.map(d => (
-                                                <span key={d.d} className={`text-[10px] font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                                    {d.d}: {d.w}/{d.n} wins, PF:{fmtNum(d.pf)}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Per-exit reason */}
-                                {(run.diagnostics as SeedDiagnostics).per_exit?.length > 0 && (
-                                    <div>
-                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Exit Reasons</p>
-                                        <div className="flex flex-wrap gap-1">
-                                            {(run.diagnostics as SeedDiagnostics).per_exit.map(e => (
-                                                <span key={e.r} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
-                                                    <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{e.r}</span>
-                                                    <span className={muted}>{e.n}x</span>
-                                                    <span className={e.avg >= 0 ? 'text-emerald-400' : 'text-red-400'}>avg:{fmtNum(e.avg)}</span>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Score distribution */}
-                                {(run.diagnostics as SeedDiagnostics).score_dist && Object.keys((run.diagnostics as SeedDiagnostics).score_dist).length > 0 && (
-                                    <div>
-                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Score Distribution</p>
-                                        <div className="flex flex-wrap gap-1">
-                                            {Object.entries((run.diagnostics as SeedDiagnostics).score_dist)
-                                                .sort(([a], [b]) => parseInt(a) - parseInt(b))
-                                                .map(([bucket, count]) => (
-                                                <span key={bucket} className={`text-[10px] font-mono px-1 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
-                                                    <span className={muted}>{bucket}:</span> <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{count}</span>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Top symbols */}
-                                {(run.diagnostics as SeedDiagnostics).per_symbol?.length > 0 && (
-                                    <div>
-                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Top Symbols (by trades)</p>
-                                        <div className="flex flex-wrap gap-1">
-                                            {(run.diagnostics as SeedDiagnostics).per_symbol.slice(0, 10).map(s => (
-                                                <span key={s.s} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'}`}>
-                                                    <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{s.s}</span>
-                                                    <span className={s.sr > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(s.sr)}</span>
-                                                    <span className={muted}>{s.w}/{s.n}</span>
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Per-hour heatmap-style */}
-                                {(run.diagnostics as SeedDiagnostics).per_hour?.length > 0 && (
-                                    <div>
-                                        <p className={`text-[9px] uppercase ${muted} mb-0.5`}>Hourly Performance</p>
-                                        <div className="flex flex-wrap gap-0.5">
-                                            {(run.diagnostics as SeedDiagnostics).per_hour
-                                                .sort((a, b) => a.h - b.h)
-                                                .map(h => {
-                                                    const wr = h.n > 0 ? h.w / h.n : 0;
-                                                    const bg = h.n === 0 ? (isDarkMode ? 'bg-slate-800' : 'bg-gray-300')
-                                                        : wr >= 0.6 ? 'bg-emerald-600/40'
-                                                        : wr >= 0.4 ? 'bg-yellow-600/40'
-                                                        : 'bg-red-600/40';
-                                                    return (
-                                                        <span key={h.h} className={`text-[9px] font-mono px-1 py-0.5 rounded ${bg}`}
-                                                              title={`${h.h}:00 — ${h.n} trades, ${h.w} wins, PnL: ${h.pnl.toFixed(2)}`}>
-                                                            {h.h.toString().padStart(2, '0')}
-                                                        </span>
-                                                    );
-                                                })}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </SeedStageSection>
-                    )}
+                            );
+                        });
+                    })()}
                 </div>
             )}
         </div>
