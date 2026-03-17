@@ -451,6 +451,7 @@ export default function Optimizer() {
                                             {profileData.profiles.map(p => (
                                                 <div key={p.name} className={`flex flex-wrap items-center gap-2 px-3 py-1.5 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
                                                     <span className={`font-mono text-xs font-medium w-20 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
+                                                    {p.description && <span className={`text-[10px] ${muted} hidden sm:inline`}>{p.description}</span>}
                                                     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                                                         p.enabled
                                                             ? isDarkMode ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700'

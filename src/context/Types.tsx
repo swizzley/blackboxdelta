@@ -792,6 +792,7 @@ export interface OptimizerProfileStats {
 
 export interface OptimizerProfileState {
     name: string;
+    description?: string;
     enabled: boolean;
     stats?: OptimizerProfileStats;
 }
