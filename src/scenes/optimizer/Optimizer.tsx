@@ -1357,19 +1357,19 @@ const STAGE_LABELS: Record<string, string> = {
 };
 const STAGE_TIME_EST: Record<string, Record<string, string>> = {
     scalp: {
-        Stage0: '~30m', StageA: '~5m', StageD: '~15m', StageD2: '~10m',
-        StageD4: '~10m', StageD5: '~5m', StageB: '~10m', StageC: '~5m',
-        StageD3: '~10m', StageE: '~10m', Tier2: '~30m', Tier3: '~20m', Diagnostics: '~2m',
+        Stage0: '~35m', StageA: '~15m', StageD: '~25m', StageD2: '~20m',
+        StageD4: '~20m', StageD5: '~15m', StageB: '~40m', StageC: '~10m',
+        StageD3: '~20m', StageE: '~5m', Tier2: '~45m', Tier3: '~30m', Diagnostics: '~2m',
     },
     intraday: {
-        Stage0: '~10m', StageA: '~2m', StageD: '~5m', StageD2: '~3m',
-        StageD4: '~3m', StageD5: '~2m', StageB: '~3m', StageC: '~2m',
-        StageD3: '~3m', StageE: '~3m', Tier2: '~10m', Tier3: '~8m', Diagnostics: '~1m',
+        Stage0: '~10m', StageA: '~5m', StageD: '~8m', StageD2: '~6m',
+        StageD4: '~6m', StageD5: '~5m', StageB: '~12m', StageC: '~3m',
+        StageD3: '~6m', StageE: '~2m', Tier2: '~15m', Tier3: '~10m', Diagnostics: '~1m',
     },
     swing: {
-        Stage0: '~5m', StageA: '~1m', StageD: '~3m', StageD2: '~2m',
-        StageD4: '~2m', StageD5: '~1m', StageB: '~2m', StageC: '~1m',
-        StageD3: '~2m', StageE: '~2m', Tier2: '~5m', Tier3: '~4m', Diagnostics: '~1m',
+        Stage0: '~5m', StageA: '~2m', StageD: '~3m', StageD2: '~3m',
+        StageD4: '~3m', StageD5: '~2m', StageB: '~5m', StageC: '~1m',
+        StageD3: '~3m', StageE: '~1m', Tier2: '~8m', Tier3: '~5m', Diagnostics: '~1m',
     },
 };
 
