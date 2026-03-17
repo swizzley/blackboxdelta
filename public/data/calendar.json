@@ -3,130 +3,78 @@
     "pl": -1.15,
     "winners": 0,
     "losers": 1,
-    "total": 1,
-    "win_pl": 0,
-    "loss_pl": -1.15,
-    "dur_sum": 720,
-    "dur_count": 1
+    "total": 1
   },
   "2026-02-26": {
     "pl": -1.74,
     "winners": 0,
     "losers": 1,
-    "total": 2,
-    "win_pl": 0,
-    "loss_pl": -1.74,
-    "dur_sum": 617,
-    "dur_count": 1
+    "total": 2
   },
   "2026-02-27": {
     "pl": 0,
     "winners": 0,
     "losers": 0,
-    "total": 5,
-    "win_pl": 0,
-    "loss_pl": 0,
-    "dur_sum": 0,
-    "dur_count": 0
+    "total": 5
   },
   "2026-02-28": {
     "pl": 0,
     "winners": 0,
     "losers": 0,
-    "total": 1,
-    "win_pl": 0,
-    "loss_pl": 0,
-    "dur_sum": 0,
-    "dur_count": 0
+    "total": 1
   },
   "2026-03-02": {
     "pl": -4.06,
     "winners": 9,
     "losers": 54,
-    "total": 83,
-    "win_pl": 3.11,
-    "loss_pl": -7.17,
-    "dur_sum": 8127,
-    "dur_count": 63
+    "total": 83
   },
   "2026-03-03": {
     "pl": -1.62,
     "winners": 9,
     "losers": 43,
-    "total": 77,
-    "win_pl": 0.3,
-    "loss_pl": -1.92,
-    "dur_sum": 6488,
-    "dur_count": 53
+    "total": 77
   },
   "2026-03-04": {
     "pl": -3.75,
     "winners": 136,
     "losers": 356,
-    "total": 494,
-    "win_pl": 2.36,
-    "loss_pl": -6.11,
-    "dur_sum": 19144,
-    "dur_count": 493
+    "total": 494
   },
   "2026-03-05": {
     "pl": -1.92,
     "winners": 221,
     "losers": 403,
-    "total": 629,
-    "win_pl": 1.32,
-    "loss_pl": -3.24,
-    "dur_sum": 20568,
-    "dur_count": 628
+    "total": 629
   },
   "2026-03-06": {
     "pl": -0.03,
     "winners": 19,
     "losers": 34,
-    "total": 55,
-    "win_pl": 0.02,
-    "loss_pl": -0.05,
-    "dur_sum": 1460,
-    "dur_count": 55
+    "total": 55
   },
   "2026-03-09": {
     "pl": -0.07,
     "winners": 7,
     "losers": 41,
-    "total": 48,
-    "win_pl": 0.03,
-    "loss_pl": -0.1,
-    "dur_sum": 2349,
-    "dur_count": 48
+    "total": 48
   },
   "2026-03-11": {
     "pl": -0.16,
     "winners": 4,
     "losers": 35,
-    "total": 41,
-    "win_pl": 0.03,
-    "loss_pl": -0.19,
-    "dur_sum": 3384,
-    "dur_count": 39
+    "total": 41
   },
   "2026-03-16": {
     "pl": -0.94,
     "winners": 41,
     "losers": 207,
-    "total": 653,
-    "win_pl": 0.52,
-    "loss_pl": -1.46,
-    "dur_sum": 43928,
-    "dur_count": 249
+    "total": 653
   },
   "2026-03-17": {
     "pl": -0.07,
     "winners": 0,
     "losers": 4,
-    "total": 64,
-    "win_pl": 0,
-    "loss_pl": -0.07,
-    "dur_sum": 159,
-    "dur_count": 4
+    "total": 64
   }
 }
