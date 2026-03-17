@@ -1334,7 +1334,7 @@ function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
 
 // --- Seed Run Components ---
 
-const SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageB', 'StageC', 'StageD3', 'StageE', 'Tier2', 'Tier3', 'Diagnostics'] as const;
+const SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'Tier2', 'Tier3', 'Diagnostics'] as const;
 const STAGE_LABELS: Record<string, string> = {
     Stage0: 'Weights',
     StageA: 'Baseline',
@@ -1344,16 +1344,40 @@ const STAGE_LABELS: Record<string, string> = {
     StageD2: 'R:R',
     StageD3: 'Hours',
     StageD4: 'Trail',
+    StageD5: 'Mkt/Lim',
     StageE: 'Assembly',
+    Tier1: 'Tier 1',
     Tier2: 'Hill Climb',
     Tier3: 'Random',
     Diagnostics: 'Diag',
+    FinalOOS: 'Final OOS',
+    Start: 'Starting',
+    'concurrent:all': 'All Profiles',
 };
+
+// Parse a profile-prefixed stage like "meanrev:StageD3" into {profile, stage}
+function parseProfileStage(raw: string): {profile: string | null; stage: string} {
+    const profiles = ['meanrev', 'breakout', 'stochrev'];
+    for (const p of profiles) {
+        if (raw.startsWith(p + ':')) {
+            return {profile: p, stage: raw.slice(p.length + 1)};
+        }
+    }
+    return {profile: null, stage: raw};
+}
+
+function formatStageLabel(raw: string): string {
+    const {profile, stage} = parseProfileStage(raw);
+    const label = STAGE_LABELS[stage] ?? stage;
+    return profile ? `${profile}: ${label}` : label;
+}
 
 function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolean; muted: string}) {
     const [expanded, setExpanded] = useState(false);
     const isRunning = run.status === 'running';
-    const currentIdx = SEED_STAGES.indexOf(run.current_stage as typeof SEED_STAGES[number]);
+    const parsed = parseProfileStage(run.current_stage);
+    const currentIdx = SEED_STAGES.indexOf(parsed.stage as typeof SEED_STAGES[number]);
+    const isConcurrentScalp = run.timeframe === 'scalp' && isRunning && (run.current_stage.startsWith('concurrent:') || parsed.profile !== null);
 
     const statusCls = isRunning
         ? (isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700')
@@ -1373,7 +1397,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                     <TimeframeBadge tf={run.timeframe} isDarkMode={isDarkMode}/>
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusCls}${isRunning ? ' animate-pulse' : ''}`}>{run.status}</span>
                     <span className={`text-xs ${muted}`}>{run.trigger_reason}</span>
-                    {isRunning && <span className={`text-xs font-medium ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>{STAGE_LABELS[run.current_stage] ?? run.current_stage}</span>}
+                    {isRunning && <span className={`text-xs font-medium ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>{formatStageLabel(run.current_stage)}</span>}
                     {run.trunk_id && <span className={`text-xs font-mono ${muted}`}>→ trunk #{run.trunk_id}</span>}
                     {run.best_sharpe !== undefined && <span className={`text-xs font-mono ${run.best_sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>S:{fmtNum(run.best_sharpe)}</span>}
                     {run.configs_tested > 0 && <span className={`text-xs ${muted}`}>{run.configs_tested} configs</span>}
@@ -1388,27 +1412,66 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
             {expanded && (
                 <div className="px-4 pb-4 space-y-3">
-                    {/* Stage progress bar */}
-                    <div className="flex gap-1 overflow-x-auto pb-1">
-                        {SEED_STAGES.map((stage, i) => {
-                            const done = i < currentIdx || run.status === 'completed';
-                            const active = i === currentIdx && isRunning;
-                            return (
-                                <div key={stage} className="flex-1 min-w-[40px]">
-                                    <div className={`h-1.5 rounded-full ${
-                                        done ? 'bg-emerald-500'
-                                        : active ? 'bg-cyan-500 animate-pulse'
-                                        : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'
-                                    }`}/>
-                                    <p className={`text-[10px] mt-0.5 text-center ${
-                                        active ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
-                                        : done ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600')
-                                        : muted
-                                    }`}>{STAGE_LABELS[stage] ?? stage}</p>
-                                </div>
-                            );
-                        })}
-                    </div>
+                    {/* Stage progress bar — concurrent profile view for scalp, linear for others */}
+                    {isConcurrentScalp ? (
+                        <div className="space-y-1.5">
+                            <p className={`text-[10px] font-medium uppercase ${muted}`}>Concurrent Profile Seeding</p>
+                            {['meanrev', 'breakout', 'stochrev'].map(pName => {
+                                const isActiveProfile = parsed.profile === pName;
+                                const profileDone = run.profile_results && (run.profile_results as any[]).some((p: any) => p.profile === pName);
+                                const profileResult = run.profile_results && (run.profile_results as any[]).find((p: any) => p.profile === pName);
+                                const profileStageIdx = isActiveProfile ? currentIdx : -1;
+                                return (
+                                    <div key={pName} className="flex items-center gap-2">
+                                        <span className={`text-[10px] font-mono w-16 ${isActiveProfile ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600') : muted}`}>{pName}</span>
+                                        <div className="flex gap-0.5 flex-1">
+                                            {SEED_STAGES.map((stage, i) => (
+                                                <div key={stage} className={`h-1 flex-1 rounded-full ${
+                                                    profileDone && profileResult
+                                                        ? (profileResult.passed ? 'bg-emerald-500' : 'bg-red-500/50')
+                                                        : i < profileStageIdx ? 'bg-emerald-500'
+                                                        : i === profileStageIdx && isActiveProfile ? 'bg-cyan-500 animate-pulse'
+                                                        : isDarkMode ? 'bg-slate-700' : 'bg-gray-300'
+                                                }`}/>
+                                            ))}
+                                        </div>
+                                        <span className={`text-[10px] font-mono w-20 text-right ${
+                                            profileDone && profileResult
+                                                ? (profileResult.passed ? 'text-emerald-400' : 'text-red-400')
+                                                : isActiveProfile ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
+                                                : muted
+                                        }`}>
+                                            {profileDone && profileResult
+                                                ? (profileResult.passed ? `S:${fmtNum(profileResult.sharpe)}` : 'FAILED')
+                                                : isActiveProfile ? (STAGE_LABELS[parsed.stage] ?? parsed.stage)
+                                                : 'running'}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="flex gap-1 overflow-x-auto pb-1">
+                            {SEED_STAGES.map((stage, i) => {
+                                const done = i < currentIdx || run.status === 'completed';
+                                const active = i === currentIdx && isRunning;
+                                return (
+                                    <div key={stage} className="flex-1 min-w-[40px]">
+                                        <div className={`h-1.5 rounded-full ${
+                                            done ? 'bg-emerald-500'
+                                            : active ? 'bg-cyan-500 animate-pulse'
+                                            : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'
+                                        }`}/>
+                                        <p className={`text-[10px] mt-0.5 text-center ${
+                                            active ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
+                                            : done ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600')
+                                            : muted
+                                        }`}>{STAGE_LABELS[stage] ?? stage}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
 
                     {run.error_message && (
                         <p className="text-xs text-red-400 font-mono">{run.error_message}</p>
