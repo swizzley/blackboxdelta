@@ -1375,10 +1375,13 @@ const STAGE_TIME_EST: Record<string, Record<string, string>> = {
 
 // Parse a profile-prefixed stage like "meanrev:StageD3" into {profile, stage}
 function parseProfileStage(raw: string): {profile: string | null; stage: string} {
-    const profiles = ['meanrev', 'breakout', 'stochrev'];
-    for (const p of profiles) {
-        if (raw.startsWith(p + ':')) {
-            return {profile: p, stage: raw.slice(p.length + 1)};
+    const colonIdx = raw.indexOf(':');
+    if (colonIdx > 0) {
+        const prefix = raw.slice(0, colonIdx);
+        const suffix = raw.slice(colonIdx + 1);
+        // If suffix looks like a stage name (starts with uppercase or is a known keyword), treat prefix as profile
+        if (suffix && /^[A-Z]/.test(suffix) || ['Start', 'Tier1', 'Tier2', 'Tier3'].some(s => suffix.startsWith(s))) {
+            return {profile: prefix, stage: suffix};
         }
     }
     return {profile: null, stage: raw};
@@ -1460,7 +1463,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 <span className="w-28"/>
                             </div>
                             {/* Profile progress rows */}
-                            {['meanrev', 'breakout', 'stochrev'].map(pName => {
+                            {(run.profile_stages ? Object.keys(run.profile_stages) : []).map(pName => {
                                 const pStageRaw = run.profile_stages?.[pName] ?? '';
                                 const isDone = pStageRaw.startsWith('PASSED:') || pStageRaw.startsWith('FAILED:');
                                 const isPassed = pStageRaw.startsWith('PASSED:');

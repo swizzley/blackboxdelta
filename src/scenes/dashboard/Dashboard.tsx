@@ -734,6 +734,9 @@ function LiveActivity({apiAvailable, isDarkMode}: {apiAvailable: boolean; isDark
                                                 <span className={`inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
                                                     {o.timeframe}
                                                 </span>
+                                                {o.profile && o.profile !== 'default' && (
+                                                    <span className="ml-1 inline-flex px-1 py-0.5 rounded text-[10px] bg-purple-900/30 text-purple-400">{o.profile}</span>
+                                                )}
                                             </td>
                                             <td className={`py-1.5 pr-3 ${muted}`}>{o.status}</td>
                                             <td className={`py-1.5 pr-3 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{o.price}</td>

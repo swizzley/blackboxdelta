@@ -339,6 +339,7 @@ export interface LiveData {
         symbol: string;
         direction: string;
         timeframe: string;
+        profile: string;
         status: string;
         opened: string;
         units: number;

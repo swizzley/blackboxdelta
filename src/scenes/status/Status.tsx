@@ -162,6 +162,9 @@ export default function Status() {
                                                         : <ArrowTrendingDownIcon className="w-4 h-4 text-red-500"/>}
                                                     <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{o.symbol.replace('_', '/')}</span>
                                                     <span className={muted}>{o.timeframe}</span>
+                                                    {o.profile && o.profile !== 'default' && (
+                                                        <span className="text-[10px] rounded bg-purple-900/30 text-purple-400 px-1">{o.profile}</span>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${

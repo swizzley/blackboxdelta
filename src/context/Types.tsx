@@ -276,6 +276,7 @@ export interface ApiOrder {
     symbol: string;
     direction: string;
     timeframe: string;
+    profile: string;
     status: string;
     type: string;
     price: number;
