@@ -1355,6 +1355,23 @@ const STAGE_LABELS: Record<string, string> = {
     Start: 'Starting',
     'concurrent:all': 'All Profiles',
 };
+const STAGE_TIME_EST: Record<string, Record<string, string>> = {
+    scalp: {
+        Stage0: '~30m', StageA: '~5m', StageD: '~15m', StageD2: '~10m',
+        StageD4: '~10m', StageD5: '~5m', StageB: '~10m', StageC: '~5m',
+        StageD3: '~10m', StageE: '~10m', Tier2: '~30m', Tier3: '~20m', Diagnostics: '~2m',
+    },
+    intraday: {
+        Stage0: '~10m', StageA: '~2m', StageD: '~5m', StageD2: '~3m',
+        StageD4: '~3m', StageD5: '~2m', StageB: '~3m', StageC: '~2m',
+        StageD3: '~3m', StageE: '~3m', Tier2: '~10m', Tier3: '~8m', Diagnostics: '~1m',
+    },
+    swing: {
+        Stage0: '~5m', StageA: '~1m', StageD: '~3m', StageD2: '~2m',
+        StageD4: '~2m', StageD5: '~1m', StageB: '~2m', StageC: '~1m',
+        StageD3: '~2m', StageE: '~2m', Tier2: '~5m', Tier3: '~4m', Diagnostics: '~1m',
+    },
+};
 
 // Parse a profile-prefixed stage like "meanrev:StageD3" into {profile, stage}
 function parseProfileStage(raw: string): {profile: string | null; stage: string} {
@@ -1416,21 +1433,42 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                 <div className="px-4 pb-4 space-y-3">
                     {/* Stage progress bar — concurrent profile view for scalp, linear for others */}
                     {isConcurrentScalp ? (
-                        <div className="space-y-1.5">
+                        <div className="space-y-2">
                             <p className={`text-[10px] font-medium uppercase ${muted}`}>Concurrent Profile Seeding</p>
+                            {/* Stage labels row */}
+                            <div className="flex items-end gap-2">
+                                <span className="w-16"/>
+                                <div className="flex gap-0.5 flex-1">
+                                    {SEED_STAGES.map(stage => (
+                                        <div key={stage} className="flex-1 text-center">
+                                            <p className={`text-[8px] leading-tight ${muted}`}>{STAGE_LABELS[stage] ?? stage}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <span className="w-28"/>
+                            </div>
+                            {/* Time estimates row */}
+                            <div className="flex items-end gap-2 -mt-1.5">
+                                <span className="w-16"/>
+                                <div className="flex gap-0.5 flex-1">
+                                    {SEED_STAGES.map(stage => (
+                                        <div key={stage} className="flex-1 text-center">
+                                            <p className={`text-[7px] leading-tight ${muted} opacity-60`}>{STAGE_TIME_EST[run.timeframe]?.[stage] ?? ''}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <span className="w-28"/>
+                            </div>
+                            {/* Profile progress rows */}
                             {['meanrev', 'breakout', 'stochrev'].map(pName => {
-                                // Get this profile's stage from profile_stages JSON (real-time per-profile tracking)
                                 const pStageRaw = run.profile_stages?.[pName] ?? '';
                                 const isDone = pStageRaw.startsWith('PASSED:') || pStageRaw.startsWith('FAILED:');
                                 const isPassed = pStageRaw.startsWith('PASSED:');
                                 const pStageIdx = isDone ? SEED_STAGES.length : SEED_STAGES.indexOf(pStageRaw as typeof SEED_STAGES[number]);
                                 const pStageLabel = isDone ? pStageRaw : (STAGE_LABELS[pStageRaw] ?? pStageRaw);
                                 const isActive = isRunning && !isDone && pStageRaw !== '';
-                                // Extract sharpe from "PASSED:T1:S0.1234" or "FAILED:T3:S-0.0500"
                                 const sharpeMatch = isDone ? pStageRaw.match(/S(-?\d+\.\d+)/) : null;
                                 const tierMatch = isDone ? pStageRaw.match(/T(\d)/) : null;
-
-                                // Fall back to profile_results for completed seeds
                                 const profileResult = run.profile_results?.find((p: any) => p.profile === pName);
                                 const showResult = isDone || (profileResult && !isRunning);
 
@@ -1443,7 +1481,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                         }`}>{pName}</span>
                                         <div className="flex gap-0.5 flex-1">
                                             {SEED_STAGES.map((stage, i) => (
-                                                <div key={stage} className={`h-1 flex-1 rounded-full ${
+                                                <div key={stage} className={`h-2 flex-1 rounded-full ${
                                                     showResult
                                                         ? (isPassed || profileResult?.passed ? 'bg-emerald-500' : 'bg-red-500/40')
                                                         : i < pStageIdx ? 'bg-emerald-500'
@@ -1484,6 +1522,9 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                             : done ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600')
                                             : muted
                                         }`}>{STAGE_LABELS[stage] ?? stage}</p>
+                                        {STAGE_TIME_EST[run.timeframe]?.[stage] && (
+                                            <p className={`text-[7px] text-center ${muted} opacity-60`}>{STAGE_TIME_EST[run.timeframe][stage]}</p>
+                                        )}
                                     </div>
                                 );
                             })}
