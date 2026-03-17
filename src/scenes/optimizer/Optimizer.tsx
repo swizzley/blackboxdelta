@@ -1357,7 +1357,7 @@ const STAGE_LABELS: Record<string, string> = {
 };
 const STAGE_TIME_EST: Record<string, Record<string, string>> = {
     scalp: {
-        Stage0: '~35m', StageA: '~15m', StageD: '~25m', StageD2: '~20m',
+        Stage0: 'skip', StageA: '~15m', StageD: '~25m', StageD2: '~20m',
         StageD4: '~20m', StageD5: '~15m', StageB: '~40m', StageC: '~10m',
         StageD3: '~20m', StageE: '~5m', Tier2: '~45m', Tier3: '~30m', Diagnostics: '~2m',
     },
