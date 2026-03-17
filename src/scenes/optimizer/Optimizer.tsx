@@ -47,6 +47,7 @@ export default function Optimizer() {
     const [profileData, setProfileData] = useState<OptimizerProfilesResponse | null>(null);
     const [profileActionLoading, setProfileActionLoading] = useState<string | null>(null);
     const [workerDirty, setWorkerDirty] = useState(false);
+    const [showProfiles, setShowProfiles] = useState(false);
     const [showSeeds, setShowSeeds] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
     const [showRecs, setShowRecs] = useState(false);
@@ -422,93 +423,101 @@ export default function Optimizer() {
                             )}
 
                             {/* Profile Management */}
-                            {profileData && profileData.profiles.length > 0 && (
+                            {profileData && profileData.profiles.length > 0 && (() => {
+                                const enabledCount = profileData.profiles.filter(p => p.enabled).length;
+                                const disabledCount = profileData.profiles.length - enabledCount;
+                                return (
                                 <div className={`${card} mb-6`}>
-                                    <h2 className={heading}>
-                                        <BeakerIcon className={iconCl}/>Scalp Profile Management
+                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowProfiles(s => !s)}>
+                                        <BeakerIcon className={iconCl}/>Scalp Profiles
+                                        <span className={`text-xs font-normal font-mono ${muted} ml-1`}>
+                                            {enabledCount}/{profileData.profiles.length} active
+                                        </span>
+                                        {profileData.aggregate && (
+                                            <span className={`text-xs font-normal font-mono ${muted}`}>
+                                                S:{profileData.aggregate.sharpe_ratio.toFixed(2)} WR:{profileData.aggregate.win_rate.toFixed(0)}% {profileData.aggregate.total_trades}t PF:{profileData.aggregate.profit_factor.toFixed(2)}
+                                            </span>
+                                        )}
+                                        {disabledCount > 0 && (
+                                            <span className={`text-xs font-normal font-mono ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{disabledCount} disabled</span>
+                                        )}
+                                        <span className="ml-auto flex-shrink-0">
+                                            {showProfiles ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                                        </span>
                                     </h2>
-                                    <div className="space-y-2">
-                                        {profileData.profiles.map(p => (
-                                            <div key={p.name} className={`flex flex-wrap items-center gap-3 p-3 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                                <span className={`font-mono text-sm font-medium w-20 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                                                    {p.name}
-                                                </span>
-                                                <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                                                    p.enabled
-                                                        ? isDarkMode ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700'
-                                                        : isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700'
-                                                }`}>
-                                                    {p.enabled ? 'ENABLED' : 'DISABLED'}
-                                                </span>
-                                                {p.stats && (
-                                                    <div className={`flex gap-3 text-xs ${muted}`}>
-                                                        <span>S:{p.stats.sharpe_ratio.toFixed(2)}</span>
-                                                        <span>WR:{p.stats.win_rate.toFixed(0)}%</span>
-                                                        <span>{p.stats.total_trades}t</span>
-                                                        <span>PF:{p.stats.profit_factor.toFixed(2)}</span>
-                                                    </div>
-                                                )}
-                                                <div className="ml-auto flex gap-1.5">
-                                                    <button
-                                                        disabled={profileActionLoading === p.name}
-                                                        onClick={async () => {
-                                                            setProfileActionLoading(p.name);
-                                                            if (p.enabled) {
-                                                                await disableProfile(p.name);
-                                                            } else {
-                                                                await enableProfile(p.name);
-                                                            }
-                                                            setProfileActionLoading(null);
-                                                            loadData();
-                                                        }}
-                                                        className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
-                                                            profileActionLoading === p.name
-                                                                ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                : p.enabled
-                                                                    ? isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'
-                                                                    : isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
-                                                        }`}
-                                                    >
-                                                        {p.enabled ? 'Disable' : 'Enable'}
-                                                    </button>
-                                                    {!p.enabled && (
+                                    {showProfiles && (
+                                        <>
+                                        <div className="space-y-1.5">
+                                            {profileData.profiles.map(p => (
+                                                <div key={p.name} className={`flex flex-wrap items-center gap-2 px-3 py-1.5 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                    <span className={`font-mono text-xs font-medium w-20 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
+                                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                                                        p.enabled
+                                                            ? isDarkMode ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700'
+                                                            : isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700'
+                                                    }`}>
+                                                        {p.enabled ? 'ON' : 'OFF'}
+                                                    </span>
+                                                    {p.stats && (
+                                                        <span className={`text-[10px] font-mono ${muted}`}>
+                                                            S:{p.stats.sharpe_ratio.toFixed(2)} WR:{p.stats.win_rate.toFixed(0)}% {p.stats.total_trades}t PF:{p.stats.profit_factor.toFixed(2)}
+                                                        </span>
+                                                    )}
+                                                    <div className="ml-auto flex gap-1">
                                                         <button
                                                             disabled={profileActionLoading === p.name}
-                                                            onClick={async () => {
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
                                                                 setProfileActionLoading(p.name);
-                                                                await reseedProfile(p.name);
+                                                                if (p.enabled) {
+                                                                    await disableProfile(p.name);
+                                                                } else {
+                                                                    await enableProfile(p.name);
+                                                                }
                                                                 setProfileActionLoading(null);
                                                                 loadData();
                                                             }}
-                                                            className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
-                                                                isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
+                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                profileActionLoading === p.name
+                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                    : p.enabled
+                                                                        ? isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'
+                                                                        : isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
                                                             }`}
                                                         >
-                                                            Re-seed
+                                                            {p.enabled ? 'Disable' : 'Enable'}
                                                         </button>
-                                                    )}
+                                                        {!p.enabled && (
+                                                            <button
+                                                                disabled={profileActionLoading === p.name}
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    setProfileActionLoading(p.name);
+                                                                    await reseedProfile(p.name);
+                                                                    setProfileActionLoading(null);
+                                                                    loadData();
+                                                                }}
+                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                    isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
+                                                                }`}
+                                                            >
+                                                                Re-seed
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    {profileData.aggregate && (
-                                        <div className={`mt-3 pt-3 border-t ${isDarkMode ? 'border-slate-600' : 'border-gray-200'}`}>
-                                            <div className={`flex gap-4 text-xs ${muted}`}>
-                                                <span className="font-medium">Aggregate:</span>
-                                                <span>S:{profileData.aggregate.sharpe_ratio.toFixed(2)}</span>
-                                                <span>WR:{profileData.aggregate.win_rate.toFixed(0)}%</span>
-                                                <span>{profileData.aggregate.total_trades}t</span>
-                                                <span>PF:{profileData.aggregate.profit_factor.toFixed(2)}</span>
-                                            </div>
+                                            ))}
                                         </div>
-                                    )}
-                                    {profileData.probe_history && profileData.probe_history.length > 0 && (
-                                        <div className={`mt-2 text-xs ${muted}`}>
-                                            Last probe: {profileData.probe_history[0].profile} (gen {profileData.probe_history[0].generation_id}) — {profileData.probe_history[0].status.toUpperCase()}
-                                        </div>
+                                        {profileData.probe_history && profileData.probe_history.length > 0 && (
+                                            <div className={`mt-2 text-[10px] ${muted}`}>
+                                                Last probe: {profileData.probe_history[0].profile} (gen {profileData.probe_history[0].generation_id}) — {profileData.probe_history[0].status.toUpperCase()}
+                                            </div>
+                                        )}
+                                        </>
                                     )}
                                 </div>
-                            )}
+                                );
+                            })()}
 
                             {/* Seed Calibration Runs */}
                             {seedRuns.length > 0 && (
