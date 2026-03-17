@@ -1638,7 +1638,11 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                             const t2 = getProfileStageData<Tier2Summary>(run.tier2_results, prf);
                             const t3 = getProfileStageData<Tier3Summary>(run.tier3_results, prf);
                             const diag = getProfileStageData<SeedDiagnostics>(run.diagnostics, prf);
-                            const hasAny = s0 || sA || sD || sD2 || sD4 || sD5 || sB || sC || sD3 || sE || t2 || t3 || diag;
+                            // Detect fast-fail from profile_stages value
+                            const profileStageVal = isConcurrentScalp ? (run.profile_stages?.[prf] ?? '') : '';
+                            const isFastFail = profileStageVal.includes('fast-fail');
+
+                            const hasAny = s0 || sA || sD || sD2 || sD4 || sD5 || sB || sC || sD3 || sE || t2 || t3 || diag || isFastFail;
                             if (!hasAny) return null;
 
                             const variantChips = (variants: SeedVariantResult[]) => (
@@ -1661,6 +1665,13 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 <div key={prf} className="space-y-3">
                                     {prf !== 'default' && (
                                         <p className={`text-xs font-mono font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'} border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-300'} pb-1`}>{prf}</p>
+                                    )}
+
+                                    {isFastFail && (
+                                        <div className={`flex items-center gap-2 px-3 py-2 rounded text-xs font-mono ${isDarkMode ? 'bg-red-900/20 border border-red-800/40' : 'bg-red-50 border border-red-200'}`}>
+                                            <span className="text-red-400 font-medium">FAST-FAIL</span>
+                                            <span className={muted}>Baseline Sharpe too negative to recover — profile auto-disabled, skipped Tier 2/3</span>
+                                        </div>
                                     )}
 
                                     {s0 && s0.length > 0 && (
