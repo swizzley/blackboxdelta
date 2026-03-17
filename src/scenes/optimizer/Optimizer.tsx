@@ -1349,7 +1349,7 @@ function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
 
 // --- Seed Run Components ---
 
-const SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'Tier2', 'Tier3', 'Diagnostics'] as const;
+const ALL_SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'Tier2', 'Tier3', 'Diagnostics'] as const;
 const STAGE_LABELS: Record<string, string> = {
     Stage0: 'Weights',
     StageA: 'Baseline',
@@ -1369,20 +1369,29 @@ const STAGE_LABELS: Record<string, string> = {
     Start: 'Starting',
     'concurrent:all': 'All Profiles',
 };
+// Stages skipped per timeframe: scalp/intraday skip Stage0 (Weights) and StageC (Dampeners) — profiles have bespoke values.
+// StageD5 (Market/Limit) is scalp-only.
+function seedStagesForTf(tf: string): string[] {
+    return ALL_SEED_STAGES.filter(s => {
+        if ((tf === 'scalp' || tf === 'intraday') && (s === 'Stage0' || s === 'StageC')) return false;
+        if (tf !== 'scalp' && s === 'StageD5') return false;
+        return true;
+    });
+}
 const STAGE_TIME_EST: Record<string, Record<string, string>> = {
     scalp: {
-        Stage0: 'skip', StageA: '~15m', StageD: '~25m', StageD2: '~20m',
-        StageD4: '~20m', StageD5: '~15m', StageB: '~40m', StageC: '~10m',
+        StageA: '~15m', StageD: '~25m', StageD2: '~20m',
+        StageD4: '~20m', StageD5: '~15m', StageB: '~40m',
         StageD3: '~20m', StageE: '~5m', Tier2: '~45m', Tier3: '~30m', Diagnostics: '~2m',
     },
     intraday: {
-        Stage0: '~10m', StageA: '~5m', StageD: '~8m', StageD2: '~6m',
-        StageD4: '~6m', StageD5: '~5m', StageB: '~12m', StageC: '~3m',
+        StageA: '~5m', StageD: '~8m', StageD2: '~6m',
+        StageD4: '~6m', StageB: '~12m',
         StageD3: '~6m', StageE: '~2m', Tier2: '~15m', Tier3: '~10m', Diagnostics: '~1m',
     },
     swing: {
         Stage0: '~5m', StageA: '~2m', StageD: '~3m', StageD2: '~3m',
-        StageD4: '~3m', StageD5: '~2m', StageB: '~5m', StageC: '~1m',
+        StageD4: '~3m', StageB: '~5m', StageC: '~1m',
         StageD3: '~3m', StageE: '~1m', Tier2: '~8m', Tier3: '~5m', Diagnostics: '~1m',
     },
 };
@@ -1432,7 +1441,8 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
     const [expanded, setExpanded] = useState(false);
     const isRunning = run.status === 'running';
     const parsed = parseProfileStage(run.current_stage);
-    const currentIdx = SEED_STAGES.indexOf(parsed.stage as typeof SEED_STAGES[number]);
+    const stages = seedStagesForTf(run.timeframe);
+    const currentIdx = stages.indexOf(parsed.stage);
     const hasProfileStages = run.profile_stages != null && Object.keys(run.profile_stages).length > 0;
     const isConcurrentProfile = (run.timeframe === 'scalp' || run.timeframe === 'intraday') && (hasProfileStages || run.current_stage.startsWith('concurrent:') || parsed.profile !== null);
 
@@ -1477,7 +1487,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                             <div className="flex items-end gap-2">
                                 <span className="w-16"/>
                                 <div className="flex gap-0.5 flex-1">
-                                    {SEED_STAGES.map(stage => (
+                                    {stages.map(stage => (
                                         <div key={stage} className="flex-1 text-center">
                                             <p className={`text-[8px] leading-tight ${muted}`}>{STAGE_LABELS[stage] ?? stage}</p>
                                         </div>
@@ -1489,7 +1499,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                             <div className="flex items-end gap-2 -mt-1.5">
                                 <span className="w-16"/>
                                 <div className="flex gap-0.5 flex-1">
-                                    {SEED_STAGES.map(stage => (
+                                    {stages.map(stage => (
                                         <div key={stage} className="flex-1 text-center">
                                             <p className={`text-[7px] leading-tight ${muted} opacity-60`}>{STAGE_TIME_EST[run.timeframe]?.[stage] ?? ''}</p>
                                         </div>
@@ -1502,7 +1512,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 const pStageRaw = run.profile_stages?.[pName] ?? '';
                                 const isDone = pStageRaw.startsWith('PASSED:') || pStageRaw.startsWith('FAILED:');
                                 const isPassed = pStageRaw.startsWith('PASSED:');
-                                const pStageIdx = isDone ? SEED_STAGES.length : SEED_STAGES.indexOf(pStageRaw as typeof SEED_STAGES[number]);
+                                const pStageIdx = isDone ? stages.length : stages.indexOf(pStageRaw);
                                 const pStageLabel = isDone ? pStageRaw : (STAGE_LABELS[pStageRaw] ?? pStageRaw);
                                 const isActive = isRunning && !isDone && pStageRaw !== '';
                                 const sharpeMatch = isDone ? pStageRaw.match(/S(-?\d+\.\d+)/) : null;
@@ -1518,7 +1528,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                             : muted
                                         }`}>{pName}</span>
                                         <div className="flex gap-0.5 flex-1">
-                                            {SEED_STAGES.map((stage, i) => (
+                                            {stages.map((stage, i) => (
                                                 <div key={stage} className={`h-2 flex-1 rounded-full ${
                                                     showResult
                                                         ? (isPassed || profileResult?.passed ? 'bg-emerald-500' : 'bg-red-500/40')
@@ -1545,7 +1555,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                         </div>
                     ) : (
                         <div className="flex gap-1 overflow-x-auto pb-1">
-                            {SEED_STAGES.map((stage, i) => {
+                            {stages.map((stage, i) => {
                                 const done = i < currentIdx || run.status === 'completed';
                                 const active = i === currentIdx && isRunning;
                                 return (
