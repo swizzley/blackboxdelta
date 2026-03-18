@@ -9,7 +9,7 @@ import {
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
-    fetchOptimizerAllProfiles, enableProfile, disableProfile, reseedProfile,
+    fetchOptimizerAllProfiles, enableProfile, disableProfile, reseedProfile, retrySeedProfile,
     pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation,
 } from '../../api/client';
 import type {
@@ -535,7 +535,10 @@ export default function Optimizer() {
                                     {showSeeds && (
                                         <div className="space-y-3">
                                             {seedRuns.map(sr => (
-                                                <SeedRunCard key={sr.id} run={sr} isDarkMode={isDarkMode} muted={muted}/>
+                                                <SeedRunCard key={sr.id} run={sr} isDarkMode={isDarkMode} muted={muted} onRefresh={async () => {
+                                                    const fresh = await fetchOptimizerSeedRuns(undefined, undefined, 10);
+                                                    if (fresh) setSeedRuns(fresh);
+                                                }}/>
                                             ))}
                                         </div>
                                     )}
@@ -1437,7 +1440,7 @@ function formatStageLabel(raw: string): string {
     return profile ? `${profile}: ${label}` : label;
 }
 
-function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolean; muted: string}) {
+function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkMode: boolean; muted: string; onRefresh?: () => void}) {
     const [expanded, setExpanded] = useState(false);
     const [openProfiles, setOpenProfiles] = useState<Set<string>>(new Set());
     const isRunning = run.status === 'running';
@@ -1662,6 +1665,21 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                             {p.win_rate > 0 && <span className={muted}>WR:{p.win_rate.toFixed(0)}%</span>}
                                             {p.configs_tested > 0 && <span className={muted}>{p.configs_tested} configs</span>}
                                             {p.error && <span className="text-red-400">{p.error}</span>}
+                                            {!p.passed && (run.status === 'resumable' || run.status === 'running') && (
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        await retrySeedProfile(p.profile, run.timeframe);
+                                                        onRefresh?.();
+                                                    }}
+                                                    className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                                                        isDarkMode ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-800/40' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                                    } transition-colors`}
+                                                    title={`Clear checkpoint and retry ${p.profile} from scratch`}
+                                                >
+                                                    RETRY
+                                                </button>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

@@ -230,6 +230,10 @@ export function reseedProfile(name: string, timeframe: string = 'scalp'): Promis
     return apiPost(`/api/optimizer/profiles/${name}/reseed?timeframe=${timeframe}`, {});
 }
 
+export function retrySeedProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/retry-seed?timeframe=${timeframe}`, {});
+}
+
 // Worker allocation
 export function fetchOptimizerWorkers(): Promise<OptimizerWorkerConfig | null> {
     return apiFetch('/api/optimizer/workers');
