@@ -1521,15 +1521,17 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 const tierMatch = isDone ? pStageRaw.match(/T(\d)/) : null;
                                 const profileResult = run.profile_results?.find((p: any) => p.profile === pName);
                                 const showResult = isDone || (profileResult && !isRunning);
+                                const pSA = getProfileStageData<SeedVariantResult[]>(run.stagea_results, pName);
+                                const pInverted = pSA?.some(v => v.label === 'inverted-direction' && v.winner);
 
                                 return (
                                     <div key={pName} className="flex items-center gap-2">
-                                        <span className={`text-[10px] font-mono w-16 ${
+                                        <span className={`text-[10px] font-mono w-16 flex items-center gap-1 ${
                                             isSkipped ? muted
                                             : isDone ? (isPassed ? 'text-emerald-400' : 'text-red-400')
                                             : isActive ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
                                             : muted
-                                        }`}>{pName}</span>
+                                        }`}>{pName}{pInverted && <span className="text-amber-400" title="Direction inverted">⟲</span>}</span>
                                         <div className="flex gap-0.5 flex-1">
                                             {stages.map((stage, i) => (
                                                 <div key={stage} className={`h-2 flex-1 rounded-full ${
@@ -1740,6 +1742,8 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
 
                             // Get profile result summary for inline display
                             const profileResult = (run.profile_results as any[])?.find((p: any) => p.profile === prf);
+                            const sAForBadge = getProfileStageData<SeedVariantResult[]>(run.stagea_results, prf);
+                            const isInverted = sAForBadge?.some(v => v.label === 'inverted-direction' && v.winner);
 
                             return (
                                 <div key={prf} className="mb-1">
@@ -1749,6 +1753,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                     >
                                         <span className={`transform transition-transform text-[10px] ${isOpen ? 'rotate-90' : ''}`}>▶</span>
                                         <span className={`text-xs font-mono font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>{prf === 'default' ? 'default' : prf}</span>
+                                        {isInverted && <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${isDarkMode ? 'bg-amber-900/30 text-amber-400 ring-1 ring-amber-700/50' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}>INV</span>}
                                         {isFastFail && <span className="text-[10px] text-red-400 font-mono">FAST-FAIL</span>}
                                         {profileResult && (
                                             <span className={`text-[10px] font-mono ${profileResult.sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>S:{fmtNum(profileResult.sharpe)}</span>
@@ -1780,7 +1785,7 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                         </SeedStageSection>
                                     )}
 
-                                    {sA && sA.length > 0 && <SeedStageSection title="Baseline — Raw Signal Variants" isDarkMode={isDarkMode} muted={muted}>{variantChips(sA)}</SeedStageSection>}
+                                    {sA && sA.length > 0 && <SeedStageSection title={sA.some(v => v.label === 'inverted-direction') ? 'Baseline + Inversion Test' : 'Baseline — Raw Signal Variants'} isDarkMode={isDarkMode} muted={muted}>{variantChips(sA)}</SeedStageSection>}
                                     {sD && sD.length > 0 && <SeedStageSection title="Entry — Strategy Sweep" isDarkMode={isDarkMode} muted={muted}>{variantChips(sD)}</SeedStageSection>}
                                     {sD2 && sD2.length > 0 && <SeedStageSection title="R:R Threshold — Min Risk:Reward" isDarkMode={isDarkMode} muted={muted}>{variantChips(sD2)}</SeedStageSection>}
                                     {sD4 && sD4.length > 0 && <SeedStageSection title="Trail — Trailing Stop Sweep" isDarkMode={isDarkMode} muted={muted}>{variantChips(sD4)}</SeedStageSection>}
