@@ -1765,13 +1765,6 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                     {isOpen && (
                                     <div className={`space-y-3 ml-4 mt-1 pl-2 border-l-2 ${isDarkMode ? 'border-purple-800/40' : 'border-purple-200'}`}>
 
-                                    {isFastFail && (
-                                        <div className={`flex items-center gap-2 px-3 py-2 rounded text-xs font-mono ${isDarkMode ? 'bg-red-900/20 border border-red-800/40' : 'bg-red-50 border border-red-200'}`}>
-                                            <span className="text-red-400 font-medium">FAST-FAIL</span>
-                                            <span className={muted}>Baseline Sharpe too negative to recover — profile auto-disabled, skipped Tier 2/3</span>
-                                        </div>
-                                    )}
-
                                     {s0 && s0.length > 0 && (
                                         <SeedStageSection title="Weights — Component Ranking" isDarkMode={isDarkMode} muted={muted}>
                                             <div className="flex flex-wrap gap-1">
