@@ -1692,7 +1692,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                     <div>
                         {(() => {
                         const profiles = isConcurrentProfile
-                            ? (run.profile_stages ? Object.keys(run.profile_stages) : getStageProfiles(run.stagea_results))
+                            ? (run.profile_stages ? Object.keys(run.profile_stages).filter(k => k !== 'concurrent' && k !== 'all') : getStageProfiles(run.stagea_results))
                             : ['default'];
                         const allHaveData = profiles.filter(prf => {
                             const hasAny = getProfileStageData(run.stage0_results, prf) || getProfileStageData(run.stagea_results, prf) || getProfileStageData(run.staged_results, prf) || getProfileStageData(run.stageb_results, prf) || getProfileStageData(run.stagec_results, prf) || getProfileStageData(run.stagee_results, prf) || getProfileStageData(run.tier2_results, prf) || getProfileStageData(run.tier3_results, prf) || getProfileStageData(run.diagnostics, prf) || (isConcurrentProfile && (run.profile_stages?.[prf] ?? '') !== '');
