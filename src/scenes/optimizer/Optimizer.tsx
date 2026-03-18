@@ -1695,7 +1695,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                             ? (run.profile_stages ? Object.keys(run.profile_stages) : getStageProfiles(run.stagea_results))
                             : ['default'];
                         const allHaveData = profiles.filter(prf => {
-                            const hasAny = getProfileStageData(run.stage0_results, prf) || getProfileStageData(run.stagea_results, prf) || getProfileStageData(run.staged_results, prf) || getProfileStageData(run.stageb_results, prf) || getProfileStageData(run.stagec_results, prf) || getProfileStageData(run.stagee_results, prf) || getProfileStageData(run.tier2_results, prf) || getProfileStageData(run.tier3_results, prf) || getProfileStageData(run.diagnostics, prf) || (isConcurrentProfile && (run.profile_stages?.[prf] ?? '').includes('fast-fail'));
+                            const hasAny = getProfileStageData(run.stage0_results, prf) || getProfileStageData(run.stagea_results, prf) || getProfileStageData(run.staged_results, prf) || getProfileStageData(run.stageb_results, prf) || getProfileStageData(run.stagec_results, prf) || getProfileStageData(run.stagee_results, prf) || getProfileStageData(run.tier2_results, prf) || getProfileStageData(run.tier3_results, prf) || getProfileStageData(run.diagnostics, prf) || (isConcurrentProfile && (run.profile_stages?.[prf] ?? '') !== '');
                             return hasAny;
                         });
                         if (allHaveData.length === 0) return null;
@@ -1784,7 +1784,25 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                                     : isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'
                                             }`}>{profileResult.passed ? 'PASS' : 'FAIL'}</span>
                                         )}
+                                        {!profileResult && profileStageVal && (
+                                            <span className={`text-[10px] font-mono px-1 py-0.5 rounded ${isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-gray-200 text-gray-600'}`}>{profileStageVal}</span>
+                                        )}
                                     </button>
+                                    {(profileResult && !profileResult.passed || isFastFail || (!profileResult && profileStageVal === 'Resume')) && (run.status === 'resumable' || run.status === 'running' || run.status === 'failed') && (
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                await retrySeedProfile(prf, run.timeframe);
+                                                onRefresh?.();
+                                            }}
+                                            className={`ml-6 mb-1 px-2 py-0.5 rounded text-[10px] font-medium ${
+                                                isDarkMode ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-800/40' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                            } transition-colors`}
+                                            title={`Clear checkpoint and retry ${prf} from scratch`}
+                                        >
+                                            RETRY
+                                        </button>
+                                    )}
                                     {isOpen && (
                                     <div className={`space-y-3 ml-4 mt-1 pl-2 border-l-2 ${isDarkMode ? 'border-purple-800/40' : 'border-purple-200'}`}>
 
