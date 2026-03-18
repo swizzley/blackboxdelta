@@ -1508,8 +1508,8 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 </div>
                                 <span className="w-28"/>
                             </div>
-                            {/* Profile progress rows */}
-                            {(run.profile_stages ? Object.keys(run.profile_stages) : []).map(pName => {
+                            {/* Profile progress rows — filter out 'concurrent' metadata key */}
+                            {(run.profile_stages ? Object.keys(run.profile_stages).filter(k => k !== 'concurrent') : []).map(pName => {
                                 const pStageRaw = run.profile_stages?.[pName] ?? '';
                                 const isDone = pStageRaw.startsWith('PASSED:') || pStageRaw.startsWith('FAILED:');
                                 const isPassed = pStageRaw.startsWith('PASSED:');
@@ -1553,6 +1553,33 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                     </div>
                                 );
                             })}
+                            {/* Overall progress summary bar */}
+                            {(() => {
+                                const profileKeys = Object.keys(run.profile_stages ?? {}).filter(k => k !== 'concurrent');
+                                const total = profileKeys.length;
+                                if (total === 0) return null;
+                                const done = profileKeys.filter(k => {
+                                    const v = run.profile_stages?.[k] ?? '';
+                                    return v.startsWith('PASSED:') || v.startsWith('FAILED:');
+                                }).length;
+                                const passed = profileKeys.filter(k => (run.profile_stages?.[k] ?? '').startsWith('PASSED:')).length;
+                                const failed = done - passed;
+                                const pct = Math.round((done / total) * 100);
+                                return (
+                                    <div className={`flex items-center gap-2 pt-1 mt-1 border-t ${isDarkMode ? 'border-slate-600/50' : 'border-gray-300'}`}>
+                                        <span className={`text-[10px] font-medium w-16 ${muted}`}>total</span>
+                                        <div className={`flex-1 h-2.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-300'}`}>
+                                            <div className="h-full flex">
+                                                {passed > 0 && <div className="bg-emerald-500 h-full" style={{width: `${(passed / total) * 100}%`}}/>}
+                                                {failed > 0 && <div className="bg-red-500/60 h-full" style={{width: `${(failed / total) * 100}%`}}/>}
+                                            </div>
+                                        </div>
+                                        <span className={`text-[10px] font-mono w-28 text-right ${muted}`}>
+                                            {done}/{total} done{isRunning ? ` (${pct}%)` : ''}{passed > 0 ? ` · ${passed}✓` : ''}{failed > 0 ? ` · ${failed}✗` : ''}
+                                        </span>
+                                    </div>
+                                );
+                            })()}
                         </div>
                     ) : (
                         <div className="flex gap-1 overflow-x-auto pb-1">
