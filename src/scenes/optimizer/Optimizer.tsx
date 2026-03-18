@@ -1511,8 +1511,8 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                 </div>
                                 <span className="w-28"/>
                             </div>
-                            {/* Profile progress rows — filter out 'concurrent' metadata key */}
-                            {(run.profile_stages ? Object.keys(run.profile_stages).filter(k => k !== 'concurrent') : []).map(pName => {
+                            {/* Profile progress rows — filter out metadata keys */}
+                            {(run.profile_stages ? Object.keys(run.profile_stages).filter(k => k !== 'concurrent' && k !== 'all') : []).map(pName => {
                                 const pStageRaw = run.profile_stages?.[pName] ?? '';
                                 const isSkipped = pStageRaw.startsWith('SKIPPED:');
                                 const isDone = pStageRaw.startsWith('PASSED:') || pStageRaw.startsWith('FAILED:') || isSkipped;
@@ -1560,12 +1560,27 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                                 : isActive ? pStageLabel
                                                 : pStageRaw === '' ? 'queued' : pStageLabel}
                                         </span>
+                                        {isDone && !isPassed && !isSkipped && (run.status === 'resumable' || run.status === 'running' || run.status === 'failed') && (
+                                            <button
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    await retrySeedProfile(pName, run.timeframe);
+                                                    onRefresh?.();
+                                                }}
+                                                className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                                                    isDarkMode ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-800/40' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                                } transition-colors`}
+                                                title={`Clear checkpoint and retry ${pName} from scratch`}
+                                            >
+                                                ↻
+                                            </button>
+                                        )}
                                     </div>
                                 );
                             })}
                             {/* Overall progress summary bar */}
                             {(() => {
-                                const profileKeys = Object.keys(run.profile_stages ?? {}).filter(k => k !== 'concurrent');
+                                const profileKeys = Object.keys(run.profile_stages ?? {}).filter(k => k !== 'concurrent' && k !== 'all');
                                 const total = profileKeys.length;
                                 if (total === 0) return null;
                                 const done = profileKeys.filter(k => {
@@ -1665,21 +1680,6 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                             {p.win_rate > 0 && <span className={muted}>WR:{p.win_rate.toFixed(0)}%</span>}
                                             {p.configs_tested > 0 && <span className={muted}>{p.configs_tested} configs</span>}
                                             {p.error && <span className="text-red-400">{p.error}</span>}
-                                            {!p.passed && (run.status === 'resumable' || run.status === 'running' || run.status === 'failed') && (
-                                                <button
-                                                    onClick={async (e) => {
-                                                        e.stopPropagation();
-                                                        await retrySeedProfile(p.profile, run.timeframe);
-                                                        onRefresh?.();
-                                                    }}
-                                                    className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                                                        isDarkMode ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-800/40' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                                                    } transition-colors`}
-                                                    title={`Clear checkpoint and retry ${p.profile} from scratch`}
-                                                >
-                                                    RETRY
-                                                </button>
-                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -1788,21 +1788,6 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                             <span className={`text-[10px] font-mono px-1 py-0.5 rounded ${isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-gray-200 text-gray-600'}`}>{profileStageVal}</span>
                                         )}
                                     </button>
-                                    {(profileResult && !profileResult.passed || isFastFail || (!profileResult && profileStageVal === 'Resume')) && (run.status === 'resumable' || run.status === 'running' || run.status === 'failed') && (
-                                        <button
-                                            onClick={async (e) => {
-                                                e.stopPropagation();
-                                                await retrySeedProfile(prf, run.timeframe);
-                                                onRefresh?.();
-                                            }}
-                                            className={`ml-6 mb-1 px-2 py-0.5 rounded text-[10px] font-medium ${
-                                                isDarkMode ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-800/40' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                                            } transition-colors`}
-                                            title={`Clear checkpoint and retry ${prf} from scratch`}
-                                        >
-                                            RETRY
-                                        </button>
-                                    )}
                                     {isOpen && (
                                     <div className={`space-y-3 ml-4 mt-1 pl-2 border-l-2 ${isDarkMode ? 'border-purple-800/40' : 'border-purple-200'}`}>
 
