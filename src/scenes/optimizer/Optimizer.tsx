@@ -1439,7 +1439,7 @@ function formatStageLabel(raw: string): string {
 
 function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolean; muted: string}) {
     const [expanded, setExpanded] = useState(false);
-    const [profileDetailsOpen, setProfileDetailsOpen] = useState(false);
+    const [openProfiles, setOpenProfiles] = useState<Set<string>>(new Set());
     const isRunning = run.status === 'running';
     const parsed = parseProfileStage(run.current_stage);
     const stages = seedStagesForTf(run.timeframe);
@@ -1634,20 +1634,35 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                         );
                     })()}
 
-                    {/* Per-profile stage details — collapsed by default */}
+                    {/* Per-profile stage details — each profile individually expandable */}
                     <div>
-                        <button
-                            onClick={() => setProfileDetailsOpen(!profileDetailsOpen)}
-                            className={`flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider mt-1 mb-2 ${isDarkMode ? 'text-slate-400 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
-                        >
-                            <span className={`transform transition-transform ${profileDetailsOpen ? 'rotate-90' : ''}`}>▶</span>
-                            Profile stage details
-                        </button>
-                    {profileDetailsOpen && (() => {
+                        {(() => {
                         const profiles = isConcurrentProfile
                             ? (run.profile_stages ? Object.keys(run.profile_stages) : getStageProfiles(run.stagea_results))
                             : ['default'];
-                        return profiles.map(prf => {
+                        const allHaveData = profiles.filter(prf => {
+                            const hasAny = getProfileStageData(run.stage0_results, prf) || getProfileStageData(run.stagea_results, prf) || getProfileStageData(run.staged_results, prf) || getProfileStageData(run.stageb_results, prf) || getProfileStageData(run.stagec_results, prf) || getProfileStageData(run.stagee_results, prf) || getProfileStageData(run.tier2_results, prf) || getProfileStageData(run.tier3_results, prf) || getProfileStageData(run.diagnostics, prf) || (isConcurrentProfile && (run.profile_stages?.[prf] ?? '').includes('fast-fail'));
+                            return hasAny;
+                        });
+                        if (allHaveData.length === 0) return null;
+                        const allOpen = allHaveData.every(p => openProfiles.has(p));
+                        return (
+                        <>
+                        <button
+                            onClick={() => {
+                                setOpenProfiles(prev => {
+                                    const next = new Set(prev);
+                                    if (allOpen) { allHaveData.forEach(p => next.delete(p)); }
+                                    else { allHaveData.forEach(p => next.add(p)); }
+                                    return next;
+                                });
+                            }}
+                            className={`flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider mt-1 mb-2 ${isDarkMode ? 'text-slate-400 hover:text-slate-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
+                        >
+                            <span className={`transform transition-transform ${allOpen ? 'rotate-90' : ''}`}>▶</span>
+                            {allOpen ? 'Collapse all profiles' : 'Profile stage details'}
+                        </button>
+                        {allHaveData.map(prf => {
                             const s0 = getProfileStageData<SeedComponentResult[]>(run.stage0_results, prf);
                             const sA = getProfileStageData<SeedVariantResult[]>(run.stagea_results, prf);
                             const sD = getProfileStageData<SeedVariantResult[]>(run.staged_results, prf);
@@ -1661,12 +1676,17 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                             const t2 = getProfileStageData<Tier2Summary>(run.tier2_results, prf);
                             const t3 = getProfileStageData<Tier3Summary>(run.tier3_results, prf);
                             const diag = getProfileStageData<SeedDiagnostics>(run.diagnostics, prf);
-                            // Detect fast-fail from profile_stages value
                             const profileStageVal = isConcurrentProfile ? (run.profile_stages?.[prf] ?? '') : '';
                             const isFastFail = profileStageVal.includes('fast-fail');
+                            const isOpen = openProfiles.has(prf);
 
-                            const hasAny = s0 || sA || sD || sD2 || sD4 || sD5 || sB || sC || sD3 || sE || t2 || t3 || diag || isFastFail;
-                            if (!hasAny) return null;
+                            const toggleProfile = () => {
+                                setOpenProfiles(prev => {
+                                    const next = new Set(prev);
+                                    if (next.has(prf)) next.delete(prf); else next.add(prf);
+                                    return next;
+                                });
+                            };
 
                             const variantChips = (variants: SeedVariantResult[]) => (
                                 <div className="flex flex-wrap gap-1">
@@ -1684,11 +1704,32 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 </div>
                             );
 
+                            // Get profile result summary for inline display
+                            const profileResult = (run.profile_results as any[])?.find((p: any) => p.profile === prf);
+
                             return (
-                                <div key={prf} className="space-y-3">
-                                    {prf !== 'default' && (
-                                        <p className={`text-xs font-mono font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'} border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-300'} pb-1`}>{prf}</p>
-                                    )}
+                                <div key={prf} className="mb-1">
+                                    <button
+                                        onClick={toggleProfile}
+                                        className={`flex items-center gap-2 w-full text-left py-1 px-1 rounded ${isDarkMode ? 'hover:bg-slate-800/60' : 'hover:bg-gray-200/60'} transition-colors`}
+                                    >
+                                        <span className={`transform transition-transform text-[10px] ${isOpen ? 'rotate-90' : ''}`}>▶</span>
+                                        <span className={`text-xs font-mono font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`}>{prf === 'default' ? 'default' : prf}</span>
+                                        {isFastFail && <span className="text-[10px] text-red-400 font-mono">FAST-FAIL</span>}
+                                        {profileResult && (
+                                            <span className={`text-[10px] font-mono ${profileResult.sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>S:{fmtNum(profileResult.sharpe)}</span>
+                                        )}
+                                        {profileResult && profileResult.trades > 0 && <span className={`text-[10px] font-mono ${muted}`}>{profileResult.trades}t</span>}
+                                        {profileResult && (
+                                            <span className={`text-[10px] font-mono px-1 py-0.5 rounded ${
+                                                profileResult.passed
+                                                    ? isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
+                                                    : isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'
+                                            }`}>{profileResult.passed ? 'PASS' : 'FAIL'}</span>
+                                        )}
+                                    </button>
+                                    {isOpen && (
+                                    <div className={`space-y-3 ml-4 mt-1 pl-2 border-l-2 ${isDarkMode ? 'border-purple-800/40' : 'border-purple-200'}`}>
 
                                     {isFastFail && (
                                         <div className={`flex items-center gap-2 px-3 py-2 rounded text-xs font-mono ${isDarkMode ? 'bg-red-900/20 border border-red-800/40' : 'bg-red-50 border border-red-200'}`}>
@@ -1878,9 +1919,13 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                             </div>
                                         </SeedStageSection>
                                     )}
+                                    </div>
+                                    )}
                                 </div>
                             );
-                        });
+                        })}
+                        </>
+                        );
                     })()}
                     </div>
                 </div>
