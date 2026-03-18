@@ -1511,7 +1511,8 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                             {/* Profile progress rows — filter out 'concurrent' metadata key */}
                             {(run.profile_stages ? Object.keys(run.profile_stages).filter(k => k !== 'concurrent') : []).map(pName => {
                                 const pStageRaw = run.profile_stages?.[pName] ?? '';
-                                const isDone = pStageRaw.startsWith('PASSED:') || pStageRaw.startsWith('FAILED:');
+                                const isSkipped = pStageRaw.startsWith('SKIPPED:');
+                                const isDone = pStageRaw.startsWith('PASSED:') || pStageRaw.startsWith('FAILED:') || isSkipped;
                                 const isPassed = pStageRaw.startsWith('PASSED:');
                                 const pStageIdx = isDone ? stages.length : stages.indexOf(pStageRaw);
                                 const pStageLabel = isDone ? pStageRaw : (STAGE_LABELS[pStageRaw] ?? pStageRaw);
@@ -1524,14 +1525,16 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 return (
                                     <div key={pName} className="flex items-center gap-2">
                                         <span className={`text-[10px] font-mono w-16 ${
-                                            isDone ? (isPassed ? 'text-emerald-400' : 'text-red-400')
+                                            isSkipped ? muted
+                                            : isDone ? (isPassed ? 'text-emerald-400' : 'text-red-400')
                                             : isActive ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
                                             : muted
                                         }`}>{pName}</span>
                                         <div className="flex gap-0.5 flex-1">
                                             {stages.map((stage, i) => (
                                                 <div key={stage} className={`h-2 flex-1 rounded-full ${
-                                                    showResult
+                                                    isSkipped ? (isDarkMode ? 'bg-slate-700/50' : 'bg-gray-200')
+                                                    : showResult
                                                         ? (isPassed || profileResult?.passed ? 'bg-emerald-500' : 'bg-red-500/40')
                                                         : i < pStageIdx ? 'bg-emerald-500'
                                                         : i === pStageIdx && isActive ? 'bg-cyan-500 animate-pulse'
@@ -1540,12 +1543,14 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                             ))}
                                         </div>
                                         <span className={`text-[10px] font-mono w-28 text-right ${
-                                            showResult
+                                            isSkipped ? muted
+                                            : showResult
                                                 ? (isPassed || profileResult?.passed ? 'text-emerald-400' : 'text-red-400')
                                                 : isActive ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
                                                 : muted
                                         }`}>
-                                            {showResult
+                                            {isSkipped ? 'skipped'
+                                                : showResult
                                                 ? `${isPassed || profileResult?.passed ? 'PASS' : 'FAIL'} T${tierMatch?.[1] ?? profileResult?.tier ?? '?'} S:${sharpeMatch ? fmtNum(parseFloat(sharpeMatch[1])) : profileResult ? fmtNum(profileResult.sharpe) : '?'}`
                                                 : isActive ? pStageLabel
                                                 : pStageRaw === '' ? 'queued' : pStageLabel}
@@ -1560,10 +1565,11 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                 if (total === 0) return null;
                                 const done = profileKeys.filter(k => {
                                     const v = run.profile_stages?.[k] ?? '';
-                                    return v.startsWith('PASSED:') || v.startsWith('FAILED:');
+                                    return v.startsWith('PASSED:') || v.startsWith('FAILED:') || v.startsWith('SKIPPED:');
                                 }).length;
                                 const passed = profileKeys.filter(k => (run.profile_stages?.[k] ?? '').startsWith('PASSED:')).length;
-                                const failed = done - passed;
+                                const skipped = profileKeys.filter(k => (run.profile_stages?.[k] ?? '').startsWith('SKIPPED:')).length;
+                                const failed = done - passed - skipped;
                                 const pct = Math.round((done / total) * 100);
                                 return (
                                     <div className={`flex items-center gap-2 pt-1 mt-1 border-t ${isDarkMode ? 'border-slate-600/50' : 'border-gray-300'}`}>
@@ -1572,10 +1578,11 @@ function SeedRunCard({run, isDarkMode, muted}: {run: SeedRun; isDarkMode: boolea
                                             <div className="h-full flex">
                                                 {passed > 0 && <div className="bg-emerald-500 h-full" style={{width: `${(passed / total) * 100}%`}}/>}
                                                 {failed > 0 && <div className="bg-red-500/60 h-full" style={{width: `${(failed / total) * 100}%`}}/>}
+                                                {skipped > 0 && <div className={`h-full ${isDarkMode ? 'bg-slate-600' : 'bg-gray-400'}`} style={{width: `${(skipped / total) * 100}%`}}/>}
                                             </div>
                                         </div>
                                         <span className={`text-[10px] font-mono w-28 text-right ${muted}`}>
-                                            {done}/{total} done{isRunning ? ` (${pct}%)` : ''}{passed > 0 ? ` · ${passed}✓` : ''}{failed > 0 ? ` · ${failed}✗` : ''}
+                                            {done}/{total} done{isRunning ? ` (${pct}%)` : ''}{passed > 0 ? ` · ${passed}✓` : ''}{failed > 0 ? ` · ${failed}✗` : ''}{skipped > 0 ? ` · ${skipped}⊘` : ''}
                                         </span>
                                     </div>
                                 );
