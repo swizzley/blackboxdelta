@@ -1665,7 +1665,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                             {p.win_rate > 0 && <span className={muted}>WR:{p.win_rate.toFixed(0)}%</span>}
                                             {p.configs_tested > 0 && <span className={muted}>{p.configs_tested} configs</span>}
                                             {p.error && <span className="text-red-400">{p.error}</span>}
-                                            {!p.passed && (run.status === 'resumable' || run.status === 'running') && (
+                                            {!p.passed && (run.status === 'resumable' || run.status === 'running' || run.status === 'failed') && (
                                                 <button
                                                     onClick={async (e) => {
                                                         e.stopPropagation();
