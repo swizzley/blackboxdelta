@@ -150,6 +150,7 @@ export default function HourBlock({data}: HourBlockProps) {
                             <th className="px-3 py-1.5 text-left">Symbol</th>
                             <th className="px-3 py-1.5 text-left">Dir</th>
                             <th className="px-3 py-1.5 text-left">TF</th>
+                            <th className="px-3 py-1.5 text-left">Profile</th>
                             <th className="px-3 py-1.5 text-left">Status</th>
                             <th className="px-3 py-1.5 text-left">Reason</th>
                             <th className="px-3 py-1.5 text-right">P&L</th>
@@ -168,6 +169,12 @@ export default function HourBlock({data}: HourBlockProps) {
                                     <span className={o.direction === 'Long' ? 'text-emerald-500' : 'text-red-500'}>{o.direction}</span>
                                 </td>
                                 <td className={td}>{o.timeframe}</td>
+                                <td className={td}>
+                                    {o.profile && o.profile !== 'default'
+                                        ? <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${isDarkMode ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>{o.profile}</span>
+                                        : <span className={`text-xs ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>—</span>
+                                    }
+                                </td>
                                 <td className={td}>{o.status}</td>
                                 <td className={`${td} text-xs`}>{o.close_reason ?? '-'}</td>
                                 <td className={`${td} text-right font-medium ${
