@@ -255,7 +255,7 @@ export async function updateOptimizerWorkers(config: Record<string, {enabled?: b
 }
 
 // Seed runs
-export function fetchOptimizerSeedRuns(timeframe?: string, status?: string, limit = 10): Promise<SeedRun[] | null> {
+export function fetchOptimizerSeedRuns(timeframe?: string, status?: string, limit = 50): Promise<SeedRun[] | null> {
     const params = new URLSearchParams();
     if (timeframe) params.set('timeframe', timeframe);
     if (status) params.set('status', status);
