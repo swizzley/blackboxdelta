@@ -94,7 +94,7 @@ export default function Optimizer() {
 
     useEffect(() => {
         loadData();
-        const iv = setInterval(loadData, 10_000);
+        const iv = setInterval(loadData, 2_000);
         return () => clearInterval(iv);
     }, [loadData]);
 
@@ -949,6 +949,17 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
 }) {
     const [expanded, setExpanded] = useState(false);
     const [branches, setBranches] = useState<OptimizerBranch[] | null>(null);
+
+    // Auto-refresh branches while expanded and generation is active
+    useEffect(() => {
+        if (!expanded) return;
+        if (gen.status !== 'active') return;
+        const iv = setInterval(async () => {
+            const data = await fetchOptimizerBranches(gen.id);
+            if (data) setBranches(data);
+        }, 3_000);
+        return () => clearInterval(iv);
+    }, [expanded, gen.id, gen.status]);
 
     const toggle = async () => {
         if (!expanded && branches === null) {
