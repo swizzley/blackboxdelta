@@ -27,7 +27,7 @@ function apiOrderToSummary(o: ApiOrder): OrderSummary {
     return {
         id: o.id,
         symbol: o.symbol,
-        direction: o.direction,
+        direction: (o.quantity ?? 0) >= 0 ? 'Long' : 'Short',
         timeframe: o.timeframe,
         profile: o.profile,
         status: o.status,
@@ -191,7 +191,7 @@ export default function History() {
                                 <tr className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>
                                     <th className={th} onClick={() => handleSort('created')}>Date<SortIndicator col="created"/></th>
                                     <th className={th} onClick={() => handleSort('symbol')}>Symbol<SortIndicator col="symbol"/></th>
-                                    <th className={th} onClick={() => handleSort('direction')}>Dir<SortIndicator col="direction"/></th>
+                                    <th className={th} onClick={() => handleSort('direction')}><span className="hidden sm:inline">Direction</span><span className="sm:hidden">Dir</span><SortIndicator col="direction"/></th>
                                     <th className={th} onClick={() => handleSort('timeframe')}>Timeframe<SortIndicator col="timeframe"/></th>
                                     <th className={th}>Profile</th>
                                     <th className={th} onClick={() => handleSort('status')}>Status<SortIndicator col="status"/></th>
