@@ -794,11 +794,19 @@ export interface OptimizerProfileStats {
     breakeven_wr: number;
 }
 
+export interface ProfileBaselineData {
+    stats?: OptimizerProfileStats;
+    source_branch_id?: number;
+    source_generation_id?: number;
+    updated_at?: string;
+}
+
 export interface OptimizerProfileState {
     name: string;
     description?: string;
     enabled: boolean;
     stats?: OptimizerProfileStats;
+    baseline?: ProfileBaselineData;
 }
 
 export interface ProfileProbeEntry {

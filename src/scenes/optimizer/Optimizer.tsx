@@ -468,6 +468,13 @@ export default function Optimizer() {
                                                             S:{p.stats.sharpe_ratio.toFixed(2)} WR:{p.stats.win_rate.toFixed(0)}% {p.stats.total_trades}t PF:{p.stats.profit_factor.toFixed(2)}
                                                         </span>
                                                     )}
+                                                    {p.baseline?.stats && (
+                                                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                                            isDarkMode ? 'bg-indigo-900/30 text-indigo-400' : 'bg-indigo-50 text-indigo-700'
+                                                        }`} title={`Independent baseline from branch #${p.baseline.source_branch_id ?? '?'} gen #${p.baseline.source_generation_id ?? '?'}${p.baseline.updated_at ? ' @ ' + new Date(p.baseline.updated_at).toLocaleDateString() : ''}`}>
+                                                            best: S:{p.baseline.stats.sharpe_ratio.toFixed(2)} {p.baseline.stats.total_trades}t PF:{p.baseline.stats.profit_factor.toFixed(2)}
+                                                        </span>
+                                                    )}
                                                     <div className="ml-auto flex gap-1">
                                                         <button
                                                             disabled={profileActionLoading === p.name}
