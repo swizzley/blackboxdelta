@@ -2069,12 +2069,11 @@ function fmtNum(n?: number): string {
 
 function fmtPct(n?: number): string {
     if (n == null) return '—';
-    const pct = n * 100;
-    if (pct === 0) return '0%';
-    const sign = pct >= 0 ? '+' : '';
-    const abs = Math.abs(pct);
+    if (n === 0) return '0%';
+    const sign = n >= 0 ? '+' : '';
+    const abs = Math.abs(n);
     const dec = abs >= 100 ? 0 : abs >= 10 ? 1 : abs >= 1 ? 2 : 3;
-    return sign + pct.toFixed(dec) + '%';
+    return sign + n.toFixed(dec) + '%';
 }
 
 function avgPnl(r: {total_pnl?: number; total_trades?: number}): string {
