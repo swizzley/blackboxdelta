@@ -916,7 +916,6 @@ function GenerationCard({gen, isDarkMode, muted}: {gen: OptimizerGeneration; isD
                 <div className="flex items-center gap-2">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Gen #{gen.id}</span>
                     <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
-                    {gen.target_profile && <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${isDarkMode ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>{gen.target_profile}</span>}
                     {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
                     {phaseBadge
                         ? <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium animate-pulse ${phaseBadge.cls}`}>{phaseBadge.label}</span>
@@ -965,7 +964,6 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{gen.id}</span>
                     <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
-                    {gen.target_profile && <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${isDarkMode ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>{gen.target_profile}</span>}
                     <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
                     {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
                     <span className={`text-xs ${muted} hidden sm:inline`}>
