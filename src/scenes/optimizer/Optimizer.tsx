@@ -796,14 +796,19 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
                 <p className={`text-sm ${muted}`}>No OOS result available</p>
             )}
             {r?.ProfileBreakdown && Object.keys(r.ProfileBreakdown).length > 0 && (
-                <div className="mt-2 space-y-1">
+                <div className="mt-2 space-y-2">
                     {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => (
                         <div key={name} className={`pl-3 border-l-2 ${isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'}`}>
                             <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
-                            <div className="flex flex-wrap gap-1.5 mt-0.5">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-0.5">
                                 <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="Trades" value={String(pr.total_trades)} isDarkMode={isDarkMode}/>
                                 <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                <WRFractionStat wr={pr.win_rate} breakevenWR={pr.breakeven_wr} isDarkMode={isDarkMode}/>
+                                <ResultStat label="Avg P&L" value={avgPnl(pr)} isDarkMode={isDarkMode} color={plColor(pr.total_pnl)}/>
+                                <ResultStat label="Trades" value={pr.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="T/Day" value={trunk.oos_days && pr.total_trades ? (pr.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="AvgW" value={fmtPct(pr.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                                <ResultStat label="AvgL" value={fmtPct(pr.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                             </div>
                         </div>
                     ))}
