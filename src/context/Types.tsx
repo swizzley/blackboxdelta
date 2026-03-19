@@ -551,6 +551,7 @@ export interface OptimizerGeneration {
     timeframe: string;
     status: string;
     claimed_by?: string;
+    target_profile?: string;
     branch_count: number;
     started_at: string;
     completed_at?: string;
