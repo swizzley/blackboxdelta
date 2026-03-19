@@ -29,6 +29,7 @@ function apiOrderToSummary(o: ApiOrder): OrderSummary {
         symbol: o.symbol,
         direction: o.direction,
         timeframe: o.timeframe,
+        profile: o.profile,
         status: o.status,
         profit: o.profit,
         close_reason: o.close_reason,
@@ -192,6 +193,7 @@ export default function History() {
                                     <th className={th} onClick={() => handleSort('symbol')}>Symbol<SortIndicator col="symbol"/></th>
                                     <th className={th} onClick={() => handleSort('direction')}>Dir<SortIndicator col="direction"/></th>
                                     <th className={th} onClick={() => handleSort('timeframe')}>Timeframe<SortIndicator col="timeframe"/></th>
+                                    <th className={th}>Profile</th>
                                     <th className={th} onClick={() => handleSort('status')}>Status<SortIndicator col="status"/></th>
                                     <th className={th}>Reason</th>
                                     <th className={th}>Spread</th>
@@ -213,7 +215,7 @@ export default function History() {
                                             lastDay = day;
                                             rows.push(
                                                 <tr key={`day-${day}`} className={isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100/80'}>
-                                                    <td colSpan={8} className="px-3 py-1.5">
+                                                    <td colSpan={9} className="px-3 py-1.5">
                                                         <div className="flex items-center gap-3">
                                                             <span className={`text-xs font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                                                                 {dayjs(day).format('ddd, MMM D YYYY')}
@@ -251,6 +253,12 @@ export default function History() {
                                                     </span>
                                                 </td>
                                                 <td className={td}>{o.timeframe}</td>
+                                                <td className={td}>
+                                                    {o.profile && o.profile !== 'default'
+                                                        ? <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${isDarkMode ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>{o.profile}</span>
+                                                        : <span className={`text-xs ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`}>—</span>
+                                                    }
+                                                </td>
                                                 <td className={td}>
                                                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
                                                         ${o.status === 'CLOSED' ? 'bg-gray-100 text-gray-700 dark:bg-slate-600 dark:text-gray-300' :

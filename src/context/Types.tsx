@@ -81,6 +81,7 @@ export interface OrderSummary {
     symbol: string;
     direction: string;
     timeframe: string;
+    profile?: string;
     status: string;
     profit: number | null;
     close_reason?: string;
