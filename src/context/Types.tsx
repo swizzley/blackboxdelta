@@ -96,6 +96,7 @@ export interface OrderDetail {
     symbol: string;
     direction: string;
     timeframe: string;
+    profile?: string;
     status: string;
     type: string;
     entry: number;

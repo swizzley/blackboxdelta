@@ -46,6 +46,7 @@ export default function TradeDetail() {
                 symbol: apiOrder.symbol,
                 direction,
                 timeframe: apiOrder.timeframe,
+                profile: apiOrder.profile,
                 status: apiOrder.status,
                 type: apiOrder.type,
                 entry: apiOrder.price,
@@ -138,6 +139,11 @@ export default function TradeDetail() {
                                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${isDarkMode ? 'bg-slate-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
                                     {trade.timeframe}
                                 </span>
+                                {trade.profile && trade.profile !== 'default' && (
+                                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${isDarkMode ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                                        {trade.profile}
+                                    </span>
+                                )}
                                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
                                     trade.status === 'CLOSED' ? (isDarkMode ? 'bg-slate-600 text-gray-300' : 'bg-gray-100 text-gray-700') :
                                         trade.status === 'FILLED' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
@@ -198,6 +204,7 @@ export default function TradeDetail() {
                                         ['Order ID', trade.id],
                                         ['Trade ID', trade.trade_id ?? '-'],
                                         ['Type', trade.type],
+                                        ['Profile', trade.profile ?? 'default'],
                                         ['Alert ID', trade.alert_id !== undefined ? String(trade.alert_id) : '-'],
                                         ['Created', dayjs(trade.created).format('YYYY-MM-DD HH:mm:ss')],
                                         ['Closed', trade.closed ? dayjs(trade.closed).format('YYYY-MM-DD HH:mm:ss') : '-'],
