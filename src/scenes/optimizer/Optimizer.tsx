@@ -788,6 +788,20 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
             ) : (
                 <p className={`text-sm ${muted}`}>No OOS result available</p>
             )}
+            {r?.ProfileBreakdown && Object.keys(r.ProfileBreakdown).length > 0 && (
+                <div className="mt-2 space-y-1">
+                    {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => (
+                        <div key={name} className={`pl-3 border-l-2 ${isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'}`}>
+                            <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
+                            <div className="flex flex-wrap gap-1.5 mt-0.5">
+                                <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                <ResultStat label="Trades" value={String(pr.total_trades)} isDarkMode={isDarkMode}/>
+                                <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
             {expanded && detail && (
                 <div className="mt-3 pt-3 border-t border-slate-600/30" onClick={e => e.stopPropagation()}>
                     {diffs.length === 0 ? (
@@ -972,6 +986,7 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
                                     <tr className="border-b border-gray-700/20">
                                         <th className={`${thCl} pb-1.5 pr-3`}>Branch</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Status</th>
+                                        <th className={`${thCl} pb-1.5 pr-3`}>Profile</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Trades</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Win%</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>PF</th>
@@ -1130,6 +1145,20 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, isCurrent, revertTarget,
                                 <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                                 <ResultStat label="Avg P&L" value={avgPnl(r)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
                             </div>
+                            {r.ProfileBreakdown && Object.keys(r.ProfileBreakdown).length > 0 && (
+                                <div className="mt-2 space-y-1">
+                                    {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => (
+                                        <div key={name} className={`pl-3 border-l-2 ${isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'}`}>
+                                            <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
+                                            <div className="flex flex-wrap gap-1.5 mt-0.5">
+                                                <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                <ResultStat label="Trades" value={String(pr.total_trades)} isDarkMode={isDarkMode}/>
+                                                <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -1203,6 +1232,12 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
                     {b.id}
                 </td>
                 <td className={`text-xs font-medium py-1.5 pr-3 ${statusCls}`}>{b.status}</td>
+                <td className={`${tdCl} py-1.5 pr-3`}>
+                    {b.target_profile
+                        ? <span className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ${isDarkMode ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>{b.target_profile}</span>
+                        : <span className={muted}>—</span>
+                    }
+                </td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{trades || '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{winRate ? `${winRate.toFixed(0)}%` : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>{pf ? pf.toFixed(2) : '—'}</td>
@@ -1218,7 +1253,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
             </tr>
             {expanded && (
                 <tr className={rowCls}>
-                    <td colSpan={8} className="px-3 pb-3 pt-1">
+                    <td colSpan={9} className="px-3 pb-3 pt-1">
                         <div className="space-y-3">
                             {/* Meta row: duration, date ranges */}
                             <div className="flex flex-wrap gap-4 text-xs">

@@ -579,6 +579,7 @@ export interface OptimizerBranch {
     id: number;
     generation_id: number;
     trunk_id: number;
+    target_profile?: string;
     exploration_directive?: string;
     status: string;
     is_result?: OptimizerResult;
