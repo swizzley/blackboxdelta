@@ -602,6 +602,14 @@ export default function Optimizer() {
                                                             {!rec.prompt && rec.rationale && (
                                                                 <p className={`text-xs ${muted} mb-1 truncate`} title={rec.rationale}>{rec.rationale}</p>
                                                             )}
+                                                            {mutCount > 0 && (
+                                                                <DiffBlock
+                                                                    diffs={Object.entries(rec.mutations).map(([key, val]) => ({key, new_value: val}))}
+                                                                    baseId={rec.trunk_id}
+                                                                    isDarkMode={isDarkMode}
+                                                                    muted={muted}
+                                                                />
+                                                            )}
                                                             {rec.oos_result && (
                                                                 <div className={`text-xs ${muted} flex gap-3`}>
                                                                     <span>Sharpe: {rec.oos_result.sharpe_ratio.toFixed(4)}</span>
