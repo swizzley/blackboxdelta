@@ -875,7 +875,7 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                                     {profileDiffs.length > 0 && (
                                         <span className={`text-[10px] cursor-pointer ${muted}`}
                                             onClick={(e) => { e.stopPropagation(); setExpandedProfile(isProfileExpanded ? null : name); }}
-                                        >{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''} <span className={`inline-block transition-transform ${isProfileExpanded ? 'rotate-90' : ''}`}>▶</span></span>
+                                        >{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''} — Gen {trunk.generation} <span className={`inline-block transition-transform ${isProfileExpanded ? 'rotate-90' : ''}`}>▶</span></span>
                                     )}
                                     <button
                                         onClick={async (e) => {
@@ -922,7 +922,7 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                     })}
                 </div>
             )}
-            {expanded && detail && (
+            {expanded && detail && !expandedProfile && (
                 <div className="mt-3 pt-3 border-t border-slate-600/30" onClick={e => e.stopPropagation()}>
                     {diffs.length === 0 ? (
                         <p className={`text-xs ${muted}`}>No significant changes from baseline (trunk #{detail.diff_base_id})</p>
@@ -1306,7 +1306,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, isCurrent, revertTarget,
                                                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => setExpandedProfile(isProfileExpanded ? null : name)}>
                                                     <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
                                                     {profileDiffs.length > 0 && (
-                                                        <span className={`text-[10px] ${muted}`}>{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''}</span>
+                                                        <span className={`text-[10px] ${muted}`}>{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''} — Gen {t.generation}</span>
                                                     )}
                                                     <span className={`text-[10px] transition-transform ${isProfileExpanded ? 'rotate-90' : ''} ${muted}`}>▶</span>
                                                 </div>
@@ -1336,12 +1336,12 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, isCurrent, revertTarget,
                         </div>
                     )}
 
-                    {/* Param diffs */}
-                    {detail && detail.diffs && detail.diffs.length > 0 && (
+                    {/* Param diffs — hidden when a profile is expanded */}
+                    {!expandedProfile && detail && detail.diffs && detail.diffs.length > 0 && (
                         <DiffBlock diffs={detail.diffs} baseId={detail.diff_base_id} isDarkMode={isDarkMode} muted={muted}/>
                     )}
 
-                    {detail && (!detail.diffs || detail.diffs.length === 0) && (
+                    {!expandedProfile && detail && (!detail.diffs || detail.diffs.length === 0) && (
                         <p className={`text-sm ${muted}`}>No parameter changes (initial trunk or identical params)</p>
                     )}
                 </div>
