@@ -959,29 +959,36 @@ function TrunkDiffDrawer({trunkId, isDarkMode, muted}: {trunkId: number; isDarkM
     );
 }
 
-function DiffBlock({diffs, baseId, isDarkMode, muted}: {diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string}) {
+function DiffBlock({diffs, baseId, isDarkMode, muted, stripPrefix, hideHeader}: {
+    diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string; stripPrefix?: string; hideHeader?: boolean;
+}) {
     const filtered = [...diffs]
         .filter(d => d.key !== 'check.trunk_winrate')
         .sort((a, b) => a.key.localeCompare(b.key));
     return (
         <div>
-            <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
-                vs {baseId ? `trunk #${baseId}` : 'baseline'} — {filtered.length} param{filtered.length !== 1 ? 's' : ''}
-            </p>
+            {!hideHeader && (
+                <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
+                    vs {baseId ? `trunk #${baseId}` : 'baseline'} — {filtered.length} param{filtered.length !== 1 ? 's' : ''}
+                </p>
+            )}
             <div className={`rounded border px-2 py-1.5 overflow-hidden flex flex-wrap gap-1 ${
                 isDarkMode ? 'border-slate-600/50 bg-slate-900/60' : 'border-gray-300 bg-gray-200/60'
             }`}>
-                {filtered.map(d => (
-                    <span key={d.key} className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                        isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                    }`}>
-                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{d.key}:</span>
-                        {d.old_value != null && <span className="text-red-400">{d.old_value}</span>}
-                        {d.old_value != null && !d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>→</span>}
-                        {!d.removed && <span className="text-emerald-400">{d.new_value}</span>}
-                        {d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>(removed)</span>}
-                    </span>
-                ))}
+                {filtered.map(d => {
+                    const displayKey = stripPrefix && d.key.startsWith(stripPrefix) ? d.key.slice(stripPrefix.length) : d.key;
+                    return (
+                        <span key={d.key} title={d.key} className={`inline-flex items-center gap-1 whitespace-normal break-all text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                            isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                        }`}>
+                            <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{displayKey}:</span>
+                            {d.old_value != null && <span className="text-red-400">{d.old_value}</span>}
+                            {d.old_value != null && !d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>→</span>}
+                            {!d.removed && <span className="text-emerald-400">{d.new_value}</span>}
+                            {d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>(removed)</span>}
+                        </span>
+                    );
+                })}
             </div>
         </div>
     );
@@ -1146,6 +1153,7 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, isCurrent, revertTarget,
 }) {
     const [expanded, setExpanded] = useState(false);
     const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
+    const [expandedProfile, setExpandedProfile] = useState<string | null>(null);
 
     const toggle = async () => {
         if (!expanded && detail === null) {
@@ -1275,16 +1283,31 @@ function TrunkRow({trunk: t, isDarkMode, muted, isLive, isCurrent, revertTarget,
                             </div>
                             {r.ProfileBreakdown && Object.keys(r.ProfileBreakdown).length > 0 && (
                                 <div className="mt-2 space-y-1">
-                                    {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => (
-                                        <div key={name} className={`pl-3 border-l-2 ${isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'}`}>
-                                            <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
-                                            <div className="flex flex-wrap gap-1.5 mt-0.5">
-                                                <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                <ResultStat label="Trades" value={String(pr.total_trades)} isDarkMode={isDarkMode}/>
-                                                <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                    {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => {
+                                        const profileDiffs = detail?.diffs?.filter(d => d.key.startsWith(`profile.${name}.`)) ?? [];
+                                        const isProfileExpanded = expandedProfile === name;
+                                        return (
+                                            <div key={name} className={`pl-3 border-l-2 ${isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'}`}>
+                                                <div className="flex items-center gap-2 cursor-pointer" onClick={() => setExpandedProfile(isProfileExpanded ? null : name)}>
+                                                    <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
+                                                    {profileDiffs.length > 0 && (
+                                                        <span className={`text-[10px] ${muted}`}>{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''}</span>
+                                                    )}
+                                                    <span className={`text-[10px] transition-transform ${isProfileExpanded ? 'rotate-90' : ''} ${muted}`}>▶</span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-1.5 mt-0.5">
+                                                    <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                    <ResultStat label="Trades" value={String(pr.total_trades)} isDarkMode={isDarkMode}/>
+                                                    <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                </div>
+                                                {isProfileExpanded && profileDiffs.length > 0 && (
+                                                    <div className="mt-1">
+                                                        <DiffBlock diffs={profileDiffs} stripPrefix={`profile.${name}.`} isDarkMode={isDarkMode} muted={muted} hideHeader/>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
