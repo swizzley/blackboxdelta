@@ -1,6 +1,5 @@
 // Dashboard (homepage) data
 export interface DashboardData {
-    generated: string;
     all_time: TimeframeStats;
     by_timeframe: TimeframeRow[];
     pl_series: PLDataPoint[];
