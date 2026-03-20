@@ -770,6 +770,7 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
     const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
     const [loading, setLoading] = useState(false);
     const [liveToggling, setLiveToggling] = useState<string | null>(null);
+    const [expandedProfile, setExpandedProfile] = useState<string | null>(null);
 
     const toggle = async () => {
         if (!expanded && detail === null) {
@@ -859,6 +860,8 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                 <div className="mt-2 space-y-2">
                     {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => {
                         const isLive = profileLiveStatus(name);
+                        const profileDiffs = diffs.filter(d => d.key.startsWith(`profile.${name}.`));
+                        const isProfileExpanded = expandedProfile === name;
                         return (
                             <div key={name} className={`pl-3 border-l-2 ${
                                 isLive
@@ -866,7 +869,14 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                                     : isDarkMode ? 'border-slate-600/40' : 'border-gray-300/70'
                             } ${!isLive ? 'opacity-60' : ''}`}>
                                 <div className="flex items-center gap-2 mb-0.5">
-                                    <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
+                                    <span className={`text-[10px] font-medium uppercase tracking-wider cursor-pointer ${muted}`}
+                                        onClick={(e) => { e.stopPropagation(); setExpandedProfile(isProfileExpanded ? null : name); }}
+                                    >{name}</span>
+                                    {profileDiffs.length > 0 && (
+                                        <span className={`text-[10px] cursor-pointer ${muted}`}
+                                            onClick={(e) => { e.stopPropagation(); setExpandedProfile(isProfileExpanded ? null : name); }}
+                                        >{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''} <span className={`inline-block transition-transform ${isProfileExpanded ? 'rotate-90' : ''}`}>▶</span></span>
+                                    )}
                                     <button
                                         onClick={async (e) => {
                                             e.stopPropagation();
@@ -902,6 +912,11 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                                     <ResultStat label="AvgW" value={fmtPct(pr.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
                                     <ResultStat label="AvgL" value={fmtPct(pr.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                                 </div>
+                                {isProfileExpanded && profileDiffs.length > 0 && (
+                                    <div className="mt-1.5" onClick={e => e.stopPropagation()}>
+                                        <DiffBlock diffs={profileDiffs} stripPrefix={`profile.${name}.`} isDarkMode={isDarkMode} muted={muted} hideHeader/>
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
