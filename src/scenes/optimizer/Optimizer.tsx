@@ -1051,10 +1051,22 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
         return () => clearInterval(iv);
     }, [expanded, gen.id, gen.status]);
 
+    // Final fetch when generation completes while expanded (branches may still show verifying)
+    const prevStatus = useRef(gen.status);
+    useEffect(() => {
+        if (expanded && prevStatus.current === 'active' && gen.status !== 'active') {
+            fetchOptimizerBranches(gen.id).then(data => { if (data) setBranches(data); });
+        }
+        prevStatus.current = gen.status;
+    }, [expanded, gen.id, gen.status]);
+
     const toggle = async () => {
-        if (!expanded && branches === null) {
-            const data = await fetchOptimizerBranches(gen.id);
-            setBranches(data ?? []);
+        if (!expanded) {
+            // Always re-fetch on expand if generation is complete (cached data may be stale)
+            if (branches === null || gen.status !== 'active') {
+                const data = await fetchOptimizerBranches(gen.id);
+                setBranches(data ?? []);
+            }
         }
         setExpanded(!expanded);
     };
