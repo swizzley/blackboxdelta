@@ -10,6 +10,7 @@ import {
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
     fetchOptimizerAllProfiles, enableProfile, disableProfile, reseedProfile, retrySeedProfile,
+    goLiveProfile, noLiveProfile,
     pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation,
 } from '../../api/client';
 import type {
@@ -208,7 +209,7 @@ export default function Optimizer() {
                                                 )}
                                             </div>
                                             {trunk ? (
-                                                <TrunkCard trunk={trunk} isDarkMode={isDarkMode} muted={muted}/>
+                                                <TrunkCard trunk={trunk} isDarkMode={isDarkMode} muted={muted} allProfileData={allProfileData} onRefresh={loadData}/>
                                             ) : (
                                                 <p className={`text-sm ${muted}`}>No trunk</p>
                                             )}
@@ -462,6 +463,13 @@ export default function Optimizer() {
                                                             : isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700'
                                                     }`}>
                                                         {p.enabled ? 'ON' : 'OFF'}
+                                                    </span>
+                                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                                                        p.live
+                                                            ? isDarkMode ? 'bg-cyan-900/40 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
+                                                            : isDarkMode ? 'bg-orange-900/40 text-orange-400' : 'bg-orange-100 text-orange-700'
+                                                    }`}>
+                                                        {p.live ? 'LIVE' : 'BLOCKED'}
                                                     </span>
                                                     {p.stats && (
                                                         <span className={`text-[10px] font-mono ${muted}`}>
@@ -746,11 +754,12 @@ function TrunkSourceDot({trunk}: {trunk: OptimizerTrunk}) {
     return <span className={`inline-block w-2 h-2 rounded-sm flex-shrink-0 ${color}`} title={title}/>;
 }
 
-function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMode: boolean; muted: string}) {
+function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; allProfileData: OptimizerAllProfilesResponse | null; onRefresh: () => void}) {
     const r = trunk.oos_result;
     const [expanded, setExpanded] = useState(false);
     const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
     const [loading, setLoading] = useState(false);
+    const [liveToggling, setLiveToggling] = useState<string | null>(null);
 
     const toggle = async () => {
         if (!expanded && detail === null) {
@@ -760,6 +769,14 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
             setLoading(false);
         }
         setExpanded(e => !e);
+    };
+
+    // Look up live status from profiles API data
+    const profileLiveStatus = (name: string): boolean => {
+        const tfData = allProfileData?.[trunk.timeframe];
+        if (!tfData) return true; // default live
+        const p = tfData.profiles.find(p => p.name === name);
+        return p?.live ?? true;
     };
 
     const diffs = detail?.diffs ?? [];
@@ -797,21 +814,54 @@ function TrunkCard({trunk, isDarkMode, muted}: {trunk: OptimizerTrunk; isDarkMod
             )}
             {r?.ProfileBreakdown && Object.keys(r.ProfileBreakdown).length > 0 && (
                 <div className="mt-2 space-y-2">
-                    {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => (
-                        <div key={name} className={`pl-3 border-l-2 ${isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'}`}>
-                            <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-0.5">
-                                <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                <WRFractionStat wr={pr.win_rate} breakevenWR={pr.breakeven_wr} isDarkMode={isDarkMode}/>
-                                <ResultStat label="Avg P&L" value={avgPnl(pr)} isDarkMode={isDarkMode} color={plColor(pr.total_pnl)}/>
-                                <ResultStat label="Trades" value={pr.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="T/Day" value={trunk.oos_days && pr.total_trades ? (pr.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="AvgW" value={fmtPct(pr.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                                <ResultStat label="AvgL" value={fmtPct(pr.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
+                    {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => {
+                        const isLive = profileLiveStatus(name);
+                        return (
+                            <div key={name} className={`pl-3 border-l-2 ${
+                                isLive
+                                    ? isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'
+                                    : isDarkMode ? 'border-slate-600/40' : 'border-gray-300/70'
+                            } ${!isLive ? 'opacity-60' : ''}`}>
+                                <div className="flex items-center gap-2 mb-0.5">
+                                    <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
+                                    <button
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            setLiveToggling(name);
+                                            if (isLive) {
+                                                await noLiveProfile(name, trunk.timeframe);
+                                            } else {
+                                                await goLiveProfile(name, trunk.timeframe);
+                                            }
+                                            setLiveToggling(null);
+                                            onRefresh();
+                                        }}
+                                        disabled={liveToggling === name}
+                                        className={`px-1.5 py-0.5 text-[9px] font-medium rounded transition-colors ${
+                                            liveToggling === name
+                                                ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                : isLive
+                                                    ? isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                    : isDarkMode ? 'bg-orange-900/30 text-orange-400 hover:bg-orange-900/50' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                                        }`}
+                                        title={isLive ? 'Profile will be pushed to live on deploy' : 'Profile blocked from live — optimizer only'}
+                                    >
+                                        {liveToggling === name ? '...' : isLive ? 'LIVE' : 'BLOCKED'}
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-0.5">
+                                    <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                    <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                    <WRFractionStat wr={pr.win_rate} breakevenWR={pr.breakeven_wr} isDarkMode={isDarkMode}/>
+                                    <ResultStat label="Avg P&L" value={avgPnl(pr)} isDarkMode={isDarkMode} color={plColor(pr.total_pnl)}/>
+                                    <ResultStat label="Trades" value={pr.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                                    <ResultStat label="T/Day" value={trunk.oos_days && pr.total_trades ? (pr.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
+                                    <ResultStat label="AvgW" value={fmtPct(pr.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                                    <ResultStat label="AvgL" value={fmtPct(pr.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
             {expanded && detail && (

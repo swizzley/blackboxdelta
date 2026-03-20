@@ -805,6 +805,7 @@ export interface OptimizerProfileState {
     name: string;
     description?: string;
     enabled: boolean;
+    live: boolean;
     stats?: OptimizerProfileStats;
     baseline?: ProfileBaselineData;
 }

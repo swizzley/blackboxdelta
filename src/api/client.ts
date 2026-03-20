@@ -222,6 +222,14 @@ export function disableProfile(name: string, timeframe: string = 'scalp'): Promi
     return apiPost(`/api/optimizer/profiles/${name}/disable?timeframe=${timeframe}`, {});
 }
 
+export function goLiveProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/golive?timeframe=${timeframe}`, {});
+}
+
+export function noLiveProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/nolive?timeframe=${timeframe}`, {});
+}
+
 export function revertProfile(name: string, trunkId: number, timeframe: string = 'scalp'): Promise<any> {
     return apiPost(`/api/optimizer/profiles/${name}/revert?timeframe=${timeframe}`, {trunk_id: trunkId});
 }
