@@ -464,6 +464,7 @@ export default function Optimizer() {
                                                     }`}>
                                                         {p.enabled ? 'ON' : 'OFF'}
                                                     </span>
+                                                    {p.stats && (
                                                     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                                                         p.live
                                                             ? isDarkMode ? 'bg-cyan-900/40 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
@@ -471,6 +472,7 @@ export default function Optimizer() {
                                                     }`}>
                                                         {p.live ? 'LIVE' : 'BLOCKED'}
                                                     </span>
+                                                    )}
                                                     {p.stats && (
                                                         <span className={`text-[10px] font-mono ${muted}`}>
                                                             S:{p.stats.sharpe_ratio.toFixed(2)} WR:{p.stats.win_rate.toFixed(0)}% {p.stats.total_trades}t PF:{p.stats.profit_factor.toFixed(2)}
@@ -781,6 +783,39 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
 
     const diffs = detail?.diffs ?? [];
 
+    // Recompute aggregate stats from only live profiles when ProfileBreakdown exists
+    const displayResult = (() => {
+        if (!r?.ProfileBreakdown || Object.keys(r.ProfileBreakdown).length === 0) return r;
+        const liveProfiles = Object.entries(r.ProfileBreakdown).filter(([name]) => profileLiveStatus(name));
+        // If all profiles are live, use the original aggregate
+        if (liveProfiles.length === Object.keys(r.ProfileBreakdown).length) return r;
+        // If no profiles are live, show zeroed stats
+        if (liveProfiles.length === 0) return {...r, total_trades: 0, wins: 0, losses: 0, win_rate: 0, total_pnl: 0, profit_factor: 0, avg_win: 0, avg_loss: 0, sharpe_ratio: 0, breakeven_wr: 0};
+        // Recompute from live profiles
+        let totalTrades = 0, wins = 0, losses = 0, grossWin = 0, grossLoss = 0, totalPnl = 0;
+        for (const [, pr] of liveProfiles) {
+            totalTrades += pr.total_trades ?? 0;
+            wins += pr.wins ?? 0;
+            losses += pr.losses ?? 0;
+            grossWin += (pr.avg_win ?? 0) * (pr.wins ?? 0);
+            grossLoss += (pr.avg_loss ?? 0) * (pr.losses ?? 0);
+            totalPnl += pr.total_pnl ?? 0;
+        }
+        const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
+        const avgWin = wins > 0 ? grossWin / wins : 0;
+        const avgLoss = losses > 0 ? grossLoss / losses : 0;
+        const pf = grossLoss > 0 ? grossWin / grossLoss : 0;
+        const breakevenWR = (avgWin + avgLoss) > 0 ? (avgLoss / (avgWin + avgLoss)) * 100 : 0;
+        // Sharpe can't be recomputed from summaries — use trade-weighted average of profile Sharpes
+        let sharpe = 0;
+        if (totalTrades > 0) {
+            for (const [, pr] of liveProfiles) {
+                sharpe += (pr.sharpe_ratio ?? 0) * ((pr.total_trades ?? 0) / totalTrades);
+            }
+        }
+        return {...r, total_trades: totalTrades, wins, losses, win_rate: winRate, total_pnl: totalPnl, profit_factor: pf, avg_win: avgWin, avg_loss: avgLoss, sharpe_ratio: sharpe, breakeven_wr: breakevenWR};
+    })();
+
     return (
         <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700/70' : 'bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors`} onClick={toggle}>
             <div className="flex items-center justify-between mb-3">
@@ -798,16 +833,16 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                     }
                 </div>
             </div>
-            {r ? (
+            {displayResult ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                    <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                    <WRFractionStat wr={r.win_rate} breakevenWR={r.breakeven_wr} isDarkMode={isDarkMode}/>
-                    <ResultStat label="Avg P&L" value={avgPnl(r)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
-                    <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="T/Day" value={trunk.oos_days && r.total_trades ? (r.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="AvgW" value={fmtPct(r.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                    <ResultStat label="AvgL" value={fmtPct(r.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
+                    <ResultStat label="Sharpe" value={displayResult.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                    <ResultStat label="PF" value={displayResult.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                    <WRFractionStat wr={displayResult.win_rate} breakevenWR={displayResult.breakeven_wr} isDarkMode={isDarkMode}/>
+                    <ResultStat label="Avg P&L" value={avgPnl(displayResult)} isDarkMode={isDarkMode} color={plColor(displayResult.total_pnl)}/>
+                    <ResultStat label="Trades" value={displayResult.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                    <ResultStat label="T/Day" value={trunk.oos_days && displayResult.total_trades ? (displayResult.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
+                    <ResultStat label="AvgW" value={fmtPct(displayResult.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                    <ResultStat label="AvgL" value={fmtPct(displayResult.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                 </div>
             ) : (
                 <p className={`text-sm ${muted}`}>No OOS result available</p>
