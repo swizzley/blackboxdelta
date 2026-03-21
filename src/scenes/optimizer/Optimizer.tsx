@@ -10,8 +10,8 @@ import {
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
     fetchOptimizerAllProfiles, enableProfile, disableProfile, reseedProfile, retrySeedProfile,
-    goLiveProfile, noLiveProfile,
-    pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation,
+    goLiveProfile, noLiveProfile, promoteProfile, demoteProfile, fetchProfileHistory,
+    pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation, assembleTrunk,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -20,7 +20,7 @@ import type {
     SeedRun, SeedComponentResult, SeedVariantResult,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
-    OptimizerAllProfilesResponse,
+    OptimizerAllProfilesResponse, ProfileHistoryEntry,
 } from '../../context/Types';
 import {
     BeakerIcon, ClockIcon,
@@ -61,6 +61,8 @@ export default function Optimizer() {
     const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
     const [seedCountdown, setSeedCountdown] = useState(0);
     const seedCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const [expandedProfileHistory, setExpandedProfileHistory] = useState<string | null>(null);
+    const [profileHistory, setProfileHistory] = useState<ProfileHistoryEntry[]>([]);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -208,6 +210,34 @@ export default function Optimizer() {
                                                     </div>
                                                 )}
                                             </div>
+                                            {/* Promoted profiles + Assemble button */}
+                                            {(() => {
+                                                const tfProfiles = allProfileData?.[tf]?.profiles ?? [];
+                                                const promoted = tfProfiles.filter(p => p.baseline?.promoted_to_trunk);
+                                                if (promoted.length === 0) return null;
+                                                return (
+                                                    <div className={`flex items-center gap-2 mt-1 mb-1 flex-wrap`}>
+                                                        <span className={`text-[10px] font-medium ${muted}`}>Promoted:</span>
+                                                        {promoted.map(p => (
+                                                            <span key={p.name} className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-50 text-purple-700'}`}>
+                                                                {p.name}
+                                                            </span>
+                                                        ))}
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (!confirm(`Assemble trunk from ${promoted.length} promoted profile(s) for ${tf}?`)) return;
+                                                                await assembleTrunk(tf, false);
+                                                                loadData();
+                                                            }}
+                                                            className={`ml-auto px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                isDarkMode ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                                            }`}
+                                                        >
+                                                            Assemble Trunk
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })()}
                                             {trunk ? (
                                                 <TrunkCard trunk={trunk} isDarkMode={isDarkMode} muted={muted} allProfileData={allProfileData} onRefresh={loadData}/>
                                             ) : (
@@ -423,8 +453,8 @@ export default function Optimizer() {
                                 </div>
                             )}
 
-                            {/* Profile Management — scalp + intraday */}
-                            {allProfileData && (['scalp', 'intraday'] as const).map(tf => {
+                            {/* Profile Management — scalp + intraday + swing */}
+                            {allProfileData && (['scalp', 'intraday', 'swing'] as const).map(tf => {
                                 const profileData = allProfileData[tf];
                                 if (!profileData || !profileData.profiles || profileData.profiles.length === 0) return null;
                                 const enabledCount = profileData.profiles.filter(p => p.enabled).length;
@@ -454,7 +484,8 @@ export default function Optimizer() {
                                         <>
                                         <div className="space-y-1.5">
                                             {profileData.profiles.map(p => (
-                                                <div key={p.name} className={`flex flex-wrap items-center gap-2 px-3 py-1.5 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                <div key={p.name}>
+                                                <div className={`flex flex-wrap items-center gap-2 px-3 py-1.5 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
                                                     <span className={`font-mono text-xs font-medium w-20 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
                                                     {p.description && <span className={`text-[10px] ${muted} hidden sm:inline`}>{p.description}</span>}
                                                     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
@@ -478,14 +509,84 @@ export default function Optimizer() {
                                                             S:{p.stats.sharpe_ratio.toFixed(2)} WR:{p.stats.win_rate.toFixed(0)}% {p.stats.total_trades}t PF:{p.stats.profit_factor.toFixed(2)}
                                                         </span>
                                                     )}
-                                                    {p.baseline?.stats && (
-                                                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                                            isDarkMode ? 'bg-indigo-900/30 text-indigo-400' : 'bg-indigo-50 text-indigo-700'
-                                                        }`} title={`Independent baseline from branch #${p.baseline.source_branch_id ?? '?'} gen #${p.baseline.source_generation_id ?? '?'}${p.baseline.updated_at ? ' @ ' + new Date(p.baseline.updated_at).toLocaleDateString() : ''}`}>
-                                                            best: S:{p.baseline.stats.sharpe_ratio.toFixed(2)} {p.baseline.stats.total_trades}t PF:{p.baseline.stats.profit_factor.toFixed(2)}
+                                                    {p.baseline && (
+                                                        <>
+                                                        {p.baseline.stats && (
+                                                            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                                                isDarkMode ? 'bg-indigo-900/30 text-indigo-400' : 'bg-indigo-50 text-indigo-700'
+                                                            }`} title={`Branch #${p.baseline.source_branch_id ?? '?'} gen #${p.baseline.source_generation_id ?? '?'}${p.baseline.updated_at ? ' @ ' + new Date(p.baseline.updated_at).toLocaleDateString() : ''}`}>
+                                                                S:{p.baseline.stats.sharpe_ratio.toFixed(2)} {p.baseline.stats.total_trades}t PF:{p.baseline.stats.profit_factor.toFixed(2)}
+                                                            </span>
+                                                        )}
+                                                        <span className={`text-[10px] font-mono ${muted}`} title="generation_counter / consecutive_failures">
+                                                            g:{p.baseline.generation_counter} f:{p.baseline.consecutive_failures}
                                                         </span>
+                                                        {p.baseline.promoted_to_trunk && (
+                                                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                                                                isDarkMode ? 'bg-purple-900/40 text-purple-400' : 'bg-purple-100 text-purple-700'
+                                                            }`} title={p.baseline.promoted_at ? `Promoted ${new Date(p.baseline.promoted_at).toLocaleDateString()}` : 'In active trunk'}>
+                                                                TRUNK
+                                                            </span>
+                                                        )}
+                                                        </>
                                                     )}
                                                     <div className="ml-auto flex gap-1">
+                                                        {/* Promote / Demote */}
+                                                        {p.baseline?.stats && p.baseline.stats.sharpe_ratio > 0 && p.baseline.stats.total_pnl > 0 && !p.baseline.promoted_to_trunk && (
+                                                            <button
+                                                                disabled={profileActionLoading === p.name}
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    setProfileActionLoading(p.name);
+                                                                    await promoteProfile(p.name, tf);
+                                                                    setProfileActionLoading(null);
+                                                                    loadData();
+                                                                }}
+                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                    isDarkMode ? 'bg-purple-900/30 text-purple-400 hover:bg-purple-900/50' : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                                                                }`}
+                                                            >
+                                                                Promote
+                                                            </button>
+                                                        )}
+                                                        {p.baseline?.promoted_to_trunk && (
+                                                            <button
+                                                                disabled={profileActionLoading === p.name}
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    setProfileActionLoading(p.name);
+                                                                    await demoteProfile(p.name, tf);
+                                                                    setProfileActionLoading(null);
+                                                                    loadData();
+                                                                }}
+                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                    isDarkMode ? 'bg-orange-900/30 text-orange-400 hover:bg-orange-900/50' : 'bg-orange-50 text-orange-700 hover:bg-orange-100'
+                                                                }`}
+                                                            >
+                                                                Demote
+                                                            </button>
+                                                        )}
+                                                        {/* History toggle */}
+                                                        {p.baseline && (
+                                                            <button
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    const key = `${tf}:${p.name}`;
+                                                                    if (expandedProfileHistory === key) {
+                                                                        setExpandedProfileHistory(null);
+                                                                    } else {
+                                                                        const res = await fetchProfileHistory(p.name, tf);
+                                                                        setProfileHistory(res?.history ?? []);
+                                                                        setExpandedProfileHistory(key);
+                                                                    }
+                                                                }}
+                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                    isDarkMode ? 'bg-slate-600/50 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                                }`}
+                                                            >
+                                                                History
+                                                            </button>
+                                                        )}
                                                         <button
                                                             disabled={profileActionLoading === p.name}
                                                             onClick={async (e) => {
@@ -527,6 +628,32 @@ export default function Optimizer() {
                                                             </button>
                                                         )}
                                                     </div>
+                                                </div>
+                                                {/* Profile history expandable */}
+                                                {expandedProfileHistory === `${tf}:${p.name}` && profileHistory.length > 0 && (
+                                                    <div className={`ml-8 mb-1 px-3 py-2 rounded text-[10px] font-mono ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'}`}>
+                                                        <div className={`font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Baseline History (last {profileHistory.length})</div>
+                                                        <div className="space-y-0.5">
+                                                            {profileHistory.map(h => (
+                                                                <div key={h.id} className={`flex gap-3 ${muted}`}>
+                                                                    <span>{new Date(h.created_at).toLocaleDateString()}</span>
+                                                                    <span>g:{h.generation_counter}</span>
+                                                                    {h.oos && (
+                                                                        <>
+                                                                        <span className={h.oos.sharpe_ratio > 0 ? (isDarkMode ? 'text-green-400' : 'text-green-700') : (isDarkMode ? 'text-red-400' : 'text-red-700')}>
+                                                                            S:{h.oos.sharpe_ratio.toFixed(3)}
+                                                                        </span>
+                                                                        <span>PF:{h.oos.profit_factor.toFixed(2)}</span>
+                                                                        <span>{h.oos.total_trades}t</span>
+                                                                        <span>WR:{h.oos.win_rate.toFixed(0)}%</span>
+                                                                        </>
+                                                                    )}
+                                                                    {h.source_branch_id && <span>b#{h.source_branch_id}</span>}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 </div>
                                             ))}
                                         </div>

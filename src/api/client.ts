@@ -242,6 +242,22 @@ export function retrySeedProfile(name: string, timeframe: string = 'scalp'): Pro
     return apiPost(`/api/optimizer/profiles/${name}/retry-seed?timeframe=${timeframe}`, {});
 }
 
+export function promoteProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/promote?timeframe=${timeframe}`, {});
+}
+
+export function demoteProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/demote?timeframe=${timeframe}`, {});
+}
+
+export function assembleTrunk(timeframe: string, push: boolean = false): Promise<any> {
+    return apiPost('/api/optimizer/trunk/assemble', { timeframe, push });
+}
+
+export function fetchProfileHistory(name: string, timeframe: string = 'scalp'): Promise<import('../context/Types').ProfileHistoryResponse | null> {
+    return apiFetch(`/api/optimizer/profiles/${name}/history?timeframe=${timeframe}`);
+}
+
 // Worker allocation
 export function fetchOptimizerWorkers(): Promise<OptimizerWorkerConfig | null> {
     return apiFetch('/api/optimizer/workers');

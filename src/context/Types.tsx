@@ -797,7 +797,28 @@ export interface ProfileBaselineData {
     stats?: OptimizerProfileStats;
     source_branch_id?: number;
     source_generation_id?: number;
+    generation_counter: number;
+    consecutive_failures: number;
+    promoted_to_trunk: boolean;
+    promoted_at?: string;
+    pushed_at?: string;
     updated_at?: string;
+}
+
+export interface ProfileHistoryEntry {
+    id: number;
+    oos?: OptimizerProfileStats;
+    is?: OptimizerProfileStats;
+    source_branch_id?: number;
+    source_generation_id?: number;
+    generation_counter: number;
+    created_at: string;
+}
+
+export interface ProfileHistoryResponse {
+    profile: string;
+    timeframe: string;
+    history: ProfileHistoryEntry[];
 }
 
 export interface OptimizerProfileState {
