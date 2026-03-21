@@ -799,6 +799,7 @@ export interface ProfileBaselineData {
     mutation_id?: number;
     source_branch_id?: number;
     source_generation_id?: number;
+    oos_days?: number;
     generation_counter: number;
     consecutive_failures: number;
     promoted_to_trunk: boolean;

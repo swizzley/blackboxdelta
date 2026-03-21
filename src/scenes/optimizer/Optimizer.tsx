@@ -242,7 +242,7 @@ export default function Optimizer() {
                                                 );
                                             })()}
                                             {trunk ? (
-                                                <TrunkCard trunk={{...trunk, oos_days: tfTrunks.find(t => t.id === trunk.id)?.oos_days ?? trunk.oos_days}} isDarkMode={isDarkMode} muted={muted} allProfileData={allProfileData} onRefresh={loadData}/>
+                                                <TrunkCard trunk={trunk} isDarkMode={isDarkMode} muted={muted} allProfileData={allProfileData} onRefresh={loadData}/>
                                             ) : (
                                                 <p className={`text-sm ${muted}`}>No trunk</p>
                                             )}
@@ -924,7 +924,7 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                     <WRFractionStat wr={displayResult.win_rate} breakevenWR={displayResult.breakeven_wr} isDarkMode={isDarkMode}/>
                     <ResultStat label="Avg P&L" value={avgPnl(displayResult)} isDarkMode={isDarkMode} color={plColor(displayResult.total_pnl)}/>
                     <ResultStat label="Trades" value={displayResult.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="T/Day" value={trunk.oos_days && displayResult.total_trades ? (displayResult.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
+                    <ResultStat label="T/Day" value={(() => { const maxDays = Math.max(0, ...promotedProfiles.map(p => p.baseline?.oos_days ?? 0)); return maxDays > 0 && displayResult.total_trades ? (displayResult.total_trades / maxDays).toFixed(2) : '—'; })()} isDarkMode={isDarkMode}/>
                     <ResultStat label="AvgW" value={fmtPct(displayResult.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
                     <ResultStat label="AvgL" value={fmtPct(displayResult.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                 </div>
@@ -986,7 +986,7 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                                             <WRFractionStat wr={pr.win_rate} breakevenWR={pr.breakeven_wr} isDarkMode={isDarkMode}/>
                                             <ResultStat label="Avg P&L" value={avgPnl(pr)} isDarkMode={isDarkMode} color={plColor(pr.total_pnl)}/>
                                             <ResultStat label="Trades" value={pr.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                                            <ResultStat label="T/Day" value={trunk.oos_days && pr.total_trades ? (pr.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
+                                            <ResultStat label="T/Day" value={p.baseline?.oos_days && pr.total_trades ? (pr.total_trades / p.baseline.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
                                             <ResultStat label="AvgW" value={fmtPct(pr.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
                                             <ResultStat label="AvgL" value={fmtPct(pr.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                                         </div>
