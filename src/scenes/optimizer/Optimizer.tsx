@@ -199,13 +199,13 @@ export default function Optimizer() {
                                                         )}
                                                         <button
                                                             onClick={async () => { await pushTrunk(trunk.id); loadData(); }}
-                                                            disabled={isUpToDate || !trunk.oos_result}
+                                                            disabled={isUpToDate || !trunk.mutation_ids?.length}
                                                             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                                                                isUpToDate || !trunk.oos_result
+                                                                isUpToDate || !trunk.mutation_ids?.length
                                                                     ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                                     : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
                                                             }`}>
-                                                            {isUpToDate ? 'Up to date' : !trunk.oos_result ? 'No OOS data' : `Deploy #${trunk.id}`}
+                                                            {isUpToDate ? 'Up to date' : !trunk.mutation_ids?.length ? 'Not assembled' : `Deploy #${trunk.id}`}
                                                         </button>
                                                     </div>
                                                 )}
