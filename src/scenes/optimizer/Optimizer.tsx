@@ -919,37 +919,34 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
 
     const diffs = detail?.diffs ?? [];
 
-    // Recompute aggregate stats from only live profiles when ProfileBreakdown exists
+    // Compute aggregate stats from promoted profile baselines (new trunk concept)
     const displayResult = (() => {
-        if (!r?.ProfileBreakdown || Object.keys(r.ProfileBreakdown).length === 0) return r;
-        const liveProfiles = Object.entries(r.ProfileBreakdown).filter(([name]) => profileLiveStatus(name));
-        // If all profiles are live, use the original aggregate
-        if (liveProfiles.length === Object.keys(r.ProfileBreakdown).length) return r;
-        // If no profiles are live, show zeroed stats
-        if (liveProfiles.length === 0) return {...r, total_trades: 0, wins: 0, losses: 0, win_rate: 0, total_pnl: 0, profit_factor: 0, avg_win: 0, avg_loss: 0, sharpe_ratio: 0, breakeven_wr: 0};
-        // Recompute from live profiles
+        const tfData = allProfileData?.[trunk.timeframe];
+        const promotedBaselines = tfData?.profiles.filter(p => p.baseline?.promoted_to_trunk && p.baseline?.stats) ?? [];
+        if (promotedBaselines.length === 0) return r;
         let totalTrades = 0, wins = 0, losses = 0, grossWin = 0, grossLoss = 0, totalPnl = 0;
-        for (const [, pr] of liveProfiles) {
-            totalTrades += pr.total_trades ?? 0;
-            wins += pr.wins ?? 0;
-            losses += pr.losses ?? 0;
-            grossWin += (pr.avg_win ?? 0) * (pr.wins ?? 0);
-            grossLoss += (pr.avg_loss ?? 0) * (pr.losses ?? 0);
-            totalPnl += pr.total_pnl ?? 0;
+        for (const p of promotedBaselines) {
+            const s = p.baseline!.stats!;
+            totalTrades += s.total_trades ?? 0;
+            wins += s.wins ?? 0;
+            losses += s.losses ?? 0;
+            grossWin += (s.avg_win ?? 0) * (s.wins ?? 0);
+            grossLoss += (s.avg_loss ?? 0) * (s.losses ?? 0);
+            totalPnl += s.total_pnl ?? 0;
         }
         const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
         const avgWin = wins > 0 ? grossWin / wins : 0;
         const avgLoss = losses > 0 ? grossLoss / losses : 0;
         const pf = grossLoss > 0 ? grossWin / grossLoss : 0;
         const breakevenWR = (avgWin + avgLoss) > 0 ? (avgLoss / (avgWin + avgLoss)) * 100 : 0;
-        // Sharpe can't be recomputed from summaries — use trade-weighted average of profile Sharpes
         let sharpe = 0;
         if (totalTrades > 0) {
-            for (const [, pr] of liveProfiles) {
-                sharpe += (pr.sharpe_ratio ?? 0) * ((pr.total_trades ?? 0) / totalTrades);
+            for (const p of promotedBaselines) {
+                const s = p.baseline!.stats!;
+                sharpe += (s.sharpe_ratio ?? 0) * ((s.total_trades ?? 0) / totalTrades);
             }
         }
-        return {...r, total_trades: totalTrades, wins, losses, win_rate: winRate, total_pnl: totalPnl, profit_factor: pf, avg_win: avgWin, avg_loss: avgLoss, sharpe_ratio: sharpe, breakeven_wr: breakevenWR};
+        return {total_trades: totalTrades, wins, losses, win_rate: winRate, total_pnl: totalPnl, profit_factor: pf, avg_win: avgWin, avg_loss: avgLoss, sharpe_ratio: sharpe, breakeven_wr: breakevenWR} as typeof r;
     })();
 
     return (
@@ -983,68 +980,76 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
             ) : (
                 <p className={`text-sm ${muted}`}>No OOS result available</p>
             )}
-            {r?.ProfileBreakdown && Object.keys(r.ProfileBreakdown).length > 0 && (
-                <div className="mt-2 space-y-2">
-                    {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => {
-                        const isLive = profileLiveStatus(name);
-                        const profileDiffs = diffs.filter(d => d.key.startsWith(`profile.${name}.`));
-                        const isProfileExpanded = expandedProfile === name;
-                        return (
-                            <div key={name} className={`pl-3 border-l-2 cursor-pointer ${
-                                isLive
-                                    ? isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'
-                                    : isDarkMode ? 'border-slate-600/40' : 'border-gray-300/70'
-                            } ${!isLive ? 'opacity-60' : ''}`} onClick={(e) => { e.stopPropagation(); setExpandedProfile(isProfileExpanded ? null : name); }}>
-                                <div className="flex items-center gap-2 mb-0.5">
-                                    <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
-                                    {profileDiffs.length > 0 && (
-                                        <span className={`text-[10px] ${muted}`}>{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''} — Gen {trunk.generation} <span className={`inline-block transition-transform ${isProfileExpanded ? 'rotate-90' : ''}`}>▶</span></span>
-                                    )}
-                                    <button
-                                        onClick={async (e) => {
-                                            e.stopPropagation();
-                                            setLiveToggling(name);
-                                            if (isLive) {
-                                                await noLiveProfile(name, trunk.timeframe);
-                                            } else {
-                                                await goLiveProfile(name, trunk.timeframe);
-                                            }
-                                            setLiveToggling(null);
-                                            onRefresh();
-                                        }}
-                                        disabled={liveToggling === name}
-                                        className={`px-1.5 py-0.5 text-[9px] font-medium rounded transition-colors ${
-                                            liveToggling === name
-                                                ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                : isLive
-                                                    ? isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                    : isDarkMode ? 'bg-orange-900/30 text-orange-400 hover:bg-orange-900/50' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-                                        }`}
-                                        title={isLive ? 'Profile will be pushed to live on deploy' : 'Profile blocked from live — optimizer only'}
-                                    >
-                                        {liveToggling === name ? '...' : isLive ? 'LIVE' : 'BLOCKED'}
-                                    </button>
-                                </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-0.5">
-                                    <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                    <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                    <WRFractionStat wr={pr.win_rate} breakevenWR={pr.breakeven_wr} isDarkMode={isDarkMode}/>
-                                    <ResultStat label="Avg P&L" value={avgPnl(pr)} isDarkMode={isDarkMode} color={plColor(pr.total_pnl)}/>
-                                    <ResultStat label="Trades" value={pr.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                                    <ResultStat label="T/Day" value={trunk.oos_days && pr.total_trades ? (pr.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
-                                    <ResultStat label="AvgW" value={fmtPct(pr.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                                    <ResultStat label="AvgL" value={fmtPct(pr.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
-                                </div>
-                                {isProfileExpanded && profileDiffs.length > 0 && (
-                                    <div className="mt-1.5">
-                                        <DiffBlock diffs={profileDiffs} stripPrefix={`profile.${name}.`} isDarkMode={isDarkMode} muted={muted} hideHeader/>
+            {(() => {
+                const tfData = allProfileData?.[trunk.timeframe];
+                const promotedProfiles = tfData?.profiles.filter(p => p.baseline?.promoted_to_trunk) ?? [];
+                if (promotedProfiles.length === 0) return null;
+                return (
+                    <div className="mt-2 space-y-2">
+                        {promotedProfiles.sort((a,b) => a.name.localeCompare(b.name)).map(p => {
+                            const name = p.name;
+                            const pr = p.baseline?.stats;
+                            const isLive = profileLiveStatus(name);
+                            const profileDiffs = diffs.filter(d => d.key.startsWith(`profile.${name}.`));
+                            const isProfileExpanded = expandedProfile === name;
+                            return (
+                                <div key={name} className={`pl-3 border-l-2 cursor-pointer ${
+                                    isLive
+                                        ? isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'
+                                        : isDarkMode ? 'border-slate-600/40' : 'border-gray-300/70'
+                                } ${!isLive ? 'opacity-60' : ''}`} onClick={(e) => { e.stopPropagation(); setExpandedProfile(isProfileExpanded ? null : name); }}>
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                        <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
+                                        {profileDiffs.length > 0 && (
+                                            <span className={`text-[10px] ${muted}`}>{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''} — Gen {trunk.generation} <span className={`inline-block transition-transform ${isProfileExpanded ? 'rotate-90' : ''}`}>▶</span></span>
+                                        )}
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                setLiveToggling(name);
+                                                if (isLive) {
+                                                    await noLiveProfile(name, trunk.timeframe);
+                                                } else {
+                                                    await goLiveProfile(name, trunk.timeframe);
+                                                }
+                                                setLiveToggling(null);
+                                                onRefresh();
+                                            }}
+                                            disabled={liveToggling === name}
+                                            className={`px-1.5 py-0.5 text-[9px] font-medium rounded transition-colors ${
+                                                liveToggling === name
+                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                    : isLive
+                                                        ? isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                        : isDarkMode ? 'bg-orange-900/30 text-orange-400 hover:bg-orange-900/50' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                                            }`}
+                                            title={isLive ? 'Profile will be pushed to live on deploy' : 'Profile blocked from live — optimizer only'}
+                                        >
+                                            {liveToggling === name ? '...' : isLive ? 'LIVE' : 'BLOCKED'}
+                                        </button>
                                     </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+                                    {pr && (
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-0.5">
+                                            <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                            <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                            <WRFractionStat wr={pr.win_rate} breakevenWR={pr.breakeven_wr} isDarkMode={isDarkMode}/>
+                                            <ResultStat label="Avg P&L" value={avgPnl(pr)} isDarkMode={isDarkMode} color={plColor(pr.total_pnl)}/>
+                                            <ResultStat label="Trades" value={pr.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                                            <ResultStat label="AvgW" value={fmtPct(pr.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                                            <ResultStat label="AvgL" value={fmtPct(pr.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
+                                        </div>
+                                    )}
+                                    {isProfileExpanded && profileDiffs.length > 0 && (
+                                        <div className="mt-1.5">
+                                            <DiffBlock diffs={profileDiffs} stripPrefix={`profile.${name}.`} isDarkMode={isDarkMode} muted={muted} hideHeader/>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                );
+            })()}
             {expanded && detail && !expandedProfile && (
                 <div className="mt-3 pt-3 border-t border-slate-600/30" onClick={e => e.stopPropagation()}>
                     {diffs.length === 0 ? (
