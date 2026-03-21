@@ -182,65 +182,62 @@ export default function Optimizer() {
                                                     <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
                                                     Trunk
                                                 </h2>
-                                                {trunk && (
-                                                    <div className="flex items-center gap-2">
-                                                        {!isUpToDate && (
-                                                            <span className={`text-xs ${muted}`}>
-                                                                {evolutionsSincePush} ev{evolutionsSincePush !== 1 ? 's' : ''}
-                                                            </span>
-                                                        )}
-                                                        {isUpToDate && liveTrunk && (
-                                                            <span className={`text-xs ${muted}`}>
-                                                                {dayjs(liveTrunk.pushed_at).fromNow()}
-                                                            </span>
-                                                        )}
-                                                        <button
-                                                            onClick={async () => { await pushTrunk(trunk.id); loadData(); }}
-                                                            disabled={isUpToDate || !trunk.mutation_ids?.length}
-                                                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                                                                isUpToDate || !trunk.mutation_ids?.length
-                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                                    : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
-                                                            }`}>
-                                                            {isUpToDate ? 'Up to date' : !trunk.mutation_ids?.length ? 'Not assembled' : `Deploy #${trunk.id}`}
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {/* Promoted profiles + Assemble button */}
-                                            {(() => {
-                                                const tfProfiles = allProfileData?.[tf]?.profiles ?? [];
-                                                const promoted = tfProfiles.filter(p => p.baseline?.promoted_to_trunk);
-                                                if (promoted.length === 0) return null;
-                                                const trunkMutIDs = new Set(trunk?.mutation_ids ?? []);
-                                                const isCurrent = trunk != null &&
-                                                    promoted.every(p => p.baseline?.mutation_id != null && trunkMutIDs.has(p.baseline.mutation_id));
-                                                return (
-                                                    <div className="mt-1 mb-1">
-                                                        <div className={`flex items-center justify-between gap-2`}>
-                                                            <div className="flex items-center gap-2 flex-wrap min-w-0">
-                                                                <span className={`text-[10px] font-medium shrink-0 ${muted}`}>Promoted:</span>
-                                                                {promoted.map(p => (
-                                                                    <span key={p.name} className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-50 text-purple-700'}`}>
-                                                                        {p.name}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
+                                                {trunk && (() => {
+                                                    const tfProfiles2 = allProfileData?.[tf]?.profiles ?? [];
+                                                    const promoted2 = tfProfiles2.filter((p: any) => p.baseline?.promoted_to_trunk);
+                                                    const trunkMutIDs2 = new Set(trunk?.mutation_ids ?? []);
+                                                    const isCurrent2 = trunk != null && promoted2.length > 0 &&
+                                                        promoted2.every((p: any) => p.baseline?.mutation_id != null && trunkMutIDs2.has(p.baseline.mutation_id));
+                                                    return (
+                                                        <div className="flex items-center gap-2">
+                                                            {!isUpToDate && (
+                                                                <span className={`text-xs ${muted}`}>
+                                                                    {evolutionsSincePush} ev{evolutionsSincePush !== 1 ? 's' : ''}
+                                                                </span>
+                                                            )}
+                                                            {isUpToDate && liveTrunk && (
+                                                                <span className={`text-xs ${muted}`}>
+                                                                    {dayjs(liveTrunk.pushed_at).fromNow()}
+                                                                </span>
+                                                            )}
                                                             <button
-                                                                disabled={isCurrent}
-                                                                onClick={async () => {
-                                                                    await assembleTrunk(tf, false);
-                                                                    loadData();
-                                                                }}
-                                                                className={`shrink-0 px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                    isCurrent
+                                                                disabled={isCurrent2}
+                                                                onClick={async () => { await assembleTrunk(tf, false); loadData(); }}
+                                                                className={`px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                    isCurrent2
                                                                         ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                                         : isDarkMode ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                                                                 }`}
                                                             >
-                                                                {isCurrent ? 'Trunk current' : 'Assemble Trunk'}
+                                                                {isCurrent2 ? 'Trunk current' : 'Assemble Trunk'}
+                                                            </button>
+                                                            <button
+                                                                onClick={async () => { await pushTrunk(trunk.id); loadData(); }}
+                                                                disabled={isUpToDate || !trunk.mutation_ids?.length}
+                                                                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                                                                    isUpToDate || !trunk.mutation_ids?.length
+                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                        : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
+                                                                }`}>
+                                                                {isUpToDate ? 'Up to date' : !trunk.mutation_ids?.length ? 'Not assembled' : `Deploy #${trunk.id}`}
                                                             </button>
                                                         </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                            {/* Promoted profiles */}
+                                            {(() => {
+                                                const tfProfiles = allProfileData?.[tf]?.profiles ?? [];
+                                                const promoted = tfProfiles.filter(p => p.baseline?.promoted_to_trunk);
+                                                if (promoted.length === 0) return null;
+                                                return (
+                                                    <div className={`flex items-center gap-2 mt-1 mb-1 flex-wrap`}>
+                                                        <span className={`text-[10px] font-medium ${muted}`}>Promoted:</span>
+                                                        {promoted.map(p => (
+                                                            <span key={p.name} className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-50 text-purple-700'}`}>
+                                                                {p.name}
+                                                            </span>
+                                                        ))}
                                                     </div>
                                                 );
                                             })()}
