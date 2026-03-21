@@ -1,13 +1,13 @@
 // Format a dollar value with appropriate precision.
 // Values >= $0.01 use normal 2-decimal format: +$1.23
-// Values < $0.01 (but non-zero) use scientific notation: +$3.5e-4
+// Values < $0.01 (but non-zero) use 4-decimal format: +$0.0083
 // This prevents sub-cent P&L from displaying as "$0.00" which hides real data.
 export function formatDollar(value: number): string {
     const sign = value >= 0 ? '+' : '-';
     const abs = Math.abs(value);
     if (abs === 0) return '$0.00';
     if (abs >= 0.01) return `${sign}$${abs.toFixed(2)}`;
-    return `${sign}$${abs.toExponential(1)}`;
+    return `${sign}$${abs.toFixed(4)}`;
 }
 
 // Format a P&L value as a per-trade percentage (value × 100).

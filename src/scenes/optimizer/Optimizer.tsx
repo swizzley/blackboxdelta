@@ -1071,7 +1071,7 @@ function DiffBlock({diffs, baseId, isDarkMode, muted, stripPrefix, hideHeader}: 
                 {filtered.map(d => {
                     const displayKey = stripPrefix && d.key.startsWith(stripPrefix) ? d.key.slice(stripPrefix.length) : d.key;
                     return (
-                        <span key={d.key} title={d.key} className={`inline-flex items-center gap-1 whitespace-normal break-all text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                        <span key={d.key} title={d.key} className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded ${
                             isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
                         }`}>
                             <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{displayKey}:</span>
