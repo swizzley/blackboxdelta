@@ -215,12 +215,9 @@ export default function Optimizer() {
                                                 const tfProfiles = allProfileData?.[tf]?.profiles ?? [];
                                                 const promoted = tfProfiles.filter(p => p.baseline?.promoted_to_trunk);
                                                 if (promoted.length === 0) return null;
-                                                const latestProfileAt = promoted.reduce((max, p) => {
-                                                    const t = p.baseline?.promoted_at ? new Date(p.baseline.promoted_at).getTime() : 0;
-                                                    return t > max ? t : max;
-                                                }, 0);
-                                                const trunkAt = trunk?.promoted_at ? new Date(trunk.promoted_at).getTime() : 0;
-                                                const isCurrent = trunkAt >= latestProfileAt;
+                                                const trunkMutIDs = new Set(trunk?.mutation_ids ?? []);
+                                                const isCurrent = trunk != null &&
+                                                    promoted.every(p => p.baseline?.mutation_id != null && trunkMutIDs.has(p.baseline.mutation_id));
                                                 return (
                                                     <div className={`flex items-center gap-2 mt-1 mb-1 flex-wrap`}>
                                                         <span className={`text-[10px] font-medium ${muted}`}>Promoted:</span>

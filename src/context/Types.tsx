@@ -512,6 +512,7 @@ export interface OptimizerTrunk {
     promoted_rec_source?: string;
     revert_reason?: string;
     reverted_to_trunk_id?: number;
+    mutation_ids?: number[];
 }
 
 export interface OptimizerTrunkDetail {
@@ -795,6 +796,7 @@ export interface OptimizerProfileStats {
 
 export interface ProfileBaselineData {
     stats?: OptimizerProfileStats;
+    mutation_id?: number;
     source_branch_id?: number;
     source_generation_id?: number;
     generation_counter: number;
