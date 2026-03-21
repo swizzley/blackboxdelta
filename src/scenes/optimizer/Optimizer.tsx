@@ -215,6 +215,12 @@ export default function Optimizer() {
                                                 const tfProfiles = allProfileData?.[tf]?.profiles ?? [];
                                                 const promoted = tfProfiles.filter(p => p.baseline?.promoted_to_trunk);
                                                 if (promoted.length === 0) return null;
+                                                const latestProfileAt = promoted.reduce((max, p) => {
+                                                    const t = p.baseline?.promoted_at ? new Date(p.baseline.promoted_at).getTime() : 0;
+                                                    return t > max ? t : max;
+                                                }, 0);
+                                                const trunkAt = trunk?.promoted_at ? new Date(trunk.promoted_at).getTime() : 0;
+                                                const isCurrent = trunkAt >= latestProfileAt;
                                                 return (
                                                     <div className={`flex items-center gap-2 mt-1 mb-1 flex-wrap`}>
                                                         <span className={`text-[10px] font-medium ${muted}`}>Promoted:</span>
@@ -224,15 +230,18 @@ export default function Optimizer() {
                                                             </span>
                                                         ))}
                                                         <button
+                                                            disabled={isCurrent}
                                                             onClick={async () => {
                                                                 await assembleTrunk(tf, false);
                                                                 loadData();
                                                             }}
                                                             className={`ml-auto px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                isDarkMode ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                                                isCurrent
+                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                    : isDarkMode ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                                                             }`}
                                                         >
-                                                            Assemble Trunk
+                                                            {isCurrent ? 'Trunk current' : 'Assemble Trunk'}
                                                         </button>
                                                     </div>
                                                 );
