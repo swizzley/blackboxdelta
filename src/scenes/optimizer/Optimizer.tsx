@@ -924,7 +924,7 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                     <WRFractionStat wr={displayResult.win_rate} breakevenWR={displayResult.breakeven_wr} isDarkMode={isDarkMode}/>
                     <ResultStat label="Avg P&L" value={avgPnl(displayResult)} isDarkMode={isDarkMode} color={plColor(displayResult.total_pnl)}/>
                     <ResultStat label="Trades" value={displayResult.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="T/Day" value={(() => { const days = promotedProfiles.map(p => p.baseline?.oos_days ?? 0).filter(d => d > 0); const avgDays = days.length ? days.reduce((a,b) => a+b, 0) / days.length : 0; return avgDays > 0 && displayResult.total_trades ? (displayResult.total_trades / avgDays).toFixed(2) : '—'; })()} isDarkMode={isDarkMode}/>
+                    <ResultStat label="T/Day" value={(() => { const tfData = allProfileData?.[trunk.timeframe]; const pb = tfData?.profiles.filter(p => p.baseline?.promoted_to_trunk) ?? []; const days = pb.map(p => p.baseline?.oos_days ?? 0).filter(d => d > 0); const avgDays = days.length ? days.reduce((a, b) => a + b, 0) / days.length : 0; return avgDays > 0 && displayResult.total_trades ? (displayResult.total_trades / avgDays).toFixed(2) : '—'; })()} isDarkMode={isDarkMode}/>
                     <ResultStat label="AvgW" value={fmtPct(displayResult.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
                     <ResultStat label="AvgL" value={fmtPct(displayResult.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                 </div>
