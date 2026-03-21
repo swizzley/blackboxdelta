@@ -11,7 +11,7 @@ import {
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
     fetchOptimizerAllProfiles, enableProfile, disableProfile, reseedProfile, retrySeedProfile,
     goLiveProfile, noLiveProfile, promoteProfile, demoteProfile, fetchProfileHistory,
-    pushTrunk, revertTrunk, unrevertTrunk, triggerSeed, applyRecommendation, assembleTrunk,
+    pushTrunk, revertTrunk, unrevertTrunk, applyRecommendation, assembleTrunk,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -56,11 +56,8 @@ export default function Optimizer() {
     const [showGens, setShowGens] = useState(false);
     const [revertTarget, setRevertTarget] = useState<number | null>(null);
     const [revertReason, setRevertReason] = useState('overfit');
-    const [seedConfirm, setSeedConfirm] = useState<string | null>(null);
     const [trunkSort, setTrunkSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
     const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
-    const [seedCountdown, setSeedCountdown] = useState(0);
-    const seedCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [expandedProfileHistory, setExpandedProfileHistory] = useState<string | null>(null);
     const [profileHistory, setProfileHistory] = useState<ProfileHistoryEntry[]>([]);
 
@@ -358,55 +355,6 @@ export default function Optimizer() {
                                                                 <span className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 animate-pulse" title={`Gen ${activeGen.id} active`}/>
                                                             )}
 
-                                                            {/* Re-seed button */}
-                                                            {seedConfirm === tf ? (
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <button
-                                                                        disabled={seedCountdown > 0}
-                                                                        onClick={async () => {
-                                                                            await triggerSeed(tf);
-                                                                            setSeedConfirm(null);
-                                                                            setSeedCountdown(0);
-                                                                            if (seedCountdownRef.current) clearInterval(seedCountdownRef.current);
-                                                                            loadData();
-                                                                        }}
-                                                                        className={`px-2 py-0.5 text-xs font-medium rounded transition-colors min-w-[4rem] text-center ${
-                                                                            seedCountdown > 0
-                                                                                ? isDarkMode ? 'bg-slate-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                                : 'bg-red-600 hover:bg-red-500 text-white cursor-pointer'
-                                                                        }`}>
-                                                                        {seedCountdown > 0 ? `${seedCountdown}s` : 'Confirm'}
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            setSeedConfirm(null);
-                                                                            setSeedCountdown(0);
-                                                                            if (seedCountdownRef.current) clearInterval(seedCountdownRef.current);
-                                                                        }}
-                                                                        className={`px-2 py-0.5 text-xs rounded ${isDarkMode ? 'bg-slate-600 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
-                                                                        Cancel
-                                                                    </button>
-                                                                </div>
-                                                            ) : (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSeedConfirm(tf);
-                                                                        setSeedCountdown(60);
-                                                                        if (seedCountdownRef.current) clearInterval(seedCountdownRef.current);
-                                                                        seedCountdownRef.current = setInterval(() => {
-                                                                            setSeedCountdown(n => {
-                                                                                if (n <= 1) { clearInterval(seedCountdownRef.current!); return 0; }
-                                                                                return n - 1;
-                                                                            });
-                                                                        }, 1000);
-                                                                    }}
-                                                                    className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
-                                                                        isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'
-                                                                    }`}
-                                                                    title="Start from scratch — runs full seed calibration pipeline">
-                                                                    Re-seed
-                                                                </button>
-                                                            )}
                                                         </div>
                                                     );
                                                 })}
@@ -615,23 +563,21 @@ export default function Optimizer() {
                                                         >
                                                             {p.enabled ? 'Disable' : 'Enable'}
                                                         </button>
-                                                        {!p.enabled && (
-                                                            <button
-                                                                disabled={profileActionLoading === p.name}
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    setProfileActionLoading(p.name);
-                                                                    await reseedProfile(p.name, tf);
-                                                                    setProfileActionLoading(null);
-                                                                    loadData();
-                                                                }}
-                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                    isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
-                                                                }`}
-                                                            >
-                                                                Re-seed
-                                                            </button>
-                                                        )}
+                                                        <button
+                                                            disabled={profileActionLoading === p.name}
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                setProfileActionLoading(p.name);
+                                                                await reseedProfile(p.name, tf);
+                                                                setProfileActionLoading(null);
+                                                                loadData();
+                                                            }}
+                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
+                                                            }`}
+                                                        >
+                                                            Re-seed
+                                                        </button>
                                                     </div>
                                                 </div>
                                                 {/* Profile history expandable */}
