@@ -216,27 +216,31 @@ export default function Optimizer() {
                                                 const isCurrent = trunk != null &&
                                                     promoted.every(p => p.baseline?.mutation_id != null && trunkMutIDs.has(p.baseline.mutation_id));
                                                 return (
-                                                    <div className={`flex items-center gap-2 mt-1 mb-1 flex-wrap`}>
-                                                        <span className={`text-[10px] font-medium ${muted}`}>Promoted:</span>
-                                                        {promoted.map(p => (
-                                                            <span key={p.name} className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-50 text-purple-700'}`}>
-                                                                {p.name}
-                                                            </span>
-                                                        ))}
-                                                        <button
-                                                            disabled={isCurrent}
-                                                            onClick={async () => {
-                                                                await assembleTrunk(tf, false);
-                                                                loadData();
-                                                            }}
-                                                            className={`ml-auto px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                isCurrent
-                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                                    : isDarkMode ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                                                            }`}
-                                                        >
-                                                            {isCurrent ? 'Trunk current' : 'Assemble Trunk'}
-                                                        </button>
+                                                    <div className="mt-1 mb-1">
+                                                        <div className={`flex items-center justify-between gap-2`}>
+                                                            <div className="flex items-center gap-2 flex-wrap min-w-0">
+                                                                <span className={`text-[10px] font-medium shrink-0 ${muted}`}>Promoted:</span>
+                                                                {promoted.map(p => (
+                                                                    <span key={p.name} className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-50 text-purple-700'}`}>
+                                                                        {p.name}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                            <button
+                                                                disabled={isCurrent}
+                                                                onClick={async () => {
+                                                                    await assembleTrunk(tf, false);
+                                                                    loadData();
+                                                                }}
+                                                                className={`shrink-0 px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                    isCurrent
+                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                        : isDarkMode ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                                                }`}
+                                                            >
+                                                                {isCurrent ? 'Trunk current' : 'Assemble Trunk'}
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 );
                                             })()}
