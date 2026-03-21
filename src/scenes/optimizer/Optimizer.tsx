@@ -189,37 +189,37 @@ export default function Optimizer() {
                                                     const isCurrent2 = trunk != null && promoted2.length > 0 &&
                                                         promoted2.every((p: any) => p.baseline?.mutation_id != null && trunkMutIDs2.has(p.baseline.mutation_id));
                                                     return (
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-1.5 shrink-0">
                                                             {!isUpToDate && (
-                                                                <span className={`text-xs ${muted}`}>
+                                                                <span className={`text-xs whitespace-nowrap ${muted}`}>
                                                                     {evolutionsSincePush} ev{evolutionsSincePush !== 1 ? 's' : ''}
                                                                 </span>
                                                             )}
                                                             {isUpToDate && liveTrunk && (
-                                                                <span className={`text-xs ${muted}`}>
+                                                                <span className={`text-xs whitespace-nowrap ${muted}`}>
                                                                     {dayjs(liveTrunk.pushed_at).fromNow()}
                                                                 </span>
                                                             )}
                                                             <button
                                                                 disabled={isCurrent2}
                                                                 onClick={async () => { await assembleTrunk(tf, false); loadData(); }}
-                                                                className={`px-2 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded whitespace-nowrap transition-colors ${
                                                                     isCurrent2
-                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                                         : isDarkMode ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                                                                 }`}
                                                             >
-                                                                {isCurrent2 ? 'Trunk current' : 'Assemble Trunk'}
+                                                                {isCurrent2 ? 'current' : 'assemble'}
                                                             </button>
                                                             <button
                                                                 onClick={async () => { await pushTrunk(trunk.id); loadData(); }}
                                                                 disabled={isUpToDate || !trunk.mutation_ids?.length}
-                                                                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded whitespace-nowrap transition-colors ${
                                                                     isUpToDate || !trunk.mutation_ids?.length
-                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                                                         : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
                                                                 }`}>
-                                                                {isUpToDate ? 'Up to date' : !trunk.mutation_ids?.length ? 'Not assembled' : `Deploy #${trunk.id}`}
+                                                                {isUpToDate ? 'deployed' : !trunk.mutation_ids?.length ? 'not assembled' : `deploy #${trunk.id}`}
                                                             </button>
                                                         </div>
                                                     );
@@ -242,7 +242,7 @@ export default function Optimizer() {
                                                 );
                                             })()}
                                             {trunk ? (
-                                                <TrunkCard trunk={trunk} isDarkMode={isDarkMode} muted={muted} allProfileData={allProfileData} onRefresh={loadData}/>
+                                                <TrunkCard trunk={{...trunk, oos_days: tfTrunks.find(t => t.id === trunk.id)?.oos_days ?? trunk.oos_days}} isDarkMode={isDarkMode} muted={muted} allProfileData={allProfileData} onRefresh={loadData}/>
                                             ) : (
                                                 <p className={`text-sm ${muted}`}>No trunk</p>
                                             )}
@@ -986,6 +986,7 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                                             <WRFractionStat wr={pr.win_rate} breakevenWR={pr.breakeven_wr} isDarkMode={isDarkMode}/>
                                             <ResultStat label="Avg P&L" value={avgPnl(pr)} isDarkMode={isDarkMode} color={plColor(pr.total_pnl)}/>
                                             <ResultStat label="Trades" value={pr.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                                            <ResultStat label="T/Day" value={trunk.oos_days && pr.total_trades ? (pr.total_trades / trunk.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
                                             <ResultStat label="AvgW" value={fmtPct(pr.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
                                             <ResultStat label="AvgL" value={fmtPct(pr.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
                                         </div>
