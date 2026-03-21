@@ -225,7 +225,6 @@ export default function Optimizer() {
                                                         ))}
                                                         <button
                                                             onClick={async () => {
-                                                                if (!confirm(`Assemble trunk from ${promoted.length} promoted profile(s) for ${tf}?`)) return;
                                                                 await assembleTrunk(tf, false);
                                                                 loadData();
                                                             }}
@@ -754,7 +753,6 @@ export default function Optimizer() {
                                                                 <button
                                                                     disabled={recActionLoading === rec.id}
                                                                     onClick={async () => {
-                                                                        if (!confirm(`Apply recommendation #${rec.id} to ${rec.timeframe} trunk?`)) return;
                                                                         setRecActionLoading(rec.id);
                                                                         await applyRecommendation(rec.id);
                                                                         loadData();
