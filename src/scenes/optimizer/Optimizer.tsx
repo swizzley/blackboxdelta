@@ -1633,7 +1633,7 @@ function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
 
 // --- Seed Run Components ---
 
-const ALL_SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'Tier2', 'Tier3', 'Diagnostics'] as const;
+const ALL_SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'LHC', 'Diagnostics'] as const;
 const STAGE_LABELS: Record<string, string> = {
     Stage0: 'Weights',
     StageA: 'Baseline',
@@ -1646,8 +1646,9 @@ const STAGE_LABELS: Record<string, string> = {
     StageD5: 'Mkt/Lim',
     StageE: 'Assembly',
     Tier1: 'Tier 1',
-    Tier2: 'Hill Climb',
-    Tier3: 'Random',
+    LHC: 'LHC Sweep',
+    LHC_sweep: 'LHC Sweep',
+    LHC_preload: 'LHC Preload',
     Diagnostics: 'Diag',
     FinalOOS: 'Final OOS',
     Start: 'Starting',
@@ -1666,17 +1667,17 @@ const STAGE_TIME_EST: Record<string, Record<string, string>> = {
     scalp: {
         StageA: '~15m', StageD: '~25m', StageD2: '~20m',
         StageD4: '~20m', StageD5: '~15m', StageB: '~40m',
-        StageD3: '~20m', StageE: '~5m', Tier2: '~45m', Tier3: '~30m', Diagnostics: '~2m',
+        StageD3: '~20m', StageE: '~5m', LHC: '~3m', Diagnostics: '~2m',
     },
     intraday: {
         StageA: '~5m', StageD: '~8m', StageD2: '~6m',
         StageD4: '~6m', StageB: '~12m',
-        StageD3: '~6m', StageE: '~2m', Tier2: '~15m', Tier3: '~10m', Diagnostics: '~1m',
+        StageD3: '~6m', StageE: '~2m', LHC: '~3m', Diagnostics: '~1m',
     },
     swing: {
         Stage0: '~5m', StageA: '~2m', StageD: '~3m', StageD2: '~3m',
         StageD4: '~3m', StageB: '~5m', StageC: '~1m',
-        StageD3: '~3m', StageE: '~1m', Tier2: '~8m', Tier3: '~5m', Diagnostics: '~1m',
+        StageD3: '~3m', StageE: '~1m', LHC: '~10m', Diagnostics: '~1m',
     },
 };
 
@@ -1687,7 +1688,7 @@ function parseProfileStage(raw: string): {profile: string | null; stage: string}
         const prefix = raw.slice(0, colonIdx);
         const suffix = raw.slice(colonIdx + 1);
         // If suffix looks like a stage name (starts with uppercase or is a known keyword), treat prefix as profile
-        if (suffix && /^[A-Z]/.test(suffix) || ['Start', 'Tier1', 'Tier2', 'Tier3'].some(s => suffix.startsWith(s))) {
+        if (suffix && /^[A-Z]/.test(suffix) || ['Start', 'Tier1', 'LHC', 'init', 'loading', 'preload'].some(s => suffix.startsWith(s))) {
             return {profile: prefix, stage: suffix};
         }
     }
