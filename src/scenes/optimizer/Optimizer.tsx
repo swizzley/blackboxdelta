@@ -593,7 +593,7 @@ export default function Optimizer() {
                                                 {p.baseline?.stats && (() => {
                                                     const bs = p.baseline!.stats!;
                                                     return (
-                                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 ml-3 mr-3 mb-1">
+                                                        <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 mt-1 ml-3 mr-3 mb-1">
                                                             <ResultStat label="Sharpe" value={bs.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                                                             <ResultStat label="PF" value={bs.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                                                             <WRFractionStat wr={bs.win_rate} breakevenWR={bs.breakeven_wr} isDarkMode={isDarkMode}/>
@@ -1671,14 +1671,16 @@ function WRFractionStat({wr, breakevenWR, isDarkMode}: {wr?: number; breakevenWR
     const above = wr != null && breakevenWR != null && breakevenWR > 0 && wr > breakevenWR;
     const wrColor = wr == null ? (isDarkMode ? 'text-gray-200' : 'text-gray-700')
         : above ? 'text-emerald-400' : 'text-red-400';
-    return (
+    const wrText = wr != null ? `${wr.toFixed(1)}%` : '—';
+    const tooltip = breakevenWR ? `Breakeven: ${breakevenWR.toFixed(1)}%` : undefined;
+    const box = (
         <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`}>
             <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>WR</p>
-            <p className={`text-sm font-semibold leading-tight ${wrColor}`}>{wr != null ? `${wr.toFixed(1)}%` : '—'}</p>
-            <div className={`my-0.5 border-t ${isDarkMode ? 'border-slate-500/50' : 'border-gray-300/70'}`}/>
-            <p className={`text-[10px] leading-tight ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{breakevenWR ? `BE ${breakevenWR.toFixed(1)}%` : 'BE —'}</p>
+            <p className={`text-sm font-semibold truncate ${wrColor}`} title={wrText}>{wrText}</p>
         </div>
     );
+    if (tooltip) return <Tooltip content={tooltip} className="">{box}</Tooltip>;
+    return box;
 }
 
 function ResultStat({label, value, isDarkMode, color, tooltip}: {label: string; value: string; isDarkMode: boolean; color?: string; tooltip?: string}) {
