@@ -258,6 +258,23 @@ export function fetchProfileHistory(name: string, timeframe: string = 'scalp'): 
     return apiFetch(`/api/optimizer/profiles/${name}/history?timeframe=${timeframe}`);
 }
 
+// LHC runs
+export function queueLHCRun(timeframe: string, profile: string, combos: number = 10000): Promise<any> {
+    return apiPost('/api/optimizer/lhc', { timeframe, profile, combos });
+}
+
+export function fetchLHCRuns(timeframe?: string, limit: number = 20): Promise<import('../context/Types').LHCRun[] | null> {
+    const params = new URLSearchParams();
+    if (timeframe) params.set('timeframe', timeframe);
+    params.set('limit', String(limit));
+    const qs = params.toString();
+    return apiFetch(`/api/optimizer/lhc-runs${qs ? '?' + qs : ''}`);
+}
+
+export function fetchLHCRunDetail(id: number): Promise<import('../context/Types').LHCRunDetail | null> {
+    return apiFetch(`/api/optimizer/lhc-runs/${id}`);
+}
+
 // Worker allocation
 export function fetchOptimizerWorkers(): Promise<OptimizerWorkerConfig | null> {
     return apiFetch('/api/optimizer/workers');

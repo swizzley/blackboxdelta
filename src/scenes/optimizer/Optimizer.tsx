@@ -12,6 +12,7 @@ import {
     fetchOptimizerAllProfiles, enableProfile, disableProfile, reseedProfile, retrySeedProfile,
     goLiveProfile, noLiveProfile, promoteProfile, demoteProfile, fetchProfileHistory,
     pushTrunk, revertTrunk, unrevertTrunk, applyRecommendation, assembleTrunk,
+    queueLHCRun, fetchLHCRuns, fetchLHCRunDetail,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -21,6 +22,7 @@ import type {
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
     OptimizerAllProfilesResponse, ProfileHistoryEntry,
+    LHCRun, LHCRunDetail,
 } from '../../context/Types';
 import {
     BeakerIcon, ClockIcon,
@@ -63,10 +65,14 @@ export default function Optimizer() {
     const [expandedBranch, setExpandedBranch] = useState<number | null>(null);
     const [branchDetail, setBranchDetail] = useState<OptimizerBranch | null>(null);
     const [historyPage, setHistoryPage] = useState(0);
+    const [lhcRuns, setLhcRuns] = useState<LHCRun[]>([]);
+    const [expandedLHC, setExpandedLHC] = useState<number | null>(null);
+    const [lhcDetail, setLhcDetail] = useState<LHCRunDetail | null>(null);
+    const [lhcSort, setLhcSort] = useState<'score' | 'combined_sharpe' | 'total_pnl' | 'profit_factor' | 'total_trades'>('score');
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
-        const [s, t, g, r, sr, wc, pd] = await Promise.all([
+        const [s, t, g, r, sr, wc, pd, lhc] = await Promise.all([
             fetchOptimizerStatus(),
             fetchOptimizerTrunks(),
             fetchOptimizerGenerations(20),
@@ -74,6 +80,7 @@ export default function Optimizer() {
             fetchOptimizerSeedRuns(),
             fetchOptimizerWorkers(),
             fetchOptimizerAllProfiles(),
+            fetchLHCRuns(),
         ]);
         if (s) setStatus(s);
         if (t) setTrunks(t);
@@ -81,6 +88,7 @@ export default function Optimizer() {
         if (r) setRecommendations(r);
         if (sr) setSeedRuns(sr);
         if (pd) setAllProfileData(pd);
+        if (lhc) setLhcRuns(lhc);
         if (wc) {
             setWorkerConfig(wc);
             if (!workerDirty) {
@@ -579,6 +587,23 @@ export default function Optimizer() {
                                                         >
                                                             Re-seed
                                                         </button>
+                                                        <button
+                                                            disabled={profileActionLoading === p.name || lhcRuns.some(r => r.profile_name === p.name && r.timeframe === tf && (r.status === 'queued' || r.status === 'preloading' || r.status === 'sweeping'))}
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                setProfileActionLoading(p.name);
+                                                                await queueLHCRun(tf, p.name);
+                                                                setProfileActionLoading(null);
+                                                                loadData();
+                                                            }}
+                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                lhcRuns.some(r => r.profile_name === p.name && r.timeframe === tf && (r.status === 'queued' || r.status === 'preloading' || r.status === 'sweeping'))
+                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                    : isDarkMode ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-900/50' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                                            }`}
+                                                        >
+                                                            LHC
+                                                        </button>
                                                     </div>
                                                 </div>
                                                 {/* Baseline stats — single row */}
@@ -731,6 +756,102 @@ export default function Optimizer() {
                                             ))}
                                         </div>
                                     )}
+                                </div>
+                            )}
+
+                            {/* LHC Sweep Runs */}
+                            {lhcRuns.length > 0 && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={heading}>
+                                        <BeakerIcon className={iconCl}/>LHC Sweeps
+                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{lhcRuns.length}</span>
+                                    </h2>
+                                    <div className="space-y-2">
+                                        {lhcRuns.map(run => (
+                                            <div key={run.id} className={`rounded px-3 py-2 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className={`font-mono text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>#{run.id}</span>
+                                                    <TimeframeBadge tf={run.timeframe} isDarkMode={isDarkMode}/>
+                                                    <span className={`font-mono text-xs font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-700'}`}>{run.profile_name}</span>
+                                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
+                                                        run.status === 'complete' ? isDarkMode ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700'
+                                                        : run.status === 'failed' ? isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700'
+                                                        : run.status === 'sweeping' ? isDarkMode ? 'bg-amber-900/40 text-amber-400 animate-pulse' : 'bg-amber-100 text-amber-700 animate-pulse'
+                                                        : isDarkMode ? 'bg-cyan-900/40 text-cyan-400 animate-pulse' : 'bg-cyan-100 text-cyan-700 animate-pulse'
+                                                    }`}>{run.status}</span>
+                                                    <span className={`text-[10px] ${muted}`}>{run.combos.toLocaleString()} combos</span>
+                                                    {run.configs_tested > 0 && (
+                                                        <span className={`text-[10px] ${muted}`}>{run.configs_tested.toLocaleString()} tested</span>
+                                                    )}
+                                                    {run.best_sharpe != null && (
+                                                        <span className={`text-[10px] font-mono ${run.best_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                            best:{run.best_sharpe.toFixed(4)}
+                                                        </span>
+                                                    )}
+                                                    {run.claimed_by && <span className={`text-[10px] ${muted}`}>@{run.claimed_by}</span>}
+                                                    <span className={`text-[10px] ${muted}`}>{dayjs(run.started_at).fromNow()}</span>
+                                                    {run.status === 'complete' && (
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (expandedLHC === run.id) { setExpandedLHC(null); return; }
+                                                                const detail = await fetchLHCRunDetail(run.id);
+                                                                if (detail) { setLhcDetail(detail); setExpandedLHC(run.id); }
+                                                            }}
+                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                isDarkMode ? 'bg-slate-600/50 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                            }`}
+                                                        >
+                                                            {expandedLHC === run.id ? 'Hide' : 'Results'}
+                                                        </button>
+                                                    )}
+                                                    {run.error_message && <span className="text-[10px] text-red-400">{run.error_message}</span>}
+                                                </div>
+                                                {/* Expanded results table */}
+                                                {expandedLHC === run.id && lhcDetail?.results && (() => {
+                                                    const sorted = [...lhcDetail.results].sort((a, b) => {
+                                                        const av = a[lhcSort] as number ?? 0;
+                                                        const bv = b[lhcSort] as number ?? 0;
+                                                        return bv - av;
+                                                    });
+                                                    return (
+                                                        <div className="mt-2">
+                                                            <div className="flex items-center gap-2 mb-1.5">
+                                                                <span className={`text-[10px] font-medium ${muted}`}>Rank by:</span>
+                                                                {(['score', 'combined_sharpe', 'total_pnl', 'profit_factor', 'total_trades'] as const).map(key => (
+                                                                    <button key={key} onClick={() => setLhcSort(key)}
+                                                                        className={`px-1.5 py-0.5 text-[10px] rounded transition-colors ${
+                                                                            lhcSort === key
+                                                                                ? isDarkMode ? 'bg-cyan-900/50 text-cyan-300' : 'bg-cyan-100 text-cyan-800'
+                                                                                : isDarkMode ? 'bg-slate-600/30 text-gray-500 hover:text-gray-300' : 'bg-gray-50 text-gray-400 hover:text-gray-700'
+                                                                        }`}>
+                                                                        {key === 'combined_sharpe' ? 'Sharpe' : key === 'total_pnl' ? 'P&L' : key === 'profit_factor' ? 'PF' : key === 'total_trades' ? 'Trades' : 'Score'}
+                                                                    </button>
+                                                                ))}
+                                                                <span className={`text-[10px] ${muted} ml-auto`}>{sorted.length} results</span>
+                                                            </div>
+                                                            <div className="space-y-1 max-h-96 overflow-y-auto">
+                                                                {sorted.slice(0, 20).map((r, i) => (
+                                                                    <div key={i} className={`flex flex-wrap items-center gap-3 px-2 py-1 rounded text-[10px] font-mono ${
+                                                                        isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'
+                                                                    }`}>
+                                                                        <span className={`w-4 text-right ${muted}`}>{i + 1}</span>
+                                                                        <span className={r.score > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{r.score.toFixed(4)}</span>
+                                                                        <span className={muted}>Sharpe:{r.combined_sharpe.toFixed(4)}</span>
+                                                                        <span className={muted}>PF:{r.profit_factor.toFixed(2)}</span>
+                                                                        <span className={muted}>WR:{r.win_rate.toFixed(1)}%</span>
+                                                                        <span className={muted}>{r.total_trades.toLocaleString()}t</span>
+                                                                        <span className={r.total_pnl > 0 ? 'text-emerald-400' : 'text-red-400'}>P&L:{r.total_pnl.toFixed(2)}</span>
+                                                                        <span className={muted}>Sil:{r.silence_ratio.toFixed(2)}</span>
+                                                                        <span className={muted}>Best:{r.best_sharpe.toFixed(3)}/{r.worst_sharpe.toFixed(3)}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 

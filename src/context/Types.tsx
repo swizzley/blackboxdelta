@@ -894,3 +894,40 @@ export interface AnalysisRunDetailApi {
     run: AnalysisRunApi;
     todos: AnalysisTodoApi[];
 }
+
+// LHC run types
+export interface LHCRun {
+    id: number;
+    timeframe: string;
+    profile_name: string;
+    status: string;
+    combos: number;
+    workers: number;
+    claimed_by?: string;
+    started_at: string;
+    completed_at?: string;
+    configs_tested: number;
+    best_sharpe?: number;
+    error_message?: string;
+}
+
+export interface LHCRunDetail extends LHCRun {
+    results?: LHCResult[];
+}
+
+export interface LHCResult {
+    rank: number;
+    params: Record<string, string>;
+    score: number;
+    combined_sharpe: number;
+    best_sharpe: number;
+    worst_sharpe: number;
+    silence_ratio: number;
+    total_trades: number;
+    win_rate: number;
+    profit_factor: number;
+    total_pnl: number;
+    max_drawdown: number;
+    avg_win: number;
+    avg_loss: number;
+}
