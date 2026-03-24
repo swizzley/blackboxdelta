@@ -63,6 +63,7 @@ export default function Optimizer() {
     const [expandedBranch, setExpandedBranch] = useState<number | null>(null);
     const [branchDetail, setBranchDetail] = useState<OptimizerBranch | null>(null);
     const [historyPage, setHistoryPage] = useState(0);
+    const gensRef = useRef<HTMLDivElement>(null);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -464,8 +465,8 @@ export default function Optimizer() {
                                                         <>
                                                         <span className={`text-[10px] font-mono ${muted}`} title="generation_counter / consecutive_failures">
                                                             {p.baseline.source_generation_id ? (
-                                                                <span className="cursor-pointer hover:underline" title={`View generation ${p.baseline.source_generation_id}`}
-                                                                    onClick={(e) => { e.stopPropagation(); setShowGens(true); }}>
+                                                                <span className={`cursor-pointer hover:underline ${isDarkMode ? 'text-cyan-400' : 'text-cyan-700'}`} title={`Generation ${p.baseline.source_generation_id}`}
+                                                                    onClick={(e) => { e.stopPropagation(); setShowGens(true); setTimeout(() => gensRef.current?.scrollIntoView({behavior: 'smooth', block: 'start'}), 100); }}>
                                                                     g:{p.baseline.generation_counter}
                                                                 </span>
                                                             ) : (
@@ -607,23 +608,47 @@ export default function Optimizer() {
                                                 })()}
                                                 {/* Inline branch detail */}
                                                 {expandedBranch === p.baseline?.source_branch_id && branchDetail && (
-                                                    <div className={`ml-3 mr-3 mb-1 px-3 py-2 rounded text-[10px] font-mono ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'}`}>
-                                                        <div className={`font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                    <div className={`ml-3 mr-3 mb-1 px-3 py-2 rounded ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'}`}>
+                                                        <div className={`text-[10px] font-mono font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                                             Branch #{branchDetail.id} — {branchDetail.status}
                                                             {branchDetail.exploration_directive && (
-                                                                <span className={`font-normal ml-2 ${muted}`}>{branchDetail.exploration_directive.slice(0, 120)}{branchDetail.exploration_directive.length > 120 ? '...' : ''}</span>
+                                                                <span className={`font-normal ml-2 ${muted}`}>{branchDetail.exploration_directive.slice(0, 150)}{branchDetail.exploration_directive.length > 150 ? '...' : ''}</span>
                                                             )}
                                                         </div>
-                                                        {branchDetail.oos_result && (
-                                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-1">
-                                                                <ResultStat label="Sharpe" value={branchDetail.oos_result.sharpe_ratio?.toFixed(3) ?? '—'} isDarkMode={isDarkMode}/>
-                                                                <ResultStat label="PF" value={branchDetail.oos_result.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                                <ResultStat label="WR" value={branchDetail.oos_result.win_rate != null ? branchDetail.oos_result.win_rate.toFixed(1) + '%' : '—'} isDarkMode={isDarkMode}/>
-                                                                <ResultStat label="Trades" value={branchDetail.oos_result.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                                                            </div>
-                                                        )}
+                                                        {branchDetail.oos_result && (() => {
+                                                            const r = branchDetail.oos_result!;
+                                                            return (<>
+                                                                <p className={`text-[10px] font-medium mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Out-of-Sample</p>
+                                                                <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+                                                                    <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                                    <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                                    <WRFractionStat wr={r.win_rate} breakevenWR={r.breakeven_wr} isDarkMode={isDarkMode}/>
+                                                                    <ResultStat label="Avg W" value={fmtPct(r.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                                                                    <ResultStat label="Avg L" value={fmtPct(r.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
+                                                                    <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                                                                    <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                                    <ResultStat label="Avg P&L" value={avgPnl(r)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
+                                                                </div>
+                                                            </>);
+                                                        })()}
+                                                        {branchDetail.is_result && (() => {
+                                                            const r = branchDetail.is_result!;
+                                                            return (<>
+                                                                <p className={`text-[10px] font-medium mt-2 mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>In-Sample</p>
+                                                                <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+                                                                    <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                                    <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                                    <WRFractionStat wr={r.win_rate} breakevenWR={r.breakeven_wr} isDarkMode={isDarkMode}/>
+                                                                    <ResultStat label="Avg W" value={fmtPct(r.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                                                                    <ResultStat label="Avg L" value={fmtPct(r.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
+                                                                    <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                                                                    <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                                    <ResultStat label="Avg P&L" value={avgPnl(r)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
+                                                                </div>
+                                                            </>);
+                                                        })()}
                                                         {branchDetail.param_diffs && branchDetail.param_diffs.length > 0 && (
-                                                            <div className="mt-1.5">
+                                                            <div className="mt-2">
                                                                 <DiffBlock diffs={branchDetail.param_diffs} stripPrefix={`profile.${p.name}.`} isDarkMode={isDarkMode} muted={muted} hideHeader/>
                                                             </div>
                                                         )}
@@ -860,7 +885,7 @@ export default function Optimizer() {
                             </div>
 
                             {/* Generation History with expandable branch details */}
-                            <div className={`${card} mb-6`}>
+                            <div ref={gensRef} className={`${card} mb-6`}>
                                 <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowGens(g => !g)}>
                                     <ClockIcon className={iconCl}/>Generation History
                                     <span className={`text-xs font-normal ${muted} ml-auto`}>{generations.length}</span>
