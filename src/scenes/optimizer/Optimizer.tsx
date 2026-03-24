@@ -1671,16 +1671,17 @@ function WRFractionStat({wr, breakevenWR, isDarkMode}: {wr?: number; breakevenWR
     const above = wr != null && breakevenWR != null && breakevenWR > 0 && wr > breakevenWR;
     const wrColor = wr == null ? (isDarkMode ? 'text-gray-200' : 'text-gray-700')
         : above ? 'text-emerald-400' : 'text-red-400';
-    const wrText = wr != null ? `${wr.toFixed(1)}%` : '—';
-    const tooltip = breakevenWR ? `Breakeven: ${breakevenWR.toFixed(1)}%` : undefined;
-    const box = (
+    const beColor = isDarkMode ? 'text-gray-500' : 'text-gray-400';
+    return (
         <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`}>
-            <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>WR</p>
-            <p className={`text-sm font-semibold truncate ${wrColor}`} title={wrText}>{wrText}</p>
+            <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>WR / BE</p>
+            <p className="text-sm font-semibold truncate">
+                <span className={wrColor}>{wr != null ? `${wr.toFixed(1)}%` : '—'}</span>
+                <span className={`mx-0.5 ${beColor}`}>/</span>
+                <span className={beColor}>{breakevenWR ? `${breakevenWR.toFixed(1)}%` : '—'}</span>
+            </p>
         </div>
     );
-    if (tooltip) return <Tooltip content={tooltip} className="">{box}</Tooltip>;
-    return box;
 }
 
 function ResultStat({label, value, isDarkMode, color, tooltip}: {label: string; value: string; isDarkMode: boolean; color?: string; tooltip?: string}) {
