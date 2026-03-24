@@ -372,6 +372,10 @@ export interface LiveData {
         opened: string;
         units: number;
         price: number;
+        stop_loss: number;
+        take_profit: number;
+        current_price?: number;
+        unrealized_pl?: number;
     }>;
 }
 

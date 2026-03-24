@@ -4,13 +4,14 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
-import {formatDollar} from '../common/Util';
-import {fetchOrders as apiFetchOrders} from '../../api/client';
+import {formatDollar, formatPct} from '../common/Util';
+import {fetchOrders as apiFetchOrders, fetchLive} from '../../api/client';
 import {connectOrders} from '../../api/sse';
 import {OrderSummary, ApiOrder} from '../../context/Types';
 import dayjs from 'dayjs';
 
 const PAGE_SIZE = 50;
+const LIVE_POLL_MS = 10_000;
 
 // Candle durations in seconds per timeframe
 const CANDLE_SECS: Record<string, number> = {scalp: 60, intraday: 900, swing: 86400};
@@ -36,7 +37,22 @@ function apiOrderToSummary(o: ApiOrder): OrderSummary {
         created: o.created,
         closed: o.closed,
         spread: o.spread,
+        price: o.price,
+        quantity: o.quantity,
     };
+}
+
+// Compute P&L % for a closed order from dollar profit and position notional
+function closedPLPct(o: OrderSummary): number | null {
+    if (o.profit == null || !o.price || !o.quantity) return null;
+    const notional = o.price * Math.abs(o.quantity);
+    if (notional === 0) return null;
+    return o.profit / notional;
+}
+
+interface LivePL {
+    unrealizedPL: number;
+    currentPrice: number;
 }
 
 type SortKey = 'created' | 'symbol' | 'timeframe' | 'status' | 'profit' | 'direction';
@@ -54,6 +70,7 @@ export default function History() {
     const [filterStatus, setFilterStatus] = useState('all');
     const [totalApiOrders, setTotalApiOrders] = useState(0);
     const sseCleanupRef = useRef<(() => void) | null>(null);
+    const [liveMap, setLiveMap] = useState<Map<string, LivePL>>(new Map());
 
     const loadApiOrders = useCallback(async () => {
         const result = await apiFetchOrders({
@@ -83,6 +100,26 @@ export default function History() {
         return () => { sseCleanupRef.current?.(); };
     }, [apiAvailable, apiBase]);
 
+    // Poll /api/live for unrealized P&L on open positions
+    useEffect(() => {
+        if (!apiAvailable) return;
+        let active = true;
+        const poll = async () => {
+            const data = await fetchLive();
+            if (!active || !data) return;
+            const m = new Map<string, LivePL>();
+            for (const o of data.open_orders) {
+                if (o.unrealized_pl != null && o.current_price != null) {
+                    m.set(o.id, {unrealizedPL: o.unrealized_pl, currentPrice: o.current_price});
+                }
+            }
+            setLiveMap(m);
+        };
+        poll();
+        const iv = setInterval(poll, LIVE_POLL_MS);
+        return () => { active = false; clearInterval(iv); };
+    }, [apiAvailable]);
+
     function handleSort(key: SortKey) {
         if (sortKey === key) {
             setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -95,6 +132,15 @@ export default function History() {
 
     // Filtering is server-side in API mode (params passed to loadApiOrders)
     const filtered = orders;
+
+    // For sorting, use live unrealized P&L for open orders
+    const getPL = (o: OrderSummary): number => {
+        if (o.status === 'FILLED') {
+            const live = liveMap.get(o.id);
+            return live ? live.unrealizedPL : 0;
+        }
+        return closedPLPct(o) ?? 0;
+    };
 
     const sorted = [...filtered].sort((a, b) => {
         let cmp = 0;
@@ -115,7 +161,7 @@ export default function History() {
                 cmp = a.direction.localeCompare(b.direction);
                 break;
             case 'profit':
-                cmp = (a.profit ?? 0) - (b.profit ?? 0);
+                cmp = getPL(a) - getPL(b);
                 break;
         }
         return sortDir === 'asc' ? cmp : -cmp;
@@ -130,6 +176,32 @@ export default function History() {
     function SortIndicator({col}: { col: SortKey }) {
         if (sortKey !== col) return null;
         return <span className="ml-1">{sortDir === 'asc' ? '\u25B2' : '\u25BC'}</span>;
+    }
+
+    // Render P&L cell for an order
+    function PLCell({o}: { o: OrderSummary }) {
+        // FILLED — show live unrealized P&L
+        if (o.status === 'FILLED') {
+            const live = liveMap.get(o.id);
+            if (!live) return <span className={isDarkMode ? 'text-gray-500' : 'text-gray-400'}>...</span>;
+            const pct = live.unrealizedPL;
+            const color = pct > 0 ? 'text-emerald-400' : pct < 0 ? 'text-red-400' : isDarkMode ? 'text-gray-400' : 'text-gray-500';
+            return (
+                <span className={`${color} inline-flex items-center gap-1`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" title="Live"/>
+                    {formatPct(pct)}
+                </span>
+            );
+        }
+        // CLOSED — show realized P&L as %
+        if (o.status === 'CLOSED') {
+            const pct = closedPLPct(o);
+            if (pct == null) return <span>-</span>;
+            const color = pct > 0 ? 'text-emerald-500' : pct < 0 ? 'text-red-500' : '';
+            return <span className={color}>{formatPct(pct)}</span>;
+        }
+        // PENDING / CANCELLED
+        return <span>-</span>;
     }
 
     const selectClass = `rounded text-sm px-2 py-1 ${isDarkMode ? 'bg-slate-700 text-gray-200 border-slate-600' : 'bg-white text-gray-700 border-gray-300'} border`;
@@ -197,7 +269,7 @@ export default function History() {
                                     <th className={th} onClick={() => handleSort('status')}>Status<SortIndicator col="status"/></th>
                                     <th className={th}>Reason</th>
                                     <th className={th}>Spread</th>
-                                    <th className={th} onClick={() => handleSort('profit')}>P&L<SortIndicator col="profit"/></th>
+                                    <th className={th} onClick={() => handleSort('profit')}>P&L %<SortIndicator col="profit"/></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -212,6 +284,7 @@ export default function History() {
                                             const dayPL = dayOrders.reduce((sum, x) => sum + (x.profit ?? 0), 0);
                                             const closed = dayOrders.filter(x => x.profit !== null);
                                             const wins = closed.filter(x => (x.profit ?? 0) > 0).length;
+                                            const openCount = dayOrders.filter(x => x.status === 'FILLED').length;
                                             lastDay = day;
                                             rows.push(
                                                 <tr key={`day-${day}`} className={isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100/80'}>
@@ -231,6 +304,11 @@ export default function History() {
                                                             <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
                                                                 {dayOrders.length} orders
                                                             </span>
+                                                            {openCount > 0 && (
+                                                                <span className="text-xs text-blue-400">
+                                                                    {openCount} open
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -271,12 +349,8 @@ export default function History() {
                                                 </td>
                                                 <td className={`${td} text-xs`}>{o.close_reason ?? '-'}</td>
                                                 <td className={`${td} text-xs`}>{o.spread ? o.spread.toFixed(5) : '-'}</td>
-                                                <td className={`${td} font-medium ${
-                                                    o.profit === null ? '' :
-                                                        o.profit > 0 ? 'text-emerald-500' :
-                                                            o.profit < 0 ? 'text-red-500' : ''
-                                                }`}>
-                                                    {o.profit !== null ? formatDollar(o.profit) : '-'}
+                                                <td className={`${td} font-medium`}>
+                                                    <PLCell o={o}/>
                                                 </td>
                                             </tr>
                                         );

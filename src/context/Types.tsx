@@ -87,6 +87,8 @@ export interface OrderSummary {
     created: string;
     closed: string | null;
     spread?: number;
+    price?: number;
+    quantity?: number;
 }
 
 // Order (full detail)
