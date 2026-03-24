@@ -275,6 +275,10 @@ export function fetchLHCRunDetail(id: number): Promise<import('../context/Types'
     return apiFetch(`/api/optimizer/lhc-runs/${id}`);
 }
 
+export function spawnLHCProfile(runId: number, resultIndex: number): Promise<{profile_name: string; parent: string; timeframe: string} | null> {
+    return apiPost(`/api/optimizer/lhc-runs/${runId}/spawn`, { result_index: resultIndex });
+}
+
 // Worker allocation
 export function fetchOptimizerWorkers(): Promise<OptimizerWorkerConfig | null> {
     return apiFetch('/api/optimizer/workers');

@@ -12,7 +12,7 @@ import {
     fetchOptimizerAllProfiles, enableProfile, disableProfile, reseedProfile, retrySeedProfile,
     goLiveProfile, noLiveProfile, promoteProfile, demoteProfile, fetchProfileHistory,
     pushTrunk, revertTrunk, unrevertTrunk, applyRecommendation, assembleTrunk,
-    queueLHCRun, fetchLHCRuns, fetchLHCRunDetail,
+    queueLHCRun, fetchLHCRuns, fetchLHCRunDetail, spawnLHCProfile,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -69,6 +69,8 @@ export default function Optimizer() {
     const [expandedLHC, setExpandedLHC] = useState<number | null>(null);
     const [lhcDetail, setLhcDetail] = useState<LHCRunDetail | null>(null);
     const [lhcSort, setLhcSort] = useState<'score' | 'combined_sharpe' | 'total_pnl' | 'profit_factor' | 'total_trades'>('score');
+    const [spawnedProfiles, setSpawnedProfiles] = useState<Record<string, string>>({}); // "runId:index" → profile name
+    const [spawning, setSpawning] = useState<string | null>(null);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -845,7 +847,10 @@ export default function Optimizer() {
                                                                 <span className={`text-[10px] ${muted} ml-auto`}>{sorted.length} results</span>
                                                             </div>
                                                             <div className="space-y-1 max-h-96 overflow-y-auto">
-                                                                {sorted.slice(0, 20).map((r, i) => (
+                                                                {sorted.slice(0, 20).map((r, i) => {
+                                                                    const spawnKey = `${run.id}:${r.rank - 1}`;
+                                                                    const spawned = spawnedProfiles[spawnKey];
+                                                                    return (
                                                                     <div key={i} className={`flex flex-wrap items-center gap-3 px-2 py-1 rounded text-[10px] font-mono ${
                                                                         isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'
                                                                     }`}>
@@ -857,9 +862,34 @@ export default function Optimizer() {
                                                                         <span className={muted}>{r.total_trades.toLocaleString()}t</span>
                                                                         <span className={r.total_pnl > 0 ? 'text-emerald-400' : 'text-red-400'}>P&L:{r.total_pnl.toFixed(2)}</span>
                                                                         <span className={muted}>Sil:{r.silence_ratio.toFixed(2)}</span>
-                                                                        <span className={muted}>Best:{r.best_sharpe.toFixed(3)}/{r.worst_sharpe.toFixed(3)}</span>
+                                                                        {spawned ? (
+                                                                            <span className={`px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'}`}>
+                                                                                {spawned}
+                                                                            </span>
+                                                                        ) : (
+                                                                            <button
+                                                                                disabled={spawning === spawnKey}
+                                                                                onClick={async () => {
+                                                                                    setSpawning(spawnKey);
+                                                                                    const result = await spawnLHCProfile(run.id, r.rank - 1);
+                                                                                    if (result?.profile_name) {
+                                                                                        setSpawnedProfiles(prev => ({...prev, [spawnKey]: result.profile_name}));
+                                                                                    }
+                                                                                    setSpawning(null);
+                                                                                    loadData();
+                                                                                }}
+                                                                                className={`px-1.5 py-0.5 rounded transition-colors ${
+                                                                                    spawning === spawnKey
+                                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                                        : isDarkMode ? 'bg-purple-900/30 text-purple-400 hover:bg-purple-900/50' : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                                                                                }`}
+                                                                            >
+                                                                                {spawning === spawnKey ? '...' : 'Spawn'}
+                                                                            </button>
+                                                                        )}
                                                                     </div>
-                                                                ))}
+                                                                    );
+                                                                })}
                                                             </div>
                                                         </div>
                                                     );
