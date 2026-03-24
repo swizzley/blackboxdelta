@@ -779,10 +779,25 @@ export default function Optimizer() {
                                                         : run.status === 'sweeping' ? isDarkMode ? 'bg-amber-900/40 text-amber-400 animate-pulse' : 'bg-amber-100 text-amber-700 animate-pulse'
                                                         : isDarkMode ? 'bg-cyan-900/40 text-cyan-400 animate-pulse' : 'bg-cyan-100 text-cyan-700 animate-pulse'
                                                     }`}>{run.status}</span>
-                                                    <span className={`text-[10px] ${muted}`}>{run.combos.toLocaleString()} combos</span>
-                                                    {run.configs_tested > 0 && (
-                                                        <span className={`text-[10px] ${muted}`}>{run.configs_tested.toLocaleString()} tested</span>
-                                                    )}
+                                                    {(() => {
+                                                        const pct = run.combos > 0 ? Math.min(100, (run.configs_tested / run.combos) * 100) : 0;
+                                                        return (
+                                                            <div className="flex items-center gap-1.5 min-w-[120px]">
+                                                                <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-200'}`}>
+                                                                    <div className={`h-full rounded-full transition-all duration-500 ${
+                                                                        run.status === 'complete' ? 'bg-emerald-500'
+                                                                        : run.status === 'failed' ? 'bg-red-500'
+                                                                        : run.status === 'preloading' ? 'bg-cyan-500 animate-pulse'
+                                                                        : 'bg-amber-500'
+                                                                    }`} style={{width: `${run.status === 'preloading' ? 15 : run.status === 'complete' ? 100 : pct}%`}}/>
+                                                                </div>
+                                                                <span className={`text-[10px] font-mono ${muted} whitespace-nowrap`}>
+                                                                    {run.status === 'preloading' ? 'warming...'
+                                                                        : `${run.configs_tested.toLocaleString()}/${run.combos.toLocaleString()}`}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })()}
                                                     {run.best_sharpe != null && (
                                                         <span className={`text-[10px] font-mono ${run.best_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                                                             best:{run.best_sharpe.toFixed(4)}
