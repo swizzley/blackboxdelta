@@ -589,11 +589,11 @@ export default function Optimizer() {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                {/* Baseline stats grid */}
+                                                {/* Baseline stats — single row */}
                                                 {p.baseline?.stats && (() => {
                                                     const bs = p.baseline!.stats!;
                                                     return (
-                                                        <div className={`grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-1 ml-3 mr-3 mb-1`}>
+                                                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 ml-3 mr-3 mb-1">
                                                             <ResultStat label="Sharpe" value={bs.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                                                             <ResultStat label="PF" value={bs.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                                                             <WRFractionStat wr={bs.win_rate} breakevenWR={bs.breakeven_wr} isDarkMode={isDarkMode}/>
