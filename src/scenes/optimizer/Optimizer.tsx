@@ -48,7 +48,7 @@ export default function Optimizer() {
     const [allProfileData, setAllProfileData] = useState<OptimizerAllProfilesResponse | null>(null);
     const [profileActionLoading, setProfileActionLoading] = useState<string | null>(null);
     const [workerDirty, setWorkerDirty] = useState(false);
-    const [showProfiles, setShowProfiles] = useState<Record<string, boolean>>({});
+    // showProfiles removed — profiles always visible
     const [showSeeds, setShowSeeds] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
     const [showRecs, setShowRecs] = useState(false);
@@ -60,6 +60,9 @@ export default function Optimizer() {
     const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
     const [expandedProfileHistory, setExpandedProfileHistory] = useState<string | null>(null);
     const [profileHistory, setProfileHistory] = useState<ProfileHistoryEntry[]>([]);
+    const [expandedBranch, setExpandedBranch] = useState<number | null>(null);
+    const [branchDetail, setBranchDetail] = useState<OptimizerBranch | null>(null);
+    const [historyPage, setHistoryPage] = useState(0);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -413,11 +416,10 @@ export default function Optimizer() {
                                 if (!profileData || !profileData.profiles || profileData.profiles.length === 0) return null;
                                 const enabledCount = profileData.profiles.filter(p => p.enabled).length;
                                 const disabledCount = profileData.profiles.length - enabledCount;
-                                const isOpen = showProfiles[tf] || false;
                                 const tfLabel = tf.charAt(0).toUpperCase() + tf.slice(1);
                                 return (
                                 <div key={tf} className={`${card} mb-6`}>
-                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowProfiles(s => ({...s, [tf]: !s[tf]}))}>
+                                    <h2 className={heading}>
                                         <BeakerIcon className={iconCl}/>{tfLabel} Profiles
                                         <span className={`text-xs font-normal font-mono ${muted} ml-1`}>
                                             {enabledCount}/{profileData.profiles.length} active
@@ -430,12 +432,7 @@ export default function Optimizer() {
                                         {disabledCount > 0 && (
                                             <span className={`text-xs font-normal font-mono ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{disabledCount} disabled</span>
                                         )}
-                                        <span className="ml-auto flex-shrink-0">
-                                            {isOpen ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
-                                        </span>
                                     </h2>
-                                    {isOpen && (
-                                        <>
                                         <div className="space-y-1.5">
                                             {profileData.profiles.map(p => (
                                                 <div key={p.name}>
@@ -465,16 +462,34 @@ export default function Optimizer() {
                                                     )}
                                                     {p.baseline && (
                                                         <>
-                                                        {p.baseline.stats && (
-                                                            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                                                                isDarkMode ? 'bg-indigo-900/30 text-indigo-400' : 'bg-indigo-50 text-indigo-700'
-                                                            }`} title={`Branch #${p.baseline.source_branch_id ?? '?'} gen #${p.baseline.source_generation_id ?? '?'}${p.baseline.updated_at ? ' @ ' + new Date(p.baseline.updated_at).toLocaleDateString() : ''}`}>
-                                                                S:{p.baseline.stats.sharpe_ratio.toFixed(2)} {p.baseline.stats.total_trades}t PF:{p.baseline.stats.profit_factor.toFixed(2)}
+                                                        <span className={`text-[10px] font-mono ${muted}`} title="generation_counter / consecutive_failures">
+                                                            {p.baseline.source_generation_id ? (
+                                                                <span className="cursor-pointer hover:underline" title={`View generation ${p.baseline.source_generation_id}`}
+                                                                    onClick={(e) => { e.stopPropagation(); setShowGens(true); }}>
+                                                                    g:{p.baseline.generation_counter}
+                                                                </span>
+                                                            ) : (
+                                                                <>g:{p.baseline.generation_counter}</>
+                                                            )}
+                                                            {' '}f:{p.baseline.consecutive_failures}
+                                                        </span>
+                                                        {p.baseline.source_branch_id && (
+                                                            <span className={`text-[10px] font-mono cursor-pointer hover:underline ${isDarkMode ? 'text-cyan-400' : 'text-cyan-700'}`}
+                                                                title={`Branch ${p.baseline.source_branch_id} from gen ${p.baseline.source_generation_id ?? '?'}`}
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    if (p.baseline!.source_generation_id) {
+                                                                        const branches = await fetchOptimizerBranches(p.baseline!.source_generation_id);
+                                                                        const branch = branches?.find(b => b.id === p.baseline!.source_branch_id);
+                                                                        if (branch) {
+                                                                            setExpandedBranch(expandedBranch === p.baseline!.source_branch_id ? null : p.baseline!.source_branch_id!);
+                                                                            setBranchDetail(branch);
+                                                                        }
+                                                                    }
+                                                                }}>
+                                                                b#{p.baseline.source_branch_id}
                                                             </span>
                                                         )}
-                                                        <span className={`text-[10px] font-mono ${muted}`} title="generation_counter / consecutive_failures">
-                                                            g:{p.baseline.generation_counter} f:{p.baseline.consecutive_failures}
-                                                        </span>
                                                         {p.baseline.promoted_to_trunk && (
                                                             <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                                                                 isDarkMode ? 'bg-purple-900/40 text-purple-400' : 'bg-purple-100 text-purple-700'
@@ -485,41 +500,33 @@ export default function Optimizer() {
                                                         </>
                                                     )}
                                                     <div className="ml-auto flex gap-1">
-                                                        {/* Promote / Demote */}
-                                                        {p.baseline?.stats && p.baseline.stats.sharpe_ratio > 0 && p.baseline.stats.total_pnl > 0 && !p.baseline.promoted_to_trunk && (
-                                                            <button
-                                                                disabled={profileActionLoading === p.name}
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    setProfileActionLoading(p.name);
-                                                                    await promoteProfile(p.name, tf);
-                                                                    setProfileActionLoading(null);
-                                                                    loadData();
-                                                                }}
-                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                    isDarkMode ? 'bg-purple-900/30 text-purple-400 hover:bg-purple-900/50' : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
-                                                                }`}
-                                                            >
-                                                                Promote
-                                                            </button>
-                                                        )}
-                                                        {p.baseline?.promoted_to_trunk && (
-                                                            <button
-                                                                disabled={profileActionLoading === p.name}
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    setProfileActionLoading(p.name);
-                                                                    await demoteProfile(p.name, tf);
-                                                                    setProfileActionLoading(null);
-                                                                    loadData();
-                                                                }}
-                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                    isDarkMode ? 'bg-orange-900/30 text-orange-400 hover:bg-orange-900/50' : 'bg-orange-50 text-orange-700 hover:bg-orange-100'
-                                                                }`}
-                                                            >
-                                                                Demote
-                                                            </button>
-                                                        )}
+                                                        {/* Promote / Update — shown when baseline has positive Sharpe+P&L */}
+                                                        {(() => {
+                                                            if (!p.baseline?.stats || p.baseline.stats.sharpe_ratio <= 0 || p.baseline.stats.total_pnl <= 0) return null;
+                                                            const currentTrunk = status?.current_trunks?.find(t => t.timeframe === tf);
+                                                            const trunkMutIDs = new Set(currentTrunk?.mutation_ids ?? []);
+                                                            const inTrunk = p.baseline.promoted_to_trunk;
+                                                            const baselineChanged = inTrunk && p.baseline.mutation_id != null && !trunkMutIDs.has(p.baseline.mutation_id);
+                                                            // Hide if already in trunk and baseline hasn't changed
+                                                            if (inTrunk && !baselineChanged) return null;
+                                                            return (
+                                                                <button
+                                                                    disabled={profileActionLoading === p.name}
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        setProfileActionLoading(p.name);
+                                                                        await promoteProfile(p.name, tf);
+                                                                        setProfileActionLoading(null);
+                                                                        loadData();
+                                                                    }}
+                                                                    className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                        isDarkMode ? 'bg-purple-900/30 text-purple-400 hover:bg-purple-900/50' : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                                                                    }`}
+                                                                >
+                                                                    {baselineChanged ? 'Update' : 'Promote'}
+                                                                </button>
+                                                            );
+                                                        })()}
                                                         {/* History toggle */}
                                                         {p.baseline && (
                                                             <button
@@ -532,6 +539,7 @@ export default function Optimizer() {
                                                                         const res = await fetchProfileHistory(p.name, tf);
                                                                         setProfileHistory(res?.history ?? []);
                                                                         setExpandedProfileHistory(key);
+                                                                        setHistoryPage(0);
                                                                     }
                                                                 }}
                                                                 className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
@@ -581,12 +589,67 @@ export default function Optimizer() {
                                                         </button>
                                                     </div>
                                                 </div>
+                                                {/* Baseline stats grid */}
+                                                {p.baseline?.stats && (() => {
+                                                    const bs = p.baseline!.stats!;
+                                                    return (
+                                                        <div className={`grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-1 ml-3 mr-3 mb-1`}>
+                                                            <ResultStat label="Sharpe" value={bs.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                            <ResultStat label="PF" value={bs.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                            <WRFractionStat wr={bs.win_rate} breakevenWR={bs.breakeven_wr} isDarkMode={isDarkMode}/>
+                                                            <ResultStat label="Avg P&L" value={avgPnl(bs)} isDarkMode={isDarkMode} color={plColor(bs.total_pnl)}/>
+                                                            <ResultStat label="Trades" value={bs.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                                                            <ResultStat label="T/Day" value={p.baseline!.oos_days && bs.total_trades ? (bs.total_trades / p.baseline!.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
+                                                            <ResultStat label="AvgW" value={fmtPct(bs.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
+                                                            <ResultStat label="AvgL" value={fmtPct(bs.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
+                                                        </div>
+                                                    );
+                                                })()}
+                                                {/* Inline branch detail */}
+                                                {expandedBranch === p.baseline?.source_branch_id && branchDetail && (
+                                                    <div className={`ml-3 mr-3 mb-1 px-3 py-2 rounded text-[10px] font-mono ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'}`}>
+                                                        <div className={`font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            Branch #{branchDetail.id} — {branchDetail.status}
+                                                            {branchDetail.exploration_directive && (
+                                                                <span className={`font-normal ml-2 ${muted}`}>{branchDetail.exploration_directive.slice(0, 120)}{branchDetail.exploration_directive.length > 120 ? '...' : ''}</span>
+                                                            )}
+                                                        </div>
+                                                        {branchDetail.oos_result && (
+                                                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-1">
+                                                                <ResultStat label="Sharpe" value={branchDetail.oos_result.sharpe_ratio?.toFixed(3) ?? '—'} isDarkMode={isDarkMode}/>
+                                                                <ResultStat label="PF" value={branchDetail.oos_result.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
+                                                                <ResultStat label="WR" value={branchDetail.oos_result.win_rate != null ? branchDetail.oos_result.win_rate.toFixed(1) + '%' : '—'} isDarkMode={isDarkMode}/>
+                                                                <ResultStat label="Trades" value={branchDetail.oos_result.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
+                                                            </div>
+                                                        )}
+                                                        {branchDetail.param_diffs && branchDetail.param_diffs.length > 0 && (
+                                                            <div className="mt-1.5">
+                                                                <DiffBlock diffs={branchDetail.param_diffs} stripPrefix={`profile.${p.name}.`} isDarkMode={isDarkMode} muted={muted} hideHeader/>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                                 {/* Profile history expandable */}
-                                                {expandedProfileHistory === `${tf}:${p.name}` && profileHistory.length > 0 && (
-                                                    <div className={`ml-8 mb-1 px-3 py-2 rounded text-[10px] font-mono ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'}`}>
-                                                        <div className={`font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Baseline History (last {profileHistory.length})</div>
+                                                {expandedProfileHistory === `${tf}:${p.name}` && profileHistory.length > 0 && (() => {
+                                                    const PAGE = 10;
+                                                    const totalPages = Math.ceil(profileHistory.length / PAGE);
+                                                    const paged = profileHistory.slice(historyPage * PAGE, (historyPage + 1) * PAGE);
+                                                    return (
+                                                    <div className={`ml-3 mr-3 mb-1 px-3 py-2 rounded text-[10px] font-mono ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'}`}>
+                                                        <div className={`font-medium mb-1 flex items-center gap-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            Baseline History ({profileHistory.length} entries)
+                                                            {totalPages > 1 && (
+                                                                <span className="flex items-center gap-1 ml-auto">
+                                                                    <button disabled={historyPage === 0} onClick={(e) => { e.stopPropagation(); setHistoryPage(p => p - 1); }}
+                                                                        className={`px-1 rounded ${historyPage === 0 ? 'opacity-30' : 'hover:bg-slate-700/50 cursor-pointer'}`}>&laquo;</button>
+                                                                    <span>{historyPage + 1}/{totalPages}</span>
+                                                                    <button disabled={historyPage >= totalPages - 1} onClick={(e) => { e.stopPropagation(); setHistoryPage(p => p + 1); }}
+                                                                        className={`px-1 rounded ${historyPage >= totalPages - 1 ? 'opacity-30' : 'hover:bg-slate-700/50 cursor-pointer'}`}>&raquo;</button>
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         <div className="space-y-0.5">
-                                                            {profileHistory.map(h => (
+                                                            {paged.map(h => (
                                                                 <div key={h.id} className={`flex gap-3 ${muted}`}>
                                                                     <span>{new Date(h.created_at).toLocaleDateString()}</span>
                                                                     <span>g:{h.generation_counter}</span>
@@ -600,12 +663,28 @@ export default function Optimizer() {
                                                                         <span>WR:{h.oos.win_rate.toFixed(0)}%</span>
                                                                         </>
                                                                     )}
-                                                                    {h.source_branch_id && <span>b#{h.source_branch_id}</span>}
+                                                                    {h.source_branch_id && (
+                                                                        <span className={`cursor-pointer hover:underline ${isDarkMode ? 'text-cyan-400' : 'text-cyan-700'}`}
+                                                                            onClick={async (e) => {
+                                                                                e.stopPropagation();
+                                                                                if (h.source_generation_id) {
+                                                                                    const branches = await fetchOptimizerBranches(h.source_generation_id);
+                                                                                    const branch = branches?.find(b => b.id === h.source_branch_id);
+                                                                                    if (branch) {
+                                                                                        setExpandedBranch(expandedBranch === h.source_branch_id ? null : h.source_branch_id!);
+                                                                                        setBranchDetail(branch);
+                                                                                    }
+                                                                                }
+                                                                            }}>
+                                                                            b#{h.source_branch_id}
+                                                                        </span>
+                                                                    )}
                                                                 </div>
                                                             ))}
                                                         </div>
                                                     </div>
-                                                )}
+                                                    );
+                                                })()}
                                                 </div>
                                             ))}
                                         </div>
@@ -614,8 +693,6 @@ export default function Optimizer() {
                                                 Last probe: {profileData.probe_history[0].profile} (gen {profileData.probe_history[0].generation_id}) — {profileData.probe_history[0].status.toUpperCase()}
                                             </div>
                                         )}
-                                        </>
-                                    )}
                                 </div>
                                 );
                             })}
@@ -977,6 +1054,22 @@ function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk
                                             title={isLive ? 'Profile will be pushed to live on deploy' : 'Profile blocked from live — optimizer only'}
                                         >
                                             {liveToggling === name ? '...' : isLive ? 'LIVE' : 'BLOCKED'}
+                                        </button>
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                setLiveToggling(name);
+                                                await demoteProfile(name, trunk.timeframe);
+                                                setLiveToggling(null);
+                                                onRefresh();
+                                            }}
+                                            disabled={liveToggling === name}
+                                            className={`px-1.5 py-0.5 text-[9px] font-medium rounded transition-colors ${
+                                                isDarkMode ? 'bg-orange-900/30 text-orange-400 hover:bg-orange-900/50' : 'bg-orange-50 text-orange-700 hover:bg-orange-100'
+                                            }`}
+                                            title="Remove this profile from the trunk"
+                                        >
+                                            Demote
                                         </button>
                                     </div>
                                     {pr && (
