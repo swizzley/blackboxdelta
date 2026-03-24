@@ -63,7 +63,6 @@ export default function Optimizer() {
     const [expandedBranch, setExpandedBranch] = useState<number | null>(null);
     const [branchDetail, setBranchDetail] = useState<OptimizerBranch | null>(null);
     const [historyPage, setHistoryPage] = useState(0);
-    const gensRef = useRef<HTMLDivElement>(null);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -464,15 +463,7 @@ export default function Optimizer() {
                                                     {p.baseline && (
                                                         <>
                                                         <span className={`text-[10px] font-mono ${muted}`} title="generation_counter / consecutive_failures">
-                                                            {p.baseline.source_generation_id ? (
-                                                                <span className={`cursor-pointer hover:underline ${isDarkMode ? 'text-cyan-400' : 'text-cyan-700'}`} title={`Generation ${p.baseline.source_generation_id}`}
-                                                                    onClick={(e) => { e.stopPropagation(); setShowGens(true); setTimeout(() => gensRef.current?.scrollIntoView({behavior: 'smooth', block: 'start'}), 100); }}>
-                                                                    g:{p.baseline.generation_counter}
-                                                                </span>
-                                                            ) : (
-                                                                <>g:{p.baseline.generation_counter}</>
-                                                            )}
-                                                            {' '}f:{p.baseline.consecutive_failures}
+                                                            g:{p.baseline.generation_counter} f:{p.baseline.consecutive_failures}
                                                         </span>
                                                         {p.baseline.source_branch_id && (
                                                             <span className={`text-[10px] font-mono cursor-pointer hover:underline ${isDarkMode ? 'text-cyan-400' : 'text-cyan-700'}`}
@@ -885,7 +876,7 @@ export default function Optimizer() {
                             </div>
 
                             {/* Generation History with expandable branch details */}
-                            <div ref={gensRef} className={`${card} mb-6`}>
+                            <div className={`${card} mb-6`}>
                                 <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowGens(g => !g)}>
                                     <ClockIcon className={iconCl}/>Generation History
                                     <span className={`text-xs font-normal ${muted} ml-auto`}>{generations.length}</span>
