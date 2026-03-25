@@ -39,37 +39,47 @@ export default function WinRateChart({data, period, breakevenTooltip}: WinRateCh
         fetches.push(fetchDay(now.format('YYYY-MM-DD')) as Promise<DayData | null>);
 
         Promise.all(fetches).then(results => {
-            interface HourEntry { dayLabel: string; hour: number; summary: typeof results[0] extends DayData | null ? NonNullable<typeof results[0]>['hours'][0]['summary'] : never }
-            const allHours: HourEntry[] = [];
-
+            // Build lookup of API hour data keyed by "YYYY-MM-DD|HH"
+            const hourMap = new Map<string, {dayLabel: string; hour: number; summary: any}>();
             for (const dayData of results) {
                 if (!dayData || !Array.isArray(dayData.hours)) continue;
                 for (const h of dayData.hours) {
-                    const hourTime = dayjs(`${dayData.date}T${String(h.hour).padStart(2, '0')}:00:00`);
-                    if (hourTime.isBefore(cutoff) || hourTime.isAfter(now)) continue;
-                    allHours.push({dayLabel: dayData.date, hour: h.hour, summary: h.summary});
+                    hourMap.set(`${dayData.date}|${h.hour}`, {dayLabel: dayData.date, hour: h.hour, summary: h.summary});
                 }
             }
 
-            if (allHours.length === 0) {
+            // Generate every hour slot in the range, filling gaps with zeros
+            const labels: string[] = [];
+            const entries: CalendarDay[] = [];
+            let cursor = cutoff.startOf('hour');
+            const end = now.startOf('hour');
+            while (cursor.isBefore(end) || cursor.isSame(end)) {
+                const key = `${cursor.format('YYYY-MM-DD')}|${cursor.hour()}`;
+                const label = needYesterday
+                    ? `${cursor.format('MM-DD')} ${cursor.format('HH')}:00`
+                    : `${cursor.format('HH')}:00`;
+                labels.push(label);
+
+                const match = hourMap.get(key);
+                if (match) {
+                    entries.push({
+                        pl: match.summary.total_pl,
+                        winners: match.summary.winners,
+                        losers: match.summary.losers,
+                        total: match.summary.total_orders,
+                        win_pl: (match.summary.avg_win ?? 0) * match.summary.winners,
+                        loss_pl: (match.summary.avg_loss ?? 0) * match.summary.losers,
+                    });
+                } else {
+                    entries.push({pl: 0, winners: 0, losers: 0, total: 0, win_pl: 0, loss_pl: 0});
+                }
+                cursor = cursor.add(1, 'hour');
+            }
+
+            if (entries.length === 0) {
                 setHourlyData(null);
                 return;
             }
-
-            const labels = allHours.map(h => {
-                // Show date prefix if data spans multiple days
-                return needYesterday
-                    ? `${h.dayLabel.slice(5)} ${String(h.hour).padStart(2, '0')}:00`
-                    : `${String(h.hour).padStart(2, '0')}:00`;
-            });
-            const entries: CalendarDay[] = allHours.map(h => ({
-                pl: h.summary.total_pl,
-                winners: h.summary.winners,
-                losers: h.summary.losers,
-                total: h.summary.total_orders,
-                win_pl: (h.summary.avg_win ?? 0) * h.summary.winners,
-                loss_pl: (h.summary.avg_loss ?? 0) * h.summary.losers,
-            }));
             setHourlyData({labels, entries});
         });
     }, [isHourPeriod, period]);
