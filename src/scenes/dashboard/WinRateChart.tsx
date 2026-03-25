@@ -125,16 +125,19 @@ export default function WinRateChart({data, period, breakevenTooltip}: WinRateCh
         winCounts.push(entry.winners);
         lossCounts.push(entry.losers);
         pointWinRate.push(closed > 0 ? Math.round(entry.winners / closed * 1000) / 10 : null);
-        rollingWinRate.push(cumTotal > 0 ? Math.round(cumWins / cumTotal * 1000) / 10 : null);
+        // Carry cumulative forward even for 0-trade hours (flat line, not gap)
+        const prevRolling = rollingWinRate.length > 0 ? rollingWinRate[rollingWinRate.length - 1] : null;
+        rollingWinRate.push(cumTotal > 0 ? Math.round(cumWins / cumTotal * 1000) / 10 : prevRolling);
 
         // Breakeven WR = 1 / (1 + R:R) * 100, where R:R = avg_win / |avg_loss|
+        const prevBE = breakevenWR.length > 0 ? breakevenWR[breakevenWR.length - 1] : null;
         if (cumWinners > 0 && cumLosers > 0 && cumLossPL !== 0) {
             const avgWin = cumWinPL / cumWinners;
             const avgLoss = Math.abs(cumLossPL / cumLosers);
             const rr = avgWin / avgLoss;
             breakevenWR.push(Math.round((1 / (1 + rr)) * 1000) / 10);
         } else {
-            breakevenWR.push(null);
+            breakevenWR.push(prevBE);
         }
     }
 
