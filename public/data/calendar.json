@@ -170,13 +170,13 @@
     "dur_count": 6
   },
   "2026-03-25": {
-    "pl": 3.3,
+    "pl": 3.28,
     "winners": 35,
-    "losers": 41,
-    "total": 76,
+    "losers": 45,
+    "total": 80,
     "win_pl": 5.1,
-    "loss_pl": -1.8,
-    "dur_sum": 33112,
-    "dur_count": 76
+    "loss_pl": -1.82,
+    "dur_sum": 33158,
+    "dur_count": 80
   }
 }
