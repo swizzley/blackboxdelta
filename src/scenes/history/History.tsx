@@ -132,7 +132,7 @@ export default function History() {
     }
 
     async function handleTakeProfitNow() {
-        const profitableCount = orders.filter(o => o.status === 'FILLED' && (liveMap.get(o.id)?.unrealizedPL ?? 0) > 0).length;
+        const profitableCount = profitableOpenCount;
         if (profitableCount === 0) return;
         if (!window.confirm(`Close ${profitableCount} profitable order${profitableCount > 1 ? 's' : ''} at market?`)) return;
         setClosingAll(true);
@@ -140,8 +140,8 @@ export default function History() {
         setTimeout(() => { setClosingAll(false); loadApiOrders(); }, 3000);
     }
 
-    // Count profitable open orders for the Take Profit Now button
-    const profitableOpenCount = orders.filter(o => o.status === 'FILLED' && (liveMap.get(o.id)?.unrealizedPL ?? 0) > 0).length;
+    // Count profitable open orders from live data (not paginated orders list)
+    const profitableOpenCount = Array.from(liveMap.values()).filter(lp => lp.unrealizedPL > 0).length;
 
     function handleSort(key: SortKey) {
         if (sortKey === key) {
