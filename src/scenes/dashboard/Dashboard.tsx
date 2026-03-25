@@ -220,6 +220,7 @@ export default function Dashboard() {
     const [periodByTimeframe, setPeriodByTimeframe] = useState<TimeframeRow[] | null>(null);
     const [periodRecCounts, setPeriodRecCounts] = useState<Record<string, number> | null>(null);
     const [periodCloseReasonCounts, setPeriodCloseReasonCounts] = useState<Record<string, number> | null>(null);
+    const [periodByProfile, setPeriodByProfile] = useState<import('../../context/Types').ProfileStats[] | null>(null);
     const [periodStatsKey, setPeriodStatsKey] = useState<string>('');
 
     useEffect(() => {
@@ -281,6 +282,7 @@ export default function Dashboard() {
             setPeriodByTimeframe(null);
             setPeriodRecCounts(null);
             setPeriodCloseReasonCounts(null);
+            setPeriodByProfile(null);
             setPeriodStatsKey('');
             return;
         }
@@ -294,6 +296,7 @@ export default function Dashboard() {
                 setPeriodByTimeframe(apiData.by_timeframe ?? null);
                 setPeriodRecCounts(apiData.recommendation_counts ?? null);
                 setPeriodCloseReasonCounts(apiData.close_reason_counts ?? null);
+                setPeriodByProfile(apiData.by_profile ?? null);
                 setPeriodStatsKey(key);
             }
         });
@@ -516,9 +519,12 @@ export default function Dashboard() {
                     </div>
 
                     {/* Breakeven by Profile */}
-                    {dashboard?.by_profile && dashboard.by_profile.length > 0 && (
-                        <BreakevenByProfile profiles={dashboard.by_profile}/>
-                    )}
+                    {(() => {
+                        const profileData = (period !== 'All' && periodByProfile) ? periodByProfile : dashboard?.by_profile;
+                        return profileData && profileData.length > 0
+                            ? <BreakevenByProfile profiles={selectedTimeframe ? profileData.filter(p => p.timeframe === selectedTimeframe) : profileData}/>
+                            : null;
+                    })()}
 
                     {/* Charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
