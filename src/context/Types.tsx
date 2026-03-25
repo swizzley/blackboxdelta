@@ -1,7 +1,22 @@
+// Per-profile stats from API dashboard endpoint
+export interface ProfileStats {
+    profile: string;
+    timeframe: string;
+    total_orders: number;
+    winners: number;
+    losers: number;
+    total_pl: number;
+    win_rate_pct: number;
+    avg_win: number | null;
+    avg_loss: number | null;
+    breakeven_pct: number | null;
+}
+
 // Dashboard (homepage) data
 export interface DashboardData {
     all_time: TimeframeStats;
     by_timeframe: TimeframeRow[];
+    by_profile?: ProfileStats[];
     pl_series: PLDataPoint[];
     direction_series: DirectionDataPoint[];
     score_series: ScoreDataPoint[];
@@ -260,6 +275,7 @@ export interface ApiDatabaseStats {
 export interface ApiDashboard {
     all_time: TimeframeStats;
     by_timeframe: TimeframeRow[];
+    by_profile?: ProfileStats[];
     recommendation_counts?: Record<string, number>;
     close_reason_counts?: Record<string, number>;
     updated_at?: string;

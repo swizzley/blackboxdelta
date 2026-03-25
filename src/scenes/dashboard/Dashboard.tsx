@@ -5,6 +5,7 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import StatCard from '../common/StatCard';
 import PLChart from './PLChart';
+import BreakevenByProfile from './BreakevenByProfile';
 import TimeframeBreakdown from './TimeframeBreakdown';
 import CalendarHeatmap from './CalendarHeatmap';
 import WinRateChart from './WinRateChart';
@@ -234,6 +235,7 @@ export default function Dashboard() {
                             ...prev,
                             all_time: {...prev.all_time, ...apiData.all_time},
                             by_timeframe: apiData.by_timeframe,
+                            by_profile: apiData.by_profile ?? prev.by_profile,
                             recommendation_counts: apiData.recommendation_counts ?? prev.recommendation_counts,
                             close_reason_counts: apiData.close_reason_counts ?? prev.close_reason_counts,
                         }
@@ -512,6 +514,11 @@ export default function Dashboard() {
                             live={liveStats && !selectedTimeframe && period === 'All'}
                         />
                     </div>
+
+                    {/* Breakeven by Profile */}
+                    {dashboard?.by_profile && dashboard.by_profile.length > 0 && (
+                        <BreakevenByProfile profiles={dashboard.by_profile}/>
+                    )}
 
                     {/* Charts */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
