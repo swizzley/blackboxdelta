@@ -16,7 +16,7 @@ export default function BreakevenByProfile({profiles}: Props) {
 
     if (valid.length === 0) return null;
 
-    const labels = valid.map(p => p.profile);
+    const labels = valid.map(p => `${p.profile} (${p.timeframe.slice(0, 1).toUpperCase()})`);
     const winRates = valid.map(p => Math.round(p.win_rate_pct * 10) / 10);
     const breakevens = valid.map(p => Math.round((p.breakeven_pct ?? 0) * 10) / 10);
     const margins = valid.map(p => Math.round((p.win_rate_pct - (p.breakeven_pct ?? 0)) * 10) / 10);
