@@ -128,7 +128,16 @@ export default function History() {
         if (!window.confirm(`Close ${o.symbol.replace('_', '/')} ${dir} at market?`)) return;
         setClosingIds(prev => new Set(prev).add(o.id));
         await closeOrder(o.id);
-        setTimeout(() => loadApiOrders(), 3000);
+        // Poll until order status changes (up to 15s)
+        let attempts = 0;
+        const pollUntilClosed = setInterval(async () => {
+            attempts++;
+            await loadApiOrders();
+            if (attempts >= 5) {
+                clearInterval(pollUntilClosed);
+                setClosingIds(prev => { const s = new Set(prev); s.delete(o.id); return s; });
+            }
+        }, 3000);
     }
 
     async function handleTakeProfitNow() {
@@ -137,7 +146,18 @@ export default function History() {
         if (!window.confirm(`Close ${profitableCount} profitable order${profitableCount > 1 ? 's' : ''} at market?`)) return;
         setClosingAll(true);
         await closeProfitableOrders();
-        setTimeout(() => { setClosingAll(false); loadApiOrders(); }, 3000);
+        // Poll until orders reflect the close (up to 15s)
+        let attempts = 0;
+        const pollUntilClosed = setInterval(async () => {
+            attempts++;
+            await loadApiOrders();
+            const stillOpen = Array.from(liveMap.values()).filter(lp => lp.unrealizedPL > 0).length;
+            if (stillOpen === 0 || attempts >= 5) {
+                clearInterval(pollUntilClosed);
+                setClosingAll(false);
+                setLiveMap(new Map());
+            }
+        }, 3000);
     }
 
     // Count profitable open orders from live data (not paginated orders list)
