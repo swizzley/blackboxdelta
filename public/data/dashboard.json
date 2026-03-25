@@ -1,20 +1,20 @@
 {
   "all_time": {
-    "total_orders": 2752,
-    "pending": 10,
-    "open_positions": 14,
-    "closed_orders": 2728,
-    "total_pl": -20.85,
-    "winners": 505,
-    "losers": 1460,
-    "breakeven": 744,
+    "total_orders": 2758,
+    "pending": 11,
+    "open_positions": 7,
+    "closed_orders": 2740,
+    "total_pl": -20.03,
+    "winners": 515,
+    "losers": 1461,
+    "breakeven": 745,
     "win_loss_ratio": 0.35,
     "win_rate_pct": 0.19,
-    "avg_win": 0.02,
+    "avg_win": 0.03,
     "avg_loss": -0.02,
-    "avg_time_in_trade_mins": 82,
-    "long_pl": -6.04,
-    "short_pl": -14.81
+    "avg_time_in_trade_mins": 83,
+    "long_pl": -5.64,
+    "short_pl": -14.39
   },
   "by_timeframe": [
     {
@@ -37,38 +37,38 @@
     },
     {
       "timeframe": "intraday",
-      "total_orders": 1182,
-      "pending": 10,
-      "open_positions": 9,
-      "closed_orders": 1163,
-      "total_pl": -4.25,
-      "winners": 89,
+      "total_orders": 1184,
+      "pending": 11,
+      "open_positions": 2,
+      "closed_orders": 1171,
+      "total_pl": -3.47,
+      "winners": 96,
       "losers": 396,
-      "breakeven": 673,
-      "win_loss_ratio": 0.22,
+      "breakeven": 674,
+      "win_loss_ratio": 0.24,
       "win_rate_pct": 0.08,
       "avg_win": 0.08,
       "avg_loss": -0.03,
-      "avg_time_in_trade_mins": 207,
-      "long_pl": 0.41,
-      "short_pl": -4.66
+      "avg_time_in_trade_mins": 208,
+      "long_pl": 0.77,
+      "short_pl": -4.24
     },
     {
       "timeframe": "scalp",
-      "total_orders": 1533,
+      "total_orders": 1537,
       "pending": 0,
       "open_positions": 5,
-      "closed_orders": 1528,
-      "total_pl": -14.12,
-      "winners": 413,
-      "losers": 1062,
+      "closed_orders": 1532,
+      "total_pl": -14.08,
+      "winners": 416,
+      "losers": 1063,
       "breakeven": 39,
       "win_loss_ratio": 0.39,
       "win_rate_pct": 0.27,
       "avg_win": 0.01,
       "avg_loss": -0.02,
       "avg_time_in_trade_mins": 38,
-      "long_pl": -5.71,
+      "long_pl": -5.67,
       "short_pl": -8.41
     }
   ],
@@ -160,8 +160,8 @@
     },
     {
       "date": "2026-03-25",
-      "cumulative_pl": -20.85,
-      "daily_pl": 2.49
+      "cumulative_pl": -20.03,
+      "daily_pl": 3.31
     }
   ],
   "direction_series": [
@@ -320,12 +320,12 @@
     },
     {
       "date": "2026-03-25",
-      "long_wins": 11,
-      "long_losses": 23,
-      "short_wins": 13,
+      "long_wins": 17,
+      "long_losses": 24,
+      "short_wins": 17,
       "short_losses": 13,
-      "long_pl": 1.7,
-      "short_pl": 0.79
+      "long_pl": 2.1,
+      "short_pl": 1.21
     }
   ],
   "score_series": [
@@ -601,33 +601,33 @@
     },
     {
       "date": "2026-03-25",
-      "avg_final_score": 3.95,
+      "avg_final_score": 3.76,
       "avg_confidence": 0,
-      "avg_trend": 0,
-      "avg_ma": 5.77,
-      "avg_crossover": 2.62,
-      "avg_oscillator": 0.11,
-      "avg_volatility": 0.62,
-      "avg_volume": 0.94,
-      "avg_fib_stack": 2.71,
-      "avg_momentum_projection": -0.5,
-      "avg_structure": 1.33,
-      "avg_cycle": 0.57,
-      "avg_pattern": 0.02,
-      "avg_sentiment": 0.132,
-      "count": 2056
+      "avg_trend": 0.01,
+      "avg_ma": 5.4,
+      "avg_crossover": 2.5,
+      "avg_oscillator": 0.13,
+      "avg_volatility": 0.58,
+      "avg_volume": 0.92,
+      "avg_fib_stack": 2.7,
+      "avg_momentum_projection": -0.49,
+      "avg_structure": 1.32,
+      "avg_cycle": 0.55,
+      "avg_pattern": 0.01,
+      "avg_sentiment": 0.133,
+      "count": 2228
     }
   ],
   "recommendation_counts": {
-    "Buy": 8305,
-    "Minimal Buy": 2580,
-    "Minimal Sell": 4249,
-    "Moderate Buy": 26846,
-    "Moderate Sell": 10033,
-    "Sell": 5459,
+    "Buy": 8367,
+    "Minimal Buy": 2586,
+    "Minimal Sell": 4254,
+    "Moderate Buy": 26856,
+    "Moderate Sell": 10038,
+    "Sell": 5526,
     "Strong Buy": 634,
     "Strong Sell": 208,
-    "Weak Buy": 11807,
-    "Weak Sell": 12243
+    "Weak Buy": 11820,
+    "Weak Sell": 12247
   }
 }
