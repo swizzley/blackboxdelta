@@ -52,6 +52,7 @@ export default function Optimizer() {
     const [workerDirty, setWorkerDirty] = useState(false);
     // showProfiles removed — profiles always visible
     const [showSeeds, setShowSeeds] = useState(false);
+    const [showLHC, setShowLHC] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
     const [showRecs, setShowRecs] = useState(false);
     const [recActionLoading, setRecActionLoading] = useState<number | null>(null);
@@ -772,11 +773,12 @@ export default function Optimizer() {
                             {/* LHC Sweep Runs */}
                             {lhcRuns.length > 0 && (
                                 <div className={`${card} mb-6`}>
-                                    <h2 className={heading}>
+                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowLHC(s => !s)}>
                                         <BeakerIcon className={iconCl}/>LHC Sweeps
                                         <span className={`text-xs font-normal ${muted} ml-auto`}>{lhcRuns.length}</span>
+                                        {showLHC ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
                                     </h2>
-                                    <div className="space-y-2">
+                                    {showLHC && (<div className="space-y-2">
                                         {lhcRuns.map(run => (
                                             <div key={run.id} className={`rounded px-3 py-2 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
                                                 <div className="flex flex-wrap items-center gap-2">
@@ -904,7 +906,7 @@ export default function Optimizer() {
                                                 })()}
                                             </div>
                                         ))}
-                                    </div>
+                                    </div>)}
                                 </div>
                             )}
 
