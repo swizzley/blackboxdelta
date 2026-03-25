@@ -9,17 +9,19 @@ interface Props {
 export default function BreakevenByProfile({profiles}: Props) {
     const {isDarkMode} = useTheme();
 
-    // Filter to profiles with enough data for breakeven calculation
+    // Show all profiles with at least 1 decided trade, sorted by margin above breakeven
     const valid = profiles
-        .filter(p => p.breakeven_pct != null && (p.winners + p.losers) >= 3)
-        .sort((a, b) => (b.win_rate_pct - (b.breakeven_pct ?? 0)) - (a.win_rate_pct - (a.breakeven_pct ?? 0)));
+        .filter(p => (p.winners + p.losers) >= 1)
+        .sort((a, b) => (b.win_rate_pct - (b.breakeven_pct ?? 50)) - (a.win_rate_pct - (a.breakeven_pct ?? 50)));
 
     if (valid.length === 0) return null;
 
     const labels = valid.map(p => `${p.profile} (${p.timeframe.slice(0, 1).toUpperCase()})`);
     const winRates = valid.map(p => Math.round(p.win_rate_pct * 10) / 10);
-    const breakevens = valid.map(p => Math.round((p.breakeven_pct ?? 0) * 10) / 10);
-    const margins = valid.map(p => Math.round((p.win_rate_pct - (p.breakeven_pct ?? 0)) * 10) / 10);
+    const breakevens = valid.map(p => p.breakeven_pct != null ? Math.round(p.breakeven_pct * 10) / 10 : null);
+    const margins = valid.map(p => p.breakeven_pct != null
+        ? Math.round((p.win_rate_pct - p.breakeven_pct) * 10) / 10
+        : null);
 
     const option = {
         backgroundColor: 'transparent',
@@ -29,17 +31,22 @@ export default function BreakevenByProfile({profiles}: Props) {
                 const idx = params[0]?.dataIndex ?? 0;
                 const p = valid[idx];
                 const margin = margins[idx];
+                const be = breakevens[idx];
                 const decided = p.winners + p.losers;
-                const marginColor = margin >= 0 ? '#10b981' : '#ef4444';
-                const marginLabel = margin >= 0 ? 'Above BE' : 'Below BE';
-                return `<b>${p.profile}</b> (${p.timeframe})`
-                    + `<br/>Win Rate: <b>${winRates[idx]}%</b> (${p.winners}W/${p.losers}L of ${decided})`
-                    + `<br/>Breakeven: <b>${breakevens[idx]}%</b>`
-                    + `<br/><span style="color:${marginColor}">${marginLabel}: <b>${Math.abs(margin).toFixed(1)}%</b></span>`
-                    + (p.avg_win != null && p.avg_loss != null
-                        ? `<br/>R:R: <b>${(Math.abs(p.avg_win / (p.avg_loss || 1))).toFixed(2)}:1</b>`
-                        : '')
-                    + `<br/>P&L: <b>$${p.total_pl.toFixed(2)}</b>`;
+                let html = `<b>${p.profile}</b> (${p.timeframe})`
+                    + `<br/>Win Rate: <b>${winRates[idx]}%</b> (${p.winners}W/${p.losers}L of ${decided})`;
+                if (be != null && margin != null) {
+                    const marginColor = margin >= 0 ? '#10b981' : '#ef4444';
+                    const marginLabel = margin >= 0 ? 'Above BE' : 'Below BE';
+                    html += `<br/>Breakeven: <b>${be}%</b>`
+                        + `<br/><span style="color:${marginColor}">${marginLabel}: <b>${Math.abs(margin).toFixed(1)}%</b></span>`;
+                } else {
+                    html += `<br/>Breakeven: <i>needs wins & losses</i>`;
+                }
+                if (p.avg_win != null && p.avg_loss != null)
+                    html += `<br/>R:R: <b>${(Math.abs(p.avg_win / (p.avg_loss || 1))).toFixed(2)}:1</b>`;
+                html += `<br/>P&L: <b>$${p.total_pl.toFixed(2)}</b>`;
+                return html;
             },
         },
         legend: {
@@ -81,7 +88,7 @@ export default function BreakevenByProfile({profiles}: Props) {
                 type: 'bar',
                 data: winRates.map((wr, i) => ({
                     value: wr,
-                    itemStyle: {color: margins[i] >= 0 ? '#10b981' : '#ef4444'},
+                    itemStyle: {color: margins[i] == null ? '#6b7280' : margins[i]! >= 0 ? '#10b981' : '#ef4444'},
                 })),
                 barMaxWidth: 30,
                 z: 1,
