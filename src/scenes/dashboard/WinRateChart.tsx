@@ -16,7 +16,7 @@ export default function WinRateChart({data, period, breakevenTooltip}: WinRateCh
     const {isDarkMode} = useTheme();
     const [hourlyData, setHourlyData] = useState<{labels: string[], entries: CalendarDay[]} | null>(null);
 
-    const isHourPeriod = period === '1H' || period === '4H' || period === '12H';
+    const isHourPeriod = period === '1H' || period === '4H' || period === '12H' || period === '1D';
 
     // Fetch hourly data from day files when an hour period is selected.
     // For periods that span midnight (e.g. 12H at 8am), fetch yesterday too.
@@ -26,10 +26,10 @@ export default function WinRateChart({data, period, breakevenTooltip}: WinRateCh
             return;
         }
         const now = dayjs();
-        let hoursBack = 24;
-        if (period === '1H') hoursBack = 1;
-        else if (period === '4H') hoursBack = 4;
+        let hoursBack = 1;
+        if (period === '4H') hoursBack = 4;
         else if (period === '12H') hoursBack = 12;
+        else if (period === '1D') hoursBack = 24;
 
         const cutoff = now.subtract(hoursBack, 'hour');
         const needYesterday = cutoff.format('YYYY-MM-DD') < now.format('YYYY-MM-DD');

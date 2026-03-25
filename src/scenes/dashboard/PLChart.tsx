@@ -1,7 +1,7 @@
 import ReactECharts from 'echarts-for-react';
 import {useTheme} from '../../context/Theme';
 import {PLDataPoint} from '../../context/Types';
-import {formatPct} from '../common/Util';
+import {formatDollar} from '../common/Util';
 
 interface PLChartProps {
     data: PLDataPoint[];
@@ -18,8 +18,8 @@ export default function PLChart({data}: PLChartProps) {
                 const p = params[0];
                 const d = params[1];
                 return `${p.axisValue}<br/>
-                    Cumulative P&L: <b>${formatPct(p.value)}</b><br/>
-                    Daily P&L: <b>${formatPct(d.value)}</b>`;
+                    Cumulative P&L: <b>${formatDollar(p.value)}</b><br/>
+                    Daily P&L: <b>${formatDollar(d.value)}</b>`;
             },
         },
         legend: {
@@ -44,13 +44,13 @@ export default function PLChart({data}: PLChartProps) {
             {
                 type: 'value',
                 name: 'Cumulative',
-                axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280', formatter: (v: number) => `${(v * 100).toFixed(2)}%`},
+                axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280', formatter: (v: number) => formatDollar(v)},
                 splitLine: {lineStyle: {color: isDarkMode ? '#1e293b' : '#f3f4f6'}},
             },
             {
                 type: 'value',
                 name: 'Daily',
-                axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280', formatter: (v: number) => `${(v * 100).toFixed(2)}%`},
+                axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280', formatter: (v: number) => formatDollar(v)},
                 splitLine: {show: false},
             },
         ],
