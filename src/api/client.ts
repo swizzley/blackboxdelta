@@ -404,6 +404,14 @@ export function fetchLive(): Promise<LiveData | null> {
     return apiFetch('/api/live');
 }
 
+export function closeOrder(id: string): Promise<{status: string; order_id: string; trade_id: string} | null> {
+    return apiPost(`/api/orders/${id}/close`);
+}
+
+export function closeProfitableOrders(): Promise<{queued: number} | null> {
+    return apiPost('/api/orders/close-profitable');
+}
+
 // Sentiment
 export function fetchSentimentPairs(): Promise<ApiSentimentPair[] | null> {
     return apiFetch('/api/sentiment/pairs');

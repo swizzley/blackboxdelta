@@ -5,7 +5,7 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {formatDollar, formatPct} from '../common/Util';
-import {fetchOrders as apiFetchOrders, fetchLive} from '../../api/client';
+import {fetchOrders as apiFetchOrders, fetchLive, closeOrder, closeProfitableOrders} from '../../api/client';
 import {connectOrders} from '../../api/sse';
 import {OrderSummary, ApiOrder} from '../../context/Types';
 import dayjs from 'dayjs';
@@ -71,6 +71,8 @@ export default function History() {
     const [totalApiOrders, setTotalApiOrders] = useState(0);
     const sseCleanupRef = useRef<(() => void) | null>(null);
     const [liveMap, setLiveMap] = useState<Map<string, LivePL>>(new Map());
+    const [closingIds, setClosingIds] = useState<Set<string>>(new Set());
+    const [closingAll, setClosingAll] = useState(false);
 
     const loadApiOrders = useCallback(async () => {
         const result = await apiFetchOrders({
@@ -119,6 +121,27 @@ export default function History() {
         const iv = setInterval(poll, LIVE_POLL_MS);
         return () => { active = false; clearInterval(iv); };
     }, [apiAvailable]);
+
+    async function handleCloseOrder(e: React.MouseEvent, o: OrderSummary) {
+        e.stopPropagation();
+        const dir = (o.quantity ?? 0) >= 0 ? 'Long' : 'Short';
+        if (!window.confirm(`Close ${o.symbol.replace('_', '/')} ${dir} at market?`)) return;
+        setClosingIds(prev => new Set(prev).add(o.id));
+        await closeOrder(o.id);
+        setTimeout(() => loadApiOrders(), 3000);
+    }
+
+    async function handleTakeProfitNow() {
+        const profitableCount = orders.filter(o => o.status === 'FILLED' && (liveMap.get(o.id)?.unrealizedPL ?? 0) > 0).length;
+        if (profitableCount === 0) return;
+        if (!window.confirm(`Close ${profitableCount} profitable order${profitableCount > 1 ? 's' : ''} at market?`)) return;
+        setClosingAll(true);
+        await closeProfitableOrders();
+        setTimeout(() => { setClosingAll(false); loadApiOrders(); }, 3000);
+    }
+
+    // Count profitable open orders for the Take Profit Now button
+    const profitableOpenCount = orders.filter(o => o.status === 'FILLED' && (liveMap.get(o.id)?.unrealizedPL ?? 0) > 0).length;
 
     function handleSort(key: SortKey) {
         if (sortKey === key) {
@@ -239,7 +262,16 @@ export default function History() {
                                 Order History
                                 <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-bold text-emerald-400 leading-none align-middle"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>LIVE</span>
                             </h2>
-                            <div className="flex gap-2 ml-auto">
+                            <div className="flex gap-2 ml-auto items-center">
+                                {profitableOpenCount > 0 && (
+                                    <button
+                                        onClick={handleTakeProfitNow}
+                                        disabled={closingAll}
+                                        className="px-3 py-1 rounded text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 transition-colors"
+                                    >
+                                        {closingAll ? 'Closing...' : `Take Profit Now (${profitableOpenCount})`}
+                                    </button>
+                                )}
                                 <select value={filterTimeframe} onChange={e => { setFilterTimeframe(e.target.value); setPage(0); }} className={selectClass}>
                                     <option value="all">All Timeframes</option>
                                     <option value="scalp">Scalp</option>
@@ -350,7 +382,19 @@ export default function History() {
                                                 <td className={`${td} text-xs`}>{o.close_reason ?? '-'}</td>
                                                 <td className={`${td} text-xs`}>{o.spread ? o.spread.toFixed(5) : '-'}</td>
                                                 <td className={`${td} font-medium`}>
-                                                    <PLCell o={o}/>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <PLCell o={o}/>
+                                                        {o.status === 'FILLED' && !closingIds.has(o.id) && (
+                                                            <button
+                                                                onClick={(e) => handleCloseOrder(e, o)}
+                                                                className="text-red-400 hover:text-red-300 text-xs font-bold opacity-40 hover:opacity-100 transition-opacity"
+                                                                title="Close at market"
+                                                            >×</button>
+                                                        )}
+                                                        {closingIds.has(o.id) && (
+                                                            <span className="text-yellow-400 text-[10px] animate-pulse">closing</span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
