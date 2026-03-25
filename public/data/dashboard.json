@@ -601,33 +601,33 @@
     },
     {
       "date": "2026-03-25",
-      "avg_final_score": 5.83,
+      "avg_final_score": 5.74,
       "avg_confidence": 0,
-      "avg_trend": 0.32,
-      "avg_ma": 8.67,
-      "avg_crossover": 3.07,
+      "avg_trend": 0.3,
+      "avg_ma": 8.48,
+      "avg_crossover": 2.98,
       "avg_oscillator": 0.21,
-      "avg_volatility": 0.98,
+      "avg_volatility": 0.92,
       "avg_volume": 1.04,
       "avg_fib_stack": 3.59,
-      "avg_momentum_projection": -0.11,
+      "avg_momentum_projection": -0.05,
       "avg_structure": 1.49,
-      "avg_cycle": 0.57,
-      "avg_pattern": -0.02,
-      "avg_sentiment": 0.132,
-      "count": 1198
+      "avg_cycle": 0.58,
+      "avg_pattern": -0,
+      "avg_sentiment": 0.134,
+      "count": 1325
     }
   ],
   "recommendation_counts": {
-    "Buy": 8064,
-    "Minimal Buy": 2526,
-    "Minimal Sell": 4221,
-    "Moderate Buy": 26767,
-    "Moderate Sell": 9994,
-    "Sell": 5172,
-    "Strong Buy": 623,
+    "Buy": 8097,
+    "Minimal Buy": 2535,
+    "Minimal Sell": 4227,
+    "Moderate Buy": 26779,
+    "Moderate Sell": 10001,
+    "Sell": 5212,
+    "Strong Buy": 627,
     "Strong Sell": 203,
-    "Weak Buy": 11750,
-    "Weak Sell": 12186
+    "Weak Buy": 11758,
+    "Weak Sell": 12194
   }
 }
