@@ -14,8 +14,9 @@ import CloseReasonChart from './CloseReasonChart';
 import TimeframeRadar from './TimeframeRadar';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
+import {useDeviceAuth} from '../../context/DeviceAuth';
 import {formatDollar} from '../common/Util';
-import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar, fetchLive, fetchDay} from '../../api/client';
+import {fetchDashboard as apiFetchDashboard, fetchCalendar as apiFetchCalendar, fetchLive, fetchDay, apiPost} from '../../api/client';
 import type {LiveData} from '../../api/client';
 import {DashboardData, CalendarData, PLDataPoint, ScoreDataPoint, TimeframeStats, TimeframeRow, ApiCalendarDay, DayData} from '../../context/Types';
 
@@ -206,6 +207,8 @@ function computeStatsFromOrders(orders: OrderForStats[]): TimeframeStats {
 export default function Dashboard() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
+    const {isAdmin} = useDeviceAuth();
+    const [refreshing, setRefreshing] = useState(false);
     const [dashboard, setDashboard] = useState<DashboardData | null>(null);
     const [calendar, setCalendar] = useState<CalendarData | null>(null);
     const [period, setPeriod] = useState<Period>('All');
@@ -455,6 +458,22 @@ export default function Dashboard() {
                             )}
                         </div>
                         <div className="flex flex-wrap items-center gap-1">
+                            {isAdmin && apiAvailable && (
+                                <button
+                                    onClick={async () => {
+                                        setRefreshing(true);
+                                        await apiPost('/api/system/refresh-dashboard');
+                                        setTimeout(() => setRefreshing(false), 5000);
+                                    }}
+                                    disabled={refreshing}
+                                    title="Refresh dashboard data"
+                                    className={`p-1 rounded-md transition-colors ${isDarkMode ? 'hover:bg-slate-700 text-gray-400' : 'hover:bg-gray-200 text-gray-500'} disabled:opacity-30`}
+                                >
+                                    <svg className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                </button>
+                            )}
                             {PERIODS.map(p => (
                                 <button
                                     key={p}
