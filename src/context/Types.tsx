@@ -847,6 +847,7 @@ export interface OptimizerProfileState {
     description?: string;
     enabled: boolean;
     live: boolean;
+    disabled_reason?: string; // "stall" = auto-disabled, requires reseed
     stats?: OptimizerProfileStats;
     baseline?: ProfileBaselineData;
 }

@@ -551,29 +551,37 @@ export default function Optimizer() {
                                                                 History
                                                             </button>
                                                         )}
-                                                        <button
-                                                            disabled={profileActionLoading === p.name}
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                setProfileActionLoading(p.name);
-                                                                if (p.enabled) {
-                                                                    await disableProfile(p.name, tf);
-                                                                } else {
-                                                                    await enableProfile(p.name, tf);
-                                                                }
-                                                                setProfileActionLoading(null);
-                                                                loadData();
-                                                            }}
-                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                profileActionLoading === p.name
-                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                    : p.enabled
-                                                                        ? isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'
-                                                                        : isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
-                                                            }`}
-                                                        >
-                                                            {p.enabled ? 'Disable' : 'Enable'}
-                                                        </button>
+                                                        {p.disabled_reason === 'stall' ? (
+                                                            <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
+                                                                isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-50 text-orange-700'
+                                                            }`} title="Profile was auto-disabled after exhausting escalation milestones. Reseed to re-enable.">
+                                                                Stalled
+                                                            </span>
+                                                        ) : (
+                                                            <button
+                                                                disabled={profileActionLoading === p.name}
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    setProfileActionLoading(p.name);
+                                                                    if (p.enabled) {
+                                                                        await disableProfile(p.name, tf);
+                                                                    } else {
+                                                                        await enableProfile(p.name, tf);
+                                                                    }
+                                                                    setProfileActionLoading(null);
+                                                                    loadData();
+                                                                }}
+                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                    profileActionLoading === p.name
+                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                                        : p.enabled
+                                                                            ? isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'
+                                                                            : isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
+                                                                }`}
+                                                            >
+                                                                {p.enabled ? 'Disable' : 'Enable'}
+                                                            </button>
+                                                        )}
                                                         <button
                                                             disabled={profileActionLoading === p.name}
                                                             onClick={async (e) => {
