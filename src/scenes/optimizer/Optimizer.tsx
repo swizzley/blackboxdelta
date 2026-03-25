@@ -521,7 +521,7 @@ export default function Optimizer() {
                                                                         setProfileActionLoading(null);
                                                                         loadData();
                                                                     }}
-                                                                    className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                                    className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                                                                         isDarkMode ? 'bg-purple-900/30 text-purple-400 hover:bg-purple-900/50' : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
                                                                     }`}
                                                                 >
@@ -583,11 +583,11 @@ export default function Optimizer() {
                                                                 setProfileActionLoading(null);
                                                                 loadData();
                                                             }}
-                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                                                                 isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
                                                             }`}
                                                         >
-                                                            Re-seed
+                                                            {profileActionLoading === p.name ? 'Seeding…' : 'Re-seed'}
                                                         </button>
                                                         <button
                                                             disabled={profileActionLoading === p.name || lhcRuns.some(r => r.profile_name === p.name && r.timeframe === tf && (r.status === 'queued' || r.status === 'preloading' || r.status === 'sweeping'))}
