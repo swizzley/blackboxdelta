@@ -47,6 +47,7 @@ export default function ProfilesAll() {
     const [params, setParams] = useState<ProfileParamsResponse | null>(null);
     const [paramsLoading, setParamsLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [actionDone, setActionDone] = useState<string | null>(null);
     const [bulkLoading, setBulkLoading] = useState(false);
 
     // Filter state from URL params
@@ -182,9 +183,12 @@ export default function ProfilesAll() {
     };
 
     const doAction = async (action: (name: string, tf: string) => Promise<any>, name: string, tf: string) => {
-        setActionLoading(`${tf}:${name}`);
+        const key = `${tf}:${name}`;
+        setActionLoading(key);
         await action(name, tf);
         setActionLoading(null);
+        setActionDone(key);
+        setTimeout(() => setActionDone(null), 2000);
         loadData();
     };
 
@@ -565,10 +569,10 @@ export default function ProfilesAll() {
                                                             className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${p.enabled ? (isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700') : (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700')}`}>
                                                             {p.enabled ? 'Off' : 'On'}
                                                         </button>
-                                                        <button disabled={actionLoading === key}
+                                                        <button disabled={actionLoading === key || actionDone === key}
                                                             onClick={() => doAction(reseedProfile, p.name, p.timeframe)}
-                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-50 text-cyan-700'}`}>
-                                                            Seed
+                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${actionDone === key ? (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700') : isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-50 text-cyan-700'}`}>
+                                                            {actionLoading === key ? '...' : actionDone === key ? 'Queued' : 'Seed'}
                                                         </button>
                                                     </div>
                                                 </td>

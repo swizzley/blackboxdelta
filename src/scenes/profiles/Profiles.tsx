@@ -26,6 +26,7 @@ export default function Profiles() {
     const [searchQuery, setSearchQuery] = useState('');
     const [tfFilter, setTfFilter] = useState<'all' | 'scalp' | 'intraday' | 'swing'>('all');
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [actionDone, setActionDone] = useState<string | null>(null);
     const [expandedCard, setExpandedCard] = useState<string | null>(null);
     const [kanbanSearch, setKanbanSearch] = useState('');
     const [kanbanSort, setKanbanSort] = useState<'sharpe' | 'name' | 'trades' | 'pnl' | 'gens'>('sharpe');
@@ -93,9 +94,12 @@ export default function Profiles() {
     );
 
     const doAction = async (action: (name: string, tf: string) => Promise<any>, name: string, tf: string) => {
-        setActionLoading(`${tf}:${name}`);
+        const key = `${tf}:${name}`;
+        setActionLoading(key);
         await action(name, tf);
         setActionLoading(null);
+        setActionDone(key);
+        setTimeout(() => setActionDone(null), 2000);
         loadData();
     };
 
@@ -295,11 +299,11 @@ export default function Profiles() {
                                                             Demote
                                                         </button>
                                                         <button
-                                                            disabled={actionLoading === cardKey(p)}
+                                                            disabled={actionLoading === cardKey(p) || actionDone === cardKey(p)}
                                                             onClick={e => { e.stopPropagation(); doAction(reseedProfile, p.name, p.timeframe); }}
-                                                            className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'}`}
+                                                            className={`px-2 py-1 text-[10px] font-medium rounded ${actionDone === cardKey(p) ? (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700') : isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'}`}
                                                         >
-                                                            Re-seed
+                                                            {actionLoading === cardKey(p) ? 'Queuing...' : actionDone === cardKey(p) ? 'Queued' : 'Re-seed'}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -395,11 +399,11 @@ export default function Profiles() {
                                             )}
                                             <div className="ml-auto flex gap-1.5">
                                                 <button
-                                                    disabled={actionLoading === cardKey(p)}
+                                                    disabled={actionLoading === cardKey(p) || actionDone === cardKey(p)}
                                                     onClick={() => doAction(reseedProfile, p.name, p.timeframe)}
-                                                    className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'}`}
+                                                    className={`px-2 py-1 text-[10px] font-medium rounded ${actionDone === cardKey(p) ? (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700') : isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'}`}
                                                 >
-                                                    Reseed
+                                                    {actionLoading === cardKey(p) ? 'Queuing...' : actionDone === cardKey(p) ? 'Queued' : 'Reseed'}
                                                 </button>
                                                 {isNegLive && (
                                                     <button
