@@ -10,6 +10,7 @@ export interface ProfileStats {
     avg_win: number | null;
     avg_loss: number | null;
     breakeven_pct: number | null;
+    sharpe_ratio: number | null;
 }
 
 // Dashboard (homepage) data
@@ -842,14 +843,27 @@ export interface ProfileHistoryResponse {
     history: ProfileHistoryEntry[];
 }
 
+// Pipeline stage for profile management views
+export type ProfileStage = 'disabled' | 'queued' | 'seeding' | 'optimizing' | 'lhc' | 'promoted' | 'soaking' | 'live';
+
 export interface OptimizerProfileState {
     name: string;
     description?: string;
     enabled: boolean;
     live: boolean;
     disabled_reason?: string; // "stall" = auto-disabled, requires reseed
+    tier?: string;            // A/B/C/D from optimize_profiles
+    tags?: string[];          // parsed from comma-separated DB column
+    stage?: ProfileStage;     // computed by API: seeding|optimizing|passed|soaking|live|stalled|failed|disabled
+    first_order_at?: string;  // earliest closed order for this profile+timeframe
     stats?: OptimizerProfileStats;
     baseline?: ProfileBaselineData;
+}
+
+// Extended profile with denormalized timeframe for flat list views
+export interface ProfileFlat extends OptimizerProfileState {
+    timeframe: string;
+    stage: ProfileStage; // required (not optional) on flat profiles
 }
 
 export interface ProfileProbeEntry {
@@ -865,6 +879,45 @@ export interface OptimizerProfilesResponse {
 }
 
 export type OptimizerAllProfilesResponse = Record<string, OptimizerProfilesResponse>;
+
+// Profile params response (from /api/optimizer/profiles/{name}/params)
+export interface ProfileParamEntry {
+    key: string;
+    value: string;
+}
+
+export interface ProfileParamsResponse {
+    profile: string;
+    timeframe: string;
+    mutation_id: number;
+    params: ProfileParamEntry[];
+}
+
+// Profile live trading timeline (from /api/optimizer/profiles/{name}/timeline)
+export interface ProfileTimelineDay {
+    date: string;
+    daily_pl: number;
+    cumulative_pl: number;
+    trades: number;
+    wins: number;
+    losses: number;
+}
+
+export interface ProfileTimelineResponse {
+    profile: string;
+    timeframe: string;
+    total_trades: number;
+    winners: number;
+    losers: number;
+    total_pl: number;
+    win_rate_pct: number;
+    avg_win?: number;
+    avg_loss?: number;
+    first_trade?: string;
+    last_trade?: string;
+    days_live: number;
+    series: ProfileTimelineDay[];
+}
 
 // Analysis API types (from /api/analysis/*)
 export interface AnalysisRunApi {

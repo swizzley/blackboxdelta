@@ -8,6 +8,7 @@ import {useDeviceAuth} from '../../context/DeviceAuth';
 const adminNav = [
     {name: 'Dashboard', href: '/'},
     {name: 'History', href: '/history'},
+    {name: 'Profiles', href: '/profiles'},
     {name: 'Analysis', href: '/analysis'},
     {name: 'System', href: '/system'},
     {name: 'Optimizer', href: '/optimizer'},

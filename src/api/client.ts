@@ -69,6 +69,7 @@ interface OrderOpts {
     status?: string;
     timeframe?: string;
     symbol?: string;
+    profile?: string;
     limit?: number;
     offset?: number;
 }
@@ -78,6 +79,7 @@ export function fetchOrders(opts: OrderOpts = {}): Promise<ApiOrder[] | null> {
     if (opts.status) params.set('status', opts.status);
     if (opts.timeframe) params.set('timeframe', opts.timeframe);
     if (opts.symbol) params.set('symbol', opts.symbol);
+    if (opts.profile) params.set('profile', opts.profile);
     if (opts.limit) params.set('limit', String(opts.limit));
     if (opts.offset) params.set('offset', String(opts.offset));
     const qs = params.toString();
@@ -256,6 +258,14 @@ export function assembleTrunk(timeframe: string, push: boolean = false): Promise
 
 export function fetchProfileHistory(name: string, timeframe: string = 'scalp'): Promise<import('../context/Types').ProfileHistoryResponse | null> {
     return apiFetch(`/api/optimizer/profiles/${name}/history?timeframe=${timeframe}`);
+}
+
+export function fetchProfileTimeline(name: string, timeframe: string): Promise<import('../context/Types').ProfileTimelineResponse | null> {
+    return apiFetch(`/api/optimizer/profiles/${name}/timeline?timeframe=${timeframe}`);
+}
+
+export function fetchProfileParams(name: string, timeframe: string): Promise<import('../context/Types').ProfileParamsResponse | null> {
+    return apiFetch(`/api/optimizer/profiles/${name}/params?timeframe=${timeframe}`);
 }
 
 // LHC runs

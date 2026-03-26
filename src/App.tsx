@@ -8,6 +8,8 @@ import Analysis from './scenes/analysis/Analysis';
 import Status from './scenes/status/Status';
 import System from './scenes/system/System';
 import Optimizer from './scenes/optimizer/Optimizer';
+import Profiles from './scenes/profiles/Profiles';
+import ProfilesAll from './scenes/profiles/ProfilesAll';
 import Devices from './scenes/devices/Devices';
 import Error404 from './scenes/common/404';
 import ErrorBoundary from './scenes/common/ErrorBoundary';
@@ -36,6 +38,8 @@ export default function App() {
                     <Route path="/analysis" element={<AdminRoute><Analysis/></AdminRoute>}/>
                     <Route path="/system" element={<AdminRoute><Status/></AdminRoute>}/>
                     <Route path="/health" element={<AdminRoute><System/></AdminRoute>}/>
+                    <Route path="/profiles" element={<AdminRoute><Profiles/></AdminRoute>}/>
+                    <Route path="/profiles/all" element={<AdminRoute><ProfilesAll/></AdminRoute>}/>
                     <Route path="/optimizer" element={<AdminRoute><Optimizer/></AdminRoute>}/>
                     <Route path="/day/:year/:month/:day" element={<AuthedRoute><DayDetail/></AuthedRoute>}/>
                     <Route path="/trade/:year/:month/:day/:id" element={<AuthedRoute><TradeDetail/></AuthedRoute>}/>

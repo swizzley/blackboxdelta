@@ -3,16 +3,16 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import Tooltip from '../common/Tooltip';
 import {useTheme} from '../../context/Theme';
+import {ResultStat as SharedResultStat, WRFractionStat as SharedWRFractionStat, TimeframeBadge as SharedTimeframeBadge, fmtNum as sharedFmtNum, fmtPct as sharedFmtPct, avgPnl as sharedAvgPnl, plColor as sharedPlColor} from '../profiles/components/shared';
 import {useApi} from '../../context/Api';
 import {
     fetchOptimizerStatus, fetchOptimizerGenerations,
     fetchOptimizerTrunks, fetchOptimizerRecommendations,
     fetchOptimizerBranches, fetchOptimizerTrunkDetail,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
-    fetchOptimizerAllProfiles, enableProfile, disableProfile, reseedProfile, retrySeedProfile,
-    goLiveProfile, noLiveProfile, promoteProfile, demoteProfile, fetchProfileHistory,
+    fetchOptimizerAllProfiles, goLiveProfile, noLiveProfile, demoteProfile, retrySeedProfile,
     pushTrunk, revertTrunk, unrevertTrunk, applyRecommendation, assembleTrunk,
-    queueLHCRun, fetchLHCRuns, fetchLHCRunDetail, spawnLHCProfile,
+    fetchLHCRuns, fetchLHCRunDetail, spawnLHCProfile,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
@@ -21,7 +21,7 @@ import type {
     SeedRun, SeedComponentResult, SeedVariantResult,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
-    OptimizerAllProfilesResponse, ProfileHistoryEntry,
+    OptimizerAllProfilesResponse,
     LHCRun, LHCRunDetail,
 } from '../../context/Types';
 import {
@@ -48,9 +48,7 @@ export default function Optimizer() {
     const [workerConfig, setWorkerConfig] = useState<OptimizerWorkerConfig | null>(null);
     const [workerDraft, setWorkerDraft] = useState<Record<string, {enabled: boolean; priority: number}>>({});
     const [allProfileData, setAllProfileData] = useState<OptimizerAllProfilesResponse | null>(null);
-    const [profileActionLoading, setProfileActionLoading] = useState<string | null>(null);
     const [workerDirty, setWorkerDirty] = useState(false);
-    // showProfiles removed — profiles always visible
     const [showSeeds, setShowSeeds] = useState(false);
     const [showLHC, setShowLHC] = useState(false);
     const [showTrunks, setShowTrunks] = useState(false);
@@ -61,11 +59,6 @@ export default function Optimizer() {
     const [revertReason, setRevertReason] = useState('overfit');
     const [trunkSort, setTrunkSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
     const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
-    const [expandedProfileHistory, setExpandedProfileHistory] = useState<string | null>(null);
-    const [profileHistory, setProfileHistory] = useState<ProfileHistoryEntry[]>([]);
-    const [expandedBranch, setExpandedBranch] = useState<number | null>(null);
-    const [branchDetail, setBranchDetail] = useState<OptimizerBranch | null>(null);
-    const [historyPage, setHistoryPage] = useState(0);
     const [lhcRuns, setLhcRuns] = useState<LHCRun[]>([]);
     const [expandedLHC, setExpandedLHC] = useState<number | null>(null);
     const [lhcDetail, setLhcDetail] = useState<LHCRunDetail | null>(null);
@@ -421,333 +414,22 @@ export default function Optimizer() {
                                 </div>
                             )}
 
-                            {/* Profile Management — scalp + intraday + swing */}
-                            {allProfileData && (['scalp', 'intraday', 'swing'] as const).map(tf => {
-                                const profileData = allProfileData[tf];
-                                if (!profileData || !profileData.profiles || profileData.profiles.length === 0) return null;
-                                const enabledCount = profileData.profiles.filter(p => p.enabled).length;
-                                const disabledCount = profileData.profiles.length - enabledCount;
-                                const tfLabel = tf.charAt(0).toUpperCase() + tf.slice(1);
-                                return (
-                                <div key={tf} className={`${card} mb-6`}>
-                                    <h2 className={heading}>
-                                        <BeakerIcon className={iconCl}/>{tfLabel} Profiles
-                                        <span className={`text-xs font-normal font-mono ${muted} ml-1`}>
-                                            {enabledCount}/{profileData.profiles.length} active
-                                        </span>
-                                        {profileData.aggregate && (
-                                            <span className={`text-xs font-normal font-mono ${muted}`}>
-                                                S:{profileData.aggregate.sharpe_ratio.toFixed(2)} WR:{profileData.aggregate.win_rate.toFixed(0)}% {profileData.aggregate.total_trades}t PF:{profileData.aggregate.profit_factor.toFixed(2)}
-                                            </span>
-                                        )}
-                                        {disabledCount > 0 && (
-                                            <span className={`text-xs font-normal font-mono ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{disabledCount} disabled</span>
-                                        )}
-                                    </h2>
-                                        <div className="space-y-1.5">
-                                            {profileData.profiles.map(p => (
-                                                <div key={p.name}>
-                                                <div className={`flex flex-wrap items-center gap-2 px-3 py-1.5 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                                    <span className={`font-mono text-xs font-medium w-20 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
-                                                    {p.description && <span className={`text-[10px] ${muted} hidden sm:inline`}>{p.description}</span>}
-                                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                                                        p.enabled
-                                                            ? isDarkMode ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700'
-                                                            : isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700'
-                                                    }`}>
-                                                        {p.enabled ? 'ON' : 'OFF'}
-                                                    </span>
-                                                    {p.stats && (
-                                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                                                        p.live
-                                                            ? isDarkMode ? 'bg-cyan-900/40 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
-                                                            : isDarkMode ? 'bg-orange-900/40 text-orange-400' : 'bg-orange-100 text-orange-700'
-                                                    }`}>
-                                                        {p.live ? 'LIVE' : 'BLOCKED'}
-                                                    </span>
-                                                    )}
-                                                    {p.stats && (
-                                                        <span className={`text-[10px] font-mono ${muted}`}>
-                                                            S:{p.stats.sharpe_ratio.toFixed(2)} WR:{p.stats.win_rate.toFixed(0)}% {p.stats.total_trades}t PF:{p.stats.profit_factor.toFixed(2)}
-                                                        </span>
-                                                    )}
-                                                    {p.baseline && (
-                                                        <>
-                                                        <span className={`text-[10px] font-mono ${muted}`} title="generation_counter / consecutive_failures">
-                                                            g:{p.baseline.generation_counter} f:{p.baseline.consecutive_failures}
-                                                        </span>
-                                                        {p.baseline.source_branch_id && (
-                                                            <span className={`text-[10px] font-mono cursor-pointer hover:underline ${isDarkMode ? 'text-cyan-400' : 'text-cyan-700'}`}
-                                                                title={`Branch ${p.baseline.source_branch_id} from gen ${p.baseline.source_generation_id ?? '?'}`}
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    if (p.baseline!.source_generation_id) {
-                                                                        const branches = await fetchOptimizerBranches(p.baseline!.source_generation_id);
-                                                                        const branch = branches?.find(b => b.id === p.baseline!.source_branch_id);
-                                                                        if (branch) {
-                                                                            setExpandedBranch(expandedBranch === p.baseline!.source_branch_id ? null : p.baseline!.source_branch_id!);
-                                                                            setBranchDetail(branch);
-                                                                        }
-                                                                    }
-                                                                }}>
-                                                                b#{p.baseline.source_branch_id}
-                                                            </span>
-                                                        )}
-                                                        {p.baseline.promoted_to_trunk && (
-                                                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
-                                                                isDarkMode ? 'bg-purple-900/40 text-purple-400' : 'bg-purple-100 text-purple-700'
-                                                            }`} title={p.baseline.promoted_at ? `Promoted ${new Date(p.baseline.promoted_at).toLocaleDateString()}` : 'In active trunk'}>
-                                                                TRUNK
-                                                            </span>
-                                                        )}
-                                                        </>
-                                                    )}
-                                                    <div className="ml-auto flex gap-1">
-                                                        {/* Promote / Update — shown when baseline has positive Sharpe+P&L */}
-                                                        {(() => {
-                                                            if (!p.baseline?.stats || p.baseline.stats.sharpe_ratio <= 0 || p.baseline.stats.total_pnl <= 0) return null;
-                                                            const currentTrunk = status?.current_trunks?.find(t => t.timeframe === tf);
-                                                            const trunkMutIDs = new Set(currentTrunk?.mutation_ids ?? []);
-                                                            const inTrunk = p.baseline.promoted_to_trunk;
-                                                            const baselineChanged = inTrunk && p.baseline.mutation_id != null && !trunkMutIDs.has(p.baseline.mutation_id);
-                                                            // Hide if already in trunk and baseline hasn't changed
-                                                            if (inTrunk && !baselineChanged) return null;
-                                                            return (
-                                                                <button
-                                                                    disabled={profileActionLoading === p.name}
-                                                                    onClick={async (e) => {
-                                                                        e.stopPropagation();
-                                                                        setProfileActionLoading(p.name);
-                                                                        await promoteProfile(p.name, tf);
-                                                                        setProfileActionLoading(null);
-                                                                        loadData();
-                                                                    }}
-                                                                    className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                                                                        isDarkMode ? 'bg-purple-900/30 text-purple-400 hover:bg-purple-900/50' : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
-                                                                    }`}
-                                                                >
-                                                                    {baselineChanged ? 'Update' : 'Promote'}
-                                                                </button>
-                                                            );
-                                                        })()}
-                                                        {/* History toggle */}
-                                                        {p.baseline && (
-                                                            <button
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    const key = `${tf}:${p.name}`;
-                                                                    if (expandedProfileHistory === key) {
-                                                                        setExpandedProfileHistory(null);
-                                                                    } else {
-                                                                        const res = await fetchProfileHistory(p.name, tf);
-                                                                        setProfileHistory(res?.history ?? []);
-                                                                        setExpandedProfileHistory(key);
-                                                                        setHistoryPage(0);
-                                                                    }
-                                                                }}
-                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                    isDarkMode ? 'bg-slate-600/50 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                                                }`}
-                                                            >
-                                                                History
-                                                            </button>
-                                                        )}
-                                                        {p.disabled_reason === 'stall' ? (
-                                                            <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${
-                                                                isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-50 text-orange-700'
-                                                            }`} title="Profile was auto-disabled after exhausting escalation milestones. Reseed to re-enable.">
-                                                                Stalled
-                                                            </span>
-                                                        ) : (
-                                                            <button
-                                                                disabled={profileActionLoading === p.name}
-                                                                onClick={async (e) => {
-                                                                    e.stopPropagation();
-                                                                    setProfileActionLoading(p.name);
-                                                                    if (p.enabled) {
-                                                                        await disableProfile(p.name, tf);
-                                                                    } else {
-                                                                        await enableProfile(p.name, tf);
-                                                                    }
-                                                                    setProfileActionLoading(null);
-                                                                    loadData();
-                                                                }}
-                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                    profileActionLoading === p.name
-                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                        : p.enabled
-                                                                            ? isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'
-                                                                            : isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'
-                                                                }`}
-                                                            >
-                                                                {p.enabled ? 'Disable' : 'Enable'}
-                                                            </button>
-                                                        )}
-                                                        <button
-                                                            disabled={profileActionLoading === p.name}
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                setProfileActionLoading(p.name);
-                                                                await reseedProfile(p.name, tf);
-                                                                setProfileActionLoading(null);
-                                                                loadData();
-                                                            }}
-                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                                                                isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
-                                                            }`}
-                                                        >
-                                                            {profileActionLoading === p.name ? 'Seeding…' : 'Re-seed'}
-                                                        </button>
-                                                        <button
-                                                            disabled={profileActionLoading === p.name || lhcRuns.some(r => r.profile_name === p.name && r.timeframe === tf && (r.status === 'queued' || r.status === 'preloading' || r.status === 'sweeping'))}
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                setProfileActionLoading(p.name);
-                                                                await queueLHCRun(tf, p.name);
-                                                                setProfileActionLoading(null);
-                                                                loadData();
-                                                            }}
-                                                            className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-colors ${
-                                                                lhcRuns.some(r => r.profile_name === p.name && r.timeframe === tf && (r.status === 'queued' || r.status === 'preloading' || r.status === 'sweeping'))
-                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                    : isDarkMode ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-900/50' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                                                            }`}
-                                                        >
-                                                            LHC
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                {/* Baseline stats — single row */}
-                                                {p.baseline?.stats && (() => {
-                                                    const bs = p.baseline!.stats!;
-                                                    return (
-                                                        <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5 mt-1 ml-3 mr-3 mb-1">
-                                                            <ResultStat label="Sharpe" value={bs.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                            <ResultStat label="PF" value={bs.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                            <WRFractionStat wr={bs.win_rate} breakevenWR={bs.breakeven_wr} isDarkMode={isDarkMode}/>
-                                                            <ResultStat label="Avg P&L" value={avgPnl(bs)} isDarkMode={isDarkMode} color={plColor(bs.total_pnl)}/>
-                                                            <ResultStat label="Trades" value={bs.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                                                            <ResultStat label="T/Day" value={p.baseline!.oos_days && bs.total_trades ? (bs.total_trades / p.baseline!.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
-                                                            <ResultStat label="AvgW" value={fmtPct(bs.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                                                            <ResultStat label="AvgL" value={fmtPct(bs.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
-                                                        </div>
-                                                    );
-                                                })()}
-                                                {/* Inline branch detail */}
-                                                {expandedBranch === p.baseline?.source_branch_id && branchDetail && (
-                                                    <div className={`ml-3 mr-3 mb-1 px-3 py-2 rounded ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'}`}>
-                                                        <div className={`text-[10px] font-mono font-medium mb-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                            Branch #{branchDetail.id} — {branchDetail.status}
-                                                            {branchDetail.exploration_directive && (
-                                                                <span className={`font-normal ml-2 ${muted}`}>{branchDetail.exploration_directive.slice(0, 150)}{branchDetail.exploration_directive.length > 150 ? '...' : ''}</span>
-                                                            )}
-                                                        </div>
-                                                        {branchDetail.oos_result && (() => {
-                                                            const r = branchDetail.oos_result!;
-                                                            return (<>
-                                                                <p className={`text-[10px] font-medium mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Out-of-Sample</p>
-                                                                <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
-                                                                    <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                                    <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                                    <WRFractionStat wr={r.win_rate} breakevenWR={r.breakeven_wr} isDarkMode={isDarkMode}/>
-                                                                    <ResultStat label="Avg W" value={fmtPct(r.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                                                                    <ResultStat label="Avg L" value={fmtPct(r.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
-                                                                    <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                                                                    <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                                    <ResultStat label="Avg P&L" value={avgPnl(r)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
-                                                                </div>
-                                                            </>);
-                                                        })()}
-                                                        {branchDetail.is_result && (() => {
-                                                            const r = branchDetail.is_result!;
-                                                            return (<>
-                                                                <p className={`text-[10px] font-medium mt-2 mb-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>In-Sample</p>
-                                                                <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
-                                                                    <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                                    <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                                    <WRFractionStat wr={r.win_rate} breakevenWR={r.breakeven_wr} isDarkMode={isDarkMode}/>
-                                                                    <ResultStat label="Avg W" value={fmtPct(r.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                                                                    <ResultStat label="Avg L" value={fmtPct(r.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
-                                                                    <ResultStat label="Trades" value={r.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                                                                    <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                                    <ResultStat label="Avg P&L" value={avgPnl(r)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
-                                                                </div>
-                                                            </>);
-                                                        })()}
-                                                        {branchDetail.param_diffs && branchDetail.param_diffs.length > 0 && (
-                                                            <div className="mt-2">
-                                                                <DiffBlock diffs={branchDetail.param_diffs} stripPrefix={`profile.${p.name}.`} isDarkMode={isDarkMode} muted={muted} hideHeader/>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                                {/* Profile history expandable */}
-                                                {expandedProfileHistory === `${tf}:${p.name}` && profileHistory.length > 0 && (() => {
-                                                    const PAGE = 10;
-                                                    const totalPages = Math.ceil(profileHistory.length / PAGE);
-                                                    const paged = profileHistory.slice(historyPage * PAGE, (historyPage + 1) * PAGE);
-                                                    return (
-                                                    <div className={`ml-3 mr-3 mb-1 px-3 py-2 rounded text-[10px] font-mono ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100/80'}`}>
-                                                        <div className={`font-medium mb-1 flex items-center gap-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                            Baseline History ({profileHistory.length} entries)
-                                                            {totalPages > 1 && (
-                                                                <span className="flex items-center gap-1 ml-auto">
-                                                                    <button disabled={historyPage === 0} onClick={(e) => { e.stopPropagation(); setHistoryPage(p => p - 1); }}
-                                                                        className={`px-1 rounded ${historyPage === 0 ? 'opacity-30' : 'hover:bg-slate-700/50 cursor-pointer'}`}>&laquo;</button>
-                                                                    <span>{historyPage + 1}/{totalPages}</span>
-                                                                    <button disabled={historyPage >= totalPages - 1} onClick={(e) => { e.stopPropagation(); setHistoryPage(p => p + 1); }}
-                                                                        className={`px-1 rounded ${historyPage >= totalPages - 1 ? 'opacity-30' : 'hover:bg-slate-700/50 cursor-pointer'}`}>&raquo;</button>
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className="space-y-0.5">
-                                                            {paged.map(h => (
-                                                                <div key={h.id} className={`flex gap-3 ${muted}`}>
-                                                                    <span>{new Date(h.created_at).toLocaleDateString()}</span>
-                                                                    <span>g:{h.generation_counter}</span>
-                                                                    {h.oos && (
-                                                                        <>
-                                                                        <span className={h.oos.sharpe_ratio > 0 ? (isDarkMode ? 'text-green-400' : 'text-green-700') : (isDarkMode ? 'text-red-400' : 'text-red-700')}>
-                                                                            S:{h.oos.sharpe_ratio.toFixed(3)}
-                                                                        </span>
-                                                                        <span>PF:{h.oos.profit_factor.toFixed(2)}</span>
-                                                                        <span>{h.oos.total_trades}t</span>
-                                                                        <span>WR:{h.oos.win_rate.toFixed(0)}%</span>
-                                                                        </>
-                                                                    )}
-                                                                    {h.source_branch_id && (
-                                                                        <span className={`cursor-pointer hover:underline ${isDarkMode ? 'text-cyan-400' : 'text-cyan-700'}`}
-                                                                            onClick={async (e) => {
-                                                                                e.stopPropagation();
-                                                                                if (h.source_generation_id) {
-                                                                                    const branches = await fetchOptimizerBranches(h.source_generation_id);
-                                                                                    const branch = branches?.find(b => b.id === h.source_branch_id);
-                                                                                    if (branch) {
-                                                                                        setExpandedBranch(expandedBranch === h.source_branch_id ? null : h.source_branch_id!);
-                                                                                        setBranchDetail(branch);
-                                                                                    }
-                                                                                }
-                                                                            }}>
-                                                                            b#{h.source_branch_id}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                    );
-                                                })()}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        {profileData.probe_history && profileData.probe_history.length > 0 && (
-                                            <div className={`mt-2 text-[10px] ${muted}`}>
-                                                Last probe: {profileData.probe_history[0].profile} (gen {profileData.probe_history[0].generation_id}) — {profileData.probe_history[0].status.toUpperCase()}
-                                            </div>
-                                        )}
-                                </div>
-                                );
-                            })}
+                            {/* Profiles link card */}
+                            <div className={`${card} mb-6`}>
+                                <a href="/profiles" className="flex items-center gap-3 group">
+                                    <BeakerIcon className={iconCl}/>
+                                    <div>
+                                        <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} group-hover:text-cyan-500 transition-colors`}>
+                                            Profiles
+                                        </h2>
+                                        <p className={`text-sm ${muted}`}>
+                                            Manage trading strategy profiles, view pipeline status, and control live deployment
+                                        </p>
+                                    </div>
+                                    <span className="ml-auto text-cyan-500">&rarr;</span>
+                                </a>
+                            </div>
+
 
                             {/* Seed Calibration Runs */}
                             {seedRuns.length > 0 && (
@@ -1859,33 +1541,9 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
     );
 }
 
-function WRFractionStat({wr, breakevenWR, isDarkMode}: {wr?: number; breakevenWR?: number; isDarkMode: boolean}) {
-    const above = wr != null && breakevenWR != null && breakevenWR > 0 && wr > breakevenWR;
-    const wrColor = wr == null ? (isDarkMode ? 'text-gray-200' : 'text-gray-700')
-        : above ? 'text-emerald-400' : 'text-red-400';
-    const beColor = isDarkMode ? 'text-gray-500' : 'text-gray-400';
-    return (
-        <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`}>
-            <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>WR / BE</p>
-            <p className="text-sm font-semibold truncate">
-                <span className={wrColor}>{wr != null ? `${wr.toFixed(1)}%` : '—'}</span>
-                <span className={`mx-0.5 ${beColor}`}>/</span>
-                <span className={beColor}>{breakevenWR ? `${breakevenWR.toFixed(1)}%` : '—'}</span>
-            </p>
-        </div>
-    );
-}
+const WRFractionStat = SharedWRFractionStat;
 
-function ResultStat({label, value, isDarkMode, color, tooltip}: {label: string; value: string; isDarkMode: boolean; color?: string; tooltip?: string}) {
-    const box = (
-        <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-600/50' : 'bg-gray-100'}`}>
-            <p className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{label}</p>
-            <p className={`text-sm font-semibold truncate ${color ?? (isDarkMode ? 'text-gray-200' : 'text-gray-700')}`} title={value}>{value}</p>
-        </div>
-    );
-    if (tooltip) return <Tooltip content={tooltip} className="">{box}</Tooltip>;
-    return box;
-}
+const ResultStat = SharedResultStat;
 
 function MiniStat({label, value, isDarkMode, warn}: {label: string; value: string; isDarkMode: boolean; warn?: boolean}) {
     return (
@@ -1896,15 +1554,7 @@ function MiniStat({label, value, isDarkMode, warn}: {label: string; value: strin
     );
 }
 
-function TimeframeBadge({tf, isDarkMode}: {tf: string; isDarkMode: boolean}) {
-    const colors: Record<string, string> = {
-        scalp: isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-700',
-        intraday: isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700',
-        swing: isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700',
-    };
-    const cls = colors[tf?.toLowerCase()] ?? (isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500');
-    return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>{tf || '—'}</span>;
-}
+const TimeframeBadge = SharedTimeframeBadge;
 
 function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boolean}) {
     const s = status?.toLowerCase();
@@ -2571,33 +2221,10 @@ function SeedStageSection({title, isDarkMode, muted, children}: {title: string; 
 // --- Helpers ---
 
 /** Format numbers smartly — use exponential notation for very small values */
-function fmtNum(n?: number): string {
-    if (n == null) return '—';
-    const abs = Math.abs(n);
-    if (abs === 0) return '0';
-    if (abs < 0.01) return n.toExponential(2);
-    return n.toFixed(2);
-}
-
-function fmtPct(n?: number): string {
-    if (n == null) return '—';
-    if (n === 0) return '0%';
-    const sign = n >= 0 ? '+' : '';
-    const abs = Math.abs(n);
-    const dec = abs >= 100 ? 0 : abs >= 10 ? 1 : abs >= 1 ? 2 : 3;
-    return sign + n.toFixed(dec) + '%';
-}
-
-function avgPnl(r: {total_pnl?: number; total_trades?: number}): string {
-    if (r.total_pnl == null || !r.total_trades) return '—';
-    return fmtPct(r.total_pnl / r.total_trades);
-}
-
-
-function plColor(pnl?: number): string {
-    if (pnl == null) return '';
-    return pnl >= 0 ? 'text-emerald-500' : 'text-red-500';
-}
+const fmtNum = sharedFmtNum;
+const fmtPct = sharedFmtPct;
+const avgPnl = sharedAvgPnl;
+const plColor = sharedPlColor;
 
 function genDuration(g: OptimizerGeneration): string {
     if (!g.completed_at || !g.started_at) return '—';
