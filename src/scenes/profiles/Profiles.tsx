@@ -475,10 +475,11 @@ export default function Profiles() {
                                             {stageProfiles.length === 0 ? (
                                                 <p className={`text-[10px] ${muted} text-center py-4`}>Empty</p>
                                             ) : stageProfiles.map(p => (
-                                                <a key={cardKey(p)} href={`/profiles/all?name=${p.name}&tf=${p.timeframe}`}
+                                                <div key={cardKey(p)}
                                                     draggable
-                                                    onDragStart={() => setDragProfile(p)}
+                                                    onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; setDragProfile(p); }}
                                                     onDragEnd={() => { setDragProfile(null); setDragOver(null); }}
+                                                    onClick={() => navigate(`/profiles/all?name=${p.name}&tf=${p.timeframe}`)}
                                                     className={`block rounded px-2 py-1.5 transition-colors cursor-grab active:cursor-grabbing ${isDarkMode ? 'bg-slate-800/60 hover:bg-slate-800' : 'bg-white hover:bg-gray-100'} ${dragProfile && cardKey(dragProfile) === cardKey(p) ? 'opacity-40' : ''}`}>
                                                     <div className="flex items-center justify-between">
                                                         <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
@@ -495,7 +496,7 @@ export default function Profiles() {
                                                     {p.disabled_reason && (
                                                         <span className={`text-[9px] ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>{p.disabled_reason}</span>
                                                     )}
-                                                </a>
+                                                </div>
                                             ))}
                                         </div>
                                     </div>
