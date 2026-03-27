@@ -236,6 +236,10 @@ export function noLiveProfile(name: string, timeframe: string = 'scalp'): Promis
     return apiPost(`/api/optimizer/profiles/${name}/nolive?timeframe=${timeframe}`, {});
 }
 
+export function deleteProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/delete?timeframe=${timeframe}`, {});
+}
+
 export function revertProfile(name: string, trunkId: number, timeframe: string = 'scalp'): Promise<any> {
     return apiPost(`/api/optimizer/profiles/${name}/revert?timeframe=${timeframe}`, {trunk_id: trunkId});
 }

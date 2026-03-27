@@ -6,7 +6,7 @@ import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {
     fetchOptimizerAllProfiles, fetchOptimizerSeedRuns,
-    enableProfile, disableProfile,
+    enableProfile, disableProfile, deleteProfile,
     reseedProfile, fetchDashboard, fetchProfileTimeline,
     fetchOptimizerGenerations, fetchProfileHistory, fetchOrders, fetchProfileParams, fetchLHCRuns,
 } from '../../api/client';
@@ -460,6 +460,10 @@ export default function ProfilesAll() {
                             <button disabled={bulkLoading} onClick={() => doBulkAction(reseedProfile)}
                                 className={`px-2 py-1 text-xs font-medium rounded ${isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-50 text-cyan-700'}`}>
                                 Reseed All
+                            </button>
+                            <button disabled={bulkLoading} onClick={() => { if (confirm('Delete selected profiles? This cannot be undone.')) doBulkAction(deleteProfile); }}
+                                className={`px-2 py-1 text-xs font-medium rounded ${isDarkMode ? 'bg-red-900/50 text-red-400' : 'bg-red-100 text-red-700'}`}>
+                                Delete
                             </button>
                             <button onClick={() => setSelectedIds(new Set())}
                                 className={`ml-auto text-xs ${muted} hover:underline`}>
