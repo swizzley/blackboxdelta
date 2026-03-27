@@ -17,7 +17,7 @@ import ReactMarkdown from 'react-markdown';
 dayjs.extend(relativeTime);
 dayjs.extend(isoWeek);
 
-const PROVIDERS = ['ollama', 'hybrid'] as const;
+const PROVIDERS = ['roundrobin', 'ollama', 'hybrid'] as const;
 type Provider = typeof PROVIDERS[number];
 
 const SCOPE_ORDER = ['yearly', 'monthly', 'weekly', 'daily', 'hourly'] as const;
@@ -38,9 +38,10 @@ const triggerColors: Record<string, { text: string; bg: string; label: string }>
 };
 
 const providerColors: Record<string, { text: string; bg: string; label: string }> = {
-    anthropic: {text: 'text-orange-400', bg: 'bg-orange-500/20', label: 'Claude'},
-    ollama:    {text: 'text-sky-400',    bg: 'bg-sky-500/20',    label: 'Ollama'},
-    hybrid:    {text: 'text-violet-400', bg: 'bg-violet-500/20', label: 'Hybrid'},
+    anthropic:  {text: 'text-orange-400', bg: 'bg-orange-500/20', label: 'Claude'},
+    ollama:     {text: 'text-sky-400',    bg: 'bg-sky-500/20',    label: 'Ollama'},
+    hybrid:     {text: 'text-violet-400', bg: 'bg-violet-500/20', label: 'Hybrid'},
+    roundrobin: {text: 'text-emerald-400', bg: 'bg-emerald-500/20', label: 'Cloud RR'},
 };
 
 const priorityLabels: Record<number, { label: string; color: string; bg: string }> = {
@@ -347,7 +348,7 @@ export default function Analysis() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
     const [allRuns, setAllRuns] = useState<AnalysisRunApi[]>([]);
-    const [runProvider, setRunProvider] = useState<Provider>('ollama');
+    const [runProvider, setRunProvider] = useState<Provider>('roundrobin');
     const [hybridAnthropicModel, setHybridAnthropicModel] = useState('claude-sonnet-4-20250514');
     const [loading, setLoading] = useState(true);
     const [runDetail, setRunDetail] = useState<AnalysisRunDetailApi | null>(null);
