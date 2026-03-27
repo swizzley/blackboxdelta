@@ -101,20 +101,8 @@ export default function Profiles() {
     };
 
     // Drag-and-drop between kanban columns
-    // Drag targets — any stage can reach disabled/queued/soaking. Soaking requires a baseline (API validates).
-    const validDropTargets: Record<string, ProfileStage[]> = {
-        disabled: ['queued', 'soaking'],
-        queued: ['disabled', 'seeding', 'soaking'],
-        seeding: ['disabled', 'queued'],
-        optimizing: ['disabled', 'queued', 'seeding', 'soaking'],
-        lhc: ['disabled', 'queued', 'optimizing', 'soaking'],
-        soaking: ['disabled', 'queued', 'optimizing', 'live'],
-        live: ['disabled', 'queued', 'optimizing'],
-    };
-    const canDrop = (from: ProfileStage, to: ProfileStage): boolean => {
-        if (from === to) return false;
-        return (validDropTargets[from] ?? []).includes(to);
-    };
+    // Kanban is the human override control center — any stage to any stage.
+    const canDrop = (from: ProfileStage, to: ProfileStage): boolean => from !== to;
     const [stageOverrides, setStageOverrides] = useState<Map<string, ProfileStage>>(new Map());
     const handleDrop = async (target: ProfileStage) => {
         setDragOver(null);
