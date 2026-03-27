@@ -193,10 +193,10 @@
     "pl": 0.19,
     "winners": 10,
     "losers": 3,
-    "total": 14,
+    "total": 15,
     "win_pl": 0.19,
     "loss_pl": -0.01,
-    "dur_sum": 4206,
-    "dur_count": 14
+    "dur_sum": 4564,
+    "dur_count": 15
   }
 }
