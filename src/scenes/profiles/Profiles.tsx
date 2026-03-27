@@ -6,7 +6,7 @@ import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {
     fetchOptimizerAllProfiles, fetchOptimizerSeedRuns,
-    goLiveProfile, noLiveProfile, disableProfile,
+    enableProfile, disableProfile, soakProfile, goLiveProfile, noLiveProfile,
     reseedProfile, demoteProfile, fetchDashboard, fetchLHCRuns,
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, LHCRun} from '../../context/Types';
@@ -128,9 +128,43 @@ export default function Profiles() {
         }
         // Temporarily move card to target column until next data refresh
         const key = cardKey(dragProfile);
+        const p = dragProfile;
         setStageOverrides(prev => new Map(prev).set(key, target));
         setDragProfile(null);
-        // TODO: wire up actual stage transition actions when backend pipeline is implemented
+
+        // Execute the stage transition via API
+        try {
+            switch (target) {
+                case 'disabled':
+                    await disableProfile(p.name, p.timeframe);
+                    break;
+                case 'queued':
+                    await enableProfile(p.name, p.timeframe);
+                    break;
+                case 'seeding':
+                    await reseedProfile(p.name, p.timeframe);
+                    break;
+                case 'soaking':
+                    await soakProfile(p.name, p.timeframe);
+                    break;
+                case 'live':
+                    await goLiveProfile(p.name, p.timeframe);
+                    break;
+                case 'optimizing':
+                case 'lhc':
+                    // Pulling back from live/soaking → re-enable for optimization
+                    if (p.stage === 'live' || p.stage === 'soaking') {
+                        await noLiveProfile(p.name, p.timeframe);
+                    }
+                    await enableProfile(p.name, p.timeframe);
+                    break;
+            }
+        } catch (err) {
+            console.error('Stage transition failed:', err);
+        }
+        // Clear override and refresh data
+        setStageOverrides(prev => { const m = new Map(prev); m.delete(key); return m; });
+        loadData();
     };
 
     const cardKey = (p: ProfileFlat) => `${p.timeframe}:${p.name}`;

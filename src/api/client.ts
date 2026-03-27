@@ -224,6 +224,10 @@ export function disableProfile(name: string, timeframe: string = 'scalp'): Promi
     return apiPost(`/api/optimizer/profiles/${name}/disable?timeframe=${timeframe}`, {});
 }
 
+export function soakProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/soak?timeframe=${timeframe}`, {});
+}
+
 export function goLiveProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
     return apiPost(`/api/optimizer/profiles/${name}/golive?timeframe=${timeframe}`, {});
 }
