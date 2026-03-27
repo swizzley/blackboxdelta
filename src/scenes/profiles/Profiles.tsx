@@ -101,13 +101,13 @@ export default function Profiles() {
     };
 
     // Drag-and-drop between kanban columns
-    // Forward: only to next stage. Backward: step back through pipeline (skip promoted/soaking)
+    // Drag targets — any stage can reach disabled/queued/soaking. Soaking requires a baseline (API validates).
     const validDropTargets: Record<string, ProfileStage[]> = {
-        disabled: ['queued'],
-        queued: ['disabled', 'seeding'],
+        disabled: ['queued', 'soaking'],
+        queued: ['disabled', 'seeding', 'soaking'],
         seeding: ['disabled', 'queued'],
-        optimizing: ['disabled', 'queued', 'seeding'],
-        lhc: ['disabled', 'queued', 'seeding', 'optimizing'],
+        optimizing: ['disabled', 'queued', 'seeding', 'soaking'],
+        lhc: ['disabled', 'queued', 'optimizing', 'soaking'],
         soaking: ['disabled', 'queued', 'optimizing', 'live'],
         live: ['disabled', 'queued', 'optimizing'],
     };
