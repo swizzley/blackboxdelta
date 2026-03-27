@@ -7,7 +7,7 @@ import {useApi} from '../../context/Api';
 import {
     fetchOptimizerAllProfiles, fetchOptimizerSeedRuns,
     enableProfile, disableProfile, soakProfile, goLiveProfile, noLiveProfile,
-    reseedProfile, fetchDashboard, fetchLHCRuns,
+    reseedProfile, cancelSeedProfile, fetchDashboard, fetchLHCRuns,
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, LHCRun} from '../../context/Types';
 import {flattenProfiles, matchesSearch, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
@@ -118,6 +118,11 @@ export default function Profiles() {
 
         // Execute the stage transition via API
         try {
+            // Cancel seed queue entry when leaving queued/seeding
+            if (p.stage === 'queued' || p.stage === 'seeding') {
+                await cancelSeedProfile(p.name, p.timeframe);
+            }
+
             switch (target) {
                 case 'disabled':
                     await disableProfile(p.name, p.timeframe);
@@ -137,12 +142,17 @@ export default function Profiles() {
                     await goLiveProfile(p.name, p.timeframe);
                     break;
                 case 'optimizing':
-                case 'lhc':
-                    // Pulling back from live/soaking → re-enable for optimization
                     if (p.stage === 'live' || p.stage === 'soaking') {
                         await noLiveProfile(p.name, p.timeframe);
                     }
                     await enableProfile(p.name, p.timeframe);
+                    break;
+                case 'lhc':
+                    if (p.stage === 'live' || p.stage === 'soaking') {
+                        await noLiveProfile(p.name, p.timeframe);
+                    }
+                    await enableProfile(p.name, p.timeframe);
+                    // TODO: enqueue for LHC when cancel/enqueue LHC endpoints exist
                     break;
             }
         } catch (err) {
