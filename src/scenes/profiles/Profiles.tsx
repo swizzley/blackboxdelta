@@ -123,7 +123,8 @@ export default function Profiles() {
                     await disableProfile(p.name, p.timeframe);
                     break;
                 case 'queued':
-                    await enableProfile(p.name, p.timeframe);
+                    // Disable first (pull out of optimizer), then enqueue for reseed
+                    await disableProfile(p.name, p.timeframe);
                     await reseedProfile(p.name, p.timeframe);
                     break;
                 case 'seeding':
