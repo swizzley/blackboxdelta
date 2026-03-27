@@ -860,7 +860,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
 
                             {/* Param diffs */}
                             {b.param_diffs && b.param_diffs.length > 0 && (
-                                <span className={`text-xs ${muted}`}>{b.param_diffs.length} param change{b.param_diffs.length !== 1 ? 's' : ''}</span>
+                                <DiffBlock diffs={b.param_diffs} isDarkMode={isDarkMode} muted={muted} stripPrefix={b.target_profile ? `profile.${b.target_profile}.` : undefined} hideHeader/>
                             )}
                         </div>
                     </td>
