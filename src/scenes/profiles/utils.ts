@@ -6,7 +6,6 @@ export function deriveStage(p: OptimizerProfileState, seedingProfiles: Set<strin
     if (!p.enabled) return 'disabled';
     if (seedingProfiles.has(p.name)) return 'seeding';
     if (lhcProfiles.has(p.name)) return 'lhc';
-    if (p.baseline?.promoted_to_trunk) return 'promoted';
     if (optimizingProfiles.has(p.name)) return 'optimizing';
     return 'queued';
 }
@@ -40,7 +39,7 @@ export function flattenProfiles(
             }
         }
         // For "optimizing" vs "queued", we'd need active generation data.
-        // For now, treat all enabled non-seed/non-lhc/non-promoted as "optimizing"
+        // For now, treat all enabled non-seed/non-lhc as "optimizing"
         // since the API stage field handles the distinction when available.
         const optimizingNames = new Set<string>(); // placeholder — API stage is authoritative
 
@@ -49,9 +48,9 @@ export function flattenProfiles(
             let stage: ProfileStage;
             if (p.stage) {
                 const apiStage = p.stage as string;
-                if (apiStage === 'passed') stage = 'promoted'; // rename
+                if (apiStage === 'passed' || apiStage === 'promoted') stage = 'optimizing'; // promoted is legacy, fold into optimizing
                 else if (apiStage === 'stalled' || apiStage === 'failed') stage = 'disabled'; // fold into disabled
-                else if (['disabled', 'queued', 'seeding', 'optimizing', 'lhc', 'promoted', 'soaking', 'live'].includes(apiStage)) stage = apiStage as ProfileStage;
+                else if (['disabled', 'queued', 'seeding', 'optimizing', 'lhc', 'soaking', 'live'].includes(apiStage)) stage = apiStage as ProfileStage;
                 else stage = deriveStage(p, seedingNames, lhcNames, optimizingNames);
             } else {
                 stage = deriveStage(p, seedingNames, lhcNames, optimizingNames);
@@ -75,11 +74,11 @@ export function matchesSearch(p: ProfileFlat, query: string): boolean {
 }
 
 // Pipeline stages in order
-export const STAGE_ORDER: ProfileStage[] = ['disabled', 'queued', 'seeding', 'optimizing', 'lhc', 'promoted', 'soaking', 'live'];
+export const STAGE_ORDER: ProfileStage[] = ['disabled', 'queued', 'seeding', 'optimizing', 'lhc', 'soaking', 'live'];
 
 export const STAGE_LABELS: Record<ProfileStage, string> = {
     disabled: 'Disabled', queued: 'Queued', seeding: 'Seeding', optimizing: 'Optimizing',
-    lhc: 'LHC', promoted: 'Promoted', soaking: 'Soaking', live: 'Live',
+    lhc: 'LHC', soaking: 'Soaking', live: 'Live',
 };
 
 export const STAGE_COLORS: Record<ProfileStage, {bg: string; text: string; darkBg: string; darkText: string; dot: string}> = {
@@ -88,7 +87,6 @@ export const STAGE_COLORS: Record<ProfileStage, {bg: string; text: string; darkB
     seeding:    {bg: 'bg-cyan-100',    text: 'text-cyan-700',    darkBg: 'bg-cyan-900/30',    darkText: 'text-cyan-400',    dot: 'bg-cyan-500'},
     optimizing: {bg: 'bg-blue-100',    text: 'text-blue-700',    darkBg: 'bg-blue-900/30',    darkText: 'text-blue-400',    dot: 'bg-blue-500'},
     lhc:        {bg: 'bg-violet-100',  text: 'text-violet-700',  darkBg: 'bg-violet-900/30',  darkText: 'text-violet-400',  dot: 'bg-violet-500'},
-    promoted:   {bg: 'bg-emerald-100', text: 'text-emerald-700', darkBg: 'bg-emerald-900/30', darkText: 'text-emerald-400', dot: 'bg-emerald-500'},
     soaking:    {bg: 'bg-amber-100',   text: 'text-amber-700',   darkBg: 'bg-amber-900/30',   darkText: 'text-amber-400',  dot: 'bg-amber-500'},
     live:       {bg: 'bg-green-100',   text: 'text-green-700',   darkBg: 'bg-green-900/30',   darkText: 'text-green-400',   dot: 'bg-green-500'},
 };

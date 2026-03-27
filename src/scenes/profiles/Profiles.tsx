@@ -108,9 +108,8 @@ export default function Profiles() {
         seeding: ['disabled', 'queued'],
         optimizing: ['disabled', 'queued', 'seeding'],
         lhc: ['disabled', 'queued', 'seeding', 'optimizing'],
-        promoted: ['disabled', 'queued', 'seeding', 'optimizing', 'lhc', 'soaking'],
-        soaking: ['disabled', 'queued', 'seeding', 'optimizing', 'lhc', 'live'],
-        live: ['disabled', 'queued', 'seeding', 'optimizing', 'lhc'],
+        soaking: ['disabled', 'queued', 'optimizing', 'live'],
+        live: ['disabled', 'queued', 'optimizing'],
     };
     const canDrop = (from: ProfileStage, to: ProfileStage): boolean => {
         if (from === to) return false;

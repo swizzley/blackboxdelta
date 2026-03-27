@@ -844,7 +844,7 @@ export interface ProfileHistoryResponse {
 }
 
 // Pipeline stage for profile management views
-export type ProfileStage = 'disabled' | 'queued' | 'seeding' | 'optimizing' | 'lhc' | 'promoted' | 'soaking' | 'live';
+export type ProfileStage = 'disabled' | 'queued' | 'seeding' | 'optimizing' | 'lhc' | 'soaking' | 'live';
 
 export interface OptimizerProfileState {
     name: string;
