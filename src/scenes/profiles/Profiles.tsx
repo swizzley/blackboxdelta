@@ -7,7 +7,7 @@ import {useApi} from '../../context/Api';
 import {
     fetchOptimizerAllProfiles, fetchOptimizerSeedRuns,
     enableProfile, disableProfile, soakProfile, goLiveProfile, noLiveProfile,
-    reseedProfile, demoteProfile, fetchDashboard, fetchLHCRuns,
+    reseedProfile, fetchDashboard, fetchLHCRuns,
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, LHCRun} from '../../context/Types';
 import {flattenProfiles, matchesSearch, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
@@ -82,15 +82,12 @@ export default function Profiles() {
         return `${Math.floor(days / 30)}mo ${days % 30}d`;
     };
 
-    const byStage = (stage: ProfileStage) => filtered.filter(p => p.stage === stage);
-    const liveProfiles = byStage('live').sort((a, b) => (getLive(b)?.total_pl ?? 0) - (getLive(a)?.total_pl ?? 0));
-    const readyProfiles = byStage('promoted')
-        .filter(p => p.baseline?.stats && p.baseline.stats.sharpe_ratio > 0 && p.baseline.stats.profit_factor > 1)
-        .sort((a, b) => (b.baseline?.stats?.sharpe_ratio ?? 0) - (a.baseline?.stats?.sharpe_ratio ?? 0))
-        .slice(0, 10);
+    // Live Trading includes both live and soaking profiles (soaking = live at 1/10 size)
+    const liveProfiles = filtered.filter(p => p.stage === 'live' || p.stage === 'soaking')
+        .sort((a, b) => (getLive(b)?.total_pl ?? 0) - (getLive(a)?.total_pl ?? 0));
     const attentionProfiles = filtered.filter(p =>
         (p.disabled_reason === 'stall') ||
-        (p.stage === 'live' && getLive(p) && getLive(p)!.total_pl < 0)
+        ((p.stage === 'live' || p.stage === 'soaking') && getLive(p) && getLive(p)!.total_pl < 0)
     );
 
     const doAction = async (action: (name: string, tf: string) => Promise<any>, name: string, tf: string) => {
@@ -290,7 +287,10 @@ export default function Profiles() {
                                         >
                                             <div className="flex items-center justify-between mb-1">
                                                 <span className={`font-mono text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
-                                                <span className={`text-[10px] font-mono ${muted}`}>{soakTime(p)}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    {p.stage === 'soaking' && <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-50 text-amber-700'}`}>SOAK 1/10</span>}
+                                                    <span className={`text-[10px] font-mono ${muted}`}>{soakTime(p)}</span>
+                                                </div>
                                             </div>
                                             <div className="flex items-baseline gap-2">
                                                 <span className={`text-2xl font-bold ${plColor(pnl)}`}>
@@ -354,56 +354,6 @@ export default function Profiles() {
                         )}
                     </div>
 
-                    {/* Ready to Promote Section */}
-                    {readyProfiles.length > 0 && (
-                        <div className={card}>
-                            <h2 className={`${heading} mb-4`}>
-                                Ready to Promote
-                                <span className={`text-sm font-normal font-mono ${muted}`}>({readyProfiles.length})</span>
-                            </h2>
-                            <div className="space-y-2">
-                                {readyProfiles.map(p => {
-                                    const s = p.baseline?.stats;
-                                    return (
-                                        <div key={cardKey(p)} className={`flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                            <span className={`font-mono text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
-                                            <TimeframeBadge tf={p.timeframe} isDarkMode={isDarkMode}/>
-                                            {s && (
-                                                <span className={`text-xs font-mono ${muted}`}>
-                                                    S:{s.sharpe_ratio.toFixed(2)} PF:{s.profit_factor.toFixed(2)} {s.total_trades}t
-                                                </span>
-                                            )}
-                                            <span className={`text-xs font-mono ${muted}`}>
-                                                {p.baseline?.generation_counter ?? 0} gens
-                                            </span>
-                                            <div className="ml-auto flex gap-1.5">
-                                                <button
-                                                    disabled={actionLoading === cardKey(p)}
-                                                    onClick={() => doAction(goLiveProfile, p.name, p.timeframe)}
-                                                    className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}
-                                                >
-                                                    Go Live
-                                                </button>
-                                                <button
-                                                    disabled={actionLoading === cardKey(p)}
-                                                    onClick={() => doAction(demoteProfile, p.name, p.timeframe)}
-                                                    className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-slate-600/50 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                                                >
-                                                    Skip
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            {byStage('promoted').length > 10 && (
-                                <a href="/profiles/all?stage=promoted" className={`text-xs mt-2 inline-block ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>
-                                    View all {byStage('promoted').length} promoted &rarr;
-                                </a>
-                            )}
-                        </div>
-                    )}
-
                     {/* Needs Attention Section */}
                     <div className={card}>
                         <h2 className={`${heading} mb-4`}>
@@ -419,7 +369,7 @@ export default function Profiles() {
                             <div className="space-y-2">
                                 {attentionProfiles.map(p => {
                                     const isStalled = p.disabled_reason === 'stall';
-                                    const isNegLive = p.stage === 'live' && getLive(p) && getLive(p)!.total_pl < 0;
+                                    const isNegLive = (p.stage === 'live' || p.stage === 'soaking') && getLive(p) && getLive(p)!.total_pl < 0;
                                     return (
                                         <div key={cardKey(p)} className={`flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
                                             <span className={`font-mono text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
