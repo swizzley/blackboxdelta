@@ -3,30 +3,28 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import Tooltip from '../common/Tooltip';
 import {useTheme} from '../../context/Theme';
-import {ResultStat as SharedResultStat, WRFractionStat as SharedWRFractionStat, TimeframeBadge as SharedTimeframeBadge, fmtNum as sharedFmtNum, fmtPct as sharedFmtPct, avgPnl as sharedAvgPnl, plColor as sharedPlColor} from '../profiles/components/shared';
+import {ResultStat as SharedResultStat, TimeframeBadge as SharedTimeframeBadge, fmtNum as sharedFmtNum, fmtPct as sharedFmtPct, avgPnl as sharedAvgPnl, plColor as sharedPlColor} from '../profiles/components/shared';
 import {useApi} from '../../context/Api';
 import {
     fetchOptimizerStatus, fetchOptimizerGenerations,
-    fetchOptimizerTrunks, fetchOptimizerRecommendations,
-    fetchOptimizerBranches, fetchOptimizerTrunkDetail,
+    fetchOptimizerRecommendations,
+    fetchOptimizerBranches,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
-    fetchOptimizerAllProfiles, goLiveProfile, noLiveProfile, demoteProfile, retrySeedProfile,
-    pushTrunk, revertTrunk, unrevertTrunk, applyRecommendation, assembleTrunk,
+    retrySeedProfile,
     fetchLHCRuns, fetchLHCRunDetail, spawnLHCProfile,
 } from '../../api/client';
 import type {
-    OptimizerStatus, OptimizerGeneration, OptimizerTrunk,
+    OptimizerStatus, OptimizerGeneration,
     OptimizerRecommendation, OptimizerResult, OptimizerBranch,
-    OptimizerTrunkDetail, OptimizerParamDiff, OptimizerWorkerConfig,
+    OptimizerWorkerConfig,
     SeedRun, SeedComponentResult, SeedVariantResult,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
-    OptimizerAllProfilesResponse,
     LHCRun, LHCRunDetail,
 } from '../../context/Types';
 import {
     BeakerIcon, ClockIcon,
-    TableCellsIcon, LightBulbIcon, ChevronDownIcon, ChevronUpIcon,
+    LightBulbIcon, ChevronDownIcon, ChevronUpIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -40,24 +38,17 @@ export default function Optimizer() {
     const {apiAvailable} = useApi();
 
     const [status, setStatus] = useState<OptimizerStatus | null>(null);
-    const [trunks, setTrunks] = useState<OptimizerTrunk[]>([]);
     const [generations, setGenerations] = useState<OptimizerGeneration[]>([]);
     const [recommendations, setRecommendations] = useState<OptimizerRecommendation[]>([]);
     const [loading, setLoading] = useState(true);
     const [seedRuns, setSeedRuns] = useState<SeedRun[]>([]);
     const [workerConfig, setWorkerConfig] = useState<OptimizerWorkerConfig | null>(null);
     const [workerDraft, setWorkerDraft] = useState<Record<string, {enabled: boolean; priority: number}>>({});
-    const [allProfileData, setAllProfileData] = useState<OptimizerAllProfilesResponse | null>(null);
     const [workerDirty, setWorkerDirty] = useState(false);
     const [showSeeds, setShowSeeds] = useState(false);
     const [showLHC, setShowLHC] = useState(false);
-    const [showTrunks, setShowTrunks] = useState(false);
     const [showRecs, setShowRecs] = useState(false);
-    const [recActionLoading, setRecActionLoading] = useState<number | null>(null);
     const [showGens, setShowGens] = useState(false);
-    const [revertTarget, setRevertTarget] = useState<number | null>(null);
-    const [revertReason, setRevertReason] = useState('overfit');
-    const [trunkSort, setTrunkSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
     const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
     const [lhcRuns, setLhcRuns] = useState<LHCRun[]>([]);
     const [expandedLHC, setExpandedLHC] = useState<number | null>(null);
@@ -68,22 +59,18 @@ export default function Optimizer() {
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
-        const [s, t, g, r, sr, wc, pd, lhc] = await Promise.all([
+        const [s, g, r, sr, wc, lhc] = await Promise.all([
             fetchOptimizerStatus(),
-            fetchOptimizerTrunks(),
             fetchOptimizerGenerations(20),
             fetchOptimizerRecommendations(),
             fetchOptimizerSeedRuns(),
             fetchOptimizerWorkers(),
-            fetchOptimizerAllProfiles(),
             fetchLHCRuns(),
         ]);
         if (s) setStatus(s);
-        if (t) setTrunks(t);
         if (g) setGenerations(g);
         if (r) setRecommendations(r);
         if (sr) setSeedRuns(sr);
-        if (pd) setAllProfileData(pd);
         if (lhc) setLhcRuns(lhc);
         if (wc) {
             setWorkerConfig(wc);
@@ -105,25 +92,8 @@ export default function Optimizer() {
         return () => clearInterval(iv);
     }, [loadData]);
 
-    const REVERT_REASONS = [
-        { value: 'overfit', label: 'Overfitting (trade count collapse / curve fit)' },
-        { value: 'regression', label: 'Performance regression' },
-        { value: 'regime_change', label: 'Market regime change' },
-        { value: 'bad_push', label: 'Bad push (wrong params)' },
-        { value: 'manual_override', label: 'Manual override' },
-    ];
 
-    const handleRevert = async (trunkId: number) => {
-        await revertTrunk(trunkId, revertReason);
-        setRevertTarget(null);
-        setRevertReason('overfit');
-        loadData();
-    };
 
-    const handleUnrevert = async (trunkId: number) => {
-        await unrevertTrunk(trunkId);
-        loadData();
-    };
 
     const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
     const heading = `text-lg font-semibold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
@@ -150,131 +120,11 @@ export default function Optimizer() {
                         </div>
                     ) : (
                         <>
-                            {/* Per-Timeframe OOS Trade Totals */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-4">
-                                {['scalp', 'intraday', 'swing'].map(tf => {
-                                    const tfTrunks = trunks.filter(t => t.timeframe === tf && !t.revert_reason);
-                                    const totalTrades = tfTrunks.reduce((sum, t) => sum + (t.oos_result?.total_trades ?? 0), 0);
-                                    return (
-                                        <div key={tf} className={`rounded-lg px-4 py-2 flex items-center justify-between gap-3 ${isDarkMode ? 'bg-slate-800' : 'bg-white'} shadow`}>
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
-                                                <span className={`text-xs ${muted} leading-tight`}>OOS trades (all trunks)</span>
-                                            </div>
-                                            <span className={`text-lg font-bold font-mono flex-shrink-0 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{totalTrades.toLocaleString()}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
 
-                            {/* Per-Timeframe Trunks */}
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                                {['scalp', 'intraday', 'swing'].map(tf => {
-                                    const trunk = status?.current_trunks?.find(t => t.timeframe === tf);
-                                    const activeGen = status?.active_generations?.find(g => g.timeframe === tf);
-                                    const tfTrunks = trunks.filter(t => t.timeframe === tf);
-                                    const liveTrunk = tfTrunks
-                                        .filter(t => t.pushed_at)
-                                        .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime())[0];
-                                    const liveId = liveTrunk?.id;
-                                    const isUpToDate = trunk ? trunk.id === liveId : true;
-                                    const evolutionsSincePush = liveId != null && trunk
-                                        ? tfTrunks.filter(t => t.id > liveId && t.id <= trunk.id).length
-                                        : trunk?.id ?? 0;
 
-                                    return (
-                                        <div key={tf} className={card}>
-                                            <div className="flex items-center justify-between mb-1">
-                                                <h2 className={`${heading} !mb-0`}>
-                                                    <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
-                                                    Trunk
-                                                </h2>
-                                                {trunk && (() => {
-                                                    const tfProfiles2 = allProfileData?.[tf]?.profiles ?? [];
-                                                    const promoted2 = tfProfiles2.filter((p: any) => p.baseline?.promoted_to_trunk);
-                                                    const trunkMutIDs2 = new Set(trunk?.mutation_ids ?? []);
-                                                    const isCurrent2 = trunk != null && promoted2.length > 0 &&
-                                                        promoted2.every((p: any) => p.baseline?.mutation_id != null && trunkMutIDs2.has(p.baseline.mutation_id));
-                                                    return (
-                                                        <div className="flex items-center gap-1.5 shrink-0">
-                                                            {!isUpToDate && (
-                                                                <span className={`text-xs whitespace-nowrap ${muted}`}>
-                                                                    {evolutionsSincePush} ev{evolutionsSincePush !== 1 ? 's' : ''}
-                                                                </span>
-                                                            )}
-                                                            {isUpToDate && liveTrunk && (
-                                                                <span className={`text-xs whitespace-nowrap ${muted}`}>
-                                                                    {dayjs(liveTrunk.pushed_at).fromNow()}
-                                                                </span>
-                                                            )}
-                                                            <button
-                                                                disabled={isCurrent2}
-                                                                onClick={async () => { await assembleTrunk(tf, false); loadData(); }}
-                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded whitespace-nowrap transition-colors ${
-                                                                    isCurrent2
-                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                                        : isDarkMode ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                                                                }`}
-                                                            >
-                                                                {isCurrent2 ? 'current' : 'assemble'}
-                                                            </button>
-                                                            <button
-                                                                onClick={async () => { await pushTrunk(trunk.id); loadData(); }}
-                                                                disabled={isUpToDate || !trunk.mutation_ids?.length}
-                                                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded whitespace-nowrap transition-colors ${
-                                                                    isUpToDate || !trunk.mutation_ids?.length
-                                                                        ? isDarkMode ? 'bg-slate-700 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                                        : 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
-                                                                }`}>
-                                                                {isUpToDate ? 'deployed' : !trunk.mutation_ids?.length ? 'not assembled' : `deploy #${trunk.id}`}
-                                                            </button>
-                                                        </div>
-                                                    );
-                                                })()}
-                                            </div>
-                                            {/* Promoted profiles */}
-                                            {(() => {
-                                                const tfProfiles = allProfileData?.[tf]?.profiles ?? [];
-                                                const promoted = tfProfiles.filter(p => p.baseline?.promoted_to_trunk);
-                                                if (promoted.length === 0) return null;
-                                                return (
-                                                    <div className={`flex items-center gap-2 mt-1 mb-1 flex-wrap`}>
-                                                        <span className={`text-[10px] font-medium ${muted}`}>Promoted:</span>
-                                                        {promoted.map(p => (
-                                                            <span key={p.name} className={`px-1.5 py-0.5 text-[10px] font-mono rounded ${isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-50 text-purple-700'}`}>
-                                                                {p.name}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                );
-                                            })()}
-                                            {trunk ? (
-                                                <TrunkCard trunk={trunk} isDarkMode={isDarkMode} muted={muted} allProfileData={allProfileData} onRefresh={loadData}/>
-                                            ) : (
-                                                <p className={`text-sm ${muted}`}>No trunk</p>
-                                            )}
 
-                                            {/* Active generation for this timeframe */}
-                                            {activeGen && (
-                                                <div className="mt-3">
-                                                    <GenerationCard gen={activeGen} isDarkMode={isDarkMode} muted={muted}/>
-                                                </div>
-                                            )}
 
-                                            {/* Diff drawer: changes since last push */}
-                                            {trunk && (
-                                                <TrunkDiffDrawer trunkId={trunk.id} isDarkMode={isDarkMode} muted={muted}/>
-                                            )}
 
-                                            {/* Per-timeframe counts */}
-                                            <div className="mt-3 flex gap-4">
-                                                <span className={`text-xs ${muted}`}>{tfTrunks.length} trunk{tfTrunks.length !== 1 ? 's' : ''}</span>
-                                                <span className={`text-xs ${muted}`}>{generations.filter(g => g.timeframe === tf).length} gen{generations.filter(g => g.timeframe === tf).length !== 1 ? 's' : ''}</span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
 
                             {/* Worker Allocation */}
                             {workerConfig && (
@@ -413,22 +263,6 @@ export default function Optimizer() {
                                     </div>
                                 </div>
                             )}
-
-                            {/* Profiles link card */}
-                            <div className={`${card} mb-6`}>
-                                <a href="/profiles" className="flex items-center gap-3 group">
-                                    <BeakerIcon className={iconCl}/>
-                                    <div>
-                                        <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'} group-hover:text-cyan-500 transition-colors`}>
-                                            Profiles
-                                        </h2>
-                                        <p className={`text-sm ${muted}`}>
-                                            Manage trading strategy profiles, view pipeline status, and control live deployment
-                                        </p>
-                                    </div>
-                                    <span className="ml-auto text-cyan-500">&rarr;</span>
-                                </a>
-                            </div>
 
 
                             {/* Seed Calibration Runs */}
@@ -592,10 +426,10 @@ export default function Optimizer() {
                                 </div>
                             )}
 
-                            {/* Verification Queue (Recommendations) */}
+                            {/* Analyzer Queue */}
                             <div className={`${card} mb-6`}>
                                 <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowRecs(r => !r)}>
-                                    <LightBulbIcon className={iconCl}/>Verification Queue
+                                    <LightBulbIcon className={iconCl}/>Analyzer Queue
                                     {(() => { const active = recommendations.filter(r => r.status === 'running' || r.status === 'queued').length; return active > 0 ? <span className={`text-xs font-medium ml-2 ${isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>{active} active</span> : null; })()}
                                     <span className={`text-xs font-normal ${muted} ml-auto`}>{recommendations.length}</span>
                                     {showRecs ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
@@ -633,12 +467,7 @@ export default function Optimizer() {
                                                                 <p className={`text-xs ${muted} mb-1 truncate`} title={rec.rationale}>{rec.rationale}</p>
                                                             )}
                                                             {mutCount > 0 && (
-                                                                <DiffBlock
-                                                                    diffs={Object.entries(rec.mutations).map(([key, val]) => ({key, new_value: val}))}
-                                                                    baseId={rec.trunk_id}
-                                                                    isDarkMode={isDarkMode}
-                                                                    muted={muted}
-                                                                />
+                                                                <span className={`text-xs ${muted}`}>{mutCount} mutation{mutCount !== 1 ? 's' : ''}</span>
                                                             )}
                                                             {rec.oos_result && (
                                                                 <div className={`text-xs ${muted} flex gap-3`}>
@@ -653,83 +482,14 @@ export default function Optimizer() {
                                                             {rec.status === 'pending' && (
                                                                 <span className={`text-xs ${muted} italic`}>pending pickup</span>
                                                             )}
-                                                            {rec.status === 'passed' && (
-                                                                <button
-                                                                    disabled={recActionLoading === rec.id}
-                                                                    onClick={async () => {
-                                                                        setRecActionLoading(rec.id);
-                                                                        await applyRecommendation(rec.id);
-                                                                        loadData();
-                                                                        setRecActionLoading(null);
-                                                                    }}
-                                                                    className="px-2 py-1 text-xs rounded bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50"
-                                                                >Apply to Trunk</button>
-                                                            )}
+
+
                                                         </div>
                                                     </div>
                                                 </div>
                                             );
                                         })}
                                     </div>
-                                ))}
-                            </div>
-
-                            {/* Trunk History */}
-                            <div className={`${card} mb-6`}>
-                                <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowTrunks(t => !t)}>
-                                    <TableCellsIcon className={iconCl}/>Trunk History
-                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{trunks.length}</span>
-                                    {showTrunks ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
-                                </h2>
-                                {showTrunks && (trunks.length === 0 ? (
-                                    <p className={`text-sm ${muted}`}>No trunks recorded</p>
-                                ) : (
-                                    <>
-                                        <div className="flex gap-1.5 mb-3" onClick={e => e.stopPropagation()}>
-                                            {(['id', 'timeframe'] as const).map(field => (
-                                                <button key={field} onClick={() => setTrunkSort(s => ({field, dir: s.field === field && s.dir === 'desc' ? 'asc' : 'desc'}))}
-                                                    className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded transition-colors ${trunkSort.field === field ? 'bg-cyan-600 text-white' : isDarkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
-                                                    {field}{trunkSort.field === field ? (trunkSort.dir === 'asc' ? ' ↑' : ' ↓') : ''}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        <div className="space-y-1">
-                                        {(() => {
-                                            const liveIdByTf = new Map<string, number>();
-                                            for (const tf of ['scalp', 'intraday', 'swing']) {
-                                                const pushed = trunks
-                                                    .filter(t => t.timeframe === tf && t.pushed_at)
-                                                    .sort((a, b) => new Date(b.pushed_at!).getTime() - new Date(a.pushed_at!).getTime());
-                                                if (pushed.length > 0) liveIdByTf.set(tf, pushed[0].id);
-                                            }
-                                            const currentIdByTf = new Map<string, number>();
-                                            for (const ct of (status?.current_trunks ?? [])) {
-                                                currentIdByTf.set(ct.timeframe, ct.id);
-                                            }
-                                            const liveIds = new Set(liveIdByTf.values());
-                                            const tfOrder: Record<string, number> = {scalp: 0, intraday: 1, swing: 2};
-                                            const sorted = [...trunks].sort((a, b) => {
-                                                const aLive = liveIds.has(a.id) ? 1 : 0;
-                                                const bLive = liveIds.has(b.id) ? 1 : 0;
-                                                if (aLive !== bLive) return bLive - aLive;
-                                                if (trunkSort.field === 'timeframe') {
-                                                    const cmp = (tfOrder[a.timeframe] ?? 3) - (tfOrder[b.timeframe] ?? 3);
-                                                    if (cmp !== 0) return trunkSort.dir === 'asc' ? cmp : -cmp;
-                                                    return b.id - a.id;
-                                                }
-                                                return trunkSort.dir === 'asc' ? a.id - b.id : b.id - a.id;
-                                            });
-                                            return sorted.map(t => (
-                                                <TrunkRow key={t.id} trunk={t} isDarkMode={isDarkMode} muted={muted}
-                                                          isLive={liveIdByTf.get(t.timeframe) === t.id}
-                                                          isCurrent={currentIdByTf.get(t.timeframe) === t.id}
-                                                          revertTarget={revertTarget} setRevertTarget={setRevertTarget}
-                                                          revertReason={revertReason} setRevertReason={setRevertReason}
-                                                          revertReasons={REVERT_REASONS} onRevert={handleRevert} onUnrevert={handleUnrevert}/>
-                                            ));
-                                        })()}
-                                        </div>
-                                    </>
                                 ))}
                             </div>
 
@@ -782,334 +542,6 @@ export default function Optimizer() {
 }
 
 // --- Sub-components ---
-
-function TrunkSourceDot({trunk}: {trunk: OptimizerTrunk}) {
-    const color = trunk.promoted_from_recommendation_id
-        ? 'bg-violet-400' : trunk.promoted_from_branch_id
-        ? 'bg-cyan-500' : 'bg-slate-500';
-    const title = trunk.promoted_from_recommendation_id
-        ? (trunk.promoted_rec_source ?? 'recommendation')
-        : trunk.promoted_from_branch_id ? 'optimizer' : 'seed';
-    return <span className={`inline-block w-2 h-2 rounded-sm flex-shrink-0 ${color}`} title={title}/>;
-}
-
-function TrunkCard({trunk, isDarkMode, muted, allProfileData, onRefresh}: {trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; allProfileData: OptimizerAllProfilesResponse | null; onRefresh: () => void}) {
-    const r = trunk.oos_result;
-    const [expanded, setExpanded] = useState(false);
-    const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [liveToggling, setLiveToggling] = useState<string | null>(null);
-    const [expandedProfile, setExpandedProfile] = useState<string | null>(null);
-
-    const toggle = async () => {
-        if (!expanded && detail === null) {
-            setLoading(true);
-            const data = await fetchOptimizerTrunkDetail(trunk.id, 0);
-            setDetail(data ?? null);
-            setLoading(false);
-        }
-        setExpanded(e => !e);
-    };
-
-    // Look up live status from profiles API data
-    const profileLiveStatus = (name: string): boolean => {
-        const tfData = allProfileData?.[trunk.timeframe];
-        if (!tfData) return true; // default live
-        const p = tfData.profiles.find(p => p.name === name);
-        return p?.live ?? true;
-    };
-
-    const diffs = detail?.diffs ?? [];
-
-    // Compute aggregate stats from promoted profile baselines (new trunk concept)
-    const displayResult = (() => {
-        const tfData = allProfileData?.[trunk.timeframe];
-        const promotedBaselines = tfData?.profiles.filter(p => p.baseline?.promoted_to_trunk && p.baseline?.stats) ?? [];
-        if (promotedBaselines.length === 0) return r;
-        let totalTrades = 0, wins = 0, losses = 0, grossWin = 0, grossLoss = 0, totalPnl = 0;
-        for (const p of promotedBaselines) {
-            const s = p.baseline!.stats!;
-            totalTrades += s.total_trades ?? 0;
-            wins += s.wins ?? 0;
-            losses += s.losses ?? 0;
-            grossWin += (s.avg_win ?? 0) * (s.wins ?? 0);
-            grossLoss += (s.avg_loss ?? 0) * (s.losses ?? 0);
-            totalPnl += s.total_pnl ?? 0;
-        }
-        const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 0;
-        const avgWin = wins > 0 ? grossWin / wins : 0;
-        const avgLoss = losses > 0 ? grossLoss / losses : 0;
-        const pf = grossLoss > 0 ? grossWin / grossLoss : 0;
-        const breakevenWR = (avgWin + avgLoss) > 0 ? (avgLoss / (avgWin + avgLoss)) * 100 : 0;
-        let sharpe = 0;
-        if (totalTrades > 0) {
-            for (const p of promotedBaselines) {
-                const s = p.baseline!.stats!;
-                sharpe += (s.sharpe_ratio ?? 0) * ((s.total_trades ?? 0) / totalTrades);
-            }
-        }
-        return {total_trades: totalTrades, wins, losses, win_rate: winRate, total_pnl: totalPnl, profit_factor: pf, avg_win: avgWin, avg_loss: avgLoss, sharpe_ratio: sharpe, breakeven_wr: breakevenWR} as typeof r;
-    })();
-
-    return (
-        <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700/70' : 'bg-gray-50 hover:bg-gray-100'} cursor-pointer transition-colors`} onClick={toggle}>
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-1.5">
-                    <TrunkSourceDot trunk={trunk}/>
-                    <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Trunk #{trunk.id}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className={`text-xs ${muted}`}>Gen {trunk.generation} — {dayjs(trunk.promoted_at).fromNow()}</span>
-                    {loading
-                        ? <span className={`text-xs ${muted}`}>Loading…</span>
-                        : expanded
-                            ? <ChevronUpIcon className={`w-3.5 h-3.5 ${muted}`}/>
-                            : <ChevronDownIcon className={`w-3.5 h-3.5 ${muted}`}/>
-                    }
-                </div>
-            </div>
-            {displayResult ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                    <ResultStat label="Sharpe" value={displayResult.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="PF" value={displayResult.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                    <WRFractionStat wr={displayResult.win_rate} breakevenWR={displayResult.breakeven_wr} isDarkMode={isDarkMode}/>
-                    <ResultStat label="Avg P&L" value={avgPnl(displayResult)} isDarkMode={isDarkMode} color={plColor(displayResult.total_pnl)}/>
-                    <ResultStat label="Trades" value={displayResult.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                    <ResultStat label="T/Day" value={(() => { const tfData = allProfileData?.[trunk.timeframe]; const pb = tfData?.profiles.filter(p => p.baseline?.promoted_to_trunk) ?? []; const days = pb.map(p => p.baseline?.oos_days ?? 0).filter(d => d > 0); const avgDays = days.length ? days.reduce((a, b) => a + b, 0) / days.length : 0; return avgDays > 0 && displayResult.total_trades ? (displayResult.total_trades / avgDays).toFixed(2) : '—'; })()} isDarkMode={isDarkMode}/>
-                    <ResultStat label="AvgW" value={fmtPct(displayResult.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                    <ResultStat label="AvgL" value={fmtPct(displayResult.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
-                </div>
-            ) : (
-                <p className={`text-sm ${muted}`}>No OOS result available</p>
-            )}
-            {(() => {
-                const tfData = allProfileData?.[trunk.timeframe];
-                const promotedProfiles = tfData?.profiles.filter(p => p.baseline?.promoted_to_trunk) ?? [];
-                if (promotedProfiles.length === 0) return null;
-                return (
-                    <div className="mt-2 space-y-2">
-                        {promotedProfiles.sort((a,b) => a.name.localeCompare(b.name)).map(p => {
-                            const name = p.name;
-                            const pr = p.baseline?.stats;
-                            const isLive = profileLiveStatus(name);
-                            const profileDiffs = diffs.filter(d => d.key.startsWith(`profile.${name}.`));
-                            const isProfileExpanded = expandedProfile === name;
-                            return (
-                                <div key={name} className={`pl-3 border-l-2 cursor-pointer ${
-                                    isLive
-                                        ? isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'
-                                        : isDarkMode ? 'border-slate-600/40' : 'border-gray-300/70'
-                                } ${!isLive ? 'opacity-60' : ''}`} onClick={(e) => { e.stopPropagation(); setExpandedProfile(isProfileExpanded ? null : name); }}>
-                                    <div className="flex items-center gap-2 mb-0.5">
-                                        <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
-                                        {profileDiffs.length > 0 && (
-                                            <span className={`text-[10px] ${muted}`}>{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''} — Gen {trunk.generation} <span className={`inline-block transition-transform ${isProfileExpanded ? 'rotate-90' : ''}`}>▶</span></span>
-                                        )}
-                                        <button
-                                            onClick={async (e) => {
-                                                e.stopPropagation();
-                                                setLiveToggling(name);
-                                                if (isLive) {
-                                                    await noLiveProfile(name, trunk.timeframe);
-                                                } else {
-                                                    await goLiveProfile(name, trunk.timeframe);
-                                                }
-                                                setLiveToggling(null);
-                                                onRefresh();
-                                            }}
-                                            disabled={liveToggling === name}
-                                            className={`px-1.5 py-0.5 text-[9px] font-medium rounded transition-colors ${
-                                                liveToggling === name
-                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                    : isLive
-                                                        ? isDarkMode ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                        : isDarkMode ? 'bg-orange-900/30 text-orange-400 hover:bg-orange-900/50' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-                                            }`}
-                                            title={isLive ? 'Profile will be pushed to live on deploy' : 'Profile blocked from live — optimizer only'}
-                                        >
-                                            {liveToggling === name ? '...' : isLive ? 'LIVE' : 'BLOCKED'}
-                                        </button>
-                                        <button
-                                            onClick={async (e) => {
-                                                e.stopPropagation();
-                                                setLiveToggling(name);
-                                                await demoteProfile(name, trunk.timeframe);
-                                                setLiveToggling(null);
-                                                onRefresh();
-                                            }}
-                                            disabled={liveToggling === name}
-                                            className={`px-1.5 py-0.5 text-[9px] font-medium rounded transition-colors ${
-                                                isDarkMode ? 'bg-orange-900/30 text-orange-400 hover:bg-orange-900/50' : 'bg-orange-50 text-orange-700 hover:bg-orange-100'
-                                            }`}
-                                            title="Remove this profile from the trunk"
-                                        >
-                                            Demote
-                                        </button>
-                                    </div>
-                                    {pr && (
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mt-0.5">
-                                            <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                            <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                            <WRFractionStat wr={pr.win_rate} breakevenWR={pr.breakeven_wr} isDarkMode={isDarkMode}/>
-                                            <ResultStat label="Avg P&L" value={avgPnl(pr)} isDarkMode={isDarkMode} color={plColor(pr.total_pnl)}/>
-                                            <ResultStat label="Trades" value={pr.total_trades?.toLocaleString() ?? '—'} isDarkMode={isDarkMode}/>
-                                            <ResultStat label="T/Day" value={p.baseline?.oos_days && pr.total_trades ? (pr.total_trades / p.baseline.oos_days).toFixed(2) : '—'} isDarkMode={isDarkMode}/>
-                                            <ResultStat label="AvgW" value={fmtPct(pr.avg_win)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                                            <ResultStat label="AvgL" value={fmtPct(pr.avg_loss)} isDarkMode={isDarkMode} color="text-red-500"/>
-                                        </div>
-                                    )}
-                                    {isProfileExpanded && profileDiffs.length > 0 && (
-                                        <div className="mt-1.5">
-                                            <DiffBlock diffs={profileDiffs} stripPrefix={`profile.${name}.`} isDarkMode={isDarkMode} muted={muted} hideHeader/>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                );
-            })()}
-            {expanded && detail && !expandedProfile && (
-                <div className="mt-3 pt-3 border-t border-slate-600/30" onClick={e => e.stopPropagation()}>
-                    {diffs.length === 0 ? (
-                        <p className={`text-xs ${muted}`}>No significant changes from baseline (trunk #{detail.diff_base_id})</p>
-                    ) : (
-                        <DiffBlock diffs={diffs} baseId={detail.diff_base_id} isDarkMode={isDarkMode} muted={muted}/>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-}
-
-function TrunkDiffDrawer({trunkId, isDarkMode, muted}: {trunkId: number; isDarkMode: boolean; muted: string}) {
-    const [expanded, setExpanded] = useState(false);
-    const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
-    const [loading, setLoading] = useState(false);
-
-    const toggle = async () => {
-        if (!expanded && detail === null) {
-            setLoading(true);
-            const data = await fetchOptimizerTrunkDetail(trunkId);
-            setDetail(data ?? null);
-            setLoading(false);
-        }
-        setExpanded(!expanded);
-    };
-
-    const diffs = detail?.diffs ?? [];
-
-    return (
-        <div className="mt-2">
-            <button onClick={toggle} className={`flex items-center gap-1.5 text-xs ${muted} hover:${isDarkMode ? 'text-gray-300' : 'text-gray-700'} transition-colors`}>
-                {expanded
-                    ? <ChevronUpIcon className="w-3.5 h-3.5"/>
-                    : <ChevronDownIcon className="w-3.5 h-3.5"/>
-                }
-                {loading ? 'Loading...' : `Changes since last deploy${diffs.length > 0 ? ` (${diffs.length})` : ''}`}
-            </button>
-            {expanded && detail && (
-                <div className="mt-2">
-                    {diffs.length === 0 ? (
-                        <p className={`text-xs ${muted}`}>No parameter changes since {detail.diff_base_id ? `trunk #${detail.diff_base_id}` : 'baseline'}</p>
-                    ) : (
-                        <DiffBlock diffs={diffs} baseId={detail.diff_base_id} isDarkMode={isDarkMode} muted={muted}/>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-}
-
-function DiffBlock({diffs, baseId, isDarkMode, muted, stripPrefix, hideHeader}: {
-    diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string; stripPrefix?: string; hideHeader?: boolean;
-}) {
-    const filtered = [...diffs]
-        .filter(d => d.key !== 'check.trunk_winrate')
-        .sort((a, b) => a.key.localeCompare(b.key));
-    return (
-        <div>
-            {!hideHeader && (
-                <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
-                    vs {baseId ? `trunk #${baseId}` : 'baseline'} — {filtered.length} param{filtered.length !== 1 ? 's' : ''}
-                </p>
-            )}
-            <div className={`rounded border px-2 py-1.5 overflow-hidden flex flex-wrap gap-1 ${
-                isDarkMode ? 'border-slate-600/50 bg-slate-900/60' : 'border-gray-300 bg-gray-200/60'
-            }`}>
-                {filtered.map(d => {
-                    const displayKey = stripPrefix && d.key.startsWith(stripPrefix) ? d.key.slice(stripPrefix.length) : d.key;
-                    return (
-                        <span key={d.key} title={d.key} className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                            isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
-                        }`}>
-                            <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{displayKey}:</span>
-                            {d.old_value != null && <span className="text-red-400">{d.old_value}</span>}
-                            {d.old_value != null && !d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>→</span>}
-                            {!d.removed && <span className="text-emerald-400">{d.new_value}</span>}
-                            {d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>(removed)</span>}
-                        </span>
-                    );
-                })}
-            </div>
-        </div>
-    );
-}
-
-function GenerationCard({gen, isDarkMode, muted}: {gen: OptimizerGeneration; isDarkMode: boolean; muted: string}) {
-    // Determine explanatory badge when generation has no branches
-    const noBranches = gen.branch_count === 0 && (gen.passed ?? 0) === 0 && (gen.failed ?? 0) === 0 && (gen.running ?? 0) === 0;
-    const failures = gen.consecutive_failures ?? 0;
-    let phaseBadge: {label: string; cls: string} | null = null;
-    if (noBranches && gen.status === 'active') {
-        const ageMinutes = dayjs().diff(dayjs(gen.started_at), 'minute');
-        if (failures >= 20) {
-            phaseBadge = {label: `Stall T2 (${failures} fails)`, cls: isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'};
-        } else if (failures >= 10) {
-            phaseBadge = {label: `Stall T1 (${failures} fails)`, cls: isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'};
-        } else if (ageMinutes < 3) {
-            phaseBadge = {label: 'AI Planning', cls: isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'};
-        } else {
-            phaseBadge = {label: 'Waiting', cls: isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'};
-        }
-    } else if (gen.status === 'active' && failures >= 10) {
-        // Even when branches are running, show stall indicator if many consecutive failures
-        phaseBadge = {label: `${failures} consecutive fails`, cls: isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'};
-    }
-
-    return (
-        <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                    <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Gen #{gen.id}</span>
-                    <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
-                    {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
-                    {phaseBadge
-                        ? <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium animate-pulse ${phaseBadge.cls}`}>{phaseBadge.label}</span>
-                        : <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
-                    }
-                </div>
-                <span className={`text-xs ${muted}`}>{dayjs(gen.started_at).fromNow()}</span>
-            </div>
-            {noBranches ? (
-                <p className={`text-xs ${muted}`}>
-                    {failures >= 10
-                        ? `Stalling (${failures} consecutive failures) — escalated exploration with broader mutations and relaxed verifier`
-                        : phaseBadge?.label === 'AI Planning'
-                            ? 'AI is planning branch explorations for this generation...'
-                            : 'Generation is waiting — may be paused for replication lag, OOS data coverage, or post-reset cooldown'}
-                </p>
-            ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <MiniStat label="Branches" value={String(gen.branch_count)} isDarkMode={isDarkMode}/>
-                    <MiniStat label="Passed" value={String(gen.passed ?? 0)} isDarkMode={isDarkMode}/>
-                    <MiniStat label="Failed" value={String(gen.failed ?? 0)} isDarkMode={isDarkMode}/>
-                    <MiniStat label="Running" value={String(gen.running ?? 0)} isDarkMode={isDarkMode}/>
-                </div>
-            )}
-        </div>
-    );
-}
 
 function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
     gen: OptimizerGeneration; isDarkMode: boolean; muted: string; thCl: string; tdCl: string;
@@ -1206,196 +638,6 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
     );
 }
 
-function TrunkRow({trunk: t, isDarkMode, muted, isLive, isCurrent, revertTarget, setRevertTarget, revertReason, setRevertReason, revertReasons, onRevert, onUnrevert}: {
-    trunk: OptimizerTrunk; isDarkMode: boolean; muted: string; isLive: boolean; isCurrent: boolean;
-    revertTarget: number | null; setRevertTarget: (id: number | null) => void;
-    revertReason: string; setRevertReason: (r: string) => void;
-    revertReasons: {value: string; label: string}[]; onRevert: (id: number) => void;
-    onUnrevert: (id: number) => void;
-}) {
-    const [expanded, setExpanded] = useState(false);
-    const [detail, setDetail] = useState<OptimizerTrunkDetail | null>(null);
-    const [expandedProfile, setExpandedProfile] = useState<string | null>(null);
-
-    const toggle = async () => {
-        if (!expanded && detail === null) {
-            const data = await fetchOptimizerTrunkDetail(t.id);
-            setDetail(data ?? null);
-        }
-        setExpanded(!expanded);
-    };
-
-    const r = t.oos_result;
-    const wasPushed = !!t.pushed_at;
-
-    return (
-        <div className={`rounded-lg ${isLive
-            ? (isDarkMode ? 'bg-cyan-900/20 ring-1 ring-cyan-700/50' : 'bg-cyan-50 ring-1 ring-cyan-200')
-            : (isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50')
-        }`}>
-            <div className={`w-full flex items-start justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors cursor-pointer gap-2`} onClick={toggle}>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <TrunkSourceDot trunk={t}/>
-                        <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{t.id}</span>
-                    </div>
-                    <TimeframeBadge tf={t.timeframe} isDarkMode={isDarkMode}/>
-                    <span className={`text-xs ${muted}`}>Gen {t.generation}</span>
-                    {r && r.total_trades > 0 ? (
-                        <span className={`text-xs ${muted} hidden sm:inline`}>
-                            {r.total_trades} trades · <span>{r.win_rate?.toFixed(0)}% WR</span> · PF {r.profit_factor?.toFixed(2)} · Sharpe {r.sharpe_ratio?.toFixed(3)} · <span className={plColor(r.total_pnl)}>Avg P&L {avgPnl(r)}</span>
-                        </span>
-                    ) : (
-                        <span className={`text-xs ${muted} hidden sm:inline`}>No OOS data</span>
-                    )}
-                    {isLive && (
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
-                            isDarkMode ? 'bg-emerald-900/40 text-emerald-400' : 'bg-emerald-100 text-emerald-700'
-                        }`}>LIVE</span>
-                    )}
-                    {wasPushed && !isLive && (
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                            isDarkMode ? 'bg-slate-600 text-gray-400' : 'bg-gray-200 text-gray-500'
-                        }`}>previously pushed</span>
-                    )}
-                    {t.revert_reason && !t.reverted_to_trunk_id && (
-                        <span className="inline-flex items-center gap-1">
-                            <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                                isDarkMode ? 'bg-red-900/40 text-red-400' : 'bg-red-100 text-red-700'
-                            }`}>{t.revert_reason}</span>
-                            <button
-                                onClick={e => { e.stopPropagation(); onUnrevert(t.id); }}
-                                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium transition-colors ${
-                                    isDarkMode ? 'bg-slate-600 text-gray-300 hover:bg-slate-500' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                                }`}
-                                title="Remove revert mark — makes this trunk visible to the optimizer again">
-                                undo
-                            </button>
-                        </span>
-                    )}
-                    {t.reverted_to_trunk_id && (
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                            isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-100 text-amber-700'
-                        }`}>reverted from #{t.reverted_to_trunk_id}{t.revert_reason ? `: ${t.revert_reason}` : ''}</span>
-                    )}
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                    {/* Revert button — inline in row header for easy access */}
-                    {r && !isLive && !isCurrent && !t.revert_reason && revertTarget !== t.id && (
-                        <button
-                            onClick={e => { e.stopPropagation(); setRevertTarget(t.id); }}
-                            className={`text-xs font-medium px-2.5 py-1 rounded-lg transition-colors ${
-                                isDarkMode ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-900/50' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
-                            }`}>
-                            Revert
-                        </button>
-                    )}
-                    <span className={`text-xs ${muted}`}>{dayjs(t.promoted_at).fromNow()}</span>
-                    {expanded
-                        ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/>
-                        : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>
-                    }
-                </div>
-            </div>
-
-            {/* Revert confirmation — shown below header when revert target is this trunk */}
-            {revertTarget === t.id && (
-                <div className={`flex items-center gap-2 flex-wrap px-4 py-2 ${
-                    isDarkMode ? 'bg-amber-900/10 border-t border-amber-800/30' : 'bg-amber-50 border-t border-amber-200'
-                }`} onClick={e => e.stopPropagation()}>
-                    <span className={`text-xs font-medium ${isDarkMode ? 'text-amber-400' : 'text-amber-700'}`}>Revert to #{t.id}:</span>
-                    <select
-                        value={revertReason}
-                        onChange={e => setRevertReason(e.target.value)}
-                        className={`text-xs rounded px-2 py-1.5 ${
-                            isDarkMode ? 'bg-slate-700 text-gray-200 border-slate-600' : 'bg-white text-gray-700 border-gray-300'
-                        } border`}>
-                        {revertReasons.map(r => (
-                            <option key={r.value} value={r.value}>{r.label}</option>
-                        ))}
-                    </select>
-                    <button
-                        onClick={() => onRevert(t.id)}
-                        className="px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-600 hover:bg-amber-500 text-white transition-colors">
-                        Confirm
-                    </button>
-                    <button
-                        onClick={() => setRevertTarget(null)}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                            isDarkMode ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}>
-                        Cancel
-                    </button>
-                </div>
-            )}
-
-            {expanded && (
-                <div className="px-4 pb-4 space-y-4">
-                    {/* OOS Results */}
-                    {r && (
-                        <div>
-                            <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>OOS Results</p>
-                            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                                <ResultStat label="Sharpe" value={r.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="PF" value={r.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="Win%" value={r.win_rate ? `${r.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="Trades" value={String(r.total_trades)} isDarkMode={isDarkMode}/>
-                                <ResultStat label="Max DD" value={r.max_drawdown?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                <ResultStat label="Avg P&L" value={avgPnl(r)} isDarkMode={isDarkMode} color={plColor(r.total_pnl)}/>
-                            </div>
-                            {r.ProfileBreakdown && Object.keys(r.ProfileBreakdown).length > 0 && (
-                                <div className="mt-2 space-y-1">
-                                    {Object.entries(r.ProfileBreakdown).sort().map(([name, pr]) => {
-                                        const profileDiffs = detail?.diffs?.filter(d => d.key.startsWith(`profile.${name}.`)) ?? [];
-                                        const isProfileExpanded = expandedProfile === name;
-                                        return (
-                                            <div key={name} className={`pl-3 border-l-2 ${isDarkMode ? 'border-purple-500/40' : 'border-purple-300/70'}`}>
-                                                <div className="flex items-center gap-2 cursor-pointer" onClick={() => setExpandedProfile(isProfileExpanded ? null : name)}>
-                                                    <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>{name}</span>
-                                                    {profileDiffs.length > 0 && (
-                                                        <span className={`text-[10px] ${muted}`}>{profileDiffs.length} change{profileDiffs.length !== 1 ? 's' : ''} — Gen {t.generation}</span>
-                                                    )}
-                                                    <span className={`text-[10px] transition-transform ${isProfileExpanded ? 'rotate-90' : ''} ${muted}`}>▶</span>
-                                                </div>
-                                                <div className="flex flex-wrap gap-1.5 mt-0.5">
-                                                    <ResultStat label="Sharpe" value={pr.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                    <ResultStat label="Trades" value={String(pr.total_trades)} isDarkMode={isDarkMode}/>
-                                                    <ResultStat label="PF" value={pr.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
-                                                </div>
-                                                {isProfileExpanded && profileDiffs.length > 0 && (
-                                                    <div className="mt-1">
-                                                        <DiffBlock diffs={profileDiffs} stripPrefix={`profile.${name}.`} isDarkMode={isDarkMode} muted={muted} hideHeader/>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Branch directive */}
-                    {detail?.directive && (
-                        <div>
-                            <p className={`text-xs font-medium uppercase tracking-wider mb-1 ${muted}`}>Exploration Directive</p>
-                            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{detail.directive}</p>
-                        </div>
-                    )}
-
-                    {/* Param diffs — hidden when a profile is expanded */}
-                    {!expandedProfile && detail && detail.diffs && detail.diffs.length > 0 && (
-                        <DiffBlock diffs={detail.diffs} baseId={detail.diff_base_id} isDarkMode={isDarkMode} muted={muted}/>
-                    )}
-
-                    {!expandedProfile && detail && (!detail.diffs || detail.diffs.length === 0) && (
-                        <p className={`text-sm ${muted}`}>No parameter changes (initial trunk or identical params)</p>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-}
 
 function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: OptimizerBranch; isDarkMode: boolean; tdCl: string; winnerId?: number; muted: string}) {
     const [expanded, setExpanded] = useState(false);
@@ -1498,7 +740,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
 
                             {/* Param diffs */}
                             {b.param_diffs && b.param_diffs.length > 0 && (
-                                <DiffBlock diffs={b.param_diffs} isDarkMode={isDarkMode} muted={muted}/>
+                                <span className={`text-xs ${muted}`}>{b.param_diffs.length} param change{b.param_diffs.length !== 1 ? 's' : ''}</span>
                             )}
                         </div>
                     </td>
@@ -1541,19 +783,8 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
     );
 }
 
-const WRFractionStat = SharedWRFractionStat;
 
 const ResultStat = SharedResultStat;
-
-function MiniStat({label, value, isDarkMode, warn}: {label: string; value: string; isDarkMode: boolean; warn?: boolean}) {
-    return (
-        <div className={`rounded-lg px-3 py-2 text-center ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-            <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{label}</p>
-            <p className={`text-lg font-bold ${warn ? 'text-yellow-500' : (isDarkMode ? 'text-gray-200' : 'text-gray-700')}`}>{value}</p>
-        </div>
-    );
-}
-
 const TimeframeBadge = SharedTimeframeBadge;
 
 function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boolean}) {
@@ -1689,7 +920,6 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusCls}${isRunning ? ' animate-pulse' : ''}`}>{run.status}</span>
                     <span className={`text-xs ${muted}`}>{run.trigger_reason}</span>
                     {isRunning && !isConcurrentProfile && <span className={`text-xs font-medium ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>{formatStageLabel(run.current_stage)}</span>}
-                    {run.trunk_id && <span className={`text-xs font-mono ${muted}`}>→ trunk #{run.trunk_id}</span>}
                     {run.best_sharpe !== undefined && <span className={`text-xs font-mono ${run.best_sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>S:{fmtNum(run.best_sharpe)}</span>}
                     {run.configs_tested > 0 && <span className={`text-xs ${muted}`}>{run.configs_tested} configs</span>}
                     {run.claimed_by && <span className={`text-xs ${muted}`}>@{run.claimed_by}</span>}
