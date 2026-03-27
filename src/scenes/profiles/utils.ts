@@ -1,6 +1,7 @@
 import type {OptimizerProfileState, OptimizerAllProfilesResponse, ProfileFlat, ProfileStage, SeedRun, LHCRun} from '../../context/Types';
 
 export function deriveStage(p: OptimizerProfileState, seedingProfiles: Set<string>, lhcProfiles: Set<string>, optimizingProfiles: Set<string>): ProfileStage {
+    if (p.live && p.soaking) return 'soaking';
     if (p.live) return 'live';
     if (!p.enabled) return 'disabled';
     if (seedingProfiles.has(p.name)) return 'seeding';

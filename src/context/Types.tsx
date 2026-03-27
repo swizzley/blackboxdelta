@@ -851,6 +851,8 @@ export interface OptimizerProfileState {
     description?: string;
     enabled: boolean;
     live: boolean;
+    soaking?: boolean;
+    soaking_started_at?: string;
     disabled_reason?: string; // "stall" = auto-disabled, requires reseed
     tier?: string;            // A/B/C/D from optimize_profiles
     tags?: string[];          // parsed from comma-separated DB column
