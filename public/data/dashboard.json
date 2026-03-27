@@ -1,8 +1,8 @@
 {
   "all_time": {
     "total_orders": 3052,
-    "pending": 21,
-    "open_positions": 4,
+    "pending": 18,
+    "open_positions": 7,
     "closed_orders": 3027,
     "total_pl": -22.55,
     "winners": 553,
@@ -38,8 +38,8 @@
     {
       "timeframe": "intraday",
       "total_orders": 1407,
-      "pending": 21,
-      "open_positions": 4,
+      "pending": 18,
+      "open_positions": 7,
       "closed_orders": 1382,
       "total_pl": -5.27,
       "winners": 123,
