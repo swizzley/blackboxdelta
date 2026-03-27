@@ -124,6 +124,7 @@ export default function Profiles() {
                     break;
                 case 'queued':
                     await enableProfile(p.name, p.timeframe);
+                    await reseedProfile(p.name, p.timeframe);
                     break;
                 case 'seeding':
                     await reseedProfile(p.name, p.timeframe);
