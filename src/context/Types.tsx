@@ -810,6 +810,7 @@ export interface OptimizerProfileStats {
     avg_loss: number;
     max_drawdown: number;
     sharpe_ratio: number;
+    silence_ratio: number;
     breakeven_wr: number;
 }
 

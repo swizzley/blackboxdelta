@@ -17,7 +17,7 @@ import Tooltip from '../common/Tooltip';
 import {ClockIcon, ChartBarIcon, ListBulletIcon, AdjustmentsHorizontalIcon, BoltIcon, ArrowsRightLeftIcon, ArrowTrendingUpIcon} from '@heroicons/react/24/outline';
 import ReactECharts from 'echarts-for-react';
 
-type SortKey = 'name' | 'timeframe' | 'stage' | 'sharpe' | 'win_rate' | 'pf' | 'trades' | 'pnl' | 'drawdown' | 'gens' | 'failures' | 'updated' | 'live_trades' | 'live_wr' | 'live_pnl' | 'time_live';
+type SortKey = 'name' | 'timeframe' | 'stage' | 'sharpe' | 'win_rate' | 'pf' | 'silence' | 'trades' | 'pnl' | 'drawdown' | 'gens' | 'failures' | 'updated' | 'live_trades' | 'live_wr' | 'live_pnl' | 'time_live';
 
 const PAGE_SIZE = 50;
 
@@ -133,6 +133,7 @@ export default function ProfilesAll() {
                 case 'sharpe': av = getStat(a)?.sharpe_ratio ?? -999; bv = getStat(b)?.sharpe_ratio ?? -999; break;
                 case 'win_rate': av = getStat(a)?.win_rate ?? -999; bv = getStat(b)?.win_rate ?? -999; break;
                 case 'pf': av = getStat(a)?.profit_factor ?? -999; bv = getStat(b)?.profit_factor ?? -999; break;
+                case 'silence': av = getStat(a)?.silence_ratio ?? 999; bv = getStat(b)?.silence_ratio ?? 999; break;
                 case 'trades': av = getStat(a)?.total_trades ?? 0; bv = getStat(b)?.total_trades ?? 0; break;
                 case 'pnl': av = getStat(a)?.total_pnl ?? -999; bv = getStat(b)?.total_pnl ?? -999; break;
                 case 'drawdown': av = getStat(a)?.max_drawdown ?? 0; bv = getStat(b)?.max_drawdown ?? 0; break;
@@ -490,6 +491,7 @@ export default function ProfilesAll() {
                                         <SortHeader label="BT S" field="sharpe"/>
                                         <SortHeader label="WR" field="win_rate"/>
                                         <SortHeader label="PF" field="pf"/>
+                                        <SortHeader label="Sil" field="silence"/>
                                         <SortHeader label="Trd" field="trades" className="hidden md:table-cell"/>
                                         <SortHeader label="P&L" field="pnl" className="hidden md:table-cell"/>
                                         {/* Live */}
@@ -537,6 +539,9 @@ export default function ProfilesAll() {
                                                 </td>
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${muted}`}>{s ? `${s.win_rate.toFixed(0)}` : '—'}</td>
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${muted}`}>{s ? s.profit_factor.toFixed(1) : '—'}</td>
+                                                <td className={`px-1 py-1 text-[11px] font-mono ${s && s.silence_ratio === 0 ? 'text-emerald-400' : s && s.silence_ratio < 0.2 ? (isDarkMode ? 'text-amber-400' : 'text-amber-600') : s && s.silence_ratio > 0 ? 'text-red-400' : muted}`}>
+                                                    {s && s.silence_ratio != null ? s.silence_ratio.toFixed(2) : '—'}
+                                                </td>
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${muted} hidden md:table-cell`}>{s?.total_trades ?? '—'}</td>
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${plColor(s?.total_pnl)} hidden md:table-cell`}>{s ? fmtNum(s.total_pnl) : '—'}</td>
                                                 {/* Live */}
