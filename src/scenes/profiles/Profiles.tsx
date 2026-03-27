@@ -463,9 +463,9 @@ export default function Profiles() {
                                 const colors = STAGE_COLORS[stage];
                                 return (
                                     <div key={stage}
-                                        onDragOver={e => { e.preventDefault(); if (dragProfile && canDrop(dragProfile.stage, stage)) setDragOver(stage); }}
+                                        onDragOver={e => { e.preventDefault(); e.stopPropagation(); if (dragProfile && canDrop(dragProfile.stage, stage)) setDragOver(stage); }}
                                         onDragLeave={() => setDragOver(null)}
-                                        onDrop={() => handleDrop(stage)}
+                                        onDrop={e => { e.preventDefault(); e.stopPropagation(); handleDrop(stage); }}
                                         className={`min-w-[180px] w-[180px] flex-shrink-0 rounded-lg ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'} flex flex-col transition-all ${dragOver === stage ? (isDarkMode ? 'ring-2 ring-cyan-500/50 bg-slate-700/50' : 'ring-2 ring-cyan-400/50 bg-cyan-50/50') : ''}`}>
                                         <div className={`flex items-center justify-between px-3 pt-3 pb-2`}>
                                             <span className={`text-xs font-semibold uppercase ${isDarkMode ? colors.darkText : colors.text}`}>{STAGE_LABELS[stage]}</span>
