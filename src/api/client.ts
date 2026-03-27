@@ -3,8 +3,8 @@ import {getFingerprintSync} from './fingerprint';
 import type {
     ApiHealth, ApiSystem, ApiDashboard, ApiCalendarDay, ApiOrder,
     ApiAlert, ApiMarket, ApiSetting, SignalRow,
-    OptimizerStatus, OptimizerGeneration, OptimizerTrunk, OptimizerRecommendation,
-    OptimizerBranch, OptimizerTrunkDetail, OptimizerWorkerConfig, SeedRun,
+    OptimizerStatus, OptimizerGeneration, OptimizerRecommendation,
+    OptimizerBranch, OptimizerWorkerConfig, SeedRun,
     OptimizerAllProfilesResponse,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
@@ -139,18 +139,6 @@ export function fetchOptimizerGenerations(limit = 20): Promise<OptimizerGenerati
     return apiFetch(`/api/optimizer/generations?limit=${limit}`);
 }
 
-export function fetchOptimizerTrunks(limit = 20, timeframe?: string): Promise<OptimizerTrunk[] | null> {
-    const params = new URLSearchParams();
-    params.set('limit', String(limit));
-    if (timeframe) params.set('timeframe', timeframe);
-    return apiFetch(`/api/optimizer/trunks?${params}`);
-}
-
-export function fetchOptimizerTrunkDetail(trunkId: number, baseId?: number): Promise<OptimizerTrunkDetail | null> {
-    const qs = baseId !== undefined ? `?base_id=${baseId}` : '';
-    return apiFetch(`/api/optimizer/trunks/${trunkId}${qs}`);
-}
-
 export function fetchOptimizerBranches(generationId: number): Promise<OptimizerBranch[] | null> {
     return apiFetch(`/api/optimizer/generations/${generationId}/branches`);
 }
@@ -195,18 +183,6 @@ export function applyRecommendation(id: number): Promise<any> {
     return apiPost(`/api/optimizer/recommendations/${id}/apply`);
 }
 
-export function pushTrunk(id: number): Promise<any> {
-    return apiPost(`/api/optimizer/trunks/${id}/push`);
-}
-
-export function revertTrunk(id: number, reason: string): Promise<any> {
-    return apiPost(`/api/optimizer/trunks/${id}/revert`, { reason });
-}
-
-export function unrevertTrunk(id: number): Promise<any> {
-    return apiPost(`/api/optimizer/trunks/${id}/unrevert`, {});
-}
-
 export function triggerSeed(timeframe: string): Promise<any> {
     return apiPost(`/api/optimizer/seed/${timeframe}`, {});
 }
@@ -244,8 +220,8 @@ export function cancelSeedProfile(name: string, timeframe: string = 'scalp'): Pr
     return apiPost(`/api/optimizer/profiles/${name}/cancel-seed?timeframe=${timeframe}`, {});
 }
 
-export function revertProfile(name: string, trunkId: number, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/revert?timeframe=${timeframe}`, {trunk_id: trunkId});
+export function revertProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/revert?timeframe=${timeframe}`, {});
 }
 
 export function reseedProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
@@ -262,10 +238,6 @@ export function promoteProfile(name: string, timeframe: string = 'scalp'): Promi
 
 export function demoteProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
     return apiPost(`/api/optimizer/profiles/${name}/demote?timeframe=${timeframe}`, {});
-}
-
-export function assembleTrunk(timeframe: string, push: boolean = false): Promise<any> {
-    return apiPost('/api/optimizer/trunk/assemble', { timeframe, push });
 }
 
 export function fetchProfileHistory(name: string, timeframe: string = 'scalp'): Promise<import('../context/Types').ProfileHistoryResponse | null> {
@@ -382,12 +354,11 @@ export interface AnalysisJob {
     error?: string;
 }
 
-export function triggerAnalysisRun(model: string, from: string, to: string, provider = 'ollama', anthropicModel?: string, timeframe?: string, trunkId?: number): Promise<AnalysisJob | null> {
+export function triggerAnalysisRun(model: string, from: string, to: string, provider = 'ollama', anthropicModel?: string, timeframe?: string): Promise<AnalysisJob | null> {
     return apiPost('/api/analysis/run', {
         model, from, to, provider,
         ...(anthropicModel ? {anthropic_model: anthropicModel} : {}),
         ...(timeframe ? {timeframe} : {}),
-        ...(trunkId ? {trunk_id: trunkId} : {}),
     });
 }
 

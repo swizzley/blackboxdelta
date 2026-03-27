@@ -460,13 +460,12 @@ export interface MonitorResourceInfo {
 
 export interface MonitorOptimizationStatus {
     current_timeframe: string;
-    trunk_id: number;
     generation: number;
     generation_started: string;
     branches_total: number;
     branches_complete: number;
     branches_passed: number;
-    last_trunk_promotion: string;
+    last_promotion: string;
     hours_since_promotion: number;
     status: string;
     message?: string;
@@ -510,36 +509,8 @@ export interface ScoreDataPoint {
 
 // Optimizer types
 export interface OptimizerStatus {
-    current_trunks: OptimizerTrunk[];
     active_generations: OptimizerGeneration[];
     total_generations: number;
-    total_trunks: number;
-}
-
-export interface OptimizerTrunk {
-    id: number;
-    generation: number;
-    timeframe: string;
-    param_count?: number;
-    oos_result?: OptimizerResult;
-    oos_days?: number;
-    ai_score: number;
-    promoted_at: string;
-    pushed_at?: string;
-    promoted_from_branch_id?: number;
-    promoted_from_recommendation_id?: number;
-    promoted_rec_source?: string;
-    revert_reason?: string;
-    reverted_to_trunk_id?: number;
-    mutation_ids?: number[];
-}
-
-export interface OptimizerTrunkDetail {
-    trunk: OptimizerTrunk;
-    params: Record<string, string>;
-    diffs: OptimizerParamDiff[];
-    diff_base_id?: number;
-    directive?: string;
 }
 
 export interface OptimizerParamDiff {
@@ -566,7 +537,7 @@ export interface OptimizerResult {
 
 export interface OptimizerGeneration {
     id: number;
-    trunk_id: number;
+    profile_id?: number;
     timeframe: string;
     status: string;
     claimed_by?: string;
@@ -592,7 +563,6 @@ export interface OptimizerRecommendation {
     status: string;
     is_result?: OptimizerResult;
     oos_result?: OptimizerResult;
-    trunk_id?: number;
     created_at: string;
     executed_at?: string;
 }
@@ -600,7 +570,7 @@ export interface OptimizerRecommendation {
 export interface OptimizerBranch {
     id: number;
     generation_id: number;
-    trunk_id: number;
+    profile_id?: number;
     target_profile?: string;
     exploration_directive?: string;
     status: string;
@@ -769,7 +739,6 @@ export interface SeedRun {
     stagec_results?: Record<string, SeedStageCResult>;
     staged_results?: Record<string, SeedVariantResult[]>;
     stagee_results?: Record<string, SeedStageEResult>;
-    trunk_id?: number;
     error_message?: string;
     staged2_results?: Record<string, SeedVariantResult[]>;
     staged3_results?: Record<string, SeedVariantResult[]>;
@@ -822,7 +791,6 @@ export interface ProfileBaselineData {
     oos_days?: number;
     generation_counter: number;
     consecutive_failures: number;
-    promoted_to_trunk: boolean;
     promoted_at?: string;
     pushed_at?: string;
     updated_at?: string;
@@ -928,7 +896,7 @@ export interface AnalysisRunApi {
     created_at: string;
     provider: string;
     model: string;
-    scope: string; // hourly, daily, weekly, monthly, yearly, trunk
+    scope: string; // hourly, daily, weekly, monthly, yearly
     trigger: string; // service, api, ad-hoc
     order_count: number;
     todo_count: number;
@@ -938,7 +906,6 @@ export interface AnalysisRunApi {
     data_end?: string;
     skipped?: boolean;
     timeframe?: string;
-    trunk_id?: number;
 }
 
 export interface AnalysisTodoApi {

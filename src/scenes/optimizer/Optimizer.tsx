@@ -11,12 +11,13 @@ import {
     fetchOptimizerBranches,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
     retrySeedProfile,
+    applyRecommendation,
     fetchLHCRuns, fetchLHCRunDetail, spawnLHCProfile,
 } from '../../api/client';
 import type {
     OptimizerStatus, OptimizerGeneration,
     OptimizerRecommendation, OptimizerResult, OptimizerBranch,
-    OptimizerWorkerConfig,
+    OptimizerParamDiff, OptimizerWorkerConfig,
     SeedRun, SeedComponentResult, SeedVariantResult,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
@@ -56,6 +57,7 @@ export default function Optimizer() {
     const [lhcSort, setLhcSort] = useState<'score' | 'combined_sharpe' | 'total_pnl' | 'profit_factor' | 'total_trades'>('score');
     const [spawnedProfiles, setSpawnedProfiles] = useState<Record<string, string>>({}); // "runId:index" → profile name
     const [spawning, setSpawning] = useState<string | null>(null);
+    const [recActionLoading, setRecActionLoading] = useState<number | null>(null);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
@@ -92,9 +94,6 @@ export default function Optimizer() {
         return () => clearInterval(iv);
     }, [loadData]);
 
-
-
-
     const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
     const heading = `text-lg font-semibold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
     const muted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
@@ -120,11 +119,27 @@ export default function Optimizer() {
                         </div>
                     ) : (
                         <>
-
-
-
-
-
+                            {/* Per-Timeframe Active Generations */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                {['scalp', 'intraday', 'swing'].map(tf => {
+                                    const activeGen = status?.active_generations?.find(g => g.timeframe === tf);
+                                    return (
+                                        <div key={tf} className={card}>
+                                            <h2 className={`${heading} !mb-0`}>
+                                                <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
+                                            </h2>
+                                            {activeGen && (
+                                                <div className="mt-3">
+                                                    <GenerationCard gen={activeGen} isDarkMode={isDarkMode} muted={muted}/>
+                                                </div>
+                                            )}
+                                            <div className="mt-3 flex gap-4">
+                                                <span className={`text-xs ${muted}`}>{generations.filter(g => g.timeframe === tf).length} gen{generations.filter(g => g.timeframe === tf).length !== 1 ? 's' : ''}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
 
                             {/* Worker Allocation */}
                             {workerConfig && (
@@ -467,7 +482,12 @@ export default function Optimizer() {
                                                                 <p className={`text-xs ${muted} mb-1 truncate`} title={rec.rationale}>{rec.rationale}</p>
                                                             )}
                                                             {mutCount > 0 && (
-                                                                <span className={`text-xs ${muted}`}>{mutCount} mutation{mutCount !== 1 ? 's' : ''}</span>
+                                                                <DiffBlock
+                                                                    diffs={Object.entries(rec.mutations).map(([key, val]) => ({key, new_value: val}))}
+                                                                    baseId={undefined}
+                                                                    isDarkMode={isDarkMode}
+                                                                    muted={muted}
+                                                                />
                                                             )}
                                                             {rec.oos_result && (
                                                                 <div className={`text-xs ${muted} flex gap-3`}>
@@ -482,8 +502,18 @@ export default function Optimizer() {
                                                             {rec.status === 'pending' && (
                                                                 <span className={`text-xs ${muted} italic`}>pending pickup</span>
                                                             )}
-
-
+                                                            {rec.status === 'passed' && (
+                                                                <button
+                                                                    disabled={recActionLoading === rec.id}
+                                                                    onClick={async () => {
+                                                                        setRecActionLoading(rec.id);
+                                                                        await applyRecommendation(rec.id);
+                                                                        loadData();
+                                                                        setRecActionLoading(null);
+                                                                    }}
+                                                                    className="px-2 py-1 text-xs rounded bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50"
+                                                                >Apply to Baseline</button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -492,6 +522,7 @@ export default function Optimizer() {
                                     </div>
                                 ))}
                             </div>
+
 
                             {/* Generation History with expandable branch details */}
                             <div className={`${card} mb-6`}>
@@ -542,6 +573,96 @@ export default function Optimizer() {
 }
 
 // --- Sub-components ---
+
+function DiffBlock({diffs, baseId, isDarkMode, muted, stripPrefix, hideHeader}: {
+    diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string; stripPrefix?: string; hideHeader?: boolean;
+}) {
+    const filtered = [...diffs]
+        .filter(d => d.key !== 'check.baseline_winrate')
+        .sort((a, b) => a.key.localeCompare(b.key));
+    return (
+        <div>
+            {!hideHeader && (
+                <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
+                    vs {baseId ? `baseline #${baseId}` : 'baseline'} — {filtered.length} param{filtered.length !== 1 ? 's' : ''}
+                </p>
+            )}
+            <div className={`rounded border px-2 py-1.5 overflow-hidden flex flex-wrap gap-1 ${
+                isDarkMode ? 'border-slate-600/50 bg-slate-900/60' : 'border-gray-300 bg-gray-200/60'
+            }`}>
+                {filtered.map(d => {
+                    const displayKey = stripPrefix && d.key.startsWith(stripPrefix) ? d.key.slice(stripPrefix.length) : d.key;
+                    return (
+                        <span key={d.key} title={d.key} className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                            isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                        }`}>
+                            <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{displayKey}:</span>
+                            {d.old_value != null && <span className="text-red-400">{d.old_value}</span>}
+                            {d.old_value != null && !d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>→</span>}
+                            {!d.removed && <span className="text-emerald-400">{d.new_value}</span>}
+                            {d.removed && <span className={isDarkMode ? 'text-slate-600' : 'text-gray-400'}>(removed)</span>}
+                        </span>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function GenerationCard({gen, isDarkMode, muted}: {gen: OptimizerGeneration; isDarkMode: boolean; muted: string}) {
+    // Determine explanatory badge when generation has no branches
+    const noBranches = gen.branch_count === 0 && (gen.passed ?? 0) === 0 && (gen.failed ?? 0) === 0 && (gen.running ?? 0) === 0;
+    const failures = gen.consecutive_failures ?? 0;
+    let phaseBadge: {label: string; cls: string} | null = null;
+    if (noBranches && gen.status === 'active') {
+        const ageMinutes = dayjs().diff(dayjs(gen.started_at), 'minute');
+        if (failures >= 20) {
+            phaseBadge = {label: `Stall T2 (${failures} fails)`, cls: isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'};
+        } else if (failures >= 10) {
+            phaseBadge = {label: `Stall T1 (${failures} fails)`, cls: isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'};
+        } else if (ageMinutes < 3) {
+            phaseBadge = {label: 'AI Planning', cls: isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'};
+        } else {
+            phaseBadge = {label: 'Waiting', cls: isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'};
+        }
+    } else if (gen.status === 'active' && failures >= 10) {
+        // Even when branches are running, show stall indicator if many consecutive failures
+        phaseBadge = {label: `${failures} consecutive fails`, cls: isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'};
+    }
+
+    return (
+        <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+            <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                    <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Gen #{gen.id}</span>
+                    <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
+                    {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
+                    {phaseBadge
+                        ? <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium animate-pulse ${phaseBadge.cls}`}>{phaseBadge.label}</span>
+                        : <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
+                    }
+                </div>
+                <span className={`text-xs ${muted}`}>{dayjs(gen.started_at).fromNow()}</span>
+            </div>
+            {noBranches ? (
+                <p className={`text-xs ${muted}`}>
+                    {failures >= 10
+                        ? `Stalling (${failures} consecutive failures) — escalated exploration with broader mutations and relaxed verifier`
+                        : phaseBadge?.label === 'AI Planning'
+                            ? 'AI is planning branch explorations for this generation...'
+                            : 'Generation is waiting — may be paused for replication lag, OOS data coverage, or post-reset cooldown'}
+                </p>
+            ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <MiniStat label="Branches" value={String(gen.branch_count)} isDarkMode={isDarkMode}/>
+                    <MiniStat label="Passed" value={String(gen.passed ?? 0)} isDarkMode={isDarkMode}/>
+                    <MiniStat label="Failed" value={String(gen.failed ?? 0)} isDarkMode={isDarkMode}/>
+                    <MiniStat label="Running" value={String(gen.running ?? 0)} isDarkMode={isDarkMode}/>
+                </div>
+            )}
+        </div>
+    );
+}
 
 function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
     gen: OptimizerGeneration; isDarkMode: boolean; muted: string; thCl: string; tdCl: string;
@@ -637,7 +758,6 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
         </div>
     );
 }
-
 
 function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: OptimizerBranch; isDarkMode: boolean; tdCl: string; winnerId?: number; muted: string}) {
     const [expanded, setExpanded] = useState(false);
@@ -783,6 +903,14 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
     );
 }
 
+function MiniStat({label, value, isDarkMode}: {label: string; value: string; isDarkMode: boolean}) {
+    return (
+        <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100'}`}>
+            <p className={`text-[10px] uppercase tracking-wider ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{label}</p>
+            <p className={`text-sm font-mono ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{value}</p>
+        </div>
+    );
+}
 
 const ResultStat = SharedResultStat;
 const TimeframeBadge = SharedTimeframeBadge;

@@ -90,15 +90,15 @@ export function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode
     return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${cls}${pulse}`}>{status}</span>;
 }
 
-export function DiffBlock({diffs, baseId, isDarkMode, muted, stripPrefix, hideHeader}: {
+export function DiffBlock({diffs, baseId: _baseId, isDarkMode, muted, stripPrefix, hideHeader}: {
     diffs: OptimizerParamDiff[]; baseId?: number; isDarkMode: boolean; muted: string; stripPrefix?: string; hideHeader?: boolean;
 }) {
-    const filtered = [...diffs].filter(d => d.key !== 'check.trunk_winrate').sort((a, b) => a.key.localeCompare(b.key));
+    const filtered = [...diffs].sort((a, b) => a.key.localeCompare(b.key));
     return (
         <div>
             {!hideHeader && (
                 <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>
-                    vs {baseId ? `trunk #${baseId}` : 'baseline'} — {filtered.length} param{filtered.length !== 1 ? 's' : ''}
+                    vs baseline — {filtered.length} param{filtered.length !== 1 ? 's' : ''}
                 </p>
             )}
             <div className={`rounded border px-2 py-1.5 overflow-hidden flex flex-wrap gap-1 ${isDarkMode ? 'border-slate-600/50 bg-slate-900/60' : 'border-gray-300 bg-gray-200/60'}`}>
