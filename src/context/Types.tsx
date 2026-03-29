@@ -839,6 +839,7 @@ export type ProfileStage = 'disabled' | 'queued' | 'seeding' | 'optimizing' | 'l
 
 export interface OptimizerProfileState {
     name: string;
+    timeframe: string;         // registration TF (scalp/intraday/swing)
     description?: string;
     enabled: boolean;
     live: boolean;
@@ -856,7 +857,6 @@ export interface OptimizerProfileState {
 
 // Extended profile with denormalized timeframe for flat list views
 export interface ProfileFlat extends OptimizerProfileState {
-    timeframe: string;
     stage: ProfileStage; // required (not optional) on flat profiles
 }
 
@@ -872,7 +872,8 @@ export interface OptimizerProfilesResponse {
     probe_history?: ProfileProbeEntry[];
 }
 
-export type OptimizerAllProfilesResponse = Record<string, OptimizerProfilesResponse>;
+// Flat profile list — all TFs in one response. Each profile carries its own timeframe.
+export type OptimizerAllProfilesResponse = OptimizerProfilesResponse;
 
 // Profile params response (from /api/optimizer/profiles/{name}/params)
 export interface ProfileParamEntry {
