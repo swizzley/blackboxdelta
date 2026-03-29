@@ -543,9 +543,7 @@ export default function Profiles() {
                                                             <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
                                                             <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
                                                         </div>
-                                                        <span className={`text-[9px] font-bold ${
-                                                            p.timeframe === 'scalp' ? 'text-purple-400' : p.timeframe === 'intraday' ? 'text-blue-400' : 'text-amber-400'
-                                                        }`}>{p.timeframe[0].toUpperCase()}</span>
+                                                        {p.base_timeframe && <span className={`text-[9px] font-mono ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{p.base_timeframe}</span>}
                                                     </div>
                                                     {p.baseline?.stats && (
                                                         <div className="mt-0.5">
