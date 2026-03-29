@@ -10,6 +10,7 @@ import {
     fetchOptimizerRecommendations,
     fetchOptimizerBranches,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers,
+    fetchGenerationQueue,
     retrySeedProfile,
     applyRecommendation,
     fetchLHCRuns, fetchLHCRunDetail, spawnLHCProfile,
@@ -21,7 +22,7 @@ import type {
     SeedRun, SeedComponentResult, SeedVariantResult, TFSweepSummary,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
-    LHCRun, LHCRunDetail,
+    LHCRun, LHCRunDetail, GenQueueResponse,
 } from '../../context/Types';
 import {
     BeakerIcon, ClockIcon,
@@ -56,16 +57,19 @@ export default function Optimizer() {
     const [spawnedProfiles, setSpawnedProfiles] = useState<Record<string, string>>({}); // "runId:index" → profile name
     const [spawning, setSpawning] = useState<string | null>(null);
     const [recActionLoading, setRecActionLoading] = useState<number | null>(null);
+    const [genQueue, setGenQueue] = useState<GenQueueResponse | null>(null);
+    const [showGenQueue, setShowGenQueue] = useState(false);
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
-        const [s, g, r, sr, wc, lhc] = await Promise.all([
+        const [s, g, r, sr, wc, lhc, gq] = await Promise.all([
             fetchOptimizerStatus(),
             fetchOptimizerGenerations(20),
             fetchOptimizerRecommendations(),
             fetchOptimizerSeedRuns(),
             fetchOptimizerWorkers(),
             fetchLHCRuns(),
+            fetchGenerationQueue(),
         ]);
         if (s) setStatus(s);
         if (g) setGenerations(g);
@@ -73,6 +77,7 @@ export default function Optimizer() {
         if (sr) setSeedRuns(sr);
         if (lhc) setLhcRuns(lhc);
         if (wc) setWorkerConfig(wc);
+        if (gq) setGenQueue(gq);
         setLoading(false);
     }, [apiAvailable]);
 
@@ -146,6 +151,50 @@ export default function Optimizer() {
                                 </div>
                             )}
 
+
+                            {/* Generation Queue */}
+                            {(genQueue?.items?.length ?? 0) > 0 && (
+                                <div className={`${card} mb-6`}>
+                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowGenQueue(s => !s)}>
+                                        <ClockIcon className={iconCl}/>Generation Queue
+                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{genQueue?.total ?? 0} pending</span>
+                                        {showGenQueue ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                                    </h2>
+                                    {showGenQueue && (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm">
+                                                <thead>
+                                                    <tr className="border-b border-gray-700/30">
+                                                        <th className={thCl}>Profile</th>
+                                                        <th className={thCl}>Priority</th>
+                                                        <th className={thCl}>Memory</th>
+                                                        <th className={thCl}>Status</th>
+                                                        <th className={thCl}>Host</th>
+                                                        <th className={thCl}>Age</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {(genQueue?.items ?? []).map(item => (
+                                                        <tr key={item.id} className={`border-b border-gray-700/10 ${item.status === 'claimed' ? (isDarkMode ? 'bg-cyan-900/20' : 'bg-cyan-50') : ''}`}>
+                                                            <td className={tdCl}><span className="font-mono">{item.profile_name}</span></td>
+                                                            <td className={tdCl}>{item.priority}</td>
+                                                            <td className={tdCl}>{item.memory_cost.toFixed(2)}</td>
+                                                            <td className={tdCl}>
+                                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                                    item.status === 'claimed' ? 'bg-cyan-500/20 text-cyan-400' :
+                                                                    'bg-gray-500/20 text-gray-400'
+                                                                }`}>{item.status}</span>
+                                                            </td>
+                                                            <td className={tdCl}>{item.claimed_by ?? '-'}</td>
+                                                            <td className={`${tdCl} text-xs`}>{dayjs(item.created_at).fromNow()}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {/* Seed Calibration Runs */}
                             {seedRuns.length > 0 && (

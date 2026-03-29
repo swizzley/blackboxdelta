@@ -850,6 +850,9 @@ export interface OptimizerProfileState {
     tier?: string;            // A/B/C/D from optimize_profiles
     tags?: string[];          // parsed from comma-separated DB column
     base_timeframe?: string;  // effective data TF from seed Stage 0 (empty = same as registration TF)
+    cascade_mode?: string;    // MTF cascade: trend_agree, reversal_fade, breakout_expand, pattern_context
+    setup_timeframe?: string; // cascade setup TF (one step coarser)
+    bias_timeframe?: string;  // cascade bias TF (two steps coarser, empty for 2-layer)
     stage?: ProfileStage;     // computed by API: seeding|optimizing|passed|soaking|live|stalled|failed|disabled
     first_order_at?: string;  // earliest closed order for this profile+timeframe
     stats?: OptimizerProfileStats;
@@ -995,4 +998,23 @@ export interface LHCResult {
     max_drawdown: number;
     avg_win: number;
     avg_loss: number;
+}
+
+// Generation queue types (from /api/optimizer/generation-queue)
+export interface GenQueueItem {
+    id: number;
+    profile_name: string;
+    priority: number;
+    memory_cost: number;
+    status: 'pending' | 'claimed' | 'complete' | 'failed';
+    claimed_by?: string;
+    claimed_at?: string;
+    generation_id?: number;
+    created_at: string;
+    completed_at?: string;
+}
+
+export interface GenQueueResponse {
+    items: GenQueueItem[];
+    total: number;
 }

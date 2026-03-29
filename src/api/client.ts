@@ -5,7 +5,7 @@ import type {
     ApiAlert, ApiMarket, ApiSetting, SignalRow,
     OptimizerStatus, OptimizerGeneration, OptimizerRecommendation,
     OptimizerBranch, OptimizerWorkerConfig, SeedRun,
-    OptimizerAllProfilesResponse,
+    OptimizerAllProfilesResponse, GenQueueResponse,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
 } from '../context/Types';
@@ -299,6 +299,30 @@ export function fetchOptimizerSeedRuns(timeframe?: string, status?: string, limi
     if (status) params.set('status', status);
     params.set('limit', String(limit));
     return apiFetch(`/api/optimizer/seed-runs?${params}`);
+}
+
+// Generation queue
+export function fetchGenerationQueue(): Promise<GenQueueResponse | null> {
+    return apiFetch('/api/optimizer/generation-queue');
+}
+
+export async function updateGenerationQueuePriority(id: number, priority: number): Promise<boolean> {
+    const base = getApiBase();
+    try {
+        const res = await fetch(`${base}/api/optimizer/generation-queue/${id}/priority`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json', ...authHeaders()},
+            body: JSON.stringify({ priority }),
+        });
+        return res.ok;
+    } catch { return false; }
+}
+
+export async function enqueueGeneration(profileName: string, priority: number, memoryCost: number): Promise<boolean> {
+    try {
+        await apiPost('/api/optimizer/generation-queue', { profile_name: profileName, priority, memory_cost: memoryCost });
+        return true;
+    } catch { return false; }
 }
 
 // Analysis

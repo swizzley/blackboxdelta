@@ -11,7 +11,7 @@ import {
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, LHCRun} from '../../context/Types';
 import {flattenProfiles, matchesSearch, isGoldProfile, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
-import {ResultStat, WRFractionStat, TimeframeBadge, StageBadge, BaseTimeframeBadge, CompositeScoreBar, fmtNum, plColor} from './components/shared';
+import {ResultStat, WRFractionStat, StageBadge, BaseTimeframeBadge, CompositeScoreBar, fmtNum, plColor} from './components/shared';
 
 export default function Profiles() {
     const {isDarkMode} = useTheme();
@@ -50,7 +50,7 @@ export default function Profiles() {
         if (dash?.by_profile) {
             const map = new Map<string, ProfileStats>();
             for (const ps of dash.by_profile) {
-                map.set(`${ps.timeframe}:${ps.profile}`, ps);
+                map.set(ps.profile, ps);
             }
             setLiveStats(map);
         }
@@ -70,7 +70,7 @@ export default function Profiles() {
         (true) && matchesSearch(p, searchQuery)
     );
 
-    const getLive = (p: ProfileFlat) => liveStats.get(`${p.timeframe}:${p.name}`);
+    const getLive = (p: ProfileFlat) => liveStats.get(p.name);
     const isGold = (p: ProfileFlat) => isGoldProfile(p.baseline?.stats);
 
     const soakTime = (p: ProfileFlat): string => {
@@ -90,12 +90,11 @@ export default function Profiles() {
         ((p.stage === 'live' || p.stage === 'soaking') && getLive(p) && getLive(p)!.total_pl < 0)
     );
 
-    const doAction = async (action: (name: string, tf: string) => Promise<any>, name: string, tf: string) => {
-        const key = `${tf}:${name}`;
-        setActionLoading(key);
-        await action(name, tf);
+    const doAction = async (action: (name: string) => Promise<any>, name: string) => {
+        setActionLoading(name);
+        await action(name);
         setActionLoading(null);
-        setActionDone(key);
+        setActionDone(name);
         setTimeout(() => setActionDone(null), 2000);
         loadData();
     };
@@ -163,7 +162,7 @@ export default function Profiles() {
         loadData();
     };
 
-    const cardKey = (p: ProfileFlat) => `${p.timeframe}:${p.name}`;
+    const cardKey = (p: ProfileFlat) => p.name;
     const isExpanded = (p: ProfileFlat) => expandedCard === cardKey(p);
     const toggleExpand = (p: ProfileFlat) => setExpandedCard(isExpanded(p) ? null : cardKey(p));
 
@@ -246,22 +245,8 @@ export default function Profiles() {
                         {liveProfiles.length === 0 ? (
                             <p className={`text-sm ${muted}`}>No profiles currently in live trading.</p>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {(['scalp', 'intraday', 'swing'] as const)
-                                    
-                                    .map(tf => {
-                                    const tfLive = liveProfiles.filter(p => p.timeframe === tf);
-                                    return (
-                                        <div key={tf}>
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
-                                                <span className={`text-xs font-mono ${muted}`}>{tfLive.length} live</span>
-                                            </div>
-                                            {tfLive.length === 0 ? (
-                                                <p className={`text-xs ${muted}`}>None</p>
-                                            ) : (
-                                            <div className="space-y-3">
-                                {tfLive.map(p => {
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {liveProfiles.map(p => {
                                     const live = getLive(p);
                                     const pnl = live?.total_pl ?? 0;
                                     return (
@@ -315,25 +300,20 @@ export default function Profiles() {
                                                         </a>
                                                         <button
                                                             disabled={actionLoading === cardKey(p)}
-                                                            onClick={e => { e.stopPropagation(); doAction(noLiveProfile, p.name, p.timeframe); }}
+                                                            onClick={e => { e.stopPropagation(); doAction(noLiveProfile, p.name); }}
                                                             className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}
                                                         >
                                                             Demote
                                                         </button>
                                                         <button
                                                             disabled={actionLoading === cardKey(p) || actionDone === cardKey(p)}
-                                                            onClick={e => { e.stopPropagation(); doAction(reseedProfile, p.name, p.timeframe); }}
+                                                            onClick={e => { e.stopPropagation(); doAction(reseedProfile, p.name); }}
                                                             className={`px-2 py-1 text-[10px] font-medium rounded ${actionDone === cardKey(p) ? (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700') : isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'}`}
                                                         >
                                                             {actionLoading === cardKey(p) ? 'Queuing...' : actionDone === cardKey(p) ? 'Queued' : 'Re-seed'}
                                                         </button>
                                                     </div>
                                                 </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                                            </div>
                                             )}
                                         </div>
                                     );
@@ -361,7 +341,7 @@ export default function Profiles() {
                                     return (
                                         <div key={cardKey(p)} className={`flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
                                             <span className={`font-mono text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
-                                            <TimeframeBadge tf={p.timeframe} isDarkMode={isDarkMode}/>
+                                            <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
                                             <StageBadge stage={p.stage} isDarkMode={isDarkMode}/>
                                             {isNegLive && p.baseline?.stats && (
                                                 <span className="text-xs font-mono text-red-400">S:{p.baseline.stats.sharpe_ratio.toFixed(2)}</span>
@@ -372,7 +352,7 @@ export default function Profiles() {
                                             <div className="ml-auto flex gap-1.5">
                                                 <button
                                                     disabled={actionLoading === cardKey(p) || actionDone === cardKey(p)}
-                                                    onClick={() => doAction(reseedProfile, p.name, p.timeframe)}
+                                                    onClick={() => doAction(reseedProfile, p.name)}
                                                     className={`px-2 py-1 text-[10px] font-medium rounded ${actionDone === cardKey(p) ? (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700') : isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'}`}
                                                 >
                                                     {actionLoading === cardKey(p) ? 'Queuing...' : actionDone === cardKey(p) ? 'Queued' : 'Reseed'}
@@ -380,7 +360,7 @@ export default function Profiles() {
                                                 {isNegLive && (
                                                     <button
                                                         disabled={actionLoading === cardKey(p)}
-                                                        onClick={() => doAction(noLiveProfile, p.name, p.timeframe)}
+                                                        onClick={() => doAction(noLiveProfile, p.name)}
                                                         className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}
                                                     >
                                                         Demote
@@ -389,7 +369,7 @@ export default function Profiles() {
                                                 {!isNegLive && p.enabled && (
                                                     <button
                                                         disabled={actionLoading === cardKey(p)}
-                                                        onClick={() => doAction(disableProfile, p.name, p.timeframe)}
+                                                        onClick={() => doAction(disableProfile, p.name)}
                                                         className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}
                                                     >
                                                         Disable
@@ -431,15 +411,15 @@ export default function Profiles() {
                     {(() => {
                         const tfCounts = new Map<string, number>();
                         for (const p of filtered) {
-                            const tf = p.base_timeframe || p.timeframe;
+                            const tf = p.base_timeframe || '—';
                             tfCounts.set(tf, (tfCounts.get(tf) ?? 0) + 1);
                         }
                         const total = filtered.length;
                         if (total === 0) return null;
                         const entries = Array.from(tfCounts.entries()).sort((a, b) => b[1] - a[1]);
                         const tfColors: Record<string, string> = {
-                            scalp: 'bg-purple-500', fivemin: 'bg-teal-500', intraday: 'bg-blue-500',
-                            hourly: 'bg-cyan-500', fourhour: 'bg-sky-500', swing: 'bg-amber-500', weekly: 'bg-orange-500',
+                            '1m': 'bg-purple-500', '5m': 'bg-teal-500', '15m': 'bg-blue-500',
+                            '1h': 'bg-cyan-500', '4h': 'bg-sky-500', 'daily': 'bg-amber-500', 'weekly': 'bg-orange-500',
                         };
                         // Only show if any profile has a discovered base_timeframe
                         if (!filtered.some(p => p.base_timeframe)) return null;
@@ -528,7 +508,6 @@ export default function Profiles() {
                                                             <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
                                                             <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
                                                         </div>
-                                                        {p.base_timeframe && <span className={`text-[9px] font-mono ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{p.base_timeframe}</span>}
                                                     </div>
                                                     {p.baseline?.stats && (
                                                         <div className="mt-0.5">
