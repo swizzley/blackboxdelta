@@ -18,7 +18,7 @@ import type {
     OptimizerStatus, OptimizerGeneration,
     OptimizerRecommendation, OptimizerResult, OptimizerBranch,
     OptimizerParamDiff, OptimizerWorkerConfig,
-    SeedRun, SeedComponentResult, SeedVariantResult,
+    SeedRun, SeedComponentResult, SeedVariantResult, TFSweepSummary,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
     LHCRun, LHCRunDetail,
@@ -932,7 +932,7 @@ function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
 
 const ALL_SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'LHC', 'Diagnostics'] as const;
 const STAGE_LABELS: Record<string, string> = {
-    Stage0: 'Weights',
+    Stage0: 'TF Sweep',
     StageA: 'Baseline',
     StageB: 'Filters',
     StageC: 'Damp',
@@ -951,23 +951,24 @@ const STAGE_LABELS: Record<string, string> = {
     Start: 'Starting',
     'concurrent:all': 'All Profiles',
 };
-// Stages skipped per timeframe: scalp/intraday skip Stage0 (Weights) and StageC (Dampeners) — profiles have bespoke values.
+// Stages skipped per timeframe: Stage0 (TF Sweep) runs for ALL timeframes.
+// Scalp/intraday skip StageC (Dampeners) — profiles have bespoke values.
 // StageD5 (Market/Limit) is scalp-only.
 function seedStagesForTf(tf: string): string[] {
     return ALL_SEED_STAGES.filter(s => {
-        if ((tf === 'scalp' || tf === 'intraday') && (s === 'Stage0' || s === 'StageC')) return false;
+        if ((tf === 'scalp' || tf === 'intraday') && s === 'StageC') return false;
         if (tf !== 'scalp' && s === 'StageD5') return false;
         return true;
     });
 }
 const STAGE_TIME_EST: Record<string, Record<string, string>> = {
     scalp: {
-        StageA: '~15m', StageD: '~25m', StageD2: '~20m',
+        Stage0: '~20m', StageA: '~15m', StageD: '~25m', StageD2: '~20m',
         StageD4: '~20m', StageD5: '~15m', StageB: '~40m',
         StageD3: '~20m', StageE: '~5m', LHC: '~3m', Diagnostics: '~2m',
     },
     intraday: {
-        StageA: '~5m', StageD: '~8m', StageD2: '~6m',
+        Stage0: '~10m', StageA: '~5m', StageD: '~8m', StageD2: '~6m',
         StageD4: '~6m', StageB: '~12m',
         StageD3: '~6m', StageE: '~2m', LHC: '~3m', Diagnostics: '~1m',
     },
@@ -1295,7 +1296,10 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                             {allOpen ? 'Collapse all profiles' : 'Profile stage details'}
                         </button>
                         {allHaveData.map(prf => {
-                            const s0 = getProfileStageData<SeedComponentResult[]>(run.stage0_results, prf);
+                            const s0raw = getProfileStageData<any>(run.stage0_results, prf);
+                            const isTFSweep = s0raw && !Array.isArray(s0raw) && s0raw.registration_tf;
+                            const s0 = !isTFSweep && Array.isArray(s0raw) ? s0raw as SeedComponentResult[] : null;
+                            const s0Sweep = isTFSweep ? s0raw as TFSweepSummary : null;
                             const sA = getProfileStageData<SeedVariantResult[]>(run.stagea_results, prf);
                             const sD = getProfileStageData<SeedVariantResult[]>(run.staged_results, prf);
                             const sD2 = getProfileStageData<SeedVariantResult[]>(run.staged2_results, prf);
@@ -1368,6 +1372,34 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                     </button>
                                     {isOpen && (
                                     <div className={`space-y-3 ml-4 mt-1 pl-2 border-l-2 ${isDarkMode ? 'border-purple-800/40' : 'border-purple-200'}`}>
+
+                                    {s0Sweep && (
+                                        <SeedStageSection title={`TF Sweep — ${s0Sweep.results.length}/7 TFs tested, best: ${s0Sweep.best_tf}`} isDarkMode={isDarkMode} muted={muted}>
+                                            <div className="flex flex-wrap gap-1">
+                                                {[...s0Sweep.results].sort((a, b) => b.composite_score - a.composite_score).map(r => (
+                                                    <span key={r.timeframe} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                                                        r.is_best ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
+                                                        : r.is_gold ? (isDarkMode ? 'bg-amber-900/30 ring-1 ring-amber-700/50' : 'bg-amber-50 ring-1 ring-amber-200')
+                                                        : r.is_viable ? (isDarkMode ? 'bg-teal-900/30 ring-1 ring-teal-700/50' : 'bg-teal-50 ring-1 ring-teal-200')
+                                                        : isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80'
+                                                    }`}>
+                                                        <span className={isDarkMode ? 'text-slate-400' : 'text-gray-500'}>{r.label}</span>
+                                                        <span className={r.sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}>S:{fmtNum(r.sharpe)}</span>
+                                                        <span className={r.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmtNum(r.pnl)}</span>
+                                                        <span className={muted}>{r.trades}t</span>
+                                                        <span className={r.silence_ratio === 0 ? 'text-emerald-400' : muted}>sil:{r.silence_ratio.toFixed(2)}</span>
+                                                        {r.is_best && <span className="text-emerald-500">★</span>}
+                                                        {r.is_gold && <span className="text-amber-400">●</span>}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            {s0Sweep.children_spawned > 0 && (
+                                                <p className={`text-[10px] mt-1 ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>
+                                                    {s0Sweep.children_spawned} TF child{s0Sweep.children_spawned !== 1 ? 'ren' : ''} spawned
+                                                </p>
+                                            )}
+                                        </SeedStageSection>
+                                    )}
 
                                     {s0 && s0.length > 0 && (
                                         <SeedStageSection title="Weights — Component Ranking" isDarkMode={isDarkMode} muted={muted}>

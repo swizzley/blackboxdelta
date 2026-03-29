@@ -77,6 +77,32 @@ export function TimeframeBadge({tf, isDarkMode}: {tf: string; isDarkMode: boolea
     return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>{tf || '—'}</span>;
 }
 
+export function BaseTimeframeBadge({baseTf, isDarkMode}: {baseTf?: string; isDarkMode: boolean}) {
+    if (!baseTf) return null;
+    const cls = isDarkMode ? 'bg-teal-900/30 text-teal-400' : 'bg-teal-100 text-teal-700';
+    return <span className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ${cls}`}>{baseTf}</span>;
+}
+
+export function CompositeScoreBar({stats, isDarkMode}: {
+    stats: {silence_ratio?: number; total_pnl?: number; total_trades?: number; sharpe_ratio?: number};
+    isDarkMode: boolean;
+}) {
+    const sil = stats.silence_ratio ?? -1;
+    const pnl = stats.total_pnl ?? 0;
+    const trades = stats.total_trades ?? 0;
+    const sharpe = stats.sharpe_ratio ?? 0;
+    const muted = isDarkMode ? 'text-gray-500' : 'text-gray-400';
+    const silColor = sil === 0 ? 'text-emerald-400' : sil < 0.2 ? (isDarkMode ? 'text-amber-400' : 'text-amber-600') : sil < 0 ? muted : 'text-red-400';
+    return (
+        <div className="flex gap-2 text-[10px] font-mono">
+            <span className={silColor} title="Silence ratio">{sil >= 0 ? `S:${sil.toFixed(2)}` : 'S:—'}</span>
+            <span className={pnl >= 0 ? 'text-emerald-400' : 'text-red-400'} title="P&L">{fmtNum(pnl)}</span>
+            <span className={muted} title="Trades">{trades}t</span>
+            <span className={sharpe >= 1 ? 'text-emerald-400' : sharpe >= 0 ? (isDarkMode ? 'text-amber-400' : 'text-amber-600') : 'text-red-400'} title="Sharpe">SR:{sharpe.toFixed(2)}</span>
+        </div>
+    );
+}
+
 export function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boolean}) {
     const s = status?.toLowerCase();
     const cls = s === 'completed' || s === 'done'

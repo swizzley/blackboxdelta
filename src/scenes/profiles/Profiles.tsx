@@ -10,8 +10,8 @@ import {
     reseedProfile, cancelSeedProfile, fetchDashboard, fetchLHCRuns,
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, LHCRun} from '../../context/Types';
-import {flattenProfiles, matchesSearch, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
-import {ResultStat, WRFractionStat, TimeframeBadge, StageBadge, fmtNum, plColor} from './components/shared';
+import {flattenProfiles, matchesSearch, isGoldProfile, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
+import {ResultStat, WRFractionStat, TimeframeBadge, StageBadge, BaseTimeframeBadge, CompositeScoreBar, fmtNum, plColor} from './components/shared';
 
 export default function Profiles() {
     const {isDarkMode} = useTheme();
@@ -72,6 +72,7 @@ export default function Profiles() {
     );
 
     const getLive = (p: ProfileFlat) => liveStats.get(`${p.timeframe}:${p.name}`);
+    const isGold = (p: ProfileFlat) => isGoldProfile(p.baseline?.stats);
 
     const soakTime = (p: ProfileFlat): string => {
         const firstOrder = p.first_order_at;
@@ -285,7 +286,10 @@ export default function Profiles() {
                                             className={`rounded-lg p-3 cursor-pointer transition-all ${pnl > 0 ? (isDarkMode ? 'bg-emerald-900/20 border border-emerald-800/30' : 'bg-emerald-50 border border-emerald-200') : pnl < 0 ? (isDarkMode ? 'bg-red-900/20 border border-red-800/30' : 'bg-red-50 border border-red-200') : (isDarkMode ? 'bg-slate-700/50' : 'bg-gray-100')} hover:scale-[1.01]`}
                                         >
                                             <div className="flex items-center justify-between mb-1">
-                                                <span className={`font-mono text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className={`font-mono text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
+                                                    <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
+                                                </div>
                                                 <div className="flex items-center gap-1.5">
                                                     {p.stage === 'soaking' && <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-50 text-amber-700'}`}>SOAK 1/10</span>}
                                                     <span className={`text-[10px] font-mono ${muted}`}>{soakTime(p)}</span>
@@ -438,6 +442,45 @@ export default function Profiles() {
                         </div>
                     </div>
 
+                    {/* TF Distribution — shows what % of profiles are on each effective TF */}
+                    {(() => {
+                        const tfCounts = new Map<string, number>();
+                        for (const p of filtered) {
+                            const tf = p.base_timeframe || p.timeframe;
+                            tfCounts.set(tf, (tfCounts.get(tf) ?? 0) + 1);
+                        }
+                        const total = filtered.length;
+                        if (total === 0) return null;
+                        const entries = Array.from(tfCounts.entries()).sort((a, b) => b[1] - a[1]);
+                        const tfColors: Record<string, string> = {
+                            scalp: 'bg-purple-500', fivemin: 'bg-teal-500', intraday: 'bg-blue-500',
+                            hourly: 'bg-cyan-500', fourhour: 'bg-sky-500', swing: 'bg-amber-500', weekly: 'bg-orange-500',
+                        };
+                        // Only show if any profile has a discovered base_timeframe
+                        if (!filtered.some(p => p.base_timeframe)) return null;
+                        return (
+                            <div className={`${card} !py-2`}>
+                                <div className="flex items-center gap-3 mb-1">
+                                    <span className={`text-[10px] font-medium ${muted}`}>TF Distribution</span>
+                                    {entries.map(([tf, count]) => (
+                                        <span key={tf} className={`text-[9px] font-mono ${muted}`}>
+                                            {tf}: {count} ({Math.round(count / total * 100)}%)
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="flex rounded overflow-hidden h-2">
+                                    {entries.map(([tf, count]) => (
+                                        <div key={tf}
+                                            className={`${tfColors[tf] ?? 'bg-gray-500'}`}
+                                            style={{width: `${(count / total) * 100}%`}}
+                                            title={`${tf}: ${count} profiles (${Math.round(count / total * 100)}%)`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })()}
+
                     {/* Pipeline Detail — kanban columns with scroll + search/sort */}
                     <div className={card}>
                         <h2 className={`${heading} mb-3`}>Pipeline Detail</h2>
@@ -491,17 +534,22 @@ export default function Profiles() {
                                                     onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; setDragProfile(p); }}
                                                     onDragEnd={() => { setDragProfile(null); setDragOver(null); }}
                                                     onClick={() => navigate(`/profiles/all?name=${p.name}&tf=${p.timeframe}`)}
-                                                    className={`block rounded px-2 py-1.5 transition-colors cursor-grab active:cursor-grabbing ${isDarkMode ? 'bg-slate-800/60 hover:bg-slate-800' : 'bg-white hover:bg-gray-100'} ${dragProfile && cardKey(dragProfile) === cardKey(p) ? 'opacity-40' : ''}`}>
+                                                    className={`block rounded px-2 py-1.5 transition-colors cursor-grab active:cursor-grabbing ${
+                                                        isGold(p) ? (isDarkMode ? 'bg-amber-900/10 ring-1 ring-amber-500/40 hover:bg-amber-900/20' : 'bg-amber-50/50 ring-1 ring-amber-400/40 hover:bg-amber-50')
+                                                        : isDarkMode ? 'bg-slate-800/60 hover:bg-slate-800' : 'bg-white hover:bg-gray-100'
+                                                    } ${dragProfile && cardKey(dragProfile) === cardKey(p) ? 'opacity-40' : ''}`}>
                                                     <div className="flex items-center justify-between">
-                                                        <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
+                                                        <div className="flex items-center gap-1">
+                                                            <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
+                                                            <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
+                                                        </div>
                                                         <span className={`text-[9px] font-bold ${
                                                             p.timeframe === 'scalp' ? 'text-purple-400' : p.timeframe === 'intraday' ? 'text-blue-400' : 'text-amber-400'
                                                         }`}>{p.timeframe[0].toUpperCase()}</span>
                                                     </div>
                                                     {p.baseline?.stats && (
-                                                        <div className={`text-[10px] font-mono ${muted} mt-0.5`}>
-                                                            S:{p.baseline.stats.sharpe_ratio.toFixed(2)} {p.baseline.stats.total_trades}t
-                                                            {p.baseline.stats.total_pnl != null && <span className={p.baseline.stats.total_pnl >= 0 ? ' text-emerald-400' : ' text-red-400'}> {fmtNum(p.baseline.stats.total_pnl)}</span>}
+                                                        <div className="mt-0.5">
+                                                            <CompositeScoreBar stats={p.baseline.stats} isDarkMode={isDarkMode}/>
                                                         </div>
                                                     )}
                                                     {p.disabled_reason && (

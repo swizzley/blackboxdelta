@@ -1,4 +1,4 @@
-import type {OptimizerProfileState, OptimizerAllProfilesResponse, ProfileFlat, ProfileStage, SeedRun, LHCRun} from '../../context/Types';
+import type {OptimizerProfileState, OptimizerProfileStats, OptimizerAllProfilesResponse, ProfileFlat, ProfileStage, SeedRun, LHCRun} from '../../context/Types';
 
 export function deriveStage(p: OptimizerProfileState, seedingProfiles: Set<string>, lhcProfiles: Set<string>, optimizingProfiles: Set<string>): ProfileStage {
     if (p.live && p.soaking) return 'soaking';
@@ -71,6 +71,12 @@ export function matchesSearch(p: ProfileFlat, query: string): boolean {
     const q = query.toLowerCase();
     return p.name.toLowerCase().includes(q) ||
         (p.tags?.some(t => t.toLowerCase().includes(q)) ?? false);
+}
+
+// Gold profile detection — matches backend CompositeScore logic
+export function isGoldProfile(stats?: OptimizerProfileStats): boolean {
+    if (!stats) return false;
+    return stats.silence_ratio === 0 && stats.total_pnl > 0 && stats.total_trades >= 3;
 }
 
 // Pipeline stages in order

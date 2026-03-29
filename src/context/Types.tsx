@@ -619,6 +619,28 @@ export interface SeedComponentResult {
     weight: number;
 }
 
+// TF Sweep types (Stage 0 — discovers best TF per profile)
+export interface TFSweepResult {
+    timeframe: string;
+    label: string;      // human-readable TF label (e.g., "1m", "5m", "15m")
+    sharpe: number;
+    pnl: number;
+    trades: number;
+    win_rate: number;
+    silence_ratio: number;
+    composite_score: number;
+    is_gold?: boolean;   // silence=0.0, positive P&L, trades>=3
+    is_best?: boolean;   // highest composite score
+    is_viable?: boolean; // within 80% of best, positive P&L
+}
+
+export interface TFSweepSummary {
+    registration_tf: string;
+    best_tf: string;
+    results: TFSweepResult[];
+    children_spawned: number;
+}
+
 export interface SeedVariantResult {
     label: string;
     sharpe: number;
@@ -733,7 +755,7 @@ export interface SeedRun {
     completed_at?: string;
     // Stage results are profile-keyed: {"profileName": data, ...}
     // For old (pre-profile) runs, data is flat (legacy compat handled by getProfileStageData helper)
-    stage0_results?: Record<string, SeedComponentResult[]>;
+    stage0_results?: Record<string, SeedComponentResult[] | TFSweepSummary>;
     stagea_results?: Record<string, SeedVariantResult[]>;
     stageb_results?: Record<string, SeedStageBResult>;
     stagec_results?: Record<string, SeedStageCResult>;
@@ -825,6 +847,7 @@ export interface OptimizerProfileState {
     disabled_reason?: string; // "stall" = auto-disabled, requires reseed
     tier?: string;            // A/B/C/D from optimize_profiles
     tags?: string[];          // parsed from comma-separated DB column
+    base_timeframe?: string;  // effective data TF from seed Stage 0 (empty = same as registration TF)
     stage?: ProfileStage;     // computed by API: seeding|optimizing|passed|soaking|live|stalled|failed|disabled
     first_order_at?: string;  // earliest closed order for this profile+timeframe
     stats?: OptimizerProfileStats;

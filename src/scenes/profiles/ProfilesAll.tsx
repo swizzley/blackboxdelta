@@ -11,13 +11,13 @@ import {
     fetchOptimizerGenerations, fetchProfileHistory, fetchOrders, fetchProfileParams, fetchLHCRuns,
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, ProfileTimelineResponse, OptimizerGeneration, ProfileHistoryEntry, ApiOrder, ProfileParamsResponse, LHCRun} from '../../context/Types';
-import {flattenProfiles, matchesSearch, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
+import {flattenProfiles, matchesSearch, isGoldProfile, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
 import {GenerationRow, fmtNum, plColor} from './components/shared';
 import Tooltip from '../common/Tooltip';
 import {ClockIcon, ChartBarIcon, ListBulletIcon, AdjustmentsHorizontalIcon, BoltIcon, ArrowsRightLeftIcon, ArrowTrendingUpIcon} from '@heroicons/react/24/outline';
 import ReactECharts from 'echarts-for-react';
 
-type SortKey = 'name' | 'timeframe' | 'stage' | 'sharpe' | 'win_rate' | 'pf' | 'silence' | 'trades' | 'pnl' | 'drawdown' | 'gens' | 'failures' | 'updated' | 'live_trades' | 'live_wr' | 'live_pnl' | 'time_live';
+type SortKey = 'name' | 'timeframe' | 'base_tf' | 'stage' | 'sharpe' | 'win_rate' | 'pf' | 'silence' | 'trades' | 'pnl' | 'drawdown' | 'gens' | 'failures' | 'updated' | 'live_trades' | 'live_wr' | 'live_pnl' | 'time_live';
 
 const PAGE_SIZE = 50;
 
@@ -56,6 +56,7 @@ export default function ProfilesAll() {
     const stageFilter = (searchParams.get('stage') ?? 'all') as ProfileStage | 'all';
     const enabledFilter = (searchParams.get('enabled') ?? 'all') as 'all' | 'yes' | 'no';
     const liveFilter = (searchParams.get('live') ?? 'all') as 'all' | 'yes' | 'no';
+    const baseTfFilter = searchParams.get('base_tf') ?? 'all';
     const sortKey = (searchParams.get('sort') ?? 'sharpe') as SortKey;
     const sortDir = (searchParams.get('dir') ?? 'desc') as 'asc' | 'desc';
     const page = parseInt(searchParams.get('page') ?? '0', 10);
@@ -104,6 +105,15 @@ export default function ProfilesAll() {
 
     const allProfiles: ProfileFlat[] = useMemo(() => rawData ? flattenProfiles(rawData, seedRuns, lhcRuns) : [], [rawData, seedRuns, lhcRuns]);
 
+    // Unique base_timeframe values for filter dropdown
+    const uniqueBaseTFs = useMemo(() => {
+        const tfs = new Set<string>();
+        for (const p of allProfiles) {
+            if (p.base_timeframe) tfs.add(p.base_timeframe);
+        }
+        return Array.from(tfs).sort();
+    }, [allProfiles]);
+
     // Apply filters
     const filtered = useMemo(() => {
         return allProfiles.filter(p => {
@@ -113,6 +123,7 @@ export default function ProfilesAll() {
             if (enabledFilter === 'no' && p.enabled) return false;
             if (liveFilter === 'yes' && !p.live) return false;
             if (liveFilter === 'no' && p.live) return false;
+            if (baseTfFilter !== 'all' && (p.base_timeframe ?? '') !== baseTfFilter) return false;
             if (nameFilter && !matchesSearch(p, nameFilter)) return false;
             return true;
         });
@@ -129,6 +140,7 @@ export default function ProfilesAll() {
             switch (sortKey) {
                 case 'name': av = a.name; bv = b.name; break;
                 case 'timeframe': av = a.timeframe; bv = b.timeframe; break;
+                case 'base_tf': av = a.base_timeframe ?? ''; bv = b.base_timeframe ?? ''; break;
                 case 'stage': av = STAGE_ORDER.indexOf(a.stage); bv = STAGE_ORDER.indexOf(b.stage); break;
                 case 'sharpe': av = getStat(a)?.sharpe_ratio ?? -999; bv = getStat(b)?.sharpe_ratio ?? -999; break;
                 case 'win_rate': av = getStat(a)?.win_rate ?? -999; bv = getStat(b)?.win_rate ?? -999; break;
@@ -436,7 +448,14 @@ export default function ProfilesAll() {
                             <option value="yes">Live</option>
                             <option value="no">Not Live</option>
                         </select>
-                        {(nameFilter || tfFilter !== 'all' || stageFilter !== 'all' || enabledFilter !== 'all' || liveFilter !== 'all') && (
+                        {uniqueBaseTFs.length > 0 && (
+                            <select value={baseTfFilter} onChange={e => setParam('base_tf', e.target.value)}
+                                className={`rounded-md px-2 py-1 text-xs ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}>
+                                <option value="all">Base TF: All</option>
+                                {uniqueBaseTFs.map(tf => <option key={tf} value={tf}>Base: {tf}</option>)}
+                            </select>
+                        )}
+                        {(nameFilter || tfFilter !== 'all' || stageFilter !== 'all' || enabledFilter !== 'all' || liveFilter !== 'all' || baseTfFilter !== 'all') && (
                             <button
                                 onClick={() => setSearchParams({}, {replace: true})}
                                 className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
@@ -486,6 +505,7 @@ export default function ProfilesAll() {
                                         </th>
                                         <SortHeader label="Name" field="name"/>
                                         <SortHeader label="TF" field="timeframe"/>
+                                        <SortHeader label="BTF" field="base_tf"/>
                                         <SortHeader label="St" field="stage"/>
                                         {/* Backtest */}
                                         <SortHeader label="BT S" field="sharpe"/>
@@ -511,9 +531,13 @@ export default function ProfilesAll() {
                                         const live = getLive(p);
                                         const key = `${p.timeframe}:${p.name}`;
                                         const isAnyExp = expanded?.key === key;
+                                        const gold = isGoldProfile(s);
                                         const rows = [
                                             <tr key={key} onClick={() => togglePanel(p, 'timeline')}
-                                                className={`border-b cursor-pointer transition-colors ${isDarkMode ? 'border-slate-700/50 hover:bg-slate-700/30' : 'border-gray-100 hover:bg-gray-50'} ${isAnyExp ? (isDarkMode ? 'bg-slate-700/40' : 'bg-gray-50') : ''}`}>
+                                                className={`border-b cursor-pointer transition-colors ${
+                                                    gold ? (isDarkMode ? 'border-slate-700/50 hover:bg-amber-900/10 border-l-2 border-l-amber-500/50' : 'border-gray-100 hover:bg-amber-50/30 border-l-2 border-l-amber-400')
+                                                    : isDarkMode ? 'border-slate-700/50 hover:bg-slate-700/30' : 'border-gray-100 hover:bg-gray-50'
+                                                } ${isAnyExp ? (isDarkMode ? 'bg-slate-700/40' : 'bg-gray-50') : ''}`}>
                                                 <td className="px-1 py-1" onClick={e => e.stopPropagation()}>
                                                     <input type="checkbox" checked={selectedIds.has(key)} onChange={() => toggleSelect(key)} className="rounded border-gray-500"/>
                                                 </td>
@@ -527,6 +551,9 @@ export default function ProfilesAll() {
                                                             : <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-amber-400"/>
                                                         }
                                                     </Tooltip>
+                                                </td>
+                                                <td className={`px-1 py-1 text-[10px] font-mono ${p.base_timeframe ? (isDarkMode ? 'text-teal-400' : 'text-teal-600') : muted}`}>
+                                                    {p.base_timeframe || '—'}
                                                 </td>
                                                 <td className="px-1 py-1">
                                                     <Tooltip content={<>{STAGE_LABELS[p.stage] ?? p.stage}{p.disabled_reason ? ` (${p.disabled_reason})` : ''}</>}>
@@ -592,7 +619,7 @@ export default function ProfilesAll() {
                                             const panelCls = `${isDarkMode ? 'bg-slate-800/50' : 'bg-gray-50'}`;
                                             rows.push(
                                                 <tr key={`${key}-panel`} className={panelCls}>
-                                                    <td colSpan={16} className="px-4 py-4">
+                                                    <td colSpan={17} className="px-4 py-4">
 
                                                         {/* Timeline panel */}
                                                         {expanded.panel === 'timeline' && (
