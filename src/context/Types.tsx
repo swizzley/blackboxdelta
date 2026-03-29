@@ -622,13 +622,15 @@ export interface SeedComponentResult {
 // TF Sweep types (Stage 0 — Direction signal scan per TF)
 export interface TFSweepResult {
     timeframe: string;
-    label: string;          // human-readable TF label (e.g., "1m", "5m", "15m")
-    signals: number;        // total bars where Direction/ScoreSignal fired
+    label: string;
+    signals: number;
     long_signals: number;
     short_signals: number;
-    total_bars: number;     // total bars scanned
-    signal_rate: number;    // signals / total_bars
-    balance: number;        // |long - short| / signals (0 = balanced, 1 = one-sided)
+    total_bars: number;
+    scan_days: number;
+    signal_rate: number;       // signals / total_bars
+    signals_per_day: number;   // signals / scan_days (PRIMARY ranking metric)
+    balance: number;
     is_best?: boolean;
 }
 

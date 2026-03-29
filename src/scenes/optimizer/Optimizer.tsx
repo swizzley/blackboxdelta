@@ -1253,7 +1253,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                                 <p className={`text-[10px] ${muted}`}>Skipped — {s0Sweep.reason === 'skipped:tf_child' ? 'TF child uses assigned timeframe' : s0Sweep.reason}</p>
                                             ) : (s0Sweep.results ?? []).length > 0 ? (
                                                 <div className="flex flex-wrap gap-1">
-                                                    {[...s0Sweep.results].sort((a, b) => b.signal_rate - a.signal_rate).map(r => (
+                                                    {[...s0Sweep.results].sort((a, b) => (b.signals_per_day ?? 0) - (a.signals_per_day ?? 0)).map(r => (
                                                         <span key={r.timeframe} className={`inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded ${
                                                             r.is_best ? (isDarkMode ? 'bg-emerald-900/30 ring-1 ring-emerald-700/50' : 'bg-emerald-50 ring-1 ring-emerald-200')
                                                             : r.signals > 0 ? (isDarkMode ? 'bg-slate-800' : 'bg-gray-300/80')
@@ -1263,7 +1263,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                                             <span className={r.signals > 0 ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600') : muted}>{r.signals} sig</span>
                                                             {r.signals > 0 && <>
                                                                 <span className={muted}>{r.long_signals}L/{r.short_signals}S</span>
-                                                                <span className={muted}>rate:{(r.signal_rate * 100).toFixed(2)}%</span>
+                                                                <span className={isDarkMode ? 'text-amber-400' : 'text-amber-600'}>{(r.signals_per_day ?? 0).toFixed(1)}/day</span>
                                                             </>}
                                                             {r.is_best && <span className="text-emerald-500">★</span>}
                                                         </span>
