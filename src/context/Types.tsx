@@ -619,24 +619,22 @@ export interface SeedComponentResult {
     weight: number;
 }
 
-// TF Sweep types (Stage 0 — discovers best TF per profile)
+// TF Sweep types (Stage 0 — Direction signal scan per TF)
 export interface TFSweepResult {
     timeframe: string;
-    label: string;      // human-readable TF label (e.g., "1m", "5m", "15m")
-    sharpe: number;
-    pnl: number;
-    trades: number;
-    win_rate: number;
-    silence_ratio: number;
-    composite_score: number;
-    is_gold?: boolean;   // silence=0.0, positive P&L, trades>=3
-    is_best?: boolean;   // highest composite score
-    is_viable?: boolean; // within 80% of best, positive P&L
+    label: string;          // human-readable TF label (e.g., "1m", "5m", "15m")
+    signals: number;        // total bars where Direction/ScoreSignal fired
+    long_signals: number;
+    short_signals: number;
+    total_bars: number;     // total bars scanned
+    signal_rate: number;    // signals / total_bars
+    balance: number;        // |long - short| / signals (0 = balanced, 1 = one-sided)
+    is_best?: boolean;
 }
 
 export interface TFSweepSummary {
-    registration_tf: string;
     best_tf: string;
+    reason?: string;        // "signal_scan", "skipped:tf_child", "skipped:no_profile", "default:no_signals"
     results: TFSweepResult[];
     children_spawned: number;
 }
