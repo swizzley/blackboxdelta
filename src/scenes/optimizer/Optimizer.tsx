@@ -3,13 +3,13 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import Tooltip from '../common/Tooltip';
 import {useTheme} from '../../context/Theme';
-import {ResultStat as SharedResultStat, TimeframeBadge as SharedTimeframeBadge, fmtNum as sharedFmtNum, fmtPct as sharedFmtPct, avgPnl as sharedAvgPnl, plColor as sharedPlColor} from '../profiles/components/shared';
+import {ResultStat as SharedResultStat, fmtNum as sharedFmtNum, fmtPct as sharedFmtPct, avgPnl as sharedAvgPnl, plColor as sharedPlColor} from '../profiles/components/shared';
 import {useApi} from '../../context/Api';
 import {
     fetchOptimizerStatus, fetchOptimizerGenerations,
     fetchOptimizerRecommendations,
     fetchOptimizerBranches,
-    fetchOptimizerSeedRuns, fetchOptimizerWorkers, updateOptimizerWorkers,
+    fetchOptimizerSeedRuns, fetchOptimizerWorkers,
     retrySeedProfile,
     applyRecommendation,
     fetchLHCRuns, fetchLHCRunDetail, spawnLHCProfile,
@@ -44,8 +44,6 @@ export default function Optimizer() {
     const [loading, setLoading] = useState(true);
     const [seedRuns, setSeedRuns] = useState<SeedRun[]>([]);
     const [workerConfig, setWorkerConfig] = useState<OptimizerWorkerConfig | null>(null);
-    const [workerDraft, setWorkerDraft] = useState<Record<string, {enabled: boolean; priority: number}>>({});
-    const [workerDirty, setWorkerDirty] = useState(false);
     const [showSeeds, setShowSeeds] = useState(false);
     const [showLHC, setShowLHC] = useState(false);
     const [showRecs, setShowRecs] = useState(false);
@@ -74,19 +72,9 @@ export default function Optimizer() {
         if (r) setRecommendations(r);
         if (sr) setSeedRuns(sr);
         if (lhc) setLhcRuns(lhc);
-        if (wc) {
-            setWorkerConfig(wc);
-            if (!workerDirty) {
-                const draft: Record<string, {enabled: boolean; priority: number}> = {};
-                for (const tf of ['scalp', 'intraday', 'swing']) {
-                    const info = wc.timeframes[tf];
-                    if (info) draft[tf] = {enabled: info.enabled, priority: info.priority};
-                }
-                setWorkerDraft(draft);
-            }
-        }
+        if (wc) setWorkerConfig(wc);
         setLoading(false);
-    }, [apiAvailable, workerDirty]);
+    }, [apiAvailable]);
 
     useEffect(() => {
         loadData();
@@ -119,33 +107,27 @@ export default function Optimizer() {
                         </div>
                     ) : (
                         <>
-                            {/* Per-Timeframe Active Generations */}
+                            {/* Active Generations */}
+                            {(status?.active_generations ?? []).length > 0 && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                                {['scalp', 'intraday', 'swing'].map(tf => {
-                                    const activeGen = status?.active_generations?.find(g => g.timeframe === tf);
-                                    return (
-                                        <div key={tf} className={card}>
-                                            <h2 className={`${heading} !mb-0`}>
-                                                <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
-                                            </h2>
-                                            {activeGen && (
-                                                <div className="mt-3">
-                                                    <GenerationCard gen={activeGen} isDarkMode={isDarkMode} muted={muted}/>
-                                                </div>
-                                            )}
-                                            <div className="mt-3 flex gap-4">
-                                                <span className={`text-xs ${muted}`}>{generations.filter(g => g.timeframe === tf).length} gen{generations.filter(g => g.timeframe === tf).length !== 1 ? 's' : ''}</span>
-                                            </div>
+                                {(status?.active_generations ?? []).map(gen => (
+                                    <div key={gen.id} className={card}>
+                                        <h2 className={`${heading} !mb-0`}>
+                                            <span className={`font-mono text-sm ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{gen.target_profile || `Gen #${gen.id}`}</span>
+                                        </h2>
+                                        <div className="mt-3">
+                                            <GenerationCard gen={gen} isDarkMode={isDarkMode} muted={muted}/>
                                         </div>
-                                    );
-                                })}
+                                    </div>
+                                ))}
                             </div>
+                            )}
 
-                            {/* Worker Allocation */}
+                            {/* Worker Pool */}
                             {workerConfig && (
                                 <div className={`${card} mb-6`}>
                                     <h2 className={heading}>
-                                        <BeakerIcon className={iconCl}/>Worker Allocation
+                                        <BeakerIcon className={iconCl}/>Unified Worker Pool
                                         {workerConfig.host_count != null && workerConfig.host_count > 0 && (
                                             <Tooltip content={workerConfig.active_hosts?.join(', ') ?? ''}>
                                                 <span className={`ml-2 text-xs font-normal px-1.5 py-0.5 rounded ${
@@ -156,125 +138,10 @@ export default function Optimizer() {
                                             </Tooltip>
                                         )}
                                     </h2>
-                                    {(() => {
-                                        const budget = workerConfig.max_memory_units;
-                                        const cores = workerConfig.cpu_cores || 16;
-                                        const preview = computeDraftWorkers(budget, cores, workerDraft, workerConfig.host_count || 1);
-                                        return (<>
-                                            <WorkerGauge workers={preview.totalWorkers} cores={cores} memUsed={preview.memUsed} memBudget={budget} isDarkMode={isDarkMode}/>
-                                            <div className="space-y-3">
-                                                {['scalp', 'intraday', 'swing'].map(tf => {
-                                                    const draft = workerDraft[tf];
-                                                    const live = workerConfig.timeframes[tf];
-                                                    const activeGen = status?.active_generations?.find(g => g.timeframe === tf);
-                                                    if (!draft || !live) return null;
-                                                    const tfWorkers = preview.perTF[tf] ?? 0;
-
-                                                    return (
-                                                        <div key={tf} className={`flex flex-wrap items-center gap-2 p-3 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                                            <div className="flex items-center gap-2 w-20 flex-shrink-0">
-                                                                <TimeframeBadge tf={tf} isDarkMode={isDarkMode}/>
-                                                            </div>
-
-                                                            {/* Enable/Disable toggle */}
-                                                            <button
-                                                                onClick={() => {
-                                                                    setWorkerDraft(prev => ({...prev, [tf]: {...prev[tf], enabled: !prev[tf].enabled}}));
-                                                                    setWorkerDirty(true);
-                                                                }}
-                                                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                                                                    draft.enabled ? 'bg-cyan-600' : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'
-                                                                }`}
-                                                            >
-                                                                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                                                                    draft.enabled ? 'translate-x-5' : 'translate-x-0'
-                                                                }`}/>
-                                                            </button>
-
-                                                            {/* Priority selector */}
-                                                            <div className="flex gap-1">
-                                                                {([1, 2, 3] as const).map(p => {
-                                                                    const labels = {1: 'Low', 2: 'Med', 3: 'High'} as const;
-                                                                    const isActive = draft.priority === p;
-                                                                    return (
-                                                                        <button
-                                                                            key={p}
-                                                                            disabled={!draft.enabled}
-                                                                            onClick={() => {
-                                                                                setWorkerDraft(prev => ({...prev, [tf]: {...prev[tf], priority: p}}));
-                                                                                setWorkerDirty(true);
-                                                                            }}
-                                                                            className={`px-2 py-0.5 text-xs rounded font-medium transition-colors ${
-                                                                                !draft.enabled
-                                                                                    ? isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                                                    : isActive
-                                                                                        ? 'bg-cyan-600 text-white'
-                                                                                        : isDarkMode ? 'bg-slate-600 text-gray-300 hover:bg-slate-500' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                                                                            }`}
-                                                                        >
-                                                                            {labels[p]}
-                                                                        </button>
-                                                                    );
-                                                                })}
-                                                            </div>
-
-                                                            {/* Per-TF worker count */}
-                                                            <span className={`text-xs font-mono ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                                                                {tfWorkers > 0 ? `${tfWorkers}w` : '—'}
-                                                            </span>
-
-                                                            {/* Active generation indicator */}
-                                                            {activeGen && (
-                                                                <span className="flex-shrink-0 w-2 h-2 rounded-full bg-green-500 animate-pulse" title={`Gen ${activeGen.id} active`}/>
-                                                            )}
-
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </>);
-                                    })()}
-
-                                    {/* Apply button */}
-                                    <div className="mt-4 flex items-center gap-3">
-                                        <button
-                                            disabled={!workerDirty}
-                                            onClick={async () => {
-                                                const cfg: Record<string, {enabled: boolean; priority: number}> = {};
-                                                for (const tf of ['scalp', 'intraday', 'swing']) {
-                                                    if (workerDraft[tf]) cfg[tf] = workerDraft[tf];
-                                                }
-                                                await updateOptimizerWorkers(cfg);
-                                                setWorkerDirty(false);
-                                                loadData();
-                                            }}
-                                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                                                workerDirty
-                                                    ? 'bg-cyan-600 hover:bg-cyan-500 text-white cursor-pointer'
-                                                    : isDarkMode ? 'bg-slate-700 text-gray-600 cursor-not-allowed' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                            }`}
-                                        >
-                                            Apply
-                                        </button>
-                                        {workerDirty && (
-                                            <button
-                                                onClick={() => {
-                                                    if (workerConfig) {
-                                                        const draft: Record<string, {enabled: boolean; priority: number}> = {};
-                                                        for (const tf of ['scalp', 'intraday', 'swing']) {
-                                                            const info = workerConfig.timeframes[tf];
-                                                            if (info) draft[tf] = {enabled: info.enabled, priority: info.priority};
-                                                        }
-                                                        setWorkerDraft(draft);
-                                                    }
-                                                    setWorkerDirty(false);
-                                                }}
-                                                className={`text-xs ${muted} hover:underline cursor-pointer`}
-                                            >
-                                                Reset
-                                            </button>
-                                        )}
-                                        <span className={`text-xs ${muted} ml-auto`}>Changes take effect at next generation boundary</span>
+                                    <WorkerGauge workers={workerConfig.total_workers} cores={workerConfig.cpu_cores || 16} memUsed={workerConfig.memory_used} memBudget={workerConfig.max_memory_units} isDarkMode={isDarkMode}/>
+                                    <div className={`mt-3 flex gap-4 text-xs font-mono ${muted}`}>
+                                        <span>{workerConfig.total_workers} total workers</span>
+                                        <span>{(status?.active_generations ?? []).length} active gen{(status?.active_generations ?? []).length !== 1 ? 's' : ''}</span>
                                     </div>
                                 </div>
                             )}
@@ -913,7 +780,6 @@ function MiniStat({label, value, isDarkMode}: {label: string; value: string; isD
 }
 
 const ResultStat = SharedResultStat;
-const TimeframeBadge = SharedTimeframeBadge;
 
 function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boolean}) {
     const s = status?.toLowerCase();
@@ -1632,6 +1498,7 @@ function genDuration(g: OptimizerGeneration): string {
 // Memory cost per worker by timeframe (mirrors backend memoryCost map)
 const MEM_COST: Record<string, number> = {scalp: 1.0, intraday: 0.29, swing: 0.02};
 
+// @ts-ignore unused after unified pool
 function computeDraftWorkers(
     budget: number,
     maxPerTF: number,

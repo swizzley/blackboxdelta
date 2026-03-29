@@ -24,7 +24,6 @@ export default function Profiles() {
     const [liveStats, setLiveStats] = useState<Map<string, ProfileStats>>(new Map());
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [tfFilter, setTfFilter] = useState<'all' | 'scalp' | 'intraday' | 'swing'>('all');
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [actionDone, setActionDone] = useState<string | null>(null);
     const [expandedCard, setExpandedCard] = useState<string | null>(null);
@@ -68,7 +67,7 @@ export default function Profiles() {
 
     // Apply search and TF filter
     const filtered = allProfiles.filter(p =>
-        (tfFilter === 'all' || p.timeframe === tfFilter) && matchesSearch(p, searchQuery)
+        (true) && matchesSearch(p, searchQuery)
     );
 
     const getLive = (p: ProfileFlat) => liveStats.get(`${p.timeframe}:${p.name}`);
@@ -224,21 +223,7 @@ export default function Profiles() {
                                 >&times;</button>
                             )}
                         </div>
-                        <div className="flex gap-1">
-                            {(['all', 'scalp', 'intraday', 'swing'] as const).map(tf => (
-                                <button
-                                    key={tf}
-                                    onClick={() => setTfFilter(tf)}
-                                    className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-                                        tfFilter === tf
-                                            ? 'bg-cyan-600 text-white'
-                                            : isDarkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {tf === 'all' ? 'All' : tf.charAt(0).toUpperCase() + tf.slice(1)}
-                                </button>
-                            ))}
-                        </div>
+                        <div/>
                         <a href="/profiles/all" className={`text-xs ${isDarkMode ? 'text-cyan-400 hover:text-cyan-300' : 'text-cyan-600 hover:text-cyan-700'}`}>
                             View all {allProfiles.length} &rarr;
                         </a>
@@ -263,7 +248,7 @@ export default function Profiles() {
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {(['scalp', 'intraday', 'swing'] as const)
-                                    .filter(tf => tfFilter === 'all' || tfFilter === tf)
+                                    
                                     .map(tf => {
                                     const tfLive = liveProfiles.filter(p => p.timeframe === tf);
                                     return (
@@ -430,7 +415,7 @@ export default function Profiles() {
                                 return (
                                     <button
                                         key={stage}
-                                        onClick={() => count > 0 ? navigate(`/profiles/all?stage=${stage}${tfFilter !== 'all' ? `&tf=${tfFilter}` : ''}`) : undefined}
+                                        onClick={() => count > 0 ? navigate(`/profiles/all?stage=${stage}${''}`) : undefined}
                                         className={`flex-1 flex items-center justify-center gap-0.5 text-[10px] font-medium transition-opacity ${count > 0 ? 'hover:opacity-80 cursor-pointer' : 'opacity-40 cursor-default'} ${isDarkMode ? `${colors.darkBg} ${colors.darkText}` : `${colors.bg} ${colors.text}`}`}
                                         title={`${STAGE_LABELS[stage]}: ${count} profiles`}
                                     >
