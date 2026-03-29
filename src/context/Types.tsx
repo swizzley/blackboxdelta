@@ -759,6 +759,7 @@ export interface SeedRun {
     stagec_results?: Record<string, SeedStageCResult>;
     staged_results?: Record<string, SeedVariantResult[]>;
     stagee_results?: Record<string, SeedStageEResult>;
+    stagef_results?: Record<string, any>;
     error_message?: string;
     staged2_results?: Record<string, SeedVariantResult[]>;
     staged3_results?: Record<string, SeedVariantResult[]>;

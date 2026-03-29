@@ -1137,7 +1137,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                             ? (run.profile_stages ? Object.keys(run.profile_stages).filter(k => k !== 'concurrent' && k !== 'all') : getStageProfiles(run.stagea_results))
                             : ['default'];
                         const allHaveData = profiles.filter(prf => {
-                            const hasAny = getProfileStageData(run.stage0_results, prf) || getProfileStageData(run.stagea_results, prf) || getProfileStageData(run.staged_results, prf) || getProfileStageData(run.stageb_results, prf) || getProfileStageData(run.stagec_results, prf) || getProfileStageData(run.stagee_results, prf) || getProfileStageData(run.tier2_results, prf) || getProfileStageData(run.tier3_results, prf) || getProfileStageData(run.diagnostics, prf) || (isConcurrentProfile && (run.profile_stages?.[prf] ?? '') !== '');
+                            const hasAny = getProfileStageData(run.stage0_results, prf) || getProfileStageData(run.stagea_results, prf) || getProfileStageData(run.staged_results, prf) || getProfileStageData(run.stageb_results, prf) || getProfileStageData(run.stagec_results, prf) || getProfileStageData(run.stagee_results, prf) || getProfileStageData(run.stagef_results, prf) || getProfileStageData(run.tier2_results, prf) || getProfileStageData(run.tier3_results, prf) || getProfileStageData(run.diagnostics, prf) || (isConcurrentProfile && (run.profile_stages?.[prf] ?? '') !== '');
                             return hasAny;
                         });
                         if (allHaveData.length === 0) return null;
@@ -1172,6 +1172,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                             const sC = getProfileStageData<SeedStageCResult>(run.stagec_results, prf);
                             const sD3 = getProfileStageData<SeedVariantResult[]>(run.staged3_results, prf);
                             const sE = getProfileStageData<SeedStageEResult>(run.stagee_results, prf);
+                            const sF = getProfileStageData<any>(run.stagef_results, prf);
                             const t2 = getProfileStageData<Tier2Summary>(run.tier2_results, prf);
                             const t3 = getProfileStageData<Tier3Summary>(run.tier3_results, prf);
                             const diag = getProfileStageData<SeedDiagnostics>(run.diagnostics, prf);
@@ -1346,6 +1347,22 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                                 </div>
                                             </div>
                                             <p className={`text-[10px] font-mono mt-1 text-emerald-500`}>Winner: {sE.winner}</p>
+                                        </SeedStageSection>
+                                    )}
+
+                                    {sF && (
+                                        <SeedStageSection title="Cascade — MTF Confirmation Discovery" isDarkMode={isDarkMode} muted={muted}>
+                                            {sF.status === 'not_implemented' ? (
+                                                <p className={`text-[10px] ${muted}`}>Not yet implemented — planned for Phase 2. Currently passes through without cascade evaluation.</p>
+                                            ) : (
+                                                <div className="flex flex-wrap gap-2 text-[10px] font-mono">
+                                                    <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Status: {sF.status}</span>
+                                                    {sF.cascade_mode && <span className={isDarkMode ? 'text-teal-400' : 'text-teal-600'}>Mode: {sF.cascade_mode}</span>}
+                                                    {sF.with_cascade_sharpe != null && <span>With: S:{fmtNum(sF.with_cascade_sharpe)}</span>}
+                                                    {sF.without_cascade_sharpe != null && <span>Without: S:{fmtNum(sF.without_cascade_sharpe)}</span>}
+                                                    {sF.children_spawned > 0 && <span className="text-teal-400">{sF.children_spawned} child spawned</span>}
+                                                </div>
+                                            )}
                                         </SeedStageSection>
                                     )}
 
