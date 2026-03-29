@@ -796,7 +796,7 @@ function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
 
 // --- Seed Run Components ---
 
-const ALL_SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'LHC', 'Diagnostics'] as const;
+const ALL_SEED_STAGES = ['Stage0', 'StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'StageF', 'LHC', 'Diagnostics'] as const;
 const STAGE_LABELS: Record<string, string> = {
     Stage0: 'TF Sweep',
     StageA: 'Baseline',
@@ -808,6 +808,7 @@ const STAGE_LABELS: Record<string, string> = {
     StageD4: 'Trail',
     StageD5: 'Mkt/Lim',
     StageE: 'Assembly',
+    StageF: 'Cascade',
     Tier1: 'Tier 1',
     LHC: 'LHC Sweep',
     LHC_sweep: 'LHC Sweep',
