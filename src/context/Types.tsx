@@ -538,7 +538,7 @@ export interface OptimizerResult {
 export interface OptimizerGeneration {
     id: number;
     profile_id?: number;
-    timeframe: string;
+    timeframe?: string;  // legacy — no longer returned by API
     status: string;
     claimed_by?: string;
     target_profile?: string;
@@ -747,7 +747,7 @@ export interface SeedDiagnostics {
 
 export interface SeedRun {
     id: number;
-    timeframe: string;
+    timeframe?: string;  // legacy — no longer returned by API
     trigger_reason: string;
     status: string;
     current_stage: string;

@@ -314,7 +314,7 @@ export default function Optimizer() {
                                             <div key={run.id} className={`rounded px-3 py-2 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <span className={`font-mono text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>#{run.id}</span>
-                                                    <TimeframeBadge tf={run.timeframe} isDarkMode={isDarkMode}/>
+                                                    <TimeframeBadge tf={run.timeframe ?? ""} isDarkMode={isDarkMode}/>
                                                     <span className={`font-mono text-xs font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-700'}`}>{run.profile_name}</span>
                                                     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                                                         run.status === 'complete' ? isDarkMode ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700'
@@ -548,7 +548,7 @@ export default function Optimizer() {
                                                 const tfOrder: Record<string, number> = {scalp: 0, intraday: 1, swing: 2};
                                                 const sorted = [...generations].sort((a, b) => {
                                                     if (genSort.field === 'timeframe') {
-                                                        const cmp = (tfOrder[a.timeframe] ?? 3) - (tfOrder[b.timeframe] ?? 3);
+                                                        const cmp = (tfOrder[a.timeframe ?? ""] ?? 3) - (tfOrder[b.timeframe ?? ""] ?? 3);
                                                         if (cmp !== 0) return genSort.dir === 'asc' ? cmp : -cmp;
                                                         return b.id - a.id;
                                                     }
@@ -635,7 +635,7 @@ function GenerationCard({gen, isDarkMode, muted}: {gen: OptimizerGeneration; isD
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Gen #{gen.id}</span>
-                    <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
+                    <TimeframeBadge tf={gen.timeframe ?? ""} isDarkMode={isDarkMode}/>
                     {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
                     {phaseBadge
                         ? <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium animate-pulse ${phaseBadge.cls}`}>{phaseBadge.label}</span>
@@ -706,7 +706,7 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
             <button onClick={toggle} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{gen.id}</span>
-                    <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
+                    <TimeframeBadge tf={gen.timeframe ?? ""} isDarkMode={isDarkMode}/>
                     <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
                     {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
                     <span className={`text-xs ${muted} hidden sm:inline`}>
@@ -954,7 +954,7 @@ const STAGE_LABELS: Record<string, string> = {
 // Stages skipped per timeframe: Stage0 (TF Sweep) runs for ALL timeframes.
 // Scalp/intraday skip StageC (Dampeners) — profiles have bespoke values.
 // StageD5 (Market/Limit) is scalp-only.
-function seedStagesForTf(tf: string): string[] {
+function seedStagesForTf(tf?: string): string[] {
     return ALL_SEED_STAGES.filter(s => {
         if ((tf === 'scalp' || tf === 'intraday') && s === 'StageC') return false;
         if (tf !== 'scalp' && s === 'StageD5') return false;
@@ -1025,10 +1025,10 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
     const [openProfiles, setOpenProfiles] = useState<Set<string>>(new Set());
     const isRunning = run.status === 'running';
     const parsed = parseProfileStage(run.current_stage);
-    const stages = seedStagesForTf(run.timeframe);
+    const stages = seedStagesForTf(run.timeframe ?? "");
     const currentIdx = stages.indexOf(parsed.stage);
     const hasProfileStages = run.profile_stages != null && Object.keys(run.profile_stages).length > 0;
-    const isConcurrentProfile = (run.timeframe === 'scalp' || run.timeframe === 'intraday') && (hasProfileStages || run.current_stage.startsWith('concurrent:') || parsed.profile !== null);
+    const isConcurrentProfile = hasProfileStages || run.current_stage.startsWith('concurrent:') || parsed.profile !== null;
 
     const statusCls = isRunning
         ? (isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700')
@@ -1045,7 +1045,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
             <button onClick={() => setExpanded(!expanded)} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
                 <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{run.id}</span>
-                    <TimeframeBadge tf={run.timeframe} isDarkMode={isDarkMode}/>
+                    <TimeframeBadge tf={run.timeframe ?? ""} isDarkMode={isDarkMode}/>
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusCls}${isRunning ? ' animate-pulse' : ''}`}>{run.status}</span>
                     <span className={`text-xs ${muted}`}>{run.trigger_reason}</span>
                     {isRunning && !isConcurrentProfile && <span className={`text-xs font-medium ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>{formatStageLabel(run.current_stage)}</span>}
@@ -1084,7 +1084,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                 <div className="flex gap-0.5 flex-1">
                                     {stages.map(stage => (
                                         <div key={stage} className="flex-1 text-center">
-                                            <p className={`text-[7px] leading-tight ${muted} opacity-60`}>{STAGE_TIME_EST[run.timeframe]?.[stage] ?? ''}</p>
+                                            <p className={`text-[7px] leading-tight ${muted} opacity-60`}>{STAGE_TIME_EST[run.timeframe ?? ""]?.[stage] ?? ''}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -1143,7 +1143,7 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                             <button
                                                 onClick={async (e) => {
                                                     e.stopPropagation();
-                                                    await retrySeedProfile(pName, run.timeframe);
+                                                    await retrySeedProfile(pName, run.timeframe ?? "");
                                                     onRefresh?.();
                                                 }}
                                                 className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
@@ -1204,8 +1204,8 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                             : done ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600')
                                             : muted
                                         }`}>{STAGE_LABELS[stage] ?? stage}</p>
-                                        {STAGE_TIME_EST[run.timeframe]?.[stage] && (
-                                            <p className={`text-[7px] text-center ${muted} opacity-60`}>{STAGE_TIME_EST[run.timeframe][stage]}</p>
+                                        {STAGE_TIME_EST[run.timeframe ?? ""]?.[stage] && (
+                                            <p className={`text-[7px] text-center ${muted} opacity-60`}>{STAGE_TIME_EST[run.timeframe ?? ""][stage]}</p>
                                         )}
                                     </div>
                                 );

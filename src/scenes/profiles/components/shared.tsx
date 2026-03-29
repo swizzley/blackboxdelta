@@ -278,7 +278,7 @@ export function GenerationRow({gen, isDarkMode, muted}: {gen: OptimizerGeneratio
             <button onClick={toggle} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{gen.id}</span>
-                    <TimeframeBadge tf={gen.timeframe} isDarkMode={isDarkMode}/>
+                    {gen.target_profile && <span className={`text-xs font-mono ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{gen.target_profile}</span>}
                     <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
                     {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
                     <span className={`text-xs ${muted} hidden sm:inline`}>
