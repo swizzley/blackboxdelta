@@ -908,7 +908,13 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{run.id}</span>
                     
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusCls}${isRunning ? ' animate-pulse' : ''}`}>{run.status}</span>
-                    <span className={`text-xs font-mono ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{run.trigger_reason?.includes(':') ? run.trigger_reason.split(':').pop() : run.trigger_reason}</span>
+                    <span className={`text-xs font-mono ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{
+                        // Extract profile name: try trigger_reason (lhc_seed:bbrsi), then profile_stages keys, then current_stage prefix
+                        run.trigger_reason?.includes(':') ? run.trigger_reason.split(':').pop()
+                        : run.profile_stages ? Object.keys(run.profile_stages).filter(k => k !== 'concurrent' && k !== 'all')[0] ?? run.trigger_reason
+                        : run.current_stage?.includes(':') ? run.current_stage.split(':')[0]
+                        : run.trigger_reason
+                    }</span>
                     {isRunning && !isConcurrentProfile && <span className={`text-xs font-medium ${isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}`}>{formatStageLabel(run.current_stage)}</span>}
                     {run.best_sharpe !== undefined && <span className={`text-xs font-mono ${run.best_sharpe >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>S:{fmtNum(run.best_sharpe)}</span>}
                     {run.configs_tested > 0 && <span className={`text-xs ${muted}`}>{run.configs_tested} configs</span>}
