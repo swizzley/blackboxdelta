@@ -25,6 +25,15 @@ export function flattenProfiles(
             if (sr.profile_stages) {
                 for (const pName of Object.keys(sr.profile_stages)) seedingNames.add(pName);
             }
+            // Extract profile name from current_stage ("bbrsi:StageD") or trigger_reason ("lhc_seed:bbrsi")
+            if (sr.current_stage?.includes(':')) {
+                const name = sr.current_stage.split(':')[0];
+                if (name && !name.startsWith('Stage') && !name.startsWith('concurrent')) seedingNames.add(name);
+            }
+            if (sr.trigger_reason?.includes(':')) {
+                const name = sr.trigger_reason.split(':').pop();
+                if (name) seedingNames.add(name);
+            }
         }
     }
     const lhcNames = new Set<string>();
