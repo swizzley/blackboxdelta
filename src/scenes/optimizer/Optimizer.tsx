@@ -951,15 +951,9 @@ const STAGE_LABELS: Record<string, string> = {
     Start: 'Starting',
     'concurrent:all': 'All Profiles',
 };
-// Stages skipped per timeframe: Stage0 (TF Sweep) runs for ALL timeframes.
-// Scalp/intraday skip StageC (Dampeners) — profiles have bespoke values.
-// StageD5 (Market/Limit) is scalp-only.
-function seedStagesForTf(tf?: string): string[] {
-    return ALL_SEED_STAGES.filter(s => {
-        if ((tf === 'scalp' || tf === 'intraday') && s === 'StageC') return false;
-        if (tf !== 'scalp' && s === 'StageD5') return false;
-        return true;
-    });
+// All seed stages are always shown. Skipped stages display as "skip" in the progress bar.
+function seedStagesForTf(_tf?: string): string[] {
+    return [...ALL_SEED_STAGES];
 }
 const STAGE_TIME_EST: Record<string, Record<string, string>> = {
     scalp: {
