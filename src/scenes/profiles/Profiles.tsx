@@ -121,38 +121,38 @@ export default function Profiles() {
         try {
             // Cancel seed queue entry when leaving queued/seeding
             if (p.stage === 'queued' || p.stage === 'seeding') {
-                await cancelSeedProfile(p.name, p.timeframe);
+                await cancelSeedProfile(p.name);
             }
 
             switch (target) {
                 case 'disabled':
-                    await disableProfile(p.name, p.timeframe);
+                    await disableProfile(p.name);
                     break;
                 case 'queued':
                     // Disable first (pull out of optimizer), then enqueue for reseed
-                    await disableProfile(p.name, p.timeframe);
-                    await reseedProfile(p.name, p.timeframe);
+                    await disableProfile(p.name);
+                    await reseedProfile(p.name);
                     break;
                 case 'seeding':
-                    await reseedProfile(p.name, p.timeframe);
+                    await reseedProfile(p.name);
                     break;
                 case 'soaking':
-                    await soakProfile(p.name, p.timeframe);
+                    await soakProfile(p.name);
                     break;
                 case 'live':
-                    await goLiveProfile(p.name, p.timeframe);
+                    await goLiveProfile(p.name);
                     break;
                 case 'optimizing':
                     if (p.stage === 'live' || p.stage === 'soaking') {
-                        await noLiveProfile(p.name, p.timeframe);
+                        await noLiveProfile(p.name);
                     }
-                    await enableProfile(p.name, p.timeframe);
+                    await enableProfile(p.name);
                     break;
                 case 'lhc':
                     if (p.stage === 'live' || p.stage === 'soaking') {
-                        await noLiveProfile(p.name, p.timeframe);
+                        await noLiveProfile(p.name);
                     }
-                    await enableProfile(p.name, p.timeframe);
+                    await enableProfile(p.name);
                     // TODO: enqueue for LHC when cancel/enqueue LHC endpoints exist
                     break;
             }
@@ -322,7 +322,7 @@ export default function Profiles() {
                                                     )}
                                                     <div className="flex gap-1.5 mt-2">
                                                         <a
-                                                            href={`/profiles/all?name=${p.name}&tf=${p.timeframe}`}
+                                                            href={`/profiles/all?name=${p.name}`}
                                                             onClick={e => e.stopPropagation()}
                                                             className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-slate-600/50 text-gray-300 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                                                         >
@@ -533,7 +533,7 @@ export default function Profiles() {
                                                     draggable
                                                     onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; setDragProfile(p); }}
                                                     onDragEnd={() => { setDragProfile(null); setDragOver(null); }}
-                                                    onClick={() => navigate(`/profiles/all?name=${p.name}&tf=${p.timeframe}`)}
+                                                    onClick={() => navigate(`/profiles/all?name=${p.name}`)}
                                                     className={`block rounded px-2 py-1.5 transition-colors cursor-grab active:cursor-grabbing ${
                                                         isGold(p) ? (isDarkMode ? 'bg-amber-900/10 ring-1 ring-amber-500/40 hover:bg-amber-900/20' : 'bg-amber-50/50 ring-1 ring-amber-400/40 hover:bg-amber-50')
                                                         : isDarkMode ? 'bg-slate-800/60 hover:bg-slate-800' : 'bg-white hover:bg-gray-100'

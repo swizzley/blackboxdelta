@@ -67,21 +67,15 @@ export function ResultStat({label, value, isDarkMode, color, tooltip, fullValue}
     return box;
 }
 
-export function TimeframeBadge({tf, isDarkMode}: {tf: string; isDarkMode: boolean}) {
-    const colors: Record<string, string> = {
-        scalp: isDarkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-700',
-        intraday: isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700',
-        swing: isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700',
-    };
-    const cls = colors[tf?.toLowerCase()] ?? (isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500');
-    return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>{tf || '—'}</span>;
+export function TimeframeBadge({tf, isDarkMode}: {tf?: string; isDarkMode: boolean}) {
+    if (!tf) return null;
+    const cls = isDarkMode ? 'bg-teal-900/30 text-teal-400' : 'bg-teal-100 text-teal-700';
+    return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium font-mono ${cls}`}>{tf}</span>;
 }
 
-export function BaseTimeframeBadge({baseTf, isDarkMode}: {baseTf?: string; isDarkMode: boolean}) {
-    if (!baseTf) return null;
-    const cls = isDarkMode ? 'bg-teal-900/30 text-teal-400' : 'bg-teal-100 text-teal-700';
-    return <span className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ${cls}`}>{baseTf}</span>;
-}
+// Legacy alias — same as TimeframeBadge now
+export const BaseTimeframeBadge = ({baseTf, isDarkMode}: {baseTf?: string; isDarkMode: boolean}) =>
+    <TimeframeBadge tf={baseTf} isDarkMode={isDarkMode}/>;
 
 export function CompositeScoreBar({stats, isDarkMode}: {
     stats: {silence_ratio?: number; total_pnl?: number; total_trades?: number; sharpe_ratio?: number};

@@ -192,64 +192,64 @@ export function fetchOptimizerAllProfiles(): Promise<OptimizerAllProfilesRespons
     return apiFetch('/api/optimizer/profiles');
 }
 
-export function enableProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/enable?timeframe=${timeframe}`, {});
+export function enableProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/enable`, {});
 }
 
-export function disableProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/disable?timeframe=${timeframe}`, {});
+export function disableProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/disable`, {});
 }
 
-export function soakProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/soak?timeframe=${timeframe}`, {});
+export function soakProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/soak`, {});
 }
 
-export function goLiveProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/golive?timeframe=${timeframe}`, {});
+export function goLiveProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/golive`, {});
 }
 
-export function noLiveProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/nolive?timeframe=${timeframe}`, {});
+export function noLiveProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/nolive`, {});
 }
 
-export function deleteProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/delete?timeframe=${timeframe}`, {});
+export function deleteProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/delete`, {});
 }
 
-export function cancelSeedProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/cancel-seed?timeframe=${timeframe}`, {});
+export function cancelSeedProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/cancel-seed`, {});
 }
 
-export function revertProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/revert?timeframe=${timeframe}`, {});
+export function revertProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/revert`, {});
 }
 
-export function reseedProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/reseed?timeframe=${timeframe}`, {});
+export function reseedProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/reseed`, {});
 }
 
-export function retrySeedProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/retry-seed?timeframe=${timeframe}`, {});
+export function retrySeedProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/retry-seed`, {});
 }
 
-export function promoteProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/promote?timeframe=${timeframe}`, {});
+export function promoteProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/promote`, {});
 }
 
-export function demoteProfile(name: string, timeframe: string = 'scalp'): Promise<any> {
-    return apiPost(`/api/optimizer/profiles/${name}/demote?timeframe=${timeframe}`, {});
+export function demoteProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/profiles/${name}/demote`, {});
 }
 
-export function fetchProfileHistory(name: string, timeframe: string = 'scalp'): Promise<import('../context/Types').ProfileHistoryResponse | null> {
-    return apiFetch(`/api/optimizer/profiles/${name}/history?timeframe=${timeframe}`);
+export function fetchProfileHistory(name: string): Promise<import('../context/Types').ProfileHistoryResponse | null> {
+    return apiFetch(`/api/optimizer/profiles/${name}/history`);
 }
 
-export function fetchProfileTimeline(name: string, timeframe: string): Promise<import('../context/Types').ProfileTimelineResponse | null> {
-    return apiFetch(`/api/optimizer/profiles/${name}/timeline?timeframe=${timeframe}`);
+export function fetchProfileTimeline(name: string): Promise<import('../context/Types').ProfileTimelineResponse | null> {
+    return apiFetch(`/api/optimizer/profiles/${name}/timeline`);
 }
 
-export function fetchProfileParams(name: string, timeframe: string): Promise<import('../context/Types').ProfileParamsResponse | null> {
-    return apiFetch(`/api/optimizer/profiles/${name}/params?timeframe=${timeframe}`);
+export function fetchProfileParams(name: string): Promise<import('../context/Types').ProfileParamsResponse | null> {
+    return apiFetch(`/api/optimizer/profiles/${name}/params`);
 }
 
 // LHC runs
@@ -257,9 +257,8 @@ export function queueLHCRun(timeframe: string, profile: string, combos: number =
     return apiPost('/api/optimizer/lhc', { timeframe, profile, combos });
 }
 
-export function fetchLHCRuns(timeframe?: string, limit: number = 20): Promise<import('../context/Types').LHCRun[] | null> {
+export function fetchLHCRuns(limit: number = 20): Promise<import('../context/Types').LHCRun[] | null> {
     const params = new URLSearchParams();
-    if (timeframe) params.set('timeframe', timeframe);
     params.set('limit', String(limit));
     const qs = params.toString();
     return apiFetch(`/api/optimizer/lhc-runs${qs ? '?' + qs : ''}`);

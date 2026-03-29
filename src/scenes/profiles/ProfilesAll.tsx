@@ -195,12 +195,11 @@ export default function ProfilesAll() {
         }
     };
 
-    const doAction = async (action: (name: string, tf: string) => Promise<any>, name: string, tf: string) => {
-        const key = `${tf}:${name}`;
-        setActionLoading(key);
-        await action(name, tf);
+    const doAction = async (action: (name: string) => Promise<any>, name: string) => {
+        setActionLoading(name);
+        await action(name);
         setActionLoading(null);
-        setActionDone(key);
+        setActionDone(name);
         setTimeout(() => setActionDone(null), 2000);
         loadData();
     };
@@ -229,7 +228,7 @@ export default function ProfilesAll() {
         if (panel === 'timeline') {
             setTimeline(null);
             setTimelineLoading(true);
-            const tl = await fetchProfileTimeline(p.name, p.timeframe);
+            const tl = await fetchProfileTimeline(p.name);
             setTimeline(tl);
             setTimelineLoading(false);
         } else if (panel === 'gens') {
@@ -242,7 +241,7 @@ export default function ProfilesAll() {
         } else if (panel === 'history') {
             setBaselineHistory([]);
             setBaselineHistoryLoading(true);
-            const res = await fetchProfileHistory(p.name, p.timeframe);
+            const res = await fetchProfileHistory(p.name);
             setBaselineHistory(res?.history ?? []);
             setBaselineHistoryLoading(false);
         } else if (panel === 'trades') {
@@ -255,7 +254,7 @@ export default function ProfilesAll() {
         } else if (panel === 'params') {
             setParams(null);
             setParamsLoading(true);
-            const pr = await fetchProfileParams(p.name, p.timeframe);
+            const pr = await fetchProfileParams(p.name);
             setParams(pr);
             setParamsLoading(false);
         }
@@ -601,12 +600,12 @@ export default function ProfilesAll() {
                                                             </button>
                                                         ))}
                                                         <button disabled={actionLoading === key}
-                                                            onClick={() => doAction(p.enabled ? disableProfile : enableProfile, p.name, p.timeframe)}
+                                                            onClick={() => doAction(p.enabled ? disableProfile : enableProfile, p.name)}
                                                             className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${p.enabled ? (isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-700') : (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700')}`}>
                                                             {p.enabled ? 'Off' : 'On'}
                                                         </button>
                                                         <button disabled={actionLoading === key || actionDone === key}
-                                                            onClick={() => doAction(reseedProfile, p.name, p.timeframe)}
+                                                            onClick={() => doAction(reseedProfile, p.name)}
                                                             className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${actionDone === key ? (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700') : isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-50 text-cyan-700'}`}>
                                                             {actionLoading === key ? '...' : actionDone === key ? 'Queued' : 'Seed'}
                                                         </button>
