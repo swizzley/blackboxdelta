@@ -980,11 +980,13 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                                 <div key={stage} className={`h-2 flex-1 rounded-full ${
                                                     isSkipped ? (isDarkMode ? 'bg-slate-700/50' : 'bg-gray-200')
                                                     : showResult
-                                                        ? (isPassed || profileResult?.passed ? 'bg-emerald-500' : 'bg-red-500/40')
+                                                        ? i <= pStageIdx
+                                                            ? (isPassed || profileResult?.passed ? 'bg-emerald-500' : 'bg-red-500/40')
+                                                            : (isDarkMode ? 'bg-slate-600/30 border border-slate-600' : 'bg-gray-200 border border-gray-300')
                                                         : i < pStageIdx ? 'bg-emerald-500'
                                                         : i === pStageIdx && isActive ? 'bg-cyan-500 animate-pulse'
                                                         : isDarkMode ? 'bg-slate-700' : 'bg-gray-300'
-                                                }`}/>
+                                                }`} title={`${STAGE_LABELS[stage] ?? stage}${showResult && i > pStageIdx ? ' (skipped)' : ''}`}/>
                                             ))}
                                         </div>
                                         <span className={`text-[10px] font-mono w-28 text-right ${
