@@ -7,7 +7,7 @@ import {useApi} from '../../context/Api';
 import {
     fetchOptimizerAllProfiles, fetchOptimizerSeedRuns,
     enableProfile, disableProfile, soakProfile, goLiveProfile, noLiveProfile,
-    reseedProfile, cancelSeedProfile, fetchDashboard, fetchLHCRuns,
+    reseedProfile, cancelSeedProfile, fetchDashboard, fetchLHCRuns, updateSeedQueuePriority,
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, LHCRun} from '../../context/Types';
 import {flattenProfiles, matchesSearch, isGoldProfile, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
@@ -31,6 +31,7 @@ export default function Profiles() {
     const [kanbanSort, setKanbanSort] = useState<'sharpe' | 'name' | 'trades' | 'pnl' | 'gens'>('sharpe');
     const [dragProfile, setDragProfile] = useState<ProfileFlat | null>(null);
     const [dragOver, setDragOver] = useState<ProfileStage | null>(null);
+    const [dropTargetCard, setDropTargetCard] = useState<string | null>(null); // card name for intra-column reorder
 
     const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
     const muted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
@@ -471,6 +472,10 @@ export default function Profiles() {
                                 const stageProfiles = filtered
                                     .filter(p => (stageOverrides.get(cardKey(p)) ?? p.stage) === stage && (!kanbanSearch || p.name.toLowerCase().includes(kanbanSearch.toLowerCase())))
                                     .sort((a, b) => {
+                                        // Queued column: sort by seed queue priority (highest first)
+                                        if (stage === 'queued') {
+                                            return (b.seed_queue_priority ?? -1) - (a.seed_queue_priority ?? -1);
+                                        }
                                         switch (kanbanSort) {
                                             case 'name': return a.name.localeCompare(b.name);
                                             case 'trades': return (b.baseline?.stats?.total_trades ?? 0) - (a.baseline?.stats?.total_trades ?? 0);
@@ -480,11 +485,12 @@ export default function Profiles() {
                                         }
                                     });
                                 const colors = STAGE_COLORS[stage];
+                                const isReorderable = stage === 'queued';
                                 return (
                                     <div key={stage}
                                         onDragOver={e => { e.preventDefault(); e.stopPropagation(); if (dragProfile && canDrop(dragProfile.stage, stage)) setDragOver(stage); }}
-                                        onDragLeave={() => setDragOver(null)}
-                                        onDrop={e => { e.preventDefault(); e.stopPropagation(); handleDrop(stage); }}
+                                        onDragLeave={() => { setDragOver(null); setDropTargetCard(null); }}
+                                        onDrop={e => { e.preventDefault(); e.stopPropagation(); setDropTargetCard(null); handleDrop(stage); }}
                                         className={`min-w-[180px] w-[180px] flex-shrink-0 rounded-lg ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'} flex flex-col transition-all ${dragOver === stage ? (isDarkMode ? 'ring-2 ring-cyan-500/50 bg-slate-700/50' : 'ring-2 ring-cyan-400/50 bg-cyan-50/50') : ''}`}>
                                         <div className={`flex items-center justify-between px-3 pt-3 pb-2`}>
                                             <span className={`text-xs font-semibold uppercase ${isDarkMode ? colors.darkText : colors.text}`}>{STAGE_LABELS[stage]}</span>
@@ -493,19 +499,46 @@ export default function Profiles() {
                                         <div className="overflow-y-auto px-2 pb-2 space-y-1" style={{maxHeight: '400px'}}>
                                             {stageProfiles.length === 0 ? (
                                                 <p className={`text-[10px] ${muted} text-center py-4`}>Empty</p>
-                                            ) : stageProfiles.map(p => (
+                                            ) : stageProfiles.map((p, idx) => (
                                                 <div key={cardKey(p)}
                                                     draggable
                                                     onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; setDragProfile(p); }}
-                                                    onDragEnd={() => { setDragProfile(null); setDragOver(null); }}
+                                                    onDragEnd={() => { setDragProfile(null); setDragOver(null); setDropTargetCard(null); }}
+                                                    onDragOver={isReorderable ? (e) => {
+                                                        e.preventDefault(); e.stopPropagation();
+                                                        if (dragProfile && dragProfile.stage === 'queued' && cardKey(dragProfile) !== cardKey(p)) {
+                                                            setDropTargetCard(cardKey(p));
+                                                        }
+                                                    } : undefined}
+                                                    onDrop={isReorderable ? async (e) => {
+                                                        e.preventDefault(); e.stopPropagation();
+                                                        setDropTargetCard(null);
+                                                        if (!dragProfile || dragProfile.stage !== 'queued' || cardKey(dragProfile) === cardKey(p)) return;
+                                                        // Set dragged profile's priority above the target
+                                                        const srcId = dragProfile.seed_queue_id;
+                                                        const targetPriority = p.seed_queue_priority ?? 0;
+                                                        if (srcId != null) {
+                                                            // Place above: target priority + 1. If dropping below last card, use target - 1.
+                                                            const newPriority = idx === 0 ? targetPriority + 1 : targetPriority + 1;
+                                                            await updateSeedQueuePriority(srcId, newPriority);
+                                                            setDragProfile(null);
+                                                            setDragOver(null);
+                                                            loadData();
+                                                        }
+                                                    } : undefined}
                                                     onClick={() => navigate(`/profiles/all?name=${p.name}`)}
                                                     className={`block rounded px-2 py-1.5 transition-colors cursor-grab active:cursor-grabbing ${
                                                         isGold(p) ? (isDarkMode ? 'bg-amber-900/10 ring-1 ring-amber-500/40 hover:bg-amber-900/20' : 'bg-amber-50/50 ring-1 ring-amber-400/40 hover:bg-amber-50')
                                                         : isDarkMode ? 'bg-slate-800/60 hover:bg-slate-800' : 'bg-white hover:bg-gray-100'
-                                                    } ${dragProfile && cardKey(dragProfile) === cardKey(p) ? 'opacity-40' : ''}`}>
+                                                    } ${dragProfile && cardKey(dragProfile) === cardKey(p) ? 'opacity-40' : ''} ${dropTargetCard === cardKey(p) ? (isDarkMode ? 'ring-2 ring-cyan-400/60' : 'ring-2 ring-cyan-500/60') : ''}`}>
                                                     <div className="flex items-center justify-between">
                                                         <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
-                                                        {p.base_timeframe && <span className={`text-[9px] font-mono ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{p.base_timeframe}</span>}
+                                                        <div className="flex items-center gap-1">
+                                                            {isReorderable && p.seed_queue_priority != null && p.seed_queue_priority > 0 && (
+                                                                <span className={`text-[8px] font-mono ${isDarkMode ? 'text-cyan-400/60' : 'text-cyan-600/60'}`}>p:{p.seed_queue_priority}</span>
+                                                            )}
+                                                            {p.base_timeframe && <span className={`text-[9px] font-mono ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{p.base_timeframe}</span>}
+                                                        </div>
                                                     </div>
                                                     {p.baseline?.stats && (
                                                         <div className="mt-0.5">

@@ -854,6 +854,8 @@ export interface OptimizerProfileState {
     setup_timeframe?: string; // cascade setup TF (one step coarser)
     bias_timeframe?: string;  // cascade bias TF (two steps coarser, empty for 2-layer)
     stage?: ProfileStage;     // computed by API: seeding|optimizing|passed|soaking|live|stalled|failed|disabled
+    seed_queue_id?: number;   // optimize_seed_queue.id for reordering
+    seed_queue_priority?: number; // current priority in seed queue
     first_order_at?: string;  // earliest closed order for this profile+timeframe
     stats?: OptimizerProfileStats;
     baseline?: ProfileBaselineData;

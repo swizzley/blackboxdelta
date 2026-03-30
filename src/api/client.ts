@@ -318,6 +318,19 @@ export async function updateGenerationQueuePriority(id: number, priority: number
     } catch { return false; }
 }
 
+// Seed queue priority
+export async function updateSeedQueuePriority(id: number, priority: number): Promise<boolean> {
+    const base = getApiBase();
+    try {
+        const res = await fetch(`${base}/api/optimizer/seed-queue/${id}/priority`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json', ...authHeaders()},
+            body: JSON.stringify({ priority }),
+        });
+        return res.ok;
+    } catch { return false; }
+}
+
 export async function enqueueGeneration(profileName: string, priority: number, memoryCost: number): Promise<boolean> {
     try {
         await apiPost('/api/optimizer/generation-queue', { profile_name: profileName, priority, memory_cost: memoryCost });
