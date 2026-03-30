@@ -936,9 +936,11 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
     const isRunning = run.status === 'running';
     const parsed = parseProfileStage(run.current_stage);
     const stages = seedStagesForTf(run.timeframe ?? "");
-    const currentIdx = stages.indexOf(parsed.stage);
-    const hasProfileStages = run.profile_stages != null && Object.keys(run.profile_stages).length > 0;
-    const isConcurrentProfile = hasProfileStages || run.current_stage.startsWith('concurrent:') || parsed.profile !== null;
+    // Strip sub-stage suffix for index lookup (e.g. "Stage0:TFSweep" → "Stage0")
+    const baseStage = parsed.stage.includes(':') ? parsed.stage.split(':')[0] : parsed.stage;
+    const currentIdx = stages.indexOf(baseStage);
+    const hasProfileStages = run.profile_stages != null && Object.keys(run.profile_stages).filter(k => k !== 'concurrent' && k !== 'all').length > 0;
+    const isConcurrentProfile = hasProfileStages;
 
     const statusCls = isRunning
         ? (isDarkMode ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700')
@@ -1108,20 +1110,23 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                     ) : (
                         <div className="flex gap-1 overflow-x-auto pb-1">
                             {stages.map((stage, i) => {
-                                const done = i < currentIdx || run.status === 'completed';
+                                const isDone = run.status === 'completed' || run.status === 'failed';
+                                const done = i < currentIdx || isDone;
                                 const active = i === currentIdx && isRunning;
                                 return (
                                     <div key={stage} className="flex-1 min-w-[40px]">
                                         <div className={`h-1.5 rounded-full ${
-                                            done ? 'bg-emerald-500'
+                                            done && isDone && run.status === 'failed' ? 'bg-red-500/40'
+                                            : done ? 'bg-emerald-500'
                                             : active ? 'bg-cyan-500 animate-pulse'
                                             : isDarkMode ? 'bg-slate-600' : 'bg-gray-300'
                                         }`}/>
                                         <p className={`text-[10px] mt-0.5 text-center ${
                                             active ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
+                                            : done && isDone && run.status === 'failed' ? 'text-red-400'
                                             : done ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600')
                                             : muted
-                                        }`}>{STAGE_LABELS[stage] ?? stage}</p>
+                                        }`}>{STAGE_LABELS[stage] ?? stage}{active && parsed.stage.includes(':') ? `: ${parsed.stage.split(':').pop()}` : ''}</p>
                                         {STAGE_TIME_EST[run.timeframe ?? ""]?.[stage] && (
                                             <p className={`text-[7px] text-center ${muted} opacity-60`}>{STAGE_TIME_EST[run.timeframe ?? ""][stage]}</p>
                                         )}
