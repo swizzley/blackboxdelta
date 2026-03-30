@@ -143,7 +143,7 @@ export default function Optimizer() {
                                             </Tooltip>
                                         )}
                                     </h2>
-                                    <WorkerGauge workers={workerConfig.total_workers} cores={workerConfig.cpu_cores || 16} memUsed={workerConfig.memory_used} memBudget={workerConfig.max_memory_units} isDarkMode={isDarkMode}/>
+                                    <WorkerGauge workers={workerConfig.total_workers} cores={workerConfig.cpu_cores || 16} memUsed={workerConfig.memory_used ?? 0} memBudget={workerConfig.max_memory_units} isDarkMode={isDarkMode}/>
                                     <div className={`mt-3 flex gap-4 text-xs font-mono ${muted}`}>
                                         <span>{workerConfig.total_workers} total workers</span>
                                         <span>{(status?.active_generations ?? []).length} active gen{(status?.active_generations ?? []).length !== 1 ? 's' : ''}</span>
