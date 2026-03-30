@@ -1077,32 +1077,21 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                     </div>
                                 );
                             })}
-                            {/* Overall progress summary bar */}
+                            {/* Overall progress summary — only shown for multi-profile concurrent seeds */}
                             {(() => {
                                 const profileKeys = Object.keys(run.profile_stages ?? {}).filter(k => k !== 'concurrent' && k !== 'all');
                                 const total = profileKeys.length;
-                                if (total === 0) return null;
-                                const done = profileKeys.filter(k => {
-                                    const v = run.profile_stages?.[k] ?? '';
-                                    return v.startsWith('PASSED:') || v.startsWith('FAILED:') || v.startsWith('SKIPPED:');
-                                }).length;
+                                if (total <= 1) return null;
                                 const passed = profileKeys.filter(k => (run.profile_stages?.[k] ?? '').startsWith('PASSED:')).length;
+                                const failed = profileKeys.filter(k => (run.profile_stages?.[k] ?? '').startsWith('FAILED:')).length;
                                 const skipped = profileKeys.filter(k => (run.profile_stages?.[k] ?? '').startsWith('SKIPPED:')).length;
-                                const failed = done - passed - skipped;
-                                const pct = Math.round((done / total) * 100);
+                                const done = passed + failed + skipped;
                                 return (
-                                    <div className={`flex items-center gap-2 pt-1 mt-1 border-t ${isDarkMode ? 'border-slate-600/50' : 'border-gray-300'}`}>
-                                        <span className={`text-[10px] font-medium w-16 ${muted}`}>total</span>
-                                        <div className={`flex-1 h-2.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-300'}`}>
-                                            <div className="h-full flex">
-                                                {passed > 0 && <div className="bg-emerald-500 h-full" style={{width: `${(passed / total) * 100}%`}}/>}
-                                                {failed > 0 && <div className="bg-red-500/60 h-full" style={{width: `${(failed / total) * 100}%`}}/>}
-                                                {skipped > 0 && <div className={`h-full ${isDarkMode ? 'bg-slate-600' : 'bg-gray-400'}`} style={{width: `${(skipped / total) * 100}%`}}/>}
-                                            </div>
-                                        </div>
-                                        <span className={`text-[10px] font-mono w-28 text-right ${muted}`}>
-                                            {done}/{total} done{isRunning ? ` (${pct}%)` : ''}{passed > 0 ? ` · ${passed}✓` : ''}{failed > 0 ? ` · ${failed}✗` : ''}{skipped > 0 ? ` · ${skipped}⊘` : ''}
-                                        </span>
+                                    <div className={`flex items-center gap-3 pt-1 mt-1 border-t text-[10px] font-mono ${isDarkMode ? 'border-slate-600/50' : 'border-gray-300'} ${muted}`}>
+                                        <span>{done}/{total} done</span>
+                                        {passed > 0 && <span className="text-emerald-400">{passed} passed</span>}
+                                        {failed > 0 && <span className="text-red-400">{failed} failed</span>}
+                                        {skipped > 0 && <span>{skipped} skipped</span>}
                                     </div>
                                 );
                             })()}
@@ -1195,7 +1184,18 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                         {(() => {
                         const profiles = isConcurrentProfile
                             ? (run.profile_stages ? Object.keys(run.profile_stages).filter(k => k !== 'concurrent' && k !== 'all') : getStageProfiles(run.stagea_results))
-                            : ['default'];
+                            : (() => {
+                                // Single-profile seeds: derive profile name from stage result keys
+                                const candidates = new Set<string>();
+                                for (const data of [run.stage0_results, run.stagea_results, run.staged_results, run.stageb_results, run.stagef_results, run.diagnostics]) {
+                                    if (data && typeof data === 'object' && !Array.isArray(data)) {
+                                        Object.keys(data).forEach(k => candidates.add(k));
+                                    }
+                                }
+                                candidates.delete('concurrent');
+                                candidates.delete('all');
+                                return candidates.size > 0 ? [...candidates] : ['default'];
+                            })();
                         const allHaveData = profiles.filter(prf => {
                             const hasAny = getProfileStageData(run.stage0_results, prf) || getProfileStageData(run.stagea_results, prf) || getProfileStageData(run.staged_results, prf) || getProfileStageData(run.stageb_results, prf) || getProfileStageData(run.stagec_results, prf) || getProfileStageData(run.stagee_results, prf) || getProfileStageData(run.stagef_results, prf) || getProfileStageData(run.tier2_results, prf) || getProfileStageData(run.tier3_results, prf) || getProfileStageData(run.diagnostics, prf) || (isConcurrentProfile && (run.profile_stages?.[prf] ?? '') !== '');
                             return hasAny;
@@ -1411,16 +1411,54 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                     )}
 
                                     {sF && (
-                                        <SeedStageSection title="Cascade — MTF Confirmation Discovery" isDarkMode={isDarkMode} muted={muted}>
+                                        <SeedStageSection title={`Cascade — MTF Confirmation (${sF.entry_tf ?? '?'} → ${sF.setup_tf ?? '?'}${sF.bias_tf ? ` → ${sF.bias_tf}` : ''})`} isDarkMode={isDarkMode} muted={muted}>
                                             {sF.status === 'not_implemented' ? (
-                                                <p className={`text-[10px] ${muted}`}>Not yet implemented — planned for Phase 2. Currently passes through without cascade evaluation.</p>
+                                                <p className={`text-[10px] ${muted}`}>Not yet implemented. Passes through without cascade evaluation.</p>
+                                            ) : sF.status === 'no_cascade_possible' ? (
+                                                <p className={`text-[10px] ${muted}`}>No coarser TFs available for cascade.</p>
                                             ) : (
-                                                <div className="flex flex-wrap gap-2 text-[10px] font-mono">
-                                                    <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Status: {sF.status}</span>
-                                                    {sF.cascade_mode && <span className={isDarkMode ? 'text-teal-400' : 'text-teal-600'}>Mode: {sF.cascade_mode}</span>}
-                                                    {sF.with_cascade_sharpe != null && <span>With: S:{fmtNum(sF.with_cascade_sharpe)}</span>}
-                                                    {sF.without_cascade_sharpe != null && <span>Without: S:{fmtNum(sF.without_cascade_sharpe)}</span>}
-                                                    {sF.children_spawned > 0 && <span className="text-teal-400">{sF.children_spawned} child spawned</span>}
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-3 text-[10px] font-mono">
+                                                        <span className={muted}>Winner:</span>
+                                                        <span className={sF.winner && sF.winner !== 'none'
+                                                            ? 'text-emerald-400 font-semibold'
+                                                            : 'text-red-400'
+                                                        }>{sF.winner === 'none' ? 'none — cascade did not improve' : sF.winner}</span>
+                                                    </div>
+                                                    {sF.results?.length > 0 && (
+                                                        <div className="space-y-1">
+                                                            {(sF.results as any[]).map((r: any) => {
+                                                                const base = r.without;
+                                                                const cas = r.with_cascade;
+                                                                const tradeChange = base?.TotalTrades && cas?.TotalTrades
+                                                                    ? Math.round((1 - cas.TotalTrades / base.TotalTrades) * 100)
+                                                                    : 0;
+                                                                return (
+                                                                    <div key={r.mode} className={`flex items-center gap-2 text-[10px] font-mono px-2 py-1 rounded ${
+                                                                        r.improvement
+                                                                            ? isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50'
+                                                                            : isDarkMode ? 'bg-slate-800/50' : 'bg-gray-100'
+                                                                    }`}>
+                                                                        <span className={`w-28 ${r.improvement ? 'text-emerald-400' : muted}`}>{r.mode}</span>
+                                                                        <span className={muted}>S:</span>
+                                                                        <span className={base?.SharpeRatio >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmtNum(base?.SharpeRatio)}</span>
+                                                                        <span className={muted}>→</span>
+                                                                        <span className={cas?.SharpeRatio >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmtNum(cas?.SharpeRatio)}</span>
+                                                                        <span className={muted}>PF:</span>
+                                                                        <span>{fmtNum(base?.ProfitFactor)}</span>
+                                                                        <span className={muted}>→</span>
+                                                                        <span>{fmtNum(cas?.ProfitFactor)}</span>
+                                                                        <span className={muted}>t:</span>
+                                                                        <span>{base?.TotalTrades}</span>
+                                                                        <span className={muted}>→</span>
+                                                                        <span>{cas?.TotalTrades}</span>
+                                                                        {tradeChange > 0 && <span className={muted}>(-{tradeChange}%)</span>}
+                                                                        {r.improvement && <span className="text-emerald-400">✓</span>}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
                                         </SeedStageSection>
