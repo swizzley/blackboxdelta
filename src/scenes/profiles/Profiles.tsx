@@ -532,7 +532,35 @@ export default function Profiles() {
                                                         : isDarkMode ? 'bg-slate-800/60 hover:bg-slate-800' : 'bg-white hover:bg-gray-100'
                                                     } ${dragProfile && cardKey(dragProfile) === cardKey(p) ? 'opacity-40' : ''} ${dropTargetCard === cardKey(p) ? (isDarkMode ? 'ring-2 ring-cyan-400/60' : 'ring-2 ring-cyan-500/60') : ''}`}>
                                                     <div className="flex items-center justify-between">
-                                                        <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
+                                                        <div className="flex items-center gap-1">
+                                                            {isReorderable && p.seed_queue_id != null && (
+                                                                <div className="flex flex-col -my-1 mr-0.5" onClick={e => e.stopPropagation()}>
+                                                                    <button
+                                                                        disabled={idx === 0}
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            const above = stageProfiles[idx - 1];
+                                                                            const newPri = (above?.seed_queue_priority ?? 0) + 1;
+                                                                            await updateSeedQueuePriority(p.seed_queue_id!, newPri);
+                                                                            loadData();
+                                                                        }}
+                                                                        className={`text-[9px] leading-none px-0.5 rounded hover:bg-cyan-500/20 ${idx === 0 ? 'opacity-20 cursor-default' : isDarkMode ? 'text-gray-500 hover:text-cyan-400' : 'text-gray-400 hover:text-cyan-600'}`}
+                                                                    >▲</button>
+                                                                    <button
+                                                                        disabled={idx === stageProfiles.length - 1}
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            const below = stageProfiles[idx + 1];
+                                                                            const newPri = Math.max((below?.seed_queue_priority ?? 0) - 1, 0);
+                                                                            await updateSeedQueuePriority(p.seed_queue_id!, newPri);
+                                                                            loadData();
+                                                                        }}
+                                                                        className={`text-[9px] leading-none px-0.5 rounded hover:bg-cyan-500/20 ${idx === stageProfiles.length - 1 ? 'opacity-20 cursor-default' : isDarkMode ? 'text-gray-500 hover:text-cyan-400' : 'text-gray-400 hover:text-cyan-600'}`}
+                                                                    >▼</button>
+                                                                </div>
+                                                            )}
+                                                            <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
+                                                        </div>
                                                         <div className="flex items-center gap-1">
                                                             {isReorderable && p.seed_queue_priority != null && p.seed_queue_priority > 0 && (
                                                                 <span className={`text-[8px] font-mono ${isDarkMode ? 'text-cyan-400/60' : 'text-cyan-600/60'}`}>p:{p.seed_queue_priority}</span>
