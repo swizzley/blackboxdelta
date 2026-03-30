@@ -197,7 +197,6 @@ export default function Optimizer() {
                             )}
 
                             {/* Seed Calibration Runs */}
-                            {seedRuns.length > 0 && (
                                 <div className={`${card} mb-6`}>
                                     <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowSeeds(s => !s)}>
                                         <BeakerIcon className={iconCl}/>Seed Calibration
@@ -205,7 +204,9 @@ export default function Optimizer() {
                                         {showSeeds ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
                                     </h2>
                                     {showSeeds && (
-                                        <div className="space-y-3">
+                                        seedRuns.length === 0
+                                        ? <p className={`text-sm ${muted}`}>No seed runs yet.</p>
+                                        : <div className="space-y-3">
                                             {seedRuns.map(sr => (
                                                 <SeedRunCard key={sr.id} run={sr} isDarkMode={isDarkMode} muted={muted} onRefresh={async () => {
                                                     const fresh = await fetchOptimizerSeedRuns(undefined, undefined, 10);
@@ -215,7 +216,6 @@ export default function Optimizer() {
                                         </div>
                                     )}
                                 </div>
-                            )}
 
                             {/* LHC Sweep Runs */}
                             {lhcRuns.length > 0 && (

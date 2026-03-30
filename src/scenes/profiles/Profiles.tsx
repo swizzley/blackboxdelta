@@ -504,10 +504,8 @@ export default function Profiles() {
                                                         : isDarkMode ? 'bg-slate-800/60 hover:bg-slate-800' : 'bg-white hover:bg-gray-100'
                                                     } ${dragProfile && cardKey(dragProfile) === cardKey(p) ? 'opacity-40' : ''}`}>
                                                     <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-1">
-                                                            <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
-                                                            <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
-                                                        </div>
+                                                        <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
+                                                        {p.base_timeframe && <span className={`text-[9px] font-mono ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{p.base_timeframe}</span>}
                                                     </div>
                                                     {p.baseline?.stats && (
                                                         <div className="mt-0.5">
