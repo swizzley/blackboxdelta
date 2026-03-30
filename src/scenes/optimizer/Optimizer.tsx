@@ -1411,49 +1411,44 @@ function SeedRunCard({run, isDarkMode, muted, onRefresh}: {run: SeedRun; isDarkM
                                     )}
 
                                     {sF && (
-                                        <SeedStageSection title={`Cascade — MTF Confirmation (${sF.entry_tf ?? '?'} → ${sF.setup_tf ?? '?'}${sF.bias_tf ? ` → ${sF.bias_tf}` : ''})`} isDarkMode={isDarkMode} muted={muted}>
-                                            {sF.status === 'not_implemented' ? (
-                                                <p className={`text-[10px] ${muted}`}>Not yet implemented. Passes through without cascade evaluation.</p>
-                                            ) : sF.status === 'no_cascade_possible' ? (
-                                                <p className={`text-[10px] ${muted}`}>No coarser TFs available for cascade.</p>
+                                        <SeedStageSection title={`Cascade — MTF Confirmation (${sF.entry_tf ?? '?'})`} isDarkMode={isDarkMode} muted={muted}>
+                                            {sF.status === 'skipped' ? (
+                                                <p className={`text-[10px] ${muted}`}>No cascade checks defined for this profile.</p>
                                             ) : (
                                                 <div className="space-y-2">
                                                     <div className="flex items-center gap-3 text-[10px] font-mono">
-                                                        <span className={muted}>Winner:</span>
-                                                        <span className={sF.winner && sF.winner !== 'none'
+                                                        <span className={muted}>Result:</span>
+                                                        <span className={sF.winner === 'cascade'
                                                             ? 'text-emerald-400 font-semibold'
-                                                            : 'text-red-400'
-                                                        }>{sF.winner === 'none' ? 'none — cascade did not improve' : sF.winner}</span>
+                                                            : sF.winner === 'nocascade'
+                                                            ? 'text-cyan-400 font-semibold'
+                                                            : 'text-gray-400'
+                                                        }>{sF.winner === 'cascade' ? 'cascade kept (default)' : sF.winner === 'nocascade' ? 'nocascade child spawned' : sF.winner}</span>
+                                                        {sF.child_spawned && <span className={muted}>({sF.child_spawned})</span>}
                                                     </div>
                                                     {sF.results?.length > 0 && (
                                                         <div className="space-y-1">
                                                             {(sF.results as any[]).map((r: any) => {
-                                                                const base = r.without;
-                                                                const cas = r.with_cascade;
-                                                                const tradeChange = base?.TotalTrades && cas?.TotalTrades
-                                                                    ? Math.round((1 - cas.TotalTrades / base.TotalTrades) * 100)
-                                                                    : 0;
+                                                                const withCas = r.with_cascade;
+                                                                const noCas = r.without;
                                                                 return (
-                                                                    <div key={r.mode} className={`flex items-center gap-2 text-[10px] font-mono px-2 py-1 rounded ${
-                                                                        r.improvement
-                                                                            ? isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50'
-                                                                            : isDarkMode ? 'bg-slate-800/50' : 'bg-gray-100'
+                                                                    <div key={r.mode} className={`flex flex-wrap items-center gap-2 text-[10px] font-mono px-2 py-1 rounded ${
+                                                                        isDarkMode ? 'bg-slate-800/50' : 'bg-gray-100'
                                                                     }`}>
-                                                                        <span className={`w-28 ${r.improvement ? 'text-emerald-400' : muted}`}>{r.mode}</span>
+                                                                        <span className="w-full text-[9px] text-gray-500 mb-0.5">with cascade (default) vs without</span>
                                                                         <span className={muted}>S:</span>
-                                                                        <span className={base?.SharpeRatio >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmtNum(base?.SharpeRatio)}</span>
-                                                                        <span className={muted}>→</span>
-                                                                        <span className={cas?.SharpeRatio >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmtNum(cas?.SharpeRatio)}</span>
+                                                                        <span className={withCas?.SharpeRatio >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmtNum(withCas?.SharpeRatio)}</span>
+                                                                        <span className={muted}>vs</span>
+                                                                        <span className={noCas?.SharpeRatio >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmtNum(noCas?.SharpeRatio)}</span>
                                                                         <span className={muted}>PF:</span>
-                                                                        <span>{fmtNum(base?.ProfitFactor)}</span>
-                                                                        <span className={muted}>→</span>
-                                                                        <span>{fmtNum(cas?.ProfitFactor)}</span>
+                                                                        <span>{fmtNum(withCas?.ProfitFactor)}</span>
+                                                                        <span className={muted}>vs</span>
+                                                                        <span>{fmtNum(noCas?.ProfitFactor)}</span>
                                                                         <span className={muted}>t:</span>
-                                                                        <span>{base?.TotalTrades}</span>
-                                                                        <span className={muted}>→</span>
-                                                                        <span>{cas?.TotalTrades}</span>
-                                                                        {tradeChange > 0 && <span className={muted}>(-{tradeChange}%)</span>}
-                                                                        {r.improvement && <span className="text-emerald-400">✓</span>}
+                                                                        <span>{withCas?.TotalTrades ?? 0}</span>
+                                                                        <span className={muted}>vs</span>
+                                                                        <span>{noCas?.TotalTrades ?? 0}</span>
+                                                                        {r.improvement && <span className="text-cyan-400">(nocascade viable)</span>}
                                                                     </div>
                                                                 );
                                                             })}
