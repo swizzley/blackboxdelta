@@ -235,8 +235,8 @@ export default function ProfilesAll() {
             setGenHistory([]);
             setGenHistoryPage(0);
             setGenHistoryLoading(true);
-            const gens = await fetchOptimizerGenerations(100);
-            setGenHistory((gens ?? []).filter(g => g.target_profile === p.name && g.timeframe === p.timeframe));
+            const gens = await fetchOptimizerGenerations(100, p.name);
+            setGenHistory(gens ?? []);
             setGenHistoryLoading(false);
         } else if (panel === 'history') {
             setBaselineHistory([]);

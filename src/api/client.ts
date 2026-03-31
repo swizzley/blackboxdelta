@@ -135,8 +135,10 @@ export function fetchOptimizerStatus(): Promise<OptimizerStatus | null> {
     return apiFetch('/api/optimizer/status');
 }
 
-export function fetchOptimizerGenerations(limit = 20): Promise<OptimizerGeneration[] | null> {
-    return apiFetch(`/api/optimizer/generations?limit=${limit}`);
+export function fetchOptimizerGenerations(limit = 20, profile?: string): Promise<OptimizerGeneration[] | null> {
+    const params = new URLSearchParams({limit: String(limit)});
+    if (profile) params.set('profile', profile);
+    return apiFetch(`/api/optimizer/generations?${params}`);
 }
 
 export function fetchOptimizerBranches(generationId: number): Promise<OptimizerBranch[] | null> {
