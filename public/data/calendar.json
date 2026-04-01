@@ -180,33 +180,43 @@
     "dur_count": 130
   },
   "2026-03-26": {
-    "pl": -2.51,
-    "winners": 15,
-    "losers": 31,
-    "total": 46,
-    "win_pl": 1.29,
-    "loss_pl": -3.8,
-    "dur_sum": 18583,
-    "dur_count": 46
+    "pl": -0.3,
+    "winners": 14,
+    "losers": 19,
+    "total": 33,
+    "win_pl": 1.27,
+    "loss_pl": -1.57,
+    "dur_sum": 15968,
+    "dur_count": 33
   },
   "2026-03-27": {
-    "pl": 0.01,
-    "winners": 13,
-    "losers": 5,
-    "total": 21,
-    "win_pl": 0.22,
-    "loss_pl": -0.21,
-    "dur_sum": 6410,
-    "dur_count": 21
+    "pl": 0.02,
+    "winners": 2,
+    "losers": 1,
+    "total": 4,
+    "win_pl": 0.02,
+    "loss_pl": -0.01,
+    "dur_sum": 1012,
+    "dur_count": 4
   },
   "2026-03-29": {
-    "pl": 0.06,
-    "winners": 4,
+    "pl": 0.03,
+    "winners": 3,
     "losers": 0,
-    "total": 4,
-    "win_pl": 0.06,
+    "total": 3,
+    "win_pl": 0.03,
     "loss_pl": 0,
-    "dur_sum": 9566,
-    "dur_count": 4
+    "dur_sum": 6267,
+    "dur_count": 3
+  },
+  "2026-03-31": {
+    "pl": -1.17,
+    "winners": 0,
+    "losers": 7,
+    "total": 7,
+    "win_pl": 0,
+    "loss_pl": -1.17,
+    "dur_sum": 55167,
+    "dur_count": 7
   }
 }
