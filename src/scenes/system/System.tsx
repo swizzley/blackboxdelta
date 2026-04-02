@@ -4,7 +4,7 @@ import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {fetchHealthStatus} from '../../api/client';
-import type {HealthStatus, ServiceHealth} from '../../context/Types';
+import type {HealthStatus, ServiceHealth, DataFreshness, OandaStatus} from '../../context/Types';
 import {
     ServerStackIcon, SignalIcon, CpuChipIcon,
     ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon,
@@ -163,6 +163,17 @@ export default function System() {
                                     </div>
                                 </div>
                             )}
+
+                            {/* Data Pipeline & Broker */}
+                            <DataPipelineCard
+                                freshness={health.data_freshness}
+                                oanda={health.oanda}
+                                isDarkMode={isDarkMode}
+                                card={card}
+                                heading={heading}
+                                muted={muted}
+                                iconCl={iconCl}
+                            />
 
                             {/* Trading Pipeline */}
                             <ServiceGroupCard
@@ -384,6 +395,100 @@ function InfraGrid({services, isDarkMode}: {services: TaggedService[]; isDarkMod
                     </div>
                 );
             })}
+        </div>
+    );
+}
+
+function fmtAge(secs: number): string {
+    if (secs < 0) return '—';
+    if (secs < 60) return `${secs}s`;
+    if (secs < 3600) return `${Math.floor(secs / 60)}m`;
+    if (secs < 86400) return `${Math.floor(secs / 3600)}h`;
+    return `${Math.floor(secs / 86400)}d`;
+}
+
+function statusColor(status: string, isDarkMode: boolean): string {
+    if (status === 'ok') return 'text-emerald-500';
+    if (status === 'warn') return 'text-yellow-500';
+    if (status === 'critical') return 'text-red-500';
+    return isDarkMode ? 'text-gray-500' : 'text-gray-400';
+}
+
+function statusDot(status: string): string {
+    if (status === 'ok') return 'bg-emerald-400';
+    if (status === 'warn') return 'bg-yellow-400';
+    if (status === 'critical') return 'bg-red-500';
+    return 'bg-gray-400';
+}
+
+function DataPipelineCard({freshness, oanda, isDarkMode, card, heading, muted, iconCl}: {
+    freshness?: DataFreshness[]; oanda?: OandaStatus;
+    isDarkMode: boolean; card: string; heading: string; muted: string; iconCl: string;
+}) {
+    if (!freshness && !oanda) return null;
+
+    // Group freshness by kind (prices vs signals)
+    const prices = freshness?.filter(f => f.label.startsWith('prices')) ?? [];
+    const signals = freshness?.filter(f => f.label.startsWith('signals')) ?? [];
+    const worstData = freshness?.reduce((worst, f) =>
+        f.status === 'critical' ? 'critical' : f.status === 'warn' && worst !== 'critical' ? 'warn' : worst
+    , 'ok' as string) ?? 'ok';
+
+    const rowCl = `flex items-center justify-between rounded px-3 py-2 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`;
+    const labelCl = `text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`;
+
+    return (
+        <div className={`${card} mb-6`}>
+            <h2 className={heading}>
+                <SignalIcon className={iconCl}/>Data Pipeline
+                <span className={`w-2 h-2 rounded-full ml-2 ${statusDot(worstData)}`}/>
+                {oanda && (
+                    <span className={`ml-auto text-xs font-normal ${muted}`}>
+                        OANDA: <span className={statusColor(oanda.status, isDarkMode)}>
+                            {oanda.connected ? `${oanda.pairs} pairs` : 'disconnected'}
+                            {oanda.age_secs !== undefined && oanda.connected ? ` (${fmtAge(oanda.age_secs)})` : ''}
+                        </span>
+                    </span>
+                )}
+            </h2>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Prices */}
+                <div>
+                    <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${muted}`}>Candle Data</p>
+                    <div className="space-y-1">
+                        {prices.map(f => (
+                            <div key={f.table} className={rowCl}>
+                                <div className="flex items-center gap-2">
+                                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusDot(f.status)}`}/>
+                                    <span className={labelCl}>{f.label.replace('prices ', '')}</span>
+                                </div>
+                                <span className={`text-xs font-mono ${statusColor(f.status, isDarkMode)}`}>
+                                    {f.status === 'no_data' ? 'no data' : fmtAge(f.age_secs)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Signals */}
+                <div>
+                    <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${muted}`}>Signal Data</p>
+                    <div className="space-y-1">
+                        {signals.map(f => (
+                            <div key={f.table} className={rowCl}>
+                                <div className="flex items-center gap-2">
+                                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusDot(f.status)}`}/>
+                                    <span className={labelCl}>{f.label.replace('signals ', '')}</span>
+                                </div>
+                                <span className={`text-xs font-mono ${statusColor(f.status, isDarkMode)}`}>
+                                    {f.status === 'no_data' ? 'no data' : fmtAge(f.age_secs)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

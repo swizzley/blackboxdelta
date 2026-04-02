@@ -1037,6 +1037,23 @@ export interface HealthStatus {
     timestamp: string;
     hosts: Record<string, HostServices>;
     summary: HealthSummary;
+    data_freshness?: DataFreshness[];
+    oanda?: OandaStatus;
+}
+
+export interface DataFreshness {
+    table: string;
+    label: string;
+    age_secs: number;
+    status: 'ok' | 'warn' | 'critical' | 'no_data';
+    last_time?: string;
+}
+
+export interface OandaStatus {
+    connected: boolean;
+    pairs: number;
+    status: 'ok' | 'warn' | 'critical';
+    age_secs?: number;
 }
 
 export interface HostServices {
