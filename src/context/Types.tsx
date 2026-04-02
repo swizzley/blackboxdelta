@@ -1020,3 +1020,26 @@ export interface GenQueueResponse {
     items: GenQueueItem[];
     total: number;
 }
+
+// Health page — Prometheus-backed ecosystem health
+export interface HealthStatus {
+    timestamp: string;
+    hosts: Record<string, HostServices>;
+    summary: HealthSummary;
+}
+
+export interface HostServices {
+    services: ServiceHealth[];
+}
+
+export interface ServiceHealth {
+    name: string;
+    role: string;
+    active: boolean;
+}
+
+export interface HealthSummary {
+    total: number;
+    active: number;
+    inactive: number;
+}

@@ -8,6 +8,7 @@ import type {
     OptimizerAllProfilesResponse, GenQueueResponse,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
+    HealthStatus,
 } from '../context/Types';
 
 const TIMEOUT = 5000;
@@ -129,6 +130,10 @@ export function fetchVersions(): Promise<Record<string, string> | null> {
 
 export function fetchSystem(): Promise<ApiSystem | null> {
     return apiFetch('/api/system');
+}
+
+export function fetchHealthStatus(): Promise<HealthStatus | null> {
+    return apiFetch('/api/health/status');
 }
 
 export function fetchOptimizerStatus(): Promise<OptimizerStatus | null> {
