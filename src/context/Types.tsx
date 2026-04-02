@@ -831,8 +831,10 @@ export interface ProfileHistoryEntry {
 
 export interface ProfileHistoryResponse {
     profile: string;
-    timeframe: string;
-    history: ProfileHistoryEntry[];
+    items: ProfileHistoryEntry[];
+    total: number;
+    page: number;
+    page_size: number;
 }
 
 // Pipeline stage for profile management views
@@ -1019,6 +1021,15 @@ export interface GenQueueItem {
 export interface GenQueueResponse {
     items: GenQueueItem[];
     total: number;
+    page: number;
+    page_size: number;
+}
+
+export interface PaginatedResponse<T> {
+    items: T[];
+    total: number;
+    page: number;
+    page_size: number;
 }
 
 // Health page — Prometheus-backed ecosystem health

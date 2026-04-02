@@ -46,8 +46,8 @@ export default function Profiles() {
             fetchLHCRuns(),
         ]);
         if (pd) { setRawData(pd); setStageOverrides(new Map()); }
-        if (sr) setSeedRuns(sr);
-        if (lhc) setLhcRuns(lhc);
+        if (sr) setSeedRuns(sr.items ?? []);
+        if (lhc) setLhcRuns(lhc.items ?? []);
         if (dash?.by_profile) {
             const map = new Map<string, ProfileStats>();
             for (const ps of dash.by_profile) {

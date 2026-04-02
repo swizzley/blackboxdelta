@@ -2,6 +2,7 @@ import {useEffect, useState, useCallback, useRef} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import Tooltip from '../common/Tooltip';
+import Pagination from '../common/Pagination';
 import {useTheme} from '../../context/Theme';
 import {ResultStat as SharedResultStat, fmtNum as sharedFmtNum, fmtPct as sharedFmtPct, avgPnl as sharedAvgPnl, plColor as sharedPlColor} from '../profiles/components/shared';
 import {useApi} from '../../context/Api';
@@ -60,26 +61,41 @@ export default function Optimizer() {
     const [genQueue, setGenQueue] = useState<GenQueueResponse | null>(null);
     const [showGenQueue, setShowGenQueue] = useState(false);
 
+    // Pagination state
+    const [seedPage, setSeedPage] = useState(0);
+    const [seedTotal, setSeedTotal] = useState(0);
+    const [lhcPage, setLhcPage] = useState(0);
+    const [lhcTotal, setLhcTotal] = useState(0);
+    const [recPage, setRecPage] = useState(0);
+    const [recTotal, setRecTotal] = useState(0);
+    const [genPage, setGenPage] = useState(0);
+    const [genTotal, setGenTotal] = useState(0);
+
+    const SEED_PAGE_SIZE = 10;
+    const LHC_PAGE_SIZE = 10;
+    const REC_PAGE_SIZE = 20;
+    const GEN_PAGE_SIZE = 15;
+
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
         const [s, g, r, sr, wc, lhc, gq] = await Promise.all([
             fetchOptimizerStatus(),
-            fetchOptimizerGenerations(20),
-            fetchOptimizerRecommendations(),
-            fetchOptimizerSeedRuns(),
+            fetchOptimizerGenerations(GEN_PAGE_SIZE, undefined, genPage),
+            fetchOptimizerRecommendations(undefined, REC_PAGE_SIZE, recPage),
+            fetchOptimizerSeedRuns(undefined, undefined, SEED_PAGE_SIZE, seedPage),
             fetchOptimizerWorkers(),
-            fetchLHCRuns(),
+            fetchLHCRuns(LHC_PAGE_SIZE, lhcPage),
             fetchGenerationQueue(),
         ]);
         if (s) setStatus(s);
-        if (g) setGenerations(g);
-        if (r) setRecommendations(r);
-        if (sr) setSeedRuns(sr);
-        if (lhc) setLhcRuns(lhc);
+        if (g) { setGenerations(g.items ?? []); setGenTotal(g.total); }
+        if (r) { setRecommendations(r.items ?? []); setRecTotal(r.total); }
+        if (sr) { setSeedRuns(sr.items ?? []); setSeedTotal(sr.total); }
+        if (lhc) { setLhcRuns(lhc.items ?? []); setLhcTotal(lhc.total); }
         if (wc) setWorkerConfig(wc);
         if (gq) setGenQueue(gq);
         setLoading(false);
-    }, [apiAvailable]);
+    }, [apiAvailable, genPage, recPage, seedPage, lhcPage]);
 
     useEffect(() => {
         loadData();
@@ -200,7 +216,7 @@ export default function Optimizer() {
                                 <div className={`${card} mb-6`}>
                                     <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowSeeds(s => !s)}>
                                         <BeakerIcon className={iconCl}/>Seed Calibration
-                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{seedRuns.length}</span>
+                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{seedTotal}</span>
                                         {showSeeds ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
                                     </h2>
                                     {showSeeds && (
@@ -209,20 +225,21 @@ export default function Optimizer() {
                                         : <div className="space-y-3">
                                             {seedRuns.map(sr => (
                                                 <SeedRunCard key={sr.id} run={sr} isDarkMode={isDarkMode} muted={muted} onRefresh={async () => {
-                                                    const fresh = await fetchOptimizerSeedRuns(undefined, undefined, 10);
-                                                    if (fresh) setSeedRuns(fresh);
+                                                    const fresh = await fetchOptimizerSeedRuns(undefined, undefined, SEED_PAGE_SIZE, seedPage);
+                                                    if (fresh) { setSeedRuns(fresh.items ?? []); setSeedTotal(fresh.total); }
                                                 }}/>
                                             ))}
+                                            <Pagination page={seedPage} totalItems={seedTotal} pageSize={SEED_PAGE_SIZE} onPageChange={setSeedPage}/>
                                         </div>
                                     )}
                                 </div>
 
                             {/* LHC Sweep Runs */}
-                            {lhcRuns.length > 0 && (
+                            {lhcTotal > 0 && (
                                 <div className={`${card} mb-6`}>
                                     <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowLHC(s => !s)}>
                                         <BeakerIcon className={iconCl}/>LHC Sweeps
-                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{lhcRuns.length}</span>
+                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{lhcTotal}</span>
                                         {showLHC ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
                                     </h2>
                                     {showLHC && (<div className="space-y-2">
@@ -353,6 +370,7 @@ export default function Optimizer() {
                                                 })()}
                                             </div>
                                         ))}
+                                        <Pagination page={lhcPage} totalItems={lhcTotal} pageSize={LHC_PAGE_SIZE} onPageChange={setLhcPage}/>
                                     </div>)}
                                 </div>
                             )}
@@ -362,7 +380,7 @@ export default function Optimizer() {
                                 <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowRecs(r => !r)}>
                                     <LightBulbIcon className={iconCl}/>Analyzer Queue
                                     {(() => { const active = recommendations.filter(r => r.status === 'running' || r.status === 'queued').length; return active > 0 ? <span className={`text-xs font-medium ml-2 ${isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>{active} active</span> : null; })()}
-                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{recommendations.length}</span>
+                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{recTotal}</span>
                                     {showRecs ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
                                 </h2>
                                 {showRecs && (recommendations.length === 0 ? (
@@ -435,6 +453,7 @@ export default function Optimizer() {
                                                 </div>
                                             );
                                         })}
+                                        <Pagination page={recPage} totalItems={recTotal} pageSize={REC_PAGE_SIZE} onPageChange={setRecPage}/>
                                     </div>
                                 ))}
                             </div>
@@ -444,7 +463,7 @@ export default function Optimizer() {
                             <div className={`${card} mb-6`}>
                                 <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowGens(g => !g)}>
                                     <ClockIcon className={iconCl}/>Generation History
-                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{generations.length}</span>
+                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{genTotal}</span>
                                     {showGens ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
                                 </h2>
                                 {showGens && (generations.length === 0 ? (
@@ -474,6 +493,7 @@ export default function Optimizer() {
                                                     <GenerationRow key={g.id} gen={g} isDarkMode={isDarkMode} muted={muted} thCl={thCl} tdCl={tdCl}/>
                                                 ));
                                             })()}
+                                            <Pagination page={genPage} totalItems={genTotal} pageSize={GEN_PAGE_SIZE} onPageChange={setGenPage}/>
                                         </div>
                                     </>
                                 ))}

@@ -85,8 +85,8 @@ export default function ProfilesAll() {
             fetchLHCRuns(),
         ]);
         if (pd) setRawData(pd);
-        if (sr) setSeedRuns(sr);
-        if (lhc) setLhcRuns(lhc);
+        if (sr) setSeedRuns(sr.items ?? []);
+        if (lhc) setLhcRuns(lhc.items ?? []);
         if (dash?.by_profile) {
             const map = new Map<string, ProfileStats>();
             for (const ps of dash.by_profile) {
@@ -236,13 +236,13 @@ export default function ProfilesAll() {
             setGenHistoryPage(0);
             setGenHistoryLoading(true);
             const gens = await fetchOptimizerGenerations(100, p.name);
-            setGenHistory(gens ?? []);
+            setGenHistory(gens?.items ?? []);
             setGenHistoryLoading(false);
         } else if (panel === 'history') {
             setBaselineHistory([]);
             setBaselineHistoryLoading(true);
             const res = await fetchProfileHistory(p.name);
-            setBaselineHistory(res?.history ?? []);
+            setBaselineHistory(res?.items ?? []);
             setBaselineHistoryLoading(false);
         } else if (panel === 'trades') {
             setTrades([]);

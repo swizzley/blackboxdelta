@@ -5,7 +5,7 @@ import type {
     ApiAlert, ApiMarket, ApiSetting, SignalRow,
     OptimizerStatus, OptimizerGeneration, OptimizerRecommendation,
     OptimizerBranch, OptimizerWorkerConfig, SeedRun,
-    OptimizerAllProfilesResponse, GenQueueResponse,
+    OptimizerAllProfilesResponse, GenQueueResponse, PaginatedResponse,
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
     HealthStatus,
@@ -140,9 +140,10 @@ export function fetchOptimizerStatus(): Promise<OptimizerStatus | null> {
     return apiFetch('/api/optimizer/status');
 }
 
-export function fetchOptimizerGenerations(limit = 20, profile?: string): Promise<OptimizerGeneration[] | null> {
+export function fetchOptimizerGenerations(limit = 15, profile?: string, page?: number): Promise<PaginatedResponse<OptimizerGeneration> | null> {
     const params = new URLSearchParams({limit: String(limit)});
     if (profile) params.set('profile', profile);
+    if (page !== undefined) params.set('page', String(page));
     return apiFetch(`/api/optimizer/generations?${params}`);
 }
 
@@ -150,9 +151,11 @@ export function fetchOptimizerBranches(generationId: number): Promise<OptimizerB
     return apiFetch(`/api/optimizer/generations/${generationId}/branches`);
 }
 
-export function fetchOptimizerRecommendations(status?: string): Promise<OptimizerRecommendation[] | null> {
-    const qs = status ? `?status=${status}` : '';
-    return apiFetch(`/api/optimizer/recommendations${qs}`);
+export function fetchOptimizerRecommendations(status?: string, limit = 20, page?: number): Promise<PaginatedResponse<OptimizerRecommendation> | null> {
+    const params = new URLSearchParams({limit: String(limit)});
+    if (status) params.set('status', status);
+    if (page !== undefined) params.set('page', String(page));
+    return apiFetch(`/api/optimizer/recommendations?${params}`);
 }
 
 export async function apiPost(path: string, body?: any): Promise<any> {
@@ -247,8 +250,10 @@ export function demoteProfile(name: string): Promise<any> {
     return apiPost(`/api/optimizer/profiles/${name}/demote`, {});
 }
 
-export function fetchProfileHistory(name: string): Promise<import('../context/Types').ProfileHistoryResponse | null> {
-    return apiFetch(`/api/optimizer/profiles/${name}/history`);
+export function fetchProfileHistory(name: string, limit = 20, page?: number): Promise<import('../context/Types').ProfileHistoryResponse | null> {
+    const params = new URLSearchParams({limit: String(limit)});
+    if (page !== undefined) params.set('page', String(page));
+    return apiFetch(`/api/optimizer/profiles/${name}/history?${params}`);
 }
 
 export function fetchProfileTimeline(name: string): Promise<import('../context/Types').ProfileTimelineResponse | null> {
@@ -264,11 +269,10 @@ export function queueLHCRun(timeframe: string, profile: string, combos: number =
     return apiPost('/api/optimizer/lhc', { timeframe, profile, combos });
 }
 
-export function fetchLHCRuns(limit: number = 20): Promise<import('../context/Types').LHCRun[] | null> {
-    const params = new URLSearchParams();
-    params.set('limit', String(limit));
-    const qs = params.toString();
-    return apiFetch(`/api/optimizer/lhc-runs${qs ? '?' + qs : ''}`);
+export function fetchLHCRuns(limit = 10, page?: number): Promise<PaginatedResponse<import('../context/Types').LHCRun> | null> {
+    const params = new URLSearchParams({limit: String(limit)});
+    if (page !== undefined) params.set('page', String(page));
+    return apiFetch(`/api/optimizer/lhc-runs?${params}`);
 }
 
 export function fetchLHCRunDetail(id: number): Promise<import('../context/Types').LHCRunDetail | null> {
@@ -300,11 +304,11 @@ export async function updateOptimizerWorkers(config: Record<string, {enabled?: b
 }
 
 // Seed runs
-export function fetchOptimizerSeedRuns(timeframe?: string, status?: string, limit = 50): Promise<SeedRun[] | null> {
-    const params = new URLSearchParams();
+export function fetchOptimizerSeedRuns(timeframe?: string, status?: string, limit = 10, page?: number): Promise<PaginatedResponse<SeedRun> | null> {
+    const params = new URLSearchParams({limit: String(limit)});
     if (timeframe) params.set('timeframe', timeframe);
     if (status) params.set('status', status);
-    params.set('limit', String(limit));
+    if (page !== undefined) params.set('page', String(page));
     return apiFetch(`/api/optimizer/seed-runs?${params}`);
 }
 
