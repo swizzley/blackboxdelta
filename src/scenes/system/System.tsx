@@ -77,6 +77,9 @@ export default function System() {
     const infraServices = groups?.infra || [];
     const discoveredServices = groups?.discovered || [];
     const optimizerActive = optimizerServices.filter(s => s.active).length;
+    const allServices = groups ? Object.values(groups).flat() : [];
+    const criticalDown = allServices.filter(s => !s.active && !s.optional);
+    const optionalDown = allServices.filter(s => !s.active && s.optional);
 
     return (
         <>
@@ -124,16 +127,41 @@ export default function System() {
                                 />
                                 <KPICard
                                     label="Down"
-                                    value={String(summary?.inactive ?? 0)}
-                                    color={summary?.inactive === 0 ? 'ok' : (summary?.inactive ?? 0) > 3 ? 'critical' : 'warn'}
+                                    value={String(criticalDown.length)}
+                                    color={criticalDown.length === 0 ? 'ok' : criticalDown.length > 3 ? 'critical' : 'warn'}
                                     icon={<ExclamationTriangleIcon className="w-6 h-6"/>}
                                     isDarkMode={isDarkMode}
                                 />
                             </div>
 
-                            {/* Inactive services banner */}
-                            {summary && summary.inactive > 0 && (
-                                <InactiveBanner groups={groups} isDarkMode={isDarkMode}/>
+                            {/* Critical services down banner */}
+                            {criticalDown.length > 0 && (
+                                <div className={`${isDarkMode ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border rounded-lg shadow p-5 mb-6`}>
+                                    <h2 className="text-lg font-semibold mb-3 flex items-center gap-2 text-red-500">
+                                        <ExclamationTriangleIcon className="w-5 h-5"/>{criticalDown.length} Service{criticalDown.length > 1 ? 's' : ''} Down
+                                    </h2>
+                                    <div className="flex flex-wrap gap-2">
+                                        {criticalDown.map(s => (
+                                            <span key={`${s.host}-${s.name}`}
+                                                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border ${isDarkMode ? 'bg-red-900/30 text-red-400 border-red-700/40' : 'bg-red-100 text-red-700 border-red-200'}`}>
+                                                <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"/>
+                                                {s.name}
+                                                <span className="opacity-50">@{s.host}</span>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Optional services down — subtle note */}
+                            {optionalDown.length > 0 && criticalDown.length === 0 && (
+                                <div className={`${isDarkMode ? 'bg-yellow-900/10 border-yellow-800/30' : 'bg-yellow-50/50 border-yellow-200'} border rounded-lg shadow px-5 py-3 mb-6`}>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`text-sm ${muted}`}>
+                                            {optionalDown.map(s => `${s.name}@${s.host}`).join(', ')} — optional, not critical
+                                        </span>
+                                    </div>
+                                </div>
                             )}
 
                             {/* Trading Pipeline */}
@@ -243,29 +271,6 @@ function KPICard({label, value, color, icon, isDarkMode}: {label: string; value:
     );
 }
 
-function InactiveBanner({groups, isDarkMode}: {groups: Record<string, TaggedService[]> | null; isDarkMode: boolean}) {
-    if (!groups) return null;
-    const inactive = Object.values(groups).flat().filter(s => !s.active);
-    if (inactive.length === 0) return null;
-
-    return (
-        <div className={`${isDarkMode ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border rounded-lg shadow p-5 mb-6`}>
-            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2 text-red-500">
-                <ExclamationTriangleIcon className="w-5 h-5"/>{inactive.length} Service{inactive.length > 1 ? 's' : ''} Down
-            </h2>
-            <div className="flex flex-wrap gap-2">
-                {inactive.map(s => (
-                    <span key={`${s.host}-${s.name}`}
-                          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium border ${isDarkMode ? 'bg-red-900/30 text-red-400 border-red-700/40' : 'bg-red-100 text-red-700 border-red-200'}`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0"/>
-                        {s.name}
-                        <span className="opacity-50">@{s.host}</span>
-                    </span>
-                ))}
-            </div>
-        </div>
-    );
-}
 
 function ServiceGroupCard({title, icon, services, isDarkMode, card, heading, muted}: {
     title: string; icon: React.ReactNode; services: TaggedService[];

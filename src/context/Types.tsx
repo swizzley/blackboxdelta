@@ -1036,6 +1036,7 @@ export interface ServiceHealth {
     name: string;
     role: string;
     active: boolean;
+    optional?: boolean;
 }
 
 export interface HealthSummary {
