@@ -50,7 +50,7 @@ export default function Optimizer() {
     const [showLHC, setShowLHC] = useState(false);
     const [showRecs, setShowRecs] = useState(false);
     const [showGens, setShowGens] = useState(false);
-    const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
+    const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe' | 'profile'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
     const [lhcRuns, setLhcRuns] = useState<LHCRun[]>([]);
     const [expandedLHC, setExpandedLHC] = useState<number | null>(null);
     const [lhcDetail, setLhcDetail] = useState<LHCRunDetail | null>(null);
@@ -471,7 +471,7 @@ export default function Optimizer() {
                                 ) : (
                                     <>
                                         <div className="flex gap-1.5 mb-3" onClick={e => e.stopPropagation()}>
-                                            {(['id', 'timeframe'] as const).map(field => (
+                                            {(['id', 'profile', 'timeframe'] as const).map(field => (
                                                 <button key={field} onClick={() => setGenSort(s => ({field, dir: s.field === field && s.dir === 'desc' ? 'asc' : 'desc'}))}
                                                     className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded transition-colors ${genSort.field === field ? 'bg-cyan-600 text-white' : isDarkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
                                                     {field}{genSort.field === field ? (genSort.dir === 'asc' ? ' ↑' : ' ↓') : ''}
@@ -482,6 +482,11 @@ export default function Optimizer() {
                                             {(() => {
                                                 const tfOrder: Record<string, number> = {scalp: 0, intraday: 1, swing: 2};
                                                 const sorted = [...generations].sort((a, b) => {
+                                                    if (genSort.field === 'profile') {
+                                                        const cmp = (a.target_profile ?? '').localeCompare(b.target_profile ?? '');
+                                                        if (cmp !== 0) return genSort.dir === 'asc' ? cmp : -cmp;
+                                                        return b.id - a.id;
+                                                    }
                                                     if (genSort.field === 'timeframe') {
                                                         const cmp = (tfOrder[a.timeframe ?? ""] ?? 3) - (tfOrder[b.timeframe ?? ""] ?? 3);
                                                         if (cmp !== 0) return genSort.dir === 'asc' ? cmp : -cmp;
@@ -642,7 +647,7 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
             <button onClick={toggle} className={`w-full flex items-center justify-between px-4 py-2.5 text-left hover:${isDarkMode ? 'bg-slate-700/60' : 'bg-gray-100'} rounded-lg transition-colors`}>
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>#{gen.id}</span>
-                    
+                    {gen.target_profile && <span className={`text-xs font-mono font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-700'}`}>{gen.target_profile}</span>}
                     <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
                     {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
                     <span className={`text-xs ${muted} hidden sm:inline`}>
