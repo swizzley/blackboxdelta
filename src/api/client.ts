@@ -9,6 +9,7 @@ import type {
     AnalysisRunApi, AnalysisRunDetailApi, AnalysisTodoApi,
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
     HealthStatus,
+    SurgeProfile, SurgeGeneration, SurgeBranch, SurgeHistoryEntry,
 } from '../context/Types';
 
 const TIMEOUT = 5000;
@@ -463,4 +464,45 @@ export function fetchSentimentArticles(limit = 50): Promise<ApiSentimentArticle[
 
 export function fetchSentimentFeeds(): Promise<ApiSentimentFeed[] | null> {
     return apiFetch('/api/sentiment/feeds');
+}
+
+// Surge optimizer
+export function fetchSurgeProfiles(): Promise<SurgeProfile[] | null> {
+    return apiFetch('/api/optimizer/surge/profiles');
+}
+
+export function fetchSurgeGenerations(limit = 15, page?: number): Promise<PaginatedResponse<SurgeGeneration> | null> {
+    const params = new URLSearchParams({limit: String(limit)});
+    if (page !== undefined) params.set('page', String(page));
+    return apiFetch(`/api/optimizer/surge/generations?${params}`);
+}
+
+export function fetchSurgeBranches(generationId: number): Promise<SurgeBranch[] | null> {
+    return apiFetch(`/api/optimizer/surge/generations/${generationId}/branches`);
+}
+
+export function fetchSurgeProfileHistory(name: string, limit = 20, page?: number): Promise<PaginatedResponse<SurgeHistoryEntry> | null> {
+    const params = new URLSearchParams({limit: String(limit)});
+    if (page !== undefined) params.set('page', String(page));
+    return apiFetch(`/api/optimizer/surge/profiles/${name}/history?${params}`);
+}
+
+export function enableSurgeProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/surge/profiles/${name}/enable`, {});
+}
+
+export function disableSurgeProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/surge/profiles/${name}/disable`, {});
+}
+
+export function soakSurgeProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/surge/profiles/${name}/soak`, {});
+}
+
+export function goliveSurgeProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/surge/profiles/${name}/golive`, {});
+}
+
+export function noliveSurgeProfile(name: string): Promise<any> {
+    return apiPost(`/api/optimizer/surge/profiles/${name}/nolive`, {});
 }

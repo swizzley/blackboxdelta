@@ -1072,3 +1072,70 @@ export interface HealthSummary {
     active: number;
     inactive: number;
 }
+
+// Surge optimizer types
+export interface SurgeProfile {
+    id: number;
+    name: string;
+    base_timeframe: string;
+    curve_timeframe: string;
+    trend_timeframe: string;
+    zone_timeframe: string;
+    enabled: boolean;
+    is_live: boolean;
+    soaking: boolean;
+    mutation_id: number | null;
+    generation_counter: number;
+    consecutive_failures: number;
+    source_repo: string;
+    oos_result: any | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface SurgeGeneration {
+    id: number;
+    profile_name: string;
+    base_timeframe: string;
+    branch_count: number;
+    status: string;
+    claimed_by: string;
+    started_at: string | null;
+    completed_at: string | null;
+    created_at: string;
+}
+
+export interface SurgeBranch {
+    id: number;
+    profile_name: string;
+    base_timeframe: string;
+    mutation_id: number;
+    is_sharpe: number;
+    is_pf: number;
+    is_pnl: number;
+    is_trades: number;
+    is_wr: number;
+    oos_sharpe: number;
+    oos_pf: number;
+    oos_pnl: number;
+    oos_trades: number;
+    oos_wr: number;
+    status: string;
+    ai_score: number;
+    created_at: string;
+}
+
+export interface SurgeHistoryEntry {
+    id: number;
+    profile_name: string;
+    base_timeframe: string;
+    mutation_id: number;
+    sharpe_ratio: number;
+    profit_factor: number;
+    total_pnl: number;
+    win_rate: number;
+    total_trades: number;
+    source_branch_id: number | null;
+    source_generation_id: number | null;
+    promoted_at: string;
+}
