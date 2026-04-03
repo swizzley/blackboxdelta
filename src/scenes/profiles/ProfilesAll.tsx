@@ -12,12 +12,12 @@ import {
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, ProfileTimelineResponse, OptimizerGeneration, ProfileHistoryEntry, ApiOrder, ProfileParamsResponse, LHCRun} from '../../context/Types';
 import {flattenProfiles, matchesSearch, isGoldProfile, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
-import {GenerationRow, fmtNum, plColor} from './components/shared';
+import {GenerationRow, fmtNum, plColor, compositeColor} from './components/shared';
 import Tooltip from '../common/Tooltip';
 import {ClockIcon, ChartBarIcon, ListBulletIcon, AdjustmentsHorizontalIcon, BoltIcon, ArrowsRightLeftIcon, ArrowTrendingUpIcon} from '@heroicons/react/24/outline';
 import ReactECharts from 'echarts-for-react';
 
-type SortKey = 'name' | 'timeframe' | 'base_tf' | 'stage' | 'sharpe' | 'win_rate' | 'pf' | 'silence' | 'trades' | 'pnl' | 'drawdown' | 'gens' | 'failures' | 'updated' | 'live_trades' | 'live_wr' | 'live_pnl' | 'time_live';
+type SortKey = 'name' | 'timeframe' | 'base_tf' | 'stage' | 'composite' | 'sharpe' | 'win_rate' | 'pf' | 'silence' | 'trades' | 'pnl' | 'drawdown' | 'gens' | 'failures' | 'updated' | 'live_trades' | 'live_wr' | 'live_pnl' | 'time_live';
 
 const PAGE_SIZE = 50;
 
@@ -57,7 +57,7 @@ export default function ProfilesAll() {
     const enabledFilter = (searchParams.get('enabled') ?? 'all') as 'all' | 'yes' | 'no';
     const liveFilter = (searchParams.get('live') ?? 'all') as 'all' | 'yes' | 'no';
     const baseTfFilter = searchParams.get('base_tf') ?? 'all';
-    const sortKey = (searchParams.get('sort') ?? 'sharpe') as SortKey;
+    const sortKey = (searchParams.get('sort') ?? 'composite') as SortKey;
     const sortDir = (searchParams.get('dir') ?? 'desc') as 'asc' | 'desc';
     const page = parseInt(searchParams.get('page') ?? '0', 10);
 
@@ -142,6 +142,7 @@ export default function ProfilesAll() {
                 case 'timeframe': av = a.timeframe; bv = b.timeframe; break;
                 case 'base_tf': av = a.base_timeframe ?? ''; bv = b.base_timeframe ?? ''; break;
                 case 'stage': av = STAGE_ORDER.indexOf(a.stage); bv = STAGE_ORDER.indexOf(b.stage); break;
+                case 'composite': av = getStat(a)?.composite_score ?? -999; bv = getStat(b)?.composite_score ?? -999; break;
                 case 'sharpe': av = getStat(a)?.sharpe_ratio ?? -999; bv = getStat(b)?.sharpe_ratio ?? -999; break;
                 case 'win_rate': av = getStat(a)?.win_rate ?? -999; bv = getStat(b)?.win_rate ?? -999; break;
                 case 'pf': av = getStat(a)?.profit_factor ?? -999; bv = getStat(b)?.profit_factor ?? -999; break;
@@ -271,6 +272,7 @@ export default function ProfilesAll() {
     };
 
     const headerTips: Partial<Record<SortKey, string>> = {
+        composite: '35% silence + 30% pnl + 20% sharpe + 15% trades',
         sharpe: 'Backtest Sharpe Ratio', win_rate: 'Backtest Win Rate %', pf: 'Backtest Profit Factor',
         trades: 'Backtest Trade Count', pnl: 'Backtest P&L',
         live_trades: 'Live Trade Count', live_wr: 'Live Win Rate %', live_pnl: 'Live P&L',
@@ -507,7 +509,8 @@ export default function ProfilesAll() {
                                         <SortHeader label="BTF" field="base_tf"/>
                                         <SortHeader label="St" field="stage"/>
                                         {/* Backtest */}
-                                        <SortHeader label="BT S" field="sharpe"/>
+                                        <SortHeader label="Score" field="composite"/>
+                                        <SortHeader label="Sharpe" field="sharpe"/>
                                         <SortHeader label="WR" field="win_rate"/>
                                         <SortHeader label="PF" field="pf"/>
                                         <SortHeader label="Sil" field="silence"/>
@@ -560,6 +563,9 @@ export default function ProfilesAll() {
                                                     </Tooltip>
                                                 </td>
                                                 {/* Backtest */}
+                                                <td className={`px-1 py-1 text-[11px] font-mono font-semibold ${s && s.composite_score > -999 ? compositeColor(s.composite_score) : muted}`}>
+                                                    {s && s.composite_score > -999 ? s.composite_score.toFixed(2) : '—'}
+                                                </td>
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${s && s.sharpe_ratio >= 1 ? 'text-emerald-400' : s && s.sharpe_ratio >= 0 ? (isDarkMode ? 'text-amber-400' : 'text-amber-600') : s ? 'text-red-400' : muted}`}>
                                                     {s ? s.sharpe_ratio.toFixed(2) : '—'}
                                                 </td>
@@ -677,7 +683,7 @@ export default function ProfilesAll() {
                                                                         const idx = params[0]?.dataIndex;
                                                                         const h = baselineHistory[baselineHistory.length - 1 - idx];
                                                                         if (!h?.oos) return '';
-                                                                        return `<b>Gen ${h.generation_counter}</b> (${h.created_at.slice(0, 10)})<br/>Sharpe: ${h.oos.sharpe_ratio.toFixed(3)}<br/>PF: ${h.oos.profit_factor.toFixed(2)}<br/>WR: ${h.oos.win_rate.toFixed(0)}%<br/>Trades: ${h.oos.total_trades}`;
+                                                                        return `<b>Gen ${h.generation_counter}</b> (${h.created_at.slice(0, 10)})<br/>Composite: ${h.oos.composite_score?.toFixed(3) ?? '—'}<br/>Sharpe: ${h.oos.sharpe_ratio.toFixed(3)}<br/>PF: ${h.oos.profit_factor.toFixed(2)}<br/>WR: ${h.oos.win_rate.toFixed(0)}%<br/>Trades: ${h.oos.total_trades}`;
                                                                     }},
                                                                     xAxis: {type: 'category', data: [...baselineHistory].reverse().map(h => `g${h.generation_counter}`), axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280', fontSize: 9}, axisLine: {lineStyle: {color: isDarkMode ? '#334155' : '#e5e7eb'}}},
                                                                     yAxis: {type: 'value', name: 'Sharpe', nameTextStyle: {color: isDarkMode ? '#9ca3af' : '#6b7280', fontSize: 10}, axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280', fontSize: 10}, splitLine: {lineStyle: {color: isDarkMode ? '#334155' : '#e5e7eb'}}},

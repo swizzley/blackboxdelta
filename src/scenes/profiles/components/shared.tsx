@@ -77,18 +77,43 @@ export function TimeframeBadge({tf, isDarkMode}: {tf?: string; isDarkMode: boole
 export const BaseTimeframeBadge = ({baseTf, isDarkMode}: {baseTf?: string; isDarkMode: boolean}) =>
     <TimeframeBadge tf={baseTf} isDarkMode={isDarkMode}/>;
 
+export function compositeColor(score: number): string {
+    if (score <= -999) return 'text-gray-500';
+    if (score >= 0.7) return 'text-emerald-400';
+    if (score >= 0.5) return 'text-green-400';
+    if (score >= 0.3) return 'text-amber-400';
+    if (score >= 0) return 'text-orange-400';
+    return 'text-red-400';
+}
+
+export function CompositeScoreBadge({score}: {score?: number; isDarkMode?: boolean}) {
+    if (score == null || score <= -999) return null;
+    const color = compositeColor(score);
+    return (
+        <span className={`inline-flex items-center gap-0.5 font-mono text-xs font-semibold ${color}`} title={`Composite: ${score.toFixed(3)} (35% silence + 30% pnl + 20% sharpe + 15% trades)`}>
+            {score.toFixed(2)}
+        </span>
+    );
+}
+
 export function CompositeScoreBar({stats, isDarkMode}: {
-    stats: {silence_ratio?: number; total_pnl?: number; total_trades?: number; sharpe_ratio?: number};
+    stats: {silence_ratio?: number; total_pnl?: number; total_trades?: number; sharpe_ratio?: number; composite_score?: number};
     isDarkMode: boolean;
 }) {
     const sil = stats.silence_ratio ?? -1;
     const pnl = stats.total_pnl ?? 0;
     const trades = stats.total_trades ?? 0;
     const sharpe = stats.sharpe_ratio ?? 0;
+    const composite = stats.composite_score;
     const muted = isDarkMode ? 'text-gray-500' : 'text-gray-400';
     const silColor = sil === 0 ? 'text-emerald-400' : sil < 0.2 ? (isDarkMode ? 'text-amber-400' : 'text-amber-600') : sil < 0 ? muted : 'text-red-400';
     return (
-        <div className="flex gap-2 text-[10px] font-mono">
+        <div className="flex gap-2 text-[10px] font-mono items-center">
+            {composite != null && composite > -999 && (
+                <span className={`font-semibold ${compositeColor(composite)}`} title={`Composite: 35% silence + 30% pnl + 20% sharpe + 15% trades`}>
+                    C:{composite.toFixed(2)}
+                </span>
+            )}
             <span className={silColor} title="Silence ratio">{sil >= 0 ? `S:${sil.toFixed(2)}` : 'S:—'}</span>
             <span className={pnl >= 0 ? 'text-emerald-400' : 'text-red-400'} title="P&L">{fmtNum(pnl)}</span>
             <span className={muted} title="Trades">{trades}t</span>
@@ -140,10 +165,16 @@ export function DiffBlock({diffs, baseId: _baseId, isDarkMode, muted, stripPrefi
 }
 
 export function ResultBlock({label, result, isDarkMode, muted}: {label: string; result: OptimizerResult; isDarkMode: boolean; muted: string}) {
+    const cs = result.composite_score;
     return (
         <div>
             <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>{label}</p>
             <div className="flex flex-wrap gap-2">
+                {cs != null && cs > -999 && (
+                    <ResultStat label="Composite" value={cs.toFixed(3)} isDarkMode={isDarkMode}
+                        color={compositeColor(cs)}
+                        tooltip="35% silence + 30% pnl + 20% sharpe + 15% trades"/>
+                )}
                 <ResultStat label="Sharpe" value={result.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="PF" value={result.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="Win%" value={result.win_rate ? `${result.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
@@ -169,6 +200,7 @@ export function BranchRow({branch: b, isDarkMode, muted, winnerId}: {branch: Opt
     const pf = r?.profit_factor ?? b.profit_factor;
     const sharpe = r?.sharpe_ratio ?? b.sharpe_ratio;
     const dd = r?.max_drawdown ?? b.max_drawdown;
+    const cs = r?.composite_score;
     const durationStr = b.created_at && b.completed_at ? (() => {
         const ms = dayjs(b.completed_at).diff(dayjs(b.created_at));
         if (ms < 60_000) return `${Math.round(ms / 1000)}s`;
@@ -187,6 +219,7 @@ export function BranchRow({branch: b, isDarkMode, muted, winnerId}: {branch: Opt
                     {b.id}
                 </td>
                 <td className={`text-xs font-medium py-1.5 pr-3 ${statusCls}`}>{b.status}</td>
+                <td className={`${tdCl} py-1.5 pr-3 font-semibold ${cs != null && cs > -999 ? compositeColor(cs) : ''}`}>{cs != null && cs > -999 ? cs.toFixed(2) : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>
                     {b.target_profile
                         ? <span className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ${isDarkMode ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>{b.target_profile}</span>
@@ -204,7 +237,7 @@ export function BranchRow({branch: b, isDarkMode, muted, winnerId}: {branch: Opt
             </tr>
             {expanded && (
                 <tr className={rowCls}>
-                    <td colSpan={9} className="px-3 pb-3 pt-1">
+                    <td colSpan={10} className="px-3 pb-3 pt-1">
                         <div className="space-y-3">
                             <div className="flex flex-wrap gap-4 text-xs">
                                 {durationStr && <span className={muted}>Duration: <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>{durationStr}</span></span>}
@@ -298,6 +331,7 @@ export function GenerationRow({gen, isDarkMode, muted}: {gen: OptimizerGeneratio
                                     <tr className="border-b border-gray-700/20">
                                         <th className={`${thCl} pb-1.5 pr-3`}>Branch</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Status</th>
+                                        <th className={`${thCl} pb-1.5 pr-3`}>Score</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Profile</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Trades</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Win%</th>

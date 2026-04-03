@@ -11,7 +11,7 @@ import {
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, LHCRun} from '../../context/Types';
 import {flattenProfiles, matchesSearch, isGoldProfile, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
-import {ResultStat, WRFractionStat, StageBadge, BaseTimeframeBadge, CompositeScoreBar, fmtNum, plColor} from './components/shared';
+import {ResultStat, WRFractionStat, StageBadge, BaseTimeframeBadge, CompositeScoreBar, fmtNum, plColor, compositeColor} from './components/shared';
 
 export default function Profiles() {
     const {isDarkMode} = useTheme();
@@ -345,7 +345,7 @@ export default function Profiles() {
                                             <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
                                             <StageBadge stage={p.stage} isDarkMode={isDarkMode}/>
                                             {isNegLive && p.baseline?.stats && (
-                                                <span className="text-xs font-mono text-red-400">S:{p.baseline.stats.sharpe_ratio.toFixed(2)}</span>
+                                                <span className={`text-xs font-mono ${compositeColor(p.baseline.stats.composite_score ?? -999)}`}>C:{p.baseline.stats.composite_score?.toFixed(2) ?? '—'}</span>
                                             )}
                                             {isStalled && (
                                                 <span className={`text-xs ${muted}`}>f:{p.baseline?.consecutive_failures ?? 0}</span>
@@ -481,7 +481,7 @@ export default function Profiles() {
                                             case 'trades': return (b.baseline?.stats?.total_trades ?? 0) - (a.baseline?.stats?.total_trades ?? 0);
                                             case 'pnl': return (b.baseline?.stats?.total_pnl ?? -999) - (a.baseline?.stats?.total_pnl ?? -999);
                                             case 'gens': return (b.baseline?.generation_counter ?? 0) - (a.baseline?.generation_counter ?? 0);
-                                            default: return (b.baseline?.stats?.sharpe_ratio ?? -999) - (a.baseline?.stats?.sharpe_ratio ?? -999);
+                                            default: return (b.baseline?.stats?.composite_score ?? -999) - (a.baseline?.stats?.composite_score ?? -999);
                                         }
                                     });
                                 const colors = STAGE_COLORS[stage];

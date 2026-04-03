@@ -531,7 +531,9 @@ export interface OptimizerResult {
     avg_loss: number;
     max_drawdown: number;
     sharpe_ratio: number;
+    silence_ratio: number;
     breakeven_wr: number;
+    composite_score: number;
     ProfileBreakdown?: Record<string, OptimizerResult>;
 }
 
@@ -804,6 +806,7 @@ export interface OptimizerProfileStats {
     sharpe_ratio: number;
     silence_ratio: number;
     breakeven_wr: number;
+    composite_score: number;
 }
 
 export interface ProfileBaselineData {

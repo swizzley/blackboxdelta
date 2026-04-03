@@ -4,7 +4,7 @@ import Foot from '../common/Foot';
 import Tooltip from '../common/Tooltip';
 import Pagination from '../common/Pagination';
 import {useTheme} from '../../context/Theme';
-import {ResultStat as SharedResultStat, fmtNum as sharedFmtNum, fmtPct as sharedFmtPct, avgPnl as sharedAvgPnl, plColor as sharedPlColor} from '../profiles/components/shared';
+import {ResultStat as SharedResultStat, fmtNum as sharedFmtNum, fmtPct as sharedFmtPct, avgPnl as sharedAvgPnl, plColor as sharedPlColor, compositeColor} from '../profiles/components/shared';
 import {useApi} from '../../context/Api';
 import {
     fetchOptimizerStatus, fetchOptimizerGenerations,
@@ -425,6 +425,7 @@ export default function Optimizer() {
                                                             )}
                                                             {rec.oos_result && (
                                                                 <div className={`text-xs ${muted} flex gap-3`}>
+                                                                    {rec.oos_result.composite_score > -999 && <span className={`font-semibold ${compositeColor(rec.oos_result.composite_score)}`}>Score: {rec.oos_result.composite_score.toFixed(3)}</span>}
                                                                     <span>Sharpe: {rec.oos_result.sharpe_ratio.toFixed(4)}</span>
                                                                     <span>PF: {rec.oos_result.profit_factor.toFixed(2)}</span>
                                                                     <span>WR: {rec.oos_result.win_rate.toFixed(0)}%</span>
@@ -683,6 +684,7 @@ function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
                                     <tr className="border-b border-gray-700/20">
                                         <th className={`${thCl} pb-1.5 pr-3`}>Branch</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Status</th>
+                                        <th className={`${thCl} pb-1.5 pr-3`}>Score</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Profile</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Trades</th>
                                         <th className={`${thCl} pb-1.5 pr-3`}>Win%</th>
@@ -728,6 +730,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
     const pf = r?.profit_factor ?? b.profit_factor;
     const sharpe = r?.sharpe_ratio ?? b.sharpe_ratio;
     const dd = r?.max_drawdown ?? b.max_drawdown;
+    const cs = r?.composite_score;
 
     // Compute duration
     const durationStr = b.created_at && b.completed_at
@@ -754,6 +757,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
                     {b.id}
                 </td>
                 <td className={`text-xs font-medium py-1.5 pr-3 ${statusCls}`}>{b.status}</td>
+                <td className={`${tdCl} py-1.5 pr-3 font-semibold ${cs != null && cs > -999 ? compositeColor(cs) : ''}`}>{cs != null && cs > -999 ? cs.toFixed(2) : '—'}</td>
                 <td className={`${tdCl} py-1.5 pr-3`}>
                     {b.target_profile
                         ? <span className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium ${isDarkMode ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>{b.target_profile}</span>
@@ -775,7 +779,7 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
             </tr>
             {expanded && (
                 <tr className={rowCls}>
-                    <td colSpan={9} className="px-3 pb-3 pt-1">
+                    <td colSpan={10} className="px-3 pb-3 pt-1">
                         <div className="space-y-3">
                             {/* Meta row: duration, date ranges */}
                             <div className="flex flex-wrap gap-4 text-xs">
@@ -818,10 +822,16 @@ function BranchRow({branch: b, isDarkMode, tdCl, winnerId, muted}: {branch: Opti
 }
 
 function ResultBlock({label, result, isDarkMode, muted}: {label: string; result: OptimizerResult; isDarkMode: boolean; muted: string}) {
+    const cs = result.composite_score;
     return (
         <div>
             <p className={`text-xs font-medium uppercase tracking-wider mb-1.5 ${muted}`}>{label}</p>
             <div className="flex flex-wrap gap-2">
+                {cs != null && cs > -999 && (
+                    <ResultStat label="Composite" value={cs.toFixed(3)} isDarkMode={isDarkMode}
+                        color={compositeColor(cs)}
+                        tooltip="35% silence + 30% pnl + 20% sharpe + 15% trades"/>
+                )}
                 <ResultStat label="Sharpe" value={result.sharpe_ratio?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="PF" value={result.profit_factor?.toFixed(2) ?? '—'} isDarkMode={isDarkMode}/>
                 <ResultStat label="Win%" value={result.win_rate ? `${result.win_rate.toFixed(0)}%` : '—'} isDarkMode={isDarkMode}/>
