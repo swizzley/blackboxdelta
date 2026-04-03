@@ -1,8 +1,8 @@
 {
   "all_time": {
     "total_orders": 3050,
-    "pending": 4,
-    "open_positions": 4,
+    "pending": 3,
+    "open_positions": 5,
     "closed_orders": 3042,
     "total_pl": -21.69,
     "winners": 555,
