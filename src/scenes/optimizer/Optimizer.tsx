@@ -74,7 +74,7 @@ export default function Optimizer() {
     const SEED_PAGE_SIZE = 10;
     const LHC_PAGE_SIZE = 10;
     const REC_PAGE_SIZE = 20;
-    const GEN_PAGE_SIZE = 15;
+    const GEN_PAGE_SIZE = 100;
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
