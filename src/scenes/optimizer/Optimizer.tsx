@@ -50,7 +50,7 @@ export default function Optimizer() {
     const [showLHC, setShowLHC] = useState(false);
     const [showRecs, setShowRecs] = useState(false);
     const [showGens, setShowGens] = useState(false);
-    const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe' | 'profile'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
+    const [genSort, setGenSort] = useState<{field: 'id' | 'timeframe' | 'profile' | 'status'; dir: 'asc' | 'desc'}>({field: 'id', dir: 'desc'});
     const [lhcRuns, setLhcRuns] = useState<LHCRun[]>([]);
     const [expandedLHC, setExpandedLHC] = useState<number | null>(null);
     const [lhcDetail, setLhcDetail] = useState<LHCRunDetail | null>(null);
@@ -471,7 +471,7 @@ export default function Optimizer() {
                                 ) : (
                                     <>
                                         <div className="flex gap-1.5 mb-3" onClick={e => e.stopPropagation()}>
-                                            {(['id', 'profile', 'timeframe'] as const).map(field => (
+                                            {(['id', 'profile', 'timeframe', 'status'] as const).map(field => (
                                                 <button key={field} onClick={() => setGenSort(s => ({field, dir: s.field === field && s.dir === 'desc' ? 'asc' : 'desc'}))}
                                                     className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded transition-colors ${genSort.field === field ? 'bg-cyan-600 text-white' : isDarkMode ? 'bg-slate-700 text-gray-400 hover:bg-slate-600' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
                                                     {field}{genSort.field === field ? (genSort.dir === 'asc' ? ' ↑' : ' ↓') : ''}
@@ -481,7 +481,13 @@ export default function Optimizer() {
                                         <div className="space-y-1">
                                             {(() => {
                                                 const tfOrder: Record<string, number> = {scalp: 0, intraday: 1, swing: 2};
+                                                const statusOrder: Record<string, number> = {active: 0, running: 0, pending: 1, complete: 2, failed: 3};
                                                 const sorted = [...generations].sort((a, b) => {
+                                                    if (genSort.field === 'status') {
+                                                        const cmp = (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
+                                                        if (cmp !== 0) return genSort.dir === 'asc' ? cmp : -cmp;
+                                                        return b.id - a.id;
+                                                    }
                                                     if (genSort.field === 'profile') {
                                                         const cmp = (a.target_profile ?? '').localeCompare(b.target_profile ?? '');
                                                         if (cmp !== 0) return genSort.dir === 'asc' ? cmp : -cmp;
