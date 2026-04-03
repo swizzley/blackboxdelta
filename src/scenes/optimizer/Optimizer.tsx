@@ -1,6 +1,5 @@
 import {useEffect, useState, useCallback, useRef} from 'react';
 import Nav from '../common/Nav';
-import SurgeSection from './Surge';
 import Foot from '../common/Foot';
 import Tooltip from '../common/Tooltip';
 import Pagination from '../common/Pagination';
@@ -504,9 +503,6 @@ export default function Optimizer() {
                                     </>
                                 ))}
                             </div>
-
-                            {/* Surge (Market Structure) */}
-                            <SurgeSection/>
 
                         </>
                     )}
