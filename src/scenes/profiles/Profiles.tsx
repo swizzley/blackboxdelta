@@ -83,8 +83,10 @@ export default function Profiles() {
         return `${Math.floor(days / 30)}mo ${days % 30}d`;
     };
 
-    // Live Trading includes both live and soaking profiles (soaking = live at 1/10 size)
-    const liveProfiles = filtered.filter(p => p.stage === 'live' || p.stage === 'soaking')
+    // Live Trading includes both live and soaking profiles that have actual trades.
+    // Profiles with 0W/0L are hidden until they make their first trade.
+    const liveProfiles = filtered
+        .filter(p => (p.stage === 'live' || p.stage === 'soaking') && (getLive(p)?.total_orders ?? 0) > 0)
         .sort((a, b) => (getLive(b)?.total_pl ?? 0) - (getLive(a)?.total_pl ?? 0));
     const attentionProfiles = filtered.filter(p =>
         (p.disabled_reason === 'stall') ||
