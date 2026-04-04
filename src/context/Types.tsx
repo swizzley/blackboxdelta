@@ -1007,6 +1007,22 @@ export interface LHCResult {
     avg_loss: number;
 }
 
+// Seed queue types (from /api/optimizer/seed-queue)
+export interface SeedQueueItem {
+    id: number;
+    timeframe: string;
+    profile_name: string;
+    reason: string;
+    priority: number;
+    status: string;
+    claimed_by?: string;
+    claimed_at?: string;
+    completed_at?: string;
+    seed_run_id?: number;
+    error_message?: string;
+    created_at: string;
+}
+
 // Generation queue types (from /api/optimizer/generation-queue)
 export interface GenQueueItem {
     id: number;

@@ -11,7 +11,7 @@ import {
     fetchOptimizerRecommendations,
     fetchOptimizerBranches,
     fetchOptimizerSeedRuns, fetchOptimizerWorkers,
-    fetchGenerationQueue,
+    fetchGenerationQueue, fetchSeedQueue,
     retrySeedProfile,
     applyRecommendation,
     fetchLHCRuns, fetchLHCRunDetail, spawnLHCProfile,
@@ -23,11 +23,12 @@ import type {
     SeedRun, SeedComponentResult, SeedVariantResult,
     SeedStageBResult, SeedStageCResult, SeedStageEResult,
     Tier2Summary, Tier3Summary, SeedDiagnostics,
-    LHCRun, LHCRunDetail, GenQueueResponse,
+    LHCRun, LHCRunDetail, GenQueueResponse, SeedQueueItem,
 } from '../../context/Types';
 import {
-    BeakerIcon, ClockIcon,
+    BeakerIcon, ClockIcon, QueueListIcon,
     LightBulbIcon, ChevronDownIcon, ChevronUpIcon,
+    BoltIcon, CpuChipIcon,
 } from '@heroicons/react/24/outline';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -59,7 +60,8 @@ export default function Optimizer() {
     const [spawning, setSpawning] = useState<string | null>(null);
     const [recActionLoading, setRecActionLoading] = useState<number | null>(null);
     const [genQueue, setGenQueue] = useState<GenQueueResponse | null>(null);
-    const [showGenQueue, setShowGenQueue] = useState(false);
+    const [seedQueue, setSeedQueue] = useState<SeedQueueItem[]>([]);
+    const [lhcQueue, setLhcQueue] = useState<LHCRun[]>([]);
 
     // Pagination state
     const [seedPage, setSeedPage] = useState(0);
@@ -78,7 +80,7 @@ export default function Optimizer() {
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
-        const [s, g, r, sr, wc, lhc, gq] = await Promise.all([
+        const [s, g, r, sr, wc, lhc, gq, sq, lhcQ] = await Promise.all([
             fetchOptimizerStatus(),
             fetchOptimizerGenerations(GEN_PAGE_SIZE, undefined, genPage),
             fetchOptimizerRecommendations(undefined, REC_PAGE_SIZE, recPage),
@@ -86,6 +88,8 @@ export default function Optimizer() {
             fetchOptimizerWorkers(),
             fetchLHCRuns(LHC_PAGE_SIZE, lhcPage),
             fetchGenerationQueue(),
+            fetchSeedQueue(),
+            fetchLHCRuns(50, 0), // fetch all LHC to filter queued/active
         ]);
         if (s) setStatus(s);
         if (g) { setGenerations(g.items ?? []); setGenTotal(g.total); }
@@ -94,6 +98,8 @@ export default function Optimizer() {
         if (lhc) { setLhcRuns(lhc.items ?? []); setLhcTotal(lhc.total); }
         if (wc) setWorkerConfig(wc);
         if (gq) setGenQueue(gq);
+        if (sq) setSeedQueue(sq);
+        if (lhcQ) setLhcQueue((lhcQ.items ?? []).filter(r => r.status === 'queued' || r.status === 'preloading' || r.status === 'sweeping'));
         setLoading(false);
     }, [apiAvailable, genPage, recPage, seedPage, lhcPage]);
 
@@ -103,19 +109,26 @@ export default function Optimizer() {
         return () => clearInterval(iv);
     }, [loadData]);
 
-    const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
-    const heading = `text-lg font-semibold mb-4 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
+    const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-4 transition-colors duration-500`;
+    const cardCompact = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow px-4 py-3 transition-colors duration-500`;
+    const heading = `text-sm font-semibold mb-3 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
+    const headingLg = `text-base font-semibold mb-3 flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
     const muted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
-    const iconCl = 'w-5 h-5 text-cyan-500';
+    const iconCl = 'w-4 h-4 text-cyan-500';
     const thCl = `text-left text-xs font-medium uppercase tracking-wider ${muted}`;
     const tdCl = `text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`;
+
+    const activeGens = status?.active_generations ?? [];
+    const seedQueuePending = seedQueue.filter(i => i.status === 'pending');
+    const seedQueueClaimed = seedQueue.filter(i => i.status === 'claimed');
+    const genQueueItems = genQueue?.items ?? [];
+    const hasQueues = seedQueue.length > 0 || lhcQueue.length > 0 || genQueueItems.length > 0;
 
     return (
         <>
             <Nav/>
             <div className={`min-h-screen pb-12 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-50'} transition-colors duration-500`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-20">
-                    <h1 className={`text-2xl font-bold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Optimizer</h1>
 
                     {!apiAvailable ? (
                         <div className={`${card} text-center py-16`}>
@@ -128,117 +141,191 @@ export default function Optimizer() {
                         </div>
                     ) : (
                         <>
-                            {/* Active Generations */}
-                            {(status?.active_generations ?? []).length > 0 && (
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                                {(status?.active_generations ?? []).map(gen => (
-                                    <div key={gen.id} className={card}>
-                                        <h2 className={`${heading} !mb-0`}>
-                                            <span className={`font-mono text-sm ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{gen.target_profile || `Gen #${gen.id}`}</span>
-                                        </h2>
-                                        <div className="mt-3">
-                                            <GenerationCard gen={gen} isDarkMode={isDarkMode} muted={muted}/>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            )}
-
-                            {/* Worker Pool */}
+                            {/* ══════ Command Strip: Workers + Stats ══════ */}
                             {workerConfig && (
-                                <div className={`${card} mb-6`}>
-                                    <h2 className={heading}>
-                                        <BeakerIcon className={iconCl}/>Unified Worker Pool
+                                <div className={`${cardCompact} mb-4`}>
+                                    <div className="flex items-center gap-4 flex-wrap">
+                                        <div className="flex items-center gap-2">
+                                            <CpuChipIcon className="w-4 h-4 text-cyan-500"/>
+                                            <span className={`text-xs font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Optimizer</span>
+                                        </div>
                                         {workerConfig.host_count != null && workerConfig.host_count > 0 && (
                                             <Tooltip content={workerConfig.active_hosts?.join(', ') ?? ''}>
-                                                <span className={`ml-2 text-xs font-normal px-1.5 py-0.5 rounded ${
+                                                <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${
                                                     isDarkMode ? 'bg-cyan-900/40 text-cyan-400' : 'bg-cyan-100 text-cyan-700'
                                                 }`}>
                                                     {workerConfig.host_count} host{workerConfig.host_count > 1 ? 's' : ''}
                                                 </span>
                                             </Tooltip>
                                         )}
-                                    </h2>
-                                    <WorkerGauge workers={workerConfig.total_workers} cores={workerConfig.cpu_cores || 16} memUsed={workerConfig.memory_used ?? 0} memBudget={workerConfig.max_memory_units} isDarkMode={isDarkMode}/>
-                                    <div className={`mt-3 flex gap-4 text-xs font-mono ${muted}`}>
-                                        <span>{workerConfig.total_workers} total workers</span>
-                                        <span>{(status?.active_generations ?? []).length} active gen{(status?.active_generations ?? []).length !== 1 ? 's' : ''}</span>
+                                        {/* Inline worker gauges */}
+                                        <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md">
+                                            <span className={`text-[10px] font-medium w-7 text-right ${muted}`}>CPU</span>
+                                            <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                                                <div className={`h-full rounded-full transition-all duration-500 ${
+                                                    (workerConfig.cpu_cores > 0 ? workerConfig.total_workers / workerConfig.cpu_cores : 0) <= 0.6 ? 'bg-emerald-500'
+                                                    : (workerConfig.cpu_cores > 0 ? workerConfig.total_workers / workerConfig.cpu_cores : 0) <= 0.85 ? 'bg-amber-500' : 'bg-red-500'
+                                                }`} style={{width: `${Math.min(100, workerConfig.cpu_cores > 0 ? (workerConfig.total_workers / workerConfig.cpu_cores) * 100 : 0)}%`}}/>
+                                            </div>
+                                            <span className={`text-[10px] font-mono ${muted} w-16`}>{workerConfig.total_workers}/{workerConfig.cpu_cores || '?'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md">
+                                            <span className={`text-[10px] font-medium w-7 text-right ${muted}`}>RAM</span>
+                                            <div className={`flex-1 h-1.5 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                                                <div className={`h-full rounded-full transition-all duration-500 ${
+                                                    (workerConfig.max_memory_units > 0 ? (workerConfig.memory_used ?? 0) / workerConfig.max_memory_units : 0) <= 0.6 ? 'bg-emerald-500'
+                                                    : (workerConfig.max_memory_units > 0 ? (workerConfig.memory_used ?? 0) / workerConfig.max_memory_units : 0) <= 0.85 ? 'bg-amber-500' : 'bg-red-500'
+                                                }`} style={{width: `${Math.min(100, workerConfig.max_memory_units > 0 ? ((workerConfig.memory_used ?? 0) / workerConfig.max_memory_units) * 100 : 0)}%`}}/>
+                                            </div>
+                                            <span className={`text-[10px] font-mono ${muted} w-16`}>{(workerConfig.memory_used ?? 0).toFixed(1)}/{workerConfig.max_memory_units}</span>
+                                        </div>
+                                        <div className={`flex items-center gap-3 text-xs font-mono ${muted}`}>
+                                            <span>{activeGens.length} gen{activeGens.length !== 1 ? 's' : ''}</span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
 
+                            {/* ══════ Pipeline Queues ══════ */}
+                            {hasQueues && (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                                    {/* Seed Queue */}
+                                    <div className={cardCompact}>
+                                        <h3 className={heading}>
+                                            <QueueListIcon className={iconCl}/>Seed Queue
+                                            {seedQueue.length > 0 && <span className={`text-xs font-mono ml-auto ${muted}`}>{seedQueue.length}</span>}
+                                        </h3>
+                                        {seedQueue.length === 0 ? (
+                                            <p className={`text-xs ${muted}`}>Empty</p>
+                                        ) : (
+                                            <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                {seedQueueClaimed.map(item => (
+                                                    <div key={item.id} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded ${isDarkMode ? 'bg-cyan-900/20' : 'bg-cyan-50'}`}>
+                                                        <span className={`w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse`}/>
+                                                        <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{item.profile_name}</span>
+                                                        <span className={`ml-auto text-[10px] ${muted}`}>@{item.claimed_by}</span>
+                                                    </div>
+                                                ))}
+                                                {seedQueuePending.map(item => (
+                                                    <div key={item.id} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`}/>
+                                                        <span className={muted}>{item.profile_name}</span>
+                                                        {item.priority > 0 && <span className={`text-[10px] ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>p{item.priority}</span>}
+                                                        <span className={`ml-auto text-[10px] ${muted}`}>{dayjs(item.created_at).fromNow()}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
 
-                            {/* Generation Queue */}
-                            {(genQueue?.items?.length ?? 0) > 0 && (
-                                <div className={`${card} mb-6`}>
-                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowGenQueue(s => !s)}>
-                                        <ClockIcon className={iconCl}/>Generation Queue
-                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{genQueue?.total ?? 0} pending</span>
-                                        {showGenQueue ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
-                                    </h2>
-                                    {showGenQueue && (
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-sm">
-                                                <thead>
-                                                    <tr className="border-b border-gray-700/30">
-                                                        <th className={thCl}>Profile</th>
-                                                        <th className={thCl}>Priority</th>
-                                                        <th className={thCl}>Memory</th>
-                                                        <th className={thCl}>Status</th>
-                                                        <th className={thCl}>Host</th>
-                                                        <th className={thCl}>Age</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {(genQueue?.items ?? []).map(item => (
-                                                        <tr key={item.id} className={`border-b border-gray-700/10 ${item.status === 'claimed' ? (isDarkMode ? 'bg-cyan-900/20' : 'bg-cyan-50') : ''}`}>
-                                                            <td className={tdCl}><span className="font-mono">{item.profile_name}</span></td>
-                                                            <td className={tdCl}>{item.priority}</td>
-                                                            <td className={tdCl}>{item.memory_cost.toFixed(2)}</td>
-                                                            <td className={tdCl}>
-                                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                                                    item.status === 'claimed' ? 'bg-cyan-500/20 text-cyan-400' :
-                                                                    'bg-gray-500/20 text-gray-400'
-                                                                }`}>{item.status}</span>
-                                                            </td>
-                                                            <td className={tdCl}>{item.claimed_by ?? '-'}</td>
-                                                            <td className={`${tdCl} text-xs`}>{dayjs(item.created_at).fromNow()}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    )}
+                                    {/* LHC Queue */}
+                                    <div className={cardCompact}>
+                                        <h3 className={heading}>
+                                            <BoltIcon className={iconCl}/>LHC Queue
+                                            {lhcQueue.length > 0 && <span className={`text-xs font-mono ml-auto ${muted}`}>{lhcQueue.length}</span>}
+                                        </h3>
+                                        {lhcQueue.length === 0 ? (
+                                            <p className={`text-xs ${muted}`}>Empty</p>
+                                        ) : (
+                                            <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                {lhcQueue.map(run => (
+                                                    <div key={run.id} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded ${
+                                                        run.status === 'sweeping' ? (isDarkMode ? 'bg-amber-900/20' : 'bg-amber-50')
+                                                        : run.status === 'preloading' ? (isDarkMode ? 'bg-cyan-900/20' : 'bg-cyan-50')
+                                                        : isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'
+                                                    }`}>
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${
+                                                            run.status === 'sweeping' ? 'bg-amber-500 animate-pulse'
+                                                            : run.status === 'preloading' ? 'bg-cyan-500 animate-pulse'
+                                                            : isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
+                                                        }`}/>
+                                                        <span className={run.status !== 'queued' ? (isDarkMode ? 'text-gray-200' : 'text-gray-700') : muted}>{run.profile_name}</span>
+                                                        <span className={`text-[10px] px-1 rounded ${
+                                                            run.status === 'sweeping' ? (isDarkMode ? 'text-amber-400' : 'text-amber-600')
+                                                            : run.status === 'preloading' ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600')
+                                                            : muted
+                                                        }`}>{run.status}</span>
+                                                        {run.status === 'sweeping' && run.combos > 0 && (
+                                                            <span className={`text-[10px] ${muted}`}>{Math.round((run.configs_tested / run.combos) * 100)}%</span>
+                                                        )}
+                                                        {run.best_sharpe != null && run.status === 'sweeping' && (
+                                                            <span className={`text-[10px] ml-auto ${run.best_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}`}>S:{run.best_sharpe.toFixed(2)}</span>
+                                                        )}
+                                                        {run.claimed_by && <span className={`ml-auto text-[10px] ${muted}`}>@{run.claimed_by}</span>}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Generation Queue */}
+                                    <div className={cardCompact}>
+                                        <h3 className={heading}>
+                                            <ClockIcon className={iconCl}/>Gen Queue
+                                            {genQueueItems.length > 0 && <span className={`text-xs font-mono ml-auto ${muted}`}>{genQueue?.total ?? 0}</span>}
+                                        </h3>
+                                        {genQueueItems.length === 0 ? (
+                                            <p className={`text-xs ${muted}`}>Empty</p>
+                                        ) : (
+                                            <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                {genQueueItems.map(item => (
+                                                    <div key={item.id} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded ${
+                                                        item.status === 'claimed' ? (isDarkMode ? 'bg-cyan-900/20' : 'bg-cyan-50') : (isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50')
+                                                    }`}>
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'claimed' ? 'bg-cyan-500 animate-pulse' : isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`}/>
+                                                        <span className={item.status === 'claimed' ? (isDarkMode ? 'text-gray-200' : 'text-gray-700') : muted}>{item.profile_name}</span>
+                                                        {item.status === 'claimed' && item.claimed_by && <span className={`ml-auto text-[10px] ${muted}`}>@{item.claimed_by}</span>}
+                                                        {item.status === 'pending' && <span className={`ml-auto text-[10px] ${muted}`}>{dayjs(item.created_at).fromNow()}</span>}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
-                            {/* Seed Calibration Runs */}
-                                <div className={`${card} mb-6`}>
-                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowSeeds(s => !s)}>
-                                        <BeakerIcon className={iconCl}/>Seed Calibration
-                                        <span className={`text-xs font-normal ${muted} ml-auto`}>{seedTotal}</span>
-                                        {showSeeds ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                            {/* ══════ Active Generations ══════ */}
+                            {activeGens.length > 0 && (
+                                <div className={`${cardCompact} mb-4`}>
+                                    <h2 className={headingLg}>
+                                        <BoltIcon className="w-4 h-4 text-emerald-500"/>Active Generations
+                                        <span className={`text-xs font-mono ${muted} ml-auto`}>{activeGens.length}</span>
                                     </h2>
-                                    {showSeeds && (
-                                        seedRuns.length === 0
-                                        ? <p className={`text-sm ${muted}`}>No seed runs yet.</p>
-                                        : <div className="space-y-3">
-                                            {seedRuns.map(sr => (
-                                                <SeedRunCard key={sr.id} run={sr} isDarkMode={isDarkMode} muted={muted} onRefresh={async () => {
-                                                    const fresh = await fetchOptimizerSeedRuns(undefined, undefined, SEED_PAGE_SIZE, seedPage);
-                                                    if (fresh) { setSeedRuns(fresh.items ?? []); setSeedTotal(fresh.total); }
-                                                }}/>
-                                            ))}
-                                            <Pagination page={seedPage} totalItems={seedTotal} pageSize={SEED_PAGE_SIZE} onPageChange={setSeedPage}/>
-                                        </div>
-                                    )}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                        {activeGens.map(gen => (
+                                            <GenerationCard key={gen.id} gen={gen} isDarkMode={isDarkMode} muted={muted}/>
+                                        ))}
+                                    </div>
                                 </div>
+                            )}
 
-                            {/* LHC Sweep Runs */}
+                            {/* ══════ Seed Calibration Runs ══════ */}
+                            <div className={`${cardCompact} mb-4`}>
+                                <h2 className={`${headingLg} cursor-pointer select-none`} onClick={() => setShowSeeds(s => !s)}>
+                                    <BeakerIcon className={iconCl}/>Seed Calibration
+                                    <span className={`text-xs font-normal ${muted} ml-auto`}>{seedTotal}</span>
+                                    {showSeeds ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
+                                </h2>
+                                {showSeeds && (
+                                    seedRuns.length === 0
+                                    ? <p className={`text-sm ${muted}`}>No seed runs yet.</p>
+                                    : <div className="space-y-2">
+                                        {seedRuns.map(sr => (
+                                            <SeedRunCard key={sr.id} run={sr} isDarkMode={isDarkMode} muted={muted} onRefresh={async () => {
+                                                const fresh = await fetchOptimizerSeedRuns(undefined, undefined, SEED_PAGE_SIZE, seedPage);
+                                                if (fresh) { setSeedRuns(fresh.items ?? []); setSeedTotal(fresh.total); }
+                                            }}/>
+                                        ))}
+                                        <Pagination page={seedPage} totalItems={seedTotal} pageSize={SEED_PAGE_SIZE} onPageChange={setSeedPage}/>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* ══════ LHC Sweep Runs ══════ */}
                             {lhcTotal > 0 && (
-                                <div className={`${card} mb-6`}>
-                                    <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowLHC(s => !s)}>
-                                        <BeakerIcon className={iconCl}/>LHC Sweeps
+                                <div className={`${cardCompact} mb-4`}>
+                                    <h2 className={`${headingLg} cursor-pointer select-none`} onClick={() => setShowLHC(s => !s)}>
+                                        <BoltIcon className={iconCl}/>LHC Sweeps
                                         <span className={`text-xs font-normal ${muted} ml-auto`}>{lhcTotal}</span>
                                         {showLHC ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
                                     </h2>
@@ -247,7 +334,7 @@ export default function Optimizer() {
                                             <div key={run.id} className={`rounded px-3 py-2 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <span className={`font-mono text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>#{run.id}</span>
-                                                    
+
                                                     <span className={`font-mono text-xs font-medium ${isDarkMode ? 'text-purple-400' : 'text-purple-700'}`}>{run.profile_name}</span>
                                                     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${
                                                         run.status === 'complete' ? isDarkMode ? 'bg-green-900/40 text-green-400' : 'bg-green-100 text-green-700'
@@ -375,9 +462,9 @@ export default function Optimizer() {
                                 </div>
                             )}
 
-                            {/* Analyzer Queue */}
-                            <div className={`${card} mb-6`}>
-                                <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowRecs(r => !r)}>
+                            {/* ══════ Analyzer Queue ══════ */}
+                            <div className={`${cardCompact} mb-4`}>
+                                <h2 className={`${headingLg} cursor-pointer select-none`} onClick={() => setShowRecs(r => !r)}>
                                     <LightBulbIcon className={iconCl}/>Analyzer Queue
                                     {(() => { const active = recommendations.filter(r => r.status === 'running' || r.status === 'queued').length; return active > 0 ? <span className={`text-xs font-medium ml-2 ${isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>{active} active</span> : null; })()}
                                     <span className={`text-xs font-normal ${muted} ml-auto`}>{recTotal}</span>
@@ -460,9 +547,9 @@ export default function Optimizer() {
                             </div>
 
 
-                            {/* Generation History with expandable branch details */}
-                            <div className={`${card} mb-6`}>
-                                <h2 className={`${heading} cursor-pointer select-none`} onClick={() => setShowGens(g => !g)}>
+                            {/* ══════ Generation History ══════ */}
+                            <div className={`${cardCompact} mb-4`}>
+                                <h2 className={`${headingLg} cursor-pointer select-none`} onClick={() => setShowGens(g => !g)}>
                                     <ClockIcon className={iconCl}/>Generation History
                                     <span className={`text-xs font-normal ${muted} ml-auto`}>{genTotal}</span>
                                     {showGens ? <ChevronUpIcon className={`w-4 h-4 ${muted}`}/> : <ChevronDownIcon className={`w-4 h-4 ${muted}`}/>}
@@ -1609,139 +1696,4 @@ function genDuration(g: OptimizerGeneration): string {
     return `${h}h ${m}m`;
 }
 
-// Memory cost per worker by timeframe (mirrors backend memoryCost map)
-const MEM_COST: Record<string, number> = {scalp: 1.0, intraday: 0.29, swing: 0.02};
-
-// @ts-ignore unused after unified pool
-function computeDraftWorkers(
-    budget: number,
-    maxPerTF: number,
-    draft: Record<string, {enabled: boolean; priority: number}>,
-    hostCount: number = 1,
-): {totalWorkers: number; memUsed: number; perTF: Record<string, number>} {
-    const tfs = ['scalp', 'intraday', 'swing'];
-    const perTF: Record<string, number> = {};
-    const enabledTFs: string[] = [];
-    let prioritySum = 0;
-    const hosts = hostCount > 0 ? hostCount : 1;
-
-    // Compute per-host budget (each host runs its own allocation independently)
-    const perHostBudget = Math.max(1, Math.floor(budget / hosts));
-    const perHostCores = Math.max(2, Math.floor(maxPerTF / hosts));
-
-    for (const tf of tfs) {
-        perTF[tf] = 0;
-        if (draft[tf]?.enabled) {
-            enabledTFs.push(tf);
-            prioritySum += draft[tf].priority;
-        }
-    }
-    if (enabledTFs.length === 0 || prioritySum === 0) return {totalWorkers: 0, memUsed: 0, perTF};
-
-    for (const tf of enabledTFs) {
-        const share = perHostBudget * draft[tf].priority / prioritySum;
-        const cost = MEM_COST[tf] ?? 1;
-        let workers = Math.floor(share / cost);
-        if (workers < 1) workers = 1;
-        if (workers > perHostCores) workers = perHostCores;
-        perTF[tf] = workers;
-    }
-
-    // Trim pass 1: enforce per-host memory budget (lowest priority, highest cost first)
-    for (;;) {
-        let totalCost = 0;
-        for (const tf of enabledTFs) totalCost += perTF[tf] * (MEM_COST[tf] ?? 1);
-        if (totalCost <= perHostBudget) break;
-        let trimTF = '';
-        let trimPri = 999;
-        let trimCost = 0;
-        for (const tf of enabledTFs) {
-            if (perTF[tf] > 1 && (draft[tf].priority < trimPri || (draft[tf].priority === trimPri && (MEM_COST[tf] ?? 1) > trimCost))) {
-                trimPri = draft[tf].priority;
-                trimCost = MEM_COST[tf] ?? 1;
-                trimTF = tf;
-            }
-        }
-        if (!trimTF) break;
-        perTF[trimTF]--;
-    }
-
-    // Trim pass 2: enforce per-host CPU budget (lowest priority, cheapest mem cost first)
-    for (;;) {
-        let total = 0;
-        for (const tf of enabledTFs) total += perTF[tf];
-        if (total <= perHostCores) break;
-        let trimTF = '';
-        let trimPri = 999;
-        let trimCost = Infinity;
-        for (const tf of enabledTFs) {
-            const cost = MEM_COST[tf] ?? 1;
-            if (perTF[tf] > 1 && (draft[tf].priority < trimPri || (draft[tf].priority === trimPri && cost < trimCost))) {
-                trimPri = draft[tf].priority;
-                trimCost = cost;
-                trimTF = tf;
-            }
-        }
-        if (!trimTF) break;
-        perTF[trimTF]--;
-    }
-
-    // Multiply by host count to get pool-wide totals
-    let totalWorkers = 0;
-    let memUsed = 0;
-    for (const tf of enabledTFs) {
-        perTF[tf] *= hosts;
-        totalWorkers += perTF[tf];
-        memUsed += perTF[tf] * (MEM_COST[tf] ?? 1);
-    }
-    return {totalWorkers, memUsed, perTF};
-}
-
-function WorkerGauge({workers, cores, memUsed, memBudget, isDarkMode}: {
-    workers: number; cores: number; memUsed: number; memBudget: number; isDarkMode: boolean;
-}) {
-    // CPU gauge: workers vs cores
-    const cpuPct = cores > 0 ? Math.min(workers / cores, 1) : 0;
-    const cpuDisplay = Math.round(cpuPct * 100);
-    const cpuBar = cpuPct <= 0.60 ? 'bg-emerald-500' : cpuPct <= 0.85 ? 'bg-amber-500' : 'bg-red-500';
-    const cpuGlow = cpuPct <= 0.60 ? 'shadow-emerald-500/30' : cpuPct <= 0.85 ? 'shadow-amber-500/30' : 'shadow-red-500/30';
-    const cpuText = cpuPct > 0.85 ? 'text-red-400 font-semibold' : cpuPct > 0.60 ? 'text-amber-400' : isDarkMode ? 'text-gray-400' : 'text-gray-500';
-
-    // Memory gauge: always fits, but show utilization
-    const memPct = memBudget > 0 ? Math.min(memUsed / memBudget, 1) : 0;
-    const memDisplay = Math.round(memPct * 100);
-    const memBar = memPct <= 0.60 ? 'bg-emerald-500' : memPct <= 0.85 ? 'bg-amber-500' : 'bg-red-500';
-    const memGlow = memPct <= 0.60 ? 'shadow-emerald-500/30' : memPct <= 0.85 ? 'shadow-amber-500/30' : 'shadow-red-500/30';
-    const memText = memPct > 0.85 ? 'text-red-400 font-semibold' : memPct > 0.60 ? 'text-amber-400' : isDarkMode ? 'text-gray-400' : 'text-gray-500';
-
-    const labelCl = `text-xs font-medium w-10 text-right ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`;
-    const trackCl = `flex-1 h-2 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-gray-200'}`;
-
-    return (
-        <div className="space-y-1.5 mb-3">
-            <div className="flex items-center gap-3">
-                <span className={labelCl}>CPU</span>
-                <div className={trackCl}>
-                    <div className={`h-full rounded-full transition-all duration-500 ease-out shadow-sm ${cpuBar} ${cpuGlow}`}
-                        style={{width: `${cpuDisplay}%`}}/>
-                </div>
-                <span className={`text-xs font-mono whitespace-nowrap ${cpuText} hidden sm:inline`}>
-                    {workers}/{cores} workers ({cpuDisplay}%)
-                </span>
-                <span className={`text-xs font-mono ${cpuText} sm:hidden`}>{cpuDisplay}%</span>
-            </div>
-            <div className="flex items-center gap-3">
-                <span className={labelCl}>RAM</span>
-                <div className={trackCl}>
-                    <div className={`h-full rounded-full transition-all duration-500 ease-out shadow-sm ${memBar} ${memGlow}`}
-                        style={{width: `${memDisplay}%`}}/>
-                </div>
-                <span className={`text-xs font-mono whitespace-nowrap ${memText} hidden sm:inline`}>
-                    {memUsed.toFixed(1)}/{memBudget} units ({memDisplay}%)
-                </span>
-                <span className={`text-xs font-mono ${memText} sm:hidden`}>{memDisplay}%</span>
-            </div>
-        </div>
-    );
-}
 
