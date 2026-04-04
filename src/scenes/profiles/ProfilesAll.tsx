@@ -576,16 +576,18 @@ export default function ProfilesAll() {
                                                 </td>
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${muted} hidden md:table-cell`}>{s?.total_trades ?? '—'}</td>
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${plColor(s?.total_pnl)} hidden md:table-cell`}>{s ? fmtNum(s.total_pnl) : '—'}</td>
-                                                {/* Live */}
-                                                <td className={`px-1 py-1 text-[11px] font-mono ${isDarkMode ? 'border-l border-slate-600/50' : 'border-l border-gray-200'} ${live ? (isDarkMode ? 'text-gray-200' : 'text-gray-800') : muted}`}>
-                                                    {live?.total_orders ?? '—'}
+                                                {/* Live — hide if no trades (0W/0L) */}
+                                                {(() => { const hasLive = live && live.total_orders > 0; return (<>
+                                                <td className={`px-1 py-1 text-[11px] font-mono ${isDarkMode ? 'border-l border-slate-600/50' : 'border-l border-gray-200'} ${hasLive ? (isDarkMode ? 'text-gray-200' : 'text-gray-800') : muted}`}>
+                                                    {hasLive ? live.total_orders : '—'}
                                                 </td>
-                                                <td className={`px-1 py-1 text-[11px] font-mono ${live && live.win_rate_pct > 50 ? 'text-emerald-400' : live ? (isDarkMode ? 'text-amber-400' : 'text-amber-600') : muted}`}>
-                                                    {live ? `${live.win_rate_pct.toFixed(0)}` : '—'}
+                                                <td className={`px-1 py-1 text-[11px] font-mono ${hasLive && live.win_rate_pct > 50 ? 'text-emerald-400' : hasLive ? (isDarkMode ? 'text-amber-400' : 'text-amber-600') : muted}`}>
+                                                    {hasLive ? `${live.win_rate_pct.toFixed(0)}` : '—'}
                                                 </td>
-                                                <td className={`px-1 py-1 text-[11px] font-mono ${plColor(live?.total_pl)}`}>
-                                                    {live ? fmtNum(live.total_pl) : '—'}
+                                                <td className={`px-1 py-1 text-[11px] font-mono ${plColor(hasLive ? live.total_pl : undefined)}`}>
+                                                    {hasLive ? fmtNum(live.total_pl) : '—'}
                                                 </td>
+                                                </>); })()}
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${muted} hidden lg:table-cell`}>{timeLive(p)}</td>
                                                 {/* Meta */}
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${muted} hidden xl:table-cell`}>{p.baseline?.generation_counter ?? '—'}</td>
