@@ -1010,7 +1010,6 @@ export interface LHCResult {
 // Seed queue types (from /api/optimizer/seed-queue)
 export interface SeedQueueItem {
     id: number;
-    timeframe: string;
     profile_name: string;
     reason: string;
     priority: number;
