@@ -62,6 +62,7 @@ export default function Optimizer() {
     const [genQueue, setGenQueue] = useState<GenQueueResponse | null>(null);
     const [seedQueue, setSeedQueue] = useState<SeedQueueItem[]>([]);
     const [lhcQueue, setLhcQueue] = useState<LHCRun[]>([]);
+    const [recentGens, setRecentGens] = useState<OptimizerGeneration[]>([]);
 
     // Pagination state
     const [seedPage, setSeedPage] = useState(0);
@@ -78,9 +79,11 @@ export default function Optimizer() {
     const REC_PAGE_SIZE = 20;
     const GEN_PAGE_SIZE = 100;
 
+    const RECENT_GEN_LIMIT = 25;
+
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
-        const [s, g, r, sr, wc, lhc, gq, sq, lhcQ] = await Promise.all([
+        const [s, g, r, sr, wc, lhc, gq, sq, lhcQ, rg] = await Promise.all([
             fetchOptimizerStatus(),
             fetchOptimizerGenerations(GEN_PAGE_SIZE, undefined, genPage),
             fetchOptimizerRecommendations(undefined, REC_PAGE_SIZE, recPage),
@@ -90,6 +93,7 @@ export default function Optimizer() {
             fetchGenerationQueue(),
             fetchSeedQueue(),
             fetchLHCRuns(50, 0), // fetch all LHC to filter queued/active
+            fetchOptimizerGenerations(RECENT_GEN_LIMIT), // recent snapshot — always latest 25
         ]);
         if (s) setStatus(s);
         if (g) { setGenerations(g.items ?? []); setGenTotal(g.total); }
@@ -100,6 +104,7 @@ export default function Optimizer() {
         if (gq) setGenQueue(gq);
         if (sq) setSeedQueue(sq);
         if (lhcQ) setLhcQueue((lhcQ.items ?? []).filter(r => r.status === 'queued' || r.status === 'preloading' || r.status === 'sweeping'));
+        if (rg) setRecentGens(rg.items ?? []);
         setLoading(false);
     }, [apiAvailable, genPage, recPage, seedPage, lhcPage]);
 
@@ -284,17 +289,79 @@ export default function Optimizer() {
                                 </div>
                             )}
 
-                            {/* ══════ Active Generations ══════ */}
-                            {activeGens.length > 0 && (
+                            {/* ══════ Recent Generations — live snapshot ══════ */}
+                            {recentGens.length > 0 && (
                                 <div className={`${cardCompact} mb-4`}>
                                     <h2 className={headingLg}>
-                                        <BoltIcon className="w-4 h-4 text-emerald-500"/>Active Generations
-                                        <span className={`text-xs font-mono ${muted} ml-auto`}>{activeGens.length}</span>
+                                        <BoltIcon className="w-4 h-4 text-emerald-500"/>Recent Generations
+                                        <span className={`text-xs font-mono ${muted} ml-auto`}>{RECENT_GEN_LIMIT}</span>
                                     </h2>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                                        {activeGens.map(gen => (
-                                            <GenerationCard key={gen.id} gen={gen} isDarkMode={isDarkMode} muted={muted}/>
-                                        ))}
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className={`border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Gen</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Profile</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Status</th>
+                                                    <th className={`${thCl} py-1.5 pr-2 text-center`}>Br</th>
+                                                    <th className={`${thCl} py-1.5 pr-2 text-center`}>Pass</th>
+                                                    <th className={`${thCl} py-1.5 pr-2 text-center`}>Fail</th>
+                                                    <th className={`${thCl} py-1.5 pr-2 text-center`}>Run</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Host</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Duration</th>
+                                                    <th className={`${thCl} py-1.5`}>Age</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {recentGens.map(gen => {
+                                                    const isActive = gen.status === 'active' || gen.status === 'running';
+                                                    const hasWinner = gen.winner_branch_id != null && gen.winner_branch_id > 0;
+                                                    const hasPasses = (gen.passed ?? 0) > 0;
+                                                    const rowBg = isActive
+                                                        ? (isDarkMode ? 'bg-cyan-900/10' : 'bg-cyan-50/50')
+                                                        : hasWinner
+                                                            ? (isDarkMode ? 'bg-emerald-900/15' : 'bg-emerald-50/50')
+                                                            : hasPasses
+                                                                ? (isDarkMode ? 'bg-emerald-900/8' : 'bg-emerald-50/30')
+                                                                : '';
+                                                    const failures = gen.consecutive_failures ?? 0;
+
+                                                    return (
+                                                        <tr key={gen.id} className={`border-b ${isDarkMode ? 'border-slate-700/50' : 'border-gray-100'} ${rowBg} text-xs`}>
+                                                            <td className={`py-1.5 pr-2 font-mono ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{gen.id}</td>
+                                                            <td className="py-1.5 pr-2">
+                                                                {gen.target_profile ? (
+                                                                    <a href={`/profiles/all?name=${gen.target_profile}`}
+                                                                       className={`font-mono font-medium hover:underline ${isDarkMode ? 'text-purple-400 hover:text-purple-300' : 'text-purple-700 hover:text-purple-600'}`}>
+                                                                        {gen.target_profile}
+                                                                    </a>
+                                                                ) : <span className={muted}>--</span>}
+                                                            </td>
+                                                            <td className="py-1.5 pr-2">
+                                                                {isActive ? (
+                                                                    failures >= 10
+                                                                        ? <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'}`}>stall({failures})</span>
+                                                                        : <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded animate-pulse ${isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-100 text-cyan-700'}`}>active</span>
+                                                                ) : hasWinner ? (
+                                                                    <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>promoted</span>
+                                                                ) : gen.status === 'completed' || gen.status === 'done' ? (
+                                                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>done</span>
+                                                                ) : (
+                                                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'}`}>{gen.status}</span>
+                                                                )}
+                                                            </td>
+                                                            <td className={`py-1.5 pr-2 text-center font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{gen.branch_count || '--'}</td>
+                                                            <td className={`py-1.5 pr-2 text-center font-mono ${(gen.passed ?? 0) > 0 ? 'text-emerald-500' : muted}`}>{gen.passed ?? 0}</td>
+                                                            <td className={`py-1.5 pr-2 text-center font-mono ${(gen.failed ?? 0) > 0 ? 'text-red-400' : muted}`}>{gen.failed ?? 0}</td>
+                                                            <td className={`py-1.5 pr-2 text-center font-mono ${(gen.running ?? 0) > 0 ? (isDarkMode ? 'text-cyan-400' : 'text-cyan-600') : muted}`}>{gen.running ?? 0}</td>
+                                                            <td className={`py-1.5 pr-2 font-mono ${muted}`}>{gen.claimed_by ?? '--'}</td>
+                                                            <td className={`py-1.5 pr-2 font-mono ${muted}`}>{genDuration(gen)}</td>
+                                                            <td className={`py-1.5 font-mono ${muted}`}>{dayjs(gen.started_at).fromNow(true)}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             )}
@@ -644,60 +711,6 @@ function DiffBlock({diffs, baseId, isDarkMode, muted, stripPrefix, hideHeader}: 
     );
 }
 
-function GenerationCard({gen, isDarkMode, muted}: {gen: OptimizerGeneration; isDarkMode: boolean; muted: string}) {
-    // Determine explanatory badge when generation has no branches
-    const noBranches = gen.branch_count === 0 && (gen.passed ?? 0) === 0 && (gen.failed ?? 0) === 0 && (gen.running ?? 0) === 0;
-    const failures = gen.consecutive_failures ?? 0;
-    let phaseBadge: {label: string; cls: string} | null = null;
-    if (noBranches && gen.status === 'active') {
-        const ageMinutes = dayjs().diff(dayjs(gen.started_at), 'minute');
-        if (failures >= 20) {
-            phaseBadge = {label: `Stall T2 (${failures} fails)`, cls: isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'};
-        } else if (failures >= 10) {
-            phaseBadge = {label: `Stall T1 (${failures} fails)`, cls: isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'};
-        } else if (ageMinutes < 3) {
-            phaseBadge = {label: 'AI Planning', cls: isDarkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'};
-        } else {
-            phaseBadge = {label: 'Waiting', cls: isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'};
-        }
-    } else if (gen.status === 'active' && failures >= 10) {
-        // Even when branches are running, show stall indicator if many consecutive failures
-        phaseBadge = {label: `${failures} consecutive fails`, cls: isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'};
-    }
-
-    return (
-        <div className={`rounded-lg px-4 py-3 ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-            <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                    <span className={`text-sm font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>Gen #{gen.id}</span>
-                    
-                    {gen.claimed_by && <span className={`inline-flex rounded-full px-1.5 py-0.5 text-xs font-mono ${isDarkMode ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-500'}`}>@{gen.claimed_by}</span>}
-                    {phaseBadge
-                        ? <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium animate-pulse ${phaseBadge.cls}`}>{phaseBadge.label}</span>
-                        : <GenStatusBadge status={gen.status} isDarkMode={isDarkMode}/>
-                    }
-                </div>
-                <span className={`text-xs ${muted}`}>{dayjs(gen.started_at).fromNow()}</span>
-            </div>
-            {noBranches ? (
-                <p className={`text-xs ${muted}`}>
-                    {failures >= 10
-                        ? `Stalling (${failures} consecutive failures) — escalated exploration with broader mutations and relaxed verifier`
-                        : phaseBadge?.label === 'AI Planning'
-                            ? 'AI is planning branch explorations for this generation...'
-                            : 'Generation is waiting — may be paused for replication lag, OOS data coverage, or post-reset cooldown'}
-                </p>
-            ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <MiniStat label="Branches" value={String(gen.branch_count)} isDarkMode={isDarkMode}/>
-                    <MiniStat label="Passed" value={String(gen.passed ?? 0)} isDarkMode={isDarkMode}/>
-                    <MiniStat label="Failed" value={String(gen.failed ?? 0)} isDarkMode={isDarkMode}/>
-                    <MiniStat label="Running" value={String(gen.running ?? 0)} isDarkMode={isDarkMode}/>
-                </div>
-            )}
-        </div>
-    );
-}
 
 function GenerationRow({gen, isDarkMode, muted, thCl, tdCl}: {
     gen: OptimizerGeneration; isDarkMode: boolean; muted: string; thCl: string; tdCl: string;
@@ -947,14 +960,6 @@ function ResultBlock({label, result, isDarkMode, muted}: {label: string; result:
     );
 }
 
-function MiniStat({label, value, isDarkMode}: {label: string; value: string; isDarkMode: boolean}) {
-    return (
-        <div className={`rounded px-2 py-1 ${isDarkMode ? 'bg-slate-800/60' : 'bg-gray-100'}`}>
-            <p className={`text-[10px] uppercase tracking-wider ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{label}</p>
-            <p className={`text-sm font-mono ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>{value}</p>
-        </div>
-    );
-}
 
 const ResultStat = SharedResultStat;
 
