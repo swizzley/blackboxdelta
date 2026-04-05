@@ -63,6 +63,8 @@ export default function Optimizer() {
     const [seedQueue, setSeedQueue] = useState<SeedQueueItem[]>([]);
     const [lhcQueue, setLhcQueue] = useState<LHCRun[]>([]);
     const [recentGens, setRecentGens] = useState<OptimizerGeneration[]>([]);
+    const [recentSeeds, setRecentSeeds] = useState<SeedRun[]>([]);
+    const [recentLHC, setRecentLHC] = useState<LHCRun[]>([]);
 
     // Pagination state
     const [seedPage, setSeedPage] = useState(0);
@@ -80,10 +82,12 @@ export default function Optimizer() {
     const GEN_PAGE_SIZE = 100;
 
     const RECENT_GEN_LIMIT = 25;
+    const RECENT_SEED_LIMIT = 5;
+    const RECENT_LHC_LIMIT = 3;
 
     const loadData = useCallback(async () => {
         if (!apiAvailable) return;
-        const [s, g, r, sr, wc, lhc, gq, sq, lhcQ, rg] = await Promise.all([
+        const [s, g, r, sr, wc, lhc, gq, sq, lhcQ, rg, rSeed, rLhc] = await Promise.all([
             fetchOptimizerStatus(),
             fetchOptimizerGenerations(GEN_PAGE_SIZE, undefined, genPage),
             fetchOptimizerRecommendations(undefined, REC_PAGE_SIZE, recPage),
@@ -94,6 +98,8 @@ export default function Optimizer() {
             fetchSeedQueue(),
             fetchLHCRuns(50, 0), // fetch all LHC to filter queued/active
             fetchOptimizerGenerations(RECENT_GEN_LIMIT), // recent snapshot — always latest 25
+            fetchOptimizerSeedRuns(undefined, undefined, RECENT_SEED_LIMIT), // recent seeds snapshot
+            fetchLHCRuns(RECENT_LHC_LIMIT), // recent LHC snapshot
         ]);
         if (s) setStatus(s);
         if (g) { setGenerations(g.items ?? []); setGenTotal(g.total); }
@@ -105,6 +111,8 @@ export default function Optimizer() {
         if (sq) setSeedQueue(sq);
         if (lhcQ) setLhcQueue((lhcQ.items ?? []).filter(r => r.status === 'queued' || r.status === 'preloading' || r.status === 'sweeping'));
         if (rg) setRecentGens(rg.items ?? []);
+        if (rSeed) setRecentSeeds(rSeed.items ?? []);
+        if (rLhc) setRecentLHC(rLhc.items ?? []);
         setLoading(false);
     }, [apiAvailable, genPage, recPage, seedPage, lhcPage]);
 
@@ -357,6 +365,139 @@ export default function Optimizer() {
                                                             <td className={`py-1.5 pr-2 font-mono ${muted}`}>{gen.claimed_by ?? '--'}</td>
                                                             <td className={`py-1.5 pr-2 font-mono ${muted}`}>{genDuration(gen)}</td>
                                                             <td className={`py-1.5 font-mono ${muted}`}>{dayjs(gen.started_at).fromNow(true)}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ══════ Recent Seeds — live snapshot ══════ */}
+                            {recentSeeds.length > 0 && (
+                                <div className={`${cardCompact} mb-4`}>
+                                    <h2 className={headingLg}>
+                                        <BeakerIcon className="w-4 h-4 text-cyan-500"/>Recent Seeds
+                                        <span className={`text-xs font-mono ${muted} ml-auto`}>{RECENT_SEED_LIMIT}</span>
+                                    </h2>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className={`border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>ID</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Reason</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Status</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Stage</th>
+                                                    <th className={`${thCl} py-1.5 pr-2 text-right`}>Configs</th>
+                                                    <th className={`${thCl} py-1.5 pr-2 text-right`}>Best Sharpe</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Host</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Duration</th>
+                                                    <th className={`${thCl} py-1.5`}>Age</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {recentSeeds.map(seed => {
+                                                    const isActive = seed.status === 'running';
+                                                    const isFailed = seed.status === 'failed';
+                                                    const isComplete = seed.status === 'complete';
+                                                    const rowBg = isActive
+                                                        ? (isDarkMode ? 'bg-cyan-900/10' : 'bg-cyan-50/50')
+                                                        : isComplete
+                                                            ? (isDarkMode ? 'bg-emerald-900/15' : 'bg-emerald-50/50')
+                                                            : isFailed
+                                                                ? (isDarkMode ? 'bg-red-900/10' : 'bg-red-50/50')
+                                                                : '';
+                                                    return (
+                                                        <tr key={seed.id} className={`border-b ${isDarkMode ? 'border-slate-700/50' : 'border-gray-100'} ${rowBg} text-xs`}>
+                                                            <td className={`py-1.5 pr-2 font-mono ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{seed.id}</td>
+                                                            <td className={`py-1.5 pr-2 font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{seed.trigger_reason}</td>
+                                                            <td className="py-1.5 pr-2">
+                                                                {isActive ? (
+                                                                    <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded animate-pulse ${isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-100 text-cyan-700'}`}>running</span>
+                                                                ) : isComplete ? (
+                                                                    <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>complete</span>
+                                                                ) : isFailed ? (
+                                                                    <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'}`}>failed</span>
+                                                                ) : (
+                                                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>{seed.status}</span>
+                                                                )}
+                                                            </td>
+                                                            <td className={`py-1.5 pr-2 font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{seed.current_stage}</td>
+                                                            <td className={`py-1.5 pr-2 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{seed.configs_tested.toLocaleString()}</td>
+                                                            <td className={`py-1.5 pr-2 text-right font-mono ${seed.best_sharpe != null && seed.best_sharpe > 0 ? 'text-emerald-500' : seed.best_sharpe != null && seed.best_sharpe < 0 ? 'text-red-400' : muted}`}>{seed.best_sharpe != null ? seed.best_sharpe.toFixed(4) : '—'}</td>
+                                                            <td className={`py-1.5 pr-2 font-mono ${muted}`}>{seed.claimed_by ?? '—'}</td>
+                                                            <td className={`py-1.5 pr-2 font-mono ${muted}`}>{runDuration(seed.started_at, seed.completed_at)}</td>
+                                                            <td className={`py-1.5 font-mono ${muted}`}>{dayjs(seed.started_at).fromNow(true)}</td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ══════ Recent LHC — live snapshot ══════ */}
+                            {recentLHC.length > 0 && (
+                                <div className={`${cardCompact} mb-4`}>
+                                    <h2 className={headingLg}>
+                                        <CpuChipIcon className="w-4 h-4 text-amber-500"/>Recent LHC
+                                        <span className={`text-xs font-mono ${muted} ml-auto`}>{RECENT_LHC_LIMIT}</span>
+                                    </h2>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className={`border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>ID</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Profile</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Status</th>
+                                                    <th className={`${thCl} py-1.5 pr-2 text-right`}>Configs</th>
+                                                    <th className={`${thCl} py-1.5 pr-2 text-right`}>Combos</th>
+                                                    <th className={`${thCl} py-1.5 pr-2 text-right`}>Best Sharpe</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Host</th>
+                                                    <th className={`${thCl} py-1.5 pr-2`}>Duration</th>
+                                                    <th className={`${thCl} py-1.5`}>Age</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {recentLHC.map(run => {
+                                                    const isActive = run.status === 'sweeping' || run.status === 'preloading';
+                                                    const isComplete = run.status === 'complete';
+                                                    const isFailed = run.status === 'failed';
+                                                    const rowBg = isActive
+                                                        ? (isDarkMode ? 'bg-cyan-900/10' : 'bg-cyan-50/50')
+                                                        : isComplete
+                                                            ? (isDarkMode ? 'bg-emerald-900/15' : 'bg-emerald-50/50')
+                                                            : isFailed
+                                                                ? (isDarkMode ? 'bg-red-900/10' : 'bg-red-50/50')
+                                                                : '';
+                                                    return (
+                                                        <tr key={run.id} className={`border-b ${isDarkMode ? 'border-slate-700/50' : 'border-gray-100'} ${rowBg} text-xs`}>
+                                                            <td className={`py-1.5 pr-2 font-mono ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{run.id}</td>
+                                                            <td className="py-1.5 pr-2">
+                                                                <a href={`/profiles/all?name=${run.profile_name}`}
+                                                                   className={`font-mono font-medium hover:underline ${isDarkMode ? 'text-purple-400 hover:text-purple-300' : 'text-purple-700 hover:text-purple-600'}`}>
+                                                                    {run.profile_name}
+                                                                </a>
+                                                            </td>
+                                                            <td className="py-1.5 pr-2">
+                                                                {isActive ? (
+                                                                    <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded animate-pulse ${isDarkMode ? 'bg-cyan-900/30 text-cyan-400' : 'bg-cyan-100 text-cyan-700'}`}>{run.status}</span>
+                                                                ) : isComplete ? (
+                                                                    <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-emerald-900/30 text-emerald-400' : 'bg-emerald-100 text-emerald-700'}`}>complete</span>
+                                                                ) : isFailed ? (
+                                                                    <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'}`}>failed</span>
+                                                                ) : (
+                                                                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>{run.status}</span>
+                                                                )}
+                                                            </td>
+                                                            <td className={`py-1.5 pr-2 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{run.configs_tested.toLocaleString()}</td>
+                                                            <td className={`py-1.5 pr-2 text-right font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{run.combos.toLocaleString()}</td>
+                                                            <td className={`py-1.5 pr-2 text-right font-mono ${run.best_sharpe != null && run.best_sharpe > 0 ? 'text-emerald-500' : run.best_sharpe != null && run.best_sharpe < 0 ? 'text-red-400' : muted}`}>{run.best_sharpe != null ? run.best_sharpe.toFixed(4) : '—'}</td>
+                                                            <td className={`py-1.5 pr-2 font-mono ${muted}`}>{run.claimed_by ?? '—'}</td>
+                                                            <td className={`py-1.5 pr-2 font-mono ${muted}`}>{runDuration(run.started_at, run.completed_at)}</td>
+                                                            <td className={`py-1.5 font-mono ${muted}`}>{dayjs(run.started_at).fromNow(true)}</td>
                                                         </tr>
                                                     );
                                                 })}
@@ -1693,7 +1834,12 @@ const plColor = sharedPlColor;
 
 function genDuration(g: OptimizerGeneration): string {
     if (!g.completed_at || !g.started_at) return '—';
-    const ms = dayjs(g.completed_at).diff(dayjs(g.started_at));
+    return runDuration(g.started_at, g.completed_at);
+}
+
+function runDuration(startedAt?: string, completedAt?: string): string {
+    if (!completedAt || !startedAt) return '—';
+    const ms = dayjs(completedAt).diff(dayjs(startedAt));
     if (ms < 60_000) return `${Math.round(ms / 1000)}s`;
     if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m`;
     const h = Math.floor(ms / 3_600_000);
