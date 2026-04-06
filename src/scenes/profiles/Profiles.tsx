@@ -346,11 +346,15 @@ export default function Profiles() {
                                             <span className={`font-mono text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
                                             <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
                                             <StageBadge stage={p.stage} isDarkMode={isDarkMode}/>
-                                            {isNegLive && p.baseline?.stats && (
-                                                <span className={`text-xs font-mono ${compositeColor(p.baseline.stats.composite_score ?? -999)}`}>C:{p.baseline.stats.composite_score?.toFixed(2) ?? '—'}</span>
-                                            )}
                                             {isStalled && (
-                                                <span className={`text-xs ${muted}`}>f:{p.baseline?.consecutive_failures ?? 0}</span>
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'}`}>
+                                                    Stalled ({p.baseline?.consecutive_failures ?? 0} failures)
+                                                </span>
+                                            )}
+                                            {isNegLive && getLive(p) && (
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'}`}>
+                                                    Losing {getLive(p)!.total_pl.toFixed(2)} P&amp;L
+                                                </span>
                                             )}
                                             <div className="ml-auto flex gap-1.5">
                                                 <button
