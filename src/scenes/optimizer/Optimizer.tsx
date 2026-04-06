@@ -213,19 +213,19 @@ export default function Optimizer() {
                                         ) : (
                                             <div className="space-y-1 max-h-48 overflow-y-auto">
                                                 {seedQueueClaimed.map(item => (
-                                                    <div key={item.id} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded ${isDarkMode ? 'bg-cyan-900/20' : 'bg-cyan-50'}`}>
+                                                    <a key={item.id} href={`/profiles/all?name=${item.profile_name}`} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded cursor-pointer ${isDarkMode ? 'bg-cyan-900/20 hover:bg-cyan-900/40' : 'bg-cyan-50 hover:bg-cyan-100'} transition-colors`}>
                                                         <span className={`w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse`}/>
                                                         <span className={isDarkMode ? 'text-gray-200' : 'text-gray-700'}>{item.profile_name}</span>
                                                         <span className={`ml-auto text-[10px] ${muted}`}>@{item.claimed_by}</span>
-                                                    </div>
+                                                    </a>
                                                 ))}
                                                 {seedQueuePending.map(item => (
-                                                    <div key={item.id} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                                                    <a key={item.id} href={`/profiles/all?name=${item.profile_name}`} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded cursor-pointer ${isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'} transition-colors`}>
                                                         <span className={`w-1.5 h-1.5 rounded-full ${isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`}/>
                                                         <span className={muted}>{item.profile_name}</span>
                                                         {item.priority > 0 && <span className={`text-[10px] ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`}>p{item.priority}</span>}
                                                         <span className={`ml-auto text-[10px] ${muted}`}>{dayjs(item.created_at).fromNow()}</span>
-                                                    </div>
+                                                    </a>
                                                 ))}
                                             </div>
                                         )}
@@ -242,10 +242,10 @@ export default function Optimizer() {
                                         ) : (
                                             <div className="space-y-1 max-h-48 overflow-y-auto">
                                                 {lhcQueue.map(run => (
-                                                    <div key={run.id} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded ${
-                                                        run.status === 'sweeping' ? (isDarkMode ? 'bg-amber-900/20' : 'bg-amber-50')
-                                                        : run.status === 'preloading' ? (isDarkMode ? 'bg-cyan-900/20' : 'bg-cyan-50')
-                                                        : isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'
+                                                    <a key={run.id} href={`/profiles/all?name=${run.profile_name}`} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded cursor-pointer transition-colors ${
+                                                        run.status === 'sweeping' ? (isDarkMode ? 'bg-amber-900/20 hover:bg-amber-900/40' : 'bg-amber-50 hover:bg-amber-100')
+                                                        : run.status === 'preloading' ? (isDarkMode ? 'bg-cyan-900/20 hover:bg-cyan-900/40' : 'bg-cyan-50 hover:bg-cyan-100')
+                                                        : isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100'
                                                     }`}>
                                                         <span className={`w-1.5 h-1.5 rounded-full ${
                                                             run.status === 'sweeping' ? 'bg-amber-500 animate-pulse'
@@ -265,7 +265,7 @@ export default function Optimizer() {
                                                             <span className={`text-[10px] ml-auto ${run.best_sharpe > 0 ? 'text-emerald-400' : 'text-red-400'}`}>S:{run.best_sharpe.toFixed(2)}</span>
                                                         )}
                                                         {run.claimed_by && <span className={`ml-auto text-[10px] ${muted}`}>@{run.claimed_by}</span>}
-                                                    </div>
+                                                    </a>
                                                 ))}
                                             </div>
                                         )}
@@ -282,14 +282,14 @@ export default function Optimizer() {
                                         ) : (
                                             <div className="space-y-1 max-h-48 overflow-y-auto">
                                                 {genQueueItems.map(item => (
-                                                    <div key={item.id} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded ${
-                                                        item.status === 'claimed' ? (isDarkMode ? 'bg-cyan-900/20' : 'bg-cyan-50') : (isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50')
+                                                    <a key={item.id} href={`/profiles/all?name=${item.profile_name}`} className={`flex items-center gap-2 text-xs font-mono px-2 py-1 rounded cursor-pointer transition-colors ${
+                                                        item.status === 'claimed' ? (isDarkMode ? 'bg-cyan-900/20 hover:bg-cyan-900/40' : 'bg-cyan-50 hover:bg-cyan-100') : (isDarkMode ? 'bg-slate-700/50 hover:bg-slate-700' : 'bg-gray-50 hover:bg-gray-100')
                                                     }`}>
                                                         <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'claimed' ? 'bg-cyan-500 animate-pulse' : isDarkMode ? 'bg-gray-600' : 'bg-gray-300'}`}/>
                                                         <span className={item.status === 'claimed' ? (isDarkMode ? 'text-gray-200' : 'text-gray-700') : muted}>{item.profile_name}</span>
                                                         {item.status === 'claimed' && item.claimed_by && <span className={`ml-auto text-[10px] ${muted}`}>@{item.claimed_by}</span>}
                                                         {item.status === 'pending' && <span className={`ml-auto text-[10px] ${muted}`}>{dayjs(item.created_at).fromNow()}</span>}
-                                                    </div>
+                                                    </a>
                                                 ))}
                                             </div>
                                         )}
