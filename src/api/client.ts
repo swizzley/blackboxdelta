@@ -10,6 +10,7 @@ import type {
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
     HealthStatus,
     SurgeProfile, SurgeGeneration, SurgeBranch, SurgeHistoryEntry,
+    NeoStatus, NeoIncident, NeoSweep,
 } from '../context/Types';
 
 const TIMEOUT = 5000;
@@ -518,3 +519,14 @@ export function goliveSurgeProfile(name: string): Promise<any> {
 export function noliveSurgeProfile(name: string): Promise<any> {
     return apiPost(`/api/optimizer/surge/profiles/${name}/nolive`, {});
 }
+
+// --- Neo Agent ---
+export function fetchNeoStatus(): Promise<NeoStatus | null> { return apiFetch('/api/neo/status'); }
+export function fetchNeoIncidents(limit = 50, status?: string): Promise<NeoIncident[] | null> {
+    const params = new URLSearchParams({limit: String(limit)});
+    if (status) params.set('status', status);
+    return apiFetch(`/api/neo/incidents?${params}`);
+}
+export function fetchNeoSweeps(limit = 20): Promise<NeoSweep[] | null> { return apiFetch(`/api/neo/sweeps?limit=${limit}`); }
+export function pauseNeo(): Promise<any> { return apiPost('/api/neo/pause'); }
+export function resumeNeo(): Promise<any> { return apiPost('/api/neo/resume'); }

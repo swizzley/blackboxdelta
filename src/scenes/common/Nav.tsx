@@ -13,6 +13,7 @@ const adminNav = [
     {name: 'System', href: '/system'},
     {name: 'Optimizer', href: '/optimizer'},
     {name: 'Health', href: '/health'},
+    {name: 'Neo', href: '/neo'},
 ];
 
 function classNames(...classes: string[]) {

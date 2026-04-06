@@ -871,6 +871,45 @@ export interface ProfileFlat extends OptimizerProfileState {
     stage: ProfileStage; // required (not optional) on flat profiles
 }
 
+// --- Neo Agent ---
+
+export interface NeoStatus {
+    timestamp: string;
+    uptime: string;
+    observers_up: number;
+    observers_total: number;
+    last_sweep: string;
+    sweep_count: number;
+    incidents_open: number;
+    incidents_total: number;
+    paused: boolean;
+    services: { name: string; healthy: boolean; signals: number }[];
+}
+
+export interface NeoIncident {
+    id: number;
+    severity: string;
+    category: string;
+    service: string;
+    root_cause: string;
+    confidence: number;
+    status: string;
+    gitlab_issue_iid: number;
+    gitlab_url: string;
+    remediation: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface NeoSweep {
+    id: number;
+    sweep_type: string;
+    signals_collected: number;
+    incidents_found: number;
+    duration_ms: number;
+    created_at: string;
+}
+
 export interface ProfileProbeEntry {
     profile: string;
     status: string;
