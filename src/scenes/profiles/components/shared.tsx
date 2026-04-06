@@ -247,7 +247,7 @@ export function BranchRow({branch: b, isDarkMode, muted, winnerId}: {branch: Opt
                             {b.failure_reason && <div className="text-xs text-red-400 font-mono">{b.failure_reason}</div>}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {b.is_result && <ResultBlock label="In-Sample" result={b.is_result} isDarkMode={isDarkMode} muted={muted}/>}
-                                {b.oos_result && <ResultBlock label="Out-of-Sample" result={b.oos_result} isDarkMode={isDarkMode} muted={muted}/>}
+                                {b.oos_result && <ResultBlock label={b.status === 'passed' ? 'Out-of-Sample (branch — baseline may differ after confirmation)' : 'Out-of-Sample'} result={b.oos_result} isDarkMode={isDarkMode} muted={muted}/>}
                             </div>
                             {b.param_diffs && b.param_diffs.length > 0 && <DiffBlock diffs={b.param_diffs} isDarkMode={isDarkMode} muted={muted}/>}
                         </div>
