@@ -52,7 +52,6 @@ export default function ProfilesAll() {
 
     // Filter state from URL params
     const nameFilter = searchParams.get('name') ?? '';
-    const tfFilter = (searchParams.get('tf') ?? 'all') as 'all' | 'scalp' | 'intraday' | 'swing';
     const stageFilter = (searchParams.get('stage') ?? 'all') as ProfileStage | 'all';
     const enabledFilter = (searchParams.get('enabled') ?? 'all') as 'all' | 'yes' | 'no';
     const liveFilter = (searchParams.get('live') ?? 'all') as 'all' | 'yes' | 'no';
