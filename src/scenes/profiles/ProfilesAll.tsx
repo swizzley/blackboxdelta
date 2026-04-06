@@ -127,7 +127,7 @@ export default function ProfilesAll() {
             if (nameFilter && !matchesSearch(p, nameFilter)) return false;
             return true;
         });
-    }, [allProfiles, tfFilter, stageFilter, enabledFilter, liveFilter, nameFilter]);
+    }, [allProfiles, tfFilter, stageFilter, enabledFilter, liveFilter, baseTfFilter, nameFilter]);
 
     // Helper to get live stats for a profile
     const getLive = useCallback((p: ProfileFlat) => liveStats.get(`${p.timeframe}:${p.name}`), [liveStats]);
