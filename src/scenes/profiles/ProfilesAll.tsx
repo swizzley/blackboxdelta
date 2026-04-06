@@ -57,6 +57,7 @@ export default function ProfilesAll() {
     const stageFilter = (searchParams.get('stage') ?? 'all') as ProfileStage | 'all';
     const enabledFilter = (searchParams.get('enabled') ?? 'all') as 'all' | 'yes' | 'no';
     const liveFilter = (searchParams.get('live') ?? 'all') as 'all' | 'yes' | 'no';
+    const stalledFilter = (searchParams.get('stalled') ?? 'all') as 'all' | 'yes' | 'no';
     const baseTfFilter = searchParams.get('base_tf') ?? 'all';
     const sortKey = (searchParams.get('sort') ?? 'composite') as SortKey;
     const sortDir = (searchParams.get('dir') ?? 'desc') as 'asc' | 'desc';
@@ -123,11 +124,13 @@ export default function ProfilesAll() {
             if (enabledFilter === 'no' && p.enabled) return false;
             if (liveFilter === 'yes' && !p.live) return false;
             if (liveFilter === 'no' && p.live) return false;
+            if (stalledFilter === 'yes' && p.disabled_reason !== 'stall') return false;
+            if (stalledFilter === 'no' && p.disabled_reason === 'stall') return false;
             if (baseTfFilter !== 'all' && (p.base_timeframe ?? '') !== baseTfFilter) return false;
             if (nameFilter && !matchesSearch(p, nameFilter)) return false;
             return true;
         });
-    }, [allProfiles, stageFilter, enabledFilter, liveFilter, baseTfFilter, nameFilter]);
+    }, [allProfiles, stageFilter, enabledFilter, liveFilter, stalledFilter, baseTfFilter, nameFilter]);
 
     // Helper to get live stats for a profile
     const getLive = useCallback((p: ProfileFlat) => liveStats.get(`${p.timeframe}:${p.name}`), [liveStats]);
@@ -459,7 +462,13 @@ export default function ProfilesAll() {
                             <option value="yes">Live</option>
                             <option value="no">Not Live</option>
                         </select>
-                        {(nameFilter || stageFilter !== 'all' || enabledFilter !== 'all' || liveFilter !== 'all' || baseTfFilter !== 'all') && (
+                        <select value={stalledFilter} onChange={e => setParam('stalled', e.target.value)}
+                            className={`rounded-md px-2 py-1 text-xs ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}>
+                            <option value="all">Stalled: All</option>
+                            <option value="yes">Stalled</option>
+                            <option value="no">Not Stalled</option>
+                        </select>
+                        {(nameFilter || stageFilter !== 'all' || enabledFilter !== 'all' || liveFilter !== 'all' || stalledFilter !== 'all' || baseTfFilter !== 'all') && (
                             <button
                                 onClick={() => setSearchParams({}, {replace: true})}
                                 className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
