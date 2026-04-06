@@ -91,8 +91,7 @@ export default function Profiles() {
         .filter(p => (p.stage === 'live' || p.stage === 'soaking') && (getLive(p)?.total_orders ?? 0) > 0)
         .sort((a, b) => (getLive(b)?.total_pl ?? 0) - (getLive(a)?.total_pl ?? 0));
     const attentionProfiles = filtered.filter(p =>
-        (p.disabled_reason === 'stall') ||
-        ((p.stage === 'live' || p.stage === 'soaking') && getLive(p) && getLive(p)!.total_pl < 0)
+        (p.stage === 'live' || p.stage === 'soaking') && getLive(p) && getLive(p)!.total_pl < 0
     );
 
     const doAction = async (action: (name: string) => Promise<any>, name: string, label?: string) => {
@@ -349,49 +348,31 @@ export default function Profiles() {
                         ) : (
                             <div className="space-y-2">
                                 {attentionProfiles.map(p => {
-                                    const isStalled = p.disabled_reason === 'stall';
-                                    const isNegLive = (p.stage === 'live' || p.stage === 'soaking') && getLive(p) && getLive(p)!.total_pl < 0;
                                     return (
                                         <div key={cardKey(p)} className={`flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
                                             <span className={`font-mono text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
                                             <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
                                             <StageBadge stage={p.stage} isDarkMode={isDarkMode}/>
-                                            {isStalled && (
-                                                <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${isDarkMode ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'}`}>
-                                                    Stalled ({p.baseline?.consecutive_failures ?? 0} failures)
-                                                </span>
-                                            )}
-                                            {isNegLive && getLive(p) && (
+                                            {getLive(p) && (
                                                 <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'}`}>
                                                     Losing {getLive(p)!.total_pl.toFixed(2)} P&amp;L
                                                 </span>
                                             )}
                                             <div className="ml-auto flex gap-1.5">
                                                 <button
+                                                    disabled={actionLoading === cardKey(p)}
+                                                    onClick={() => doAction(noLiveProfile, p.name, 'demoted')}
+                                                    className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}
+                                                >
+                                                    Demote
+                                                </button>
+                                                <button
                                                     disabled={actionLoading === cardKey(p) || actionDone === cardKey(p)}
-                                                    onClick={() => doAction(reseedProfile, p.name)}
+                                                    onClick={() => doAction(reseedProfile, p.name, 'queued for reseed')}
                                                     className={`px-2 py-1 text-[10px] font-medium rounded ${actionDone === cardKey(p) ? (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700') : isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'}`}
                                                 >
                                                     {actionLoading === cardKey(p) ? 'Queuing...' : actionDone === cardKey(p) ? 'Queued' : 'Reseed'}
                                                 </button>
-                                                {isNegLive && (
-                                                    <button
-                                                        disabled={actionLoading === cardKey(p)}
-                                                        onClick={() => doAction(noLiveProfile, p.name)}
-                                                        className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}
-                                                    >
-                                                        Demote
-                                                    </button>
-                                                )}
-                                                {!isNegLive && p.enabled && (
-                                                    <button
-                                                        disabled={actionLoading === cardKey(p)}
-                                                        onClick={() => doAction(disableProfile, p.name)}
-                                                        className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}
-                                                    >
-                                                        Disable
-                                                    </button>
-                                                )}
                                             </div>
                                         </div>
                                     );
