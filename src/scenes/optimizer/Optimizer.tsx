@@ -1119,7 +1119,7 @@ function GenStatusBadge({status, isDarkMode}: {status: string; isDarkMode: boole
 
 // --- Seed Run Components ---
 
-const ALL_SEED_STAGES = ['StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'StageF', 'LHC', 'Diagnostics'] as const;
+const ALL_SEED_STAGES = ['StageA', 'StageD', 'StageD2', 'StageD4', 'StageD5', 'StageB', 'StageC', 'StageD3', 'StageE', 'StageF', 'Diagnostics'] as const;
 const STAGE_LABELS: Record<string, string> = {
     StageA: 'Baseline',
     StageB: 'Filters',
@@ -1148,17 +1148,17 @@ const STAGE_TIME_EST: Record<string, Record<string, string>> = {
     scalp: {
         StageA: '~15m', StageD: '~25m', StageD2: '~20m',
         StageD4: '~20m', StageD5: '~15m', StageB: '~40m',
-        StageD3: '~20m', StageE: '~5m', LHC: '~3m', Diagnostics: '~2m',
+        StageD3: '~20m', StageE: '~5m', Diagnostics: '~2m',
     },
     intraday: {
         StageA: '~5m', StageD: '~8m', StageD2: '~6m',
         StageD4: '~6m', StageB: '~12m',
-        StageD3: '~6m', StageE: '~2m', LHC: '~3m', Diagnostics: '~1m',
+        StageD3: '~6m', StageE: '~2m', Diagnostics: '~1m',
     },
     swing: {
         StageA: '~2m', StageD: '~3m', StageD2: '~3m',
         StageD4: '~3m', StageB: '~5m', StageC: '~1m',
-        StageD3: '~3m', StageE: '~1m', LHC: '~10m', Diagnostics: '~1m',
+        StageD3: '~3m', StageE: '~1m', Diagnostics: '~1m',
     },
 };
 
