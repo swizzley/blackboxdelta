@@ -117,7 +117,6 @@ export default function ProfilesAll() {
     // Apply filters
     const filtered = useMemo(() => {
         return allProfiles.filter(p => {
-            if (tfFilter !== 'all' && p.timeframe !== tfFilter) return false;
             if (stageFilter !== 'all' && p.stage !== stageFilter) return false;
             if (enabledFilter === 'yes' && !p.enabled) return false;
             if (enabledFilter === 'no' && p.enabled) return false;
@@ -127,7 +126,7 @@ export default function ProfilesAll() {
             if (nameFilter && !matchesSearch(p, nameFilter)) return false;
             return true;
         });
-    }, [allProfiles, tfFilter, stageFilter, enabledFilter, liveFilter, baseTfFilter, nameFilter]);
+    }, [allProfiles, stageFilter, enabledFilter, liveFilter, baseTfFilter, nameFilter]);
 
     // Helper to get live stats for a profile
     const getLive = useCallback((p: ProfileFlat) => liveStats.get(`${p.timeframe}:${p.name}`), [liveStats]);
@@ -425,13 +424,13 @@ export default function ProfilesAll() {
                                 >&times;</button>
                             )}
                         </div>
-                        <select value={tfFilter} onChange={e => setParam('tf', e.target.value)}
-                            className={`rounded-md px-2 py-1 text-xs ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}>
-                            <option value="all">TF: All</option>
-                            <option value="scalp">TF: Scalp</option>
-                            <option value="intraday">TF: Intraday</option>
-                            <option value="swing">TF: Swing</option>
-                        </select>
+                        {uniqueBaseTFs.length > 0 && (
+                            <select value={baseTfFilter} onChange={e => setParam('base_tf', e.target.value)}
+                                className={`rounded-md px-2 py-1 text-xs ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}>
+                                <option value="all">TF: All</option>
+                                {uniqueBaseTFs.map(tf => <option key={tf} value={tf}>TF: {tf}</option>)}
+                            </select>
+                        )}
                         <select value={stageFilter} onChange={e => setParam('stage', e.target.value)}
                             className={`rounded-md px-2 py-1 text-xs ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}>
                             <option value="all">Stage: All</option>
@@ -449,14 +448,7 @@ export default function ProfilesAll() {
                             <option value="yes">Live</option>
                             <option value="no">Not Live</option>
                         </select>
-                        {uniqueBaseTFs.length > 0 && (
-                            <select value={baseTfFilter} onChange={e => setParam('base_tf', e.target.value)}
-                                className={`rounded-md px-2 py-1 text-xs ${isDarkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-gray-50 text-gray-900 border-gray-300'} border`}>
-                                <option value="all">Base TF: All</option>
-                                {uniqueBaseTFs.map(tf => <option key={tf} value={tf}>Base: {tf}</option>)}
-                            </select>
-                        )}
-                        {(nameFilter || tfFilter !== 'all' || stageFilter !== 'all' || enabledFilter !== 'all' || liveFilter !== 'all' || baseTfFilter !== 'all') && (
+                        {(nameFilter || stageFilter !== 'all' || enabledFilter !== 'all' || liveFilter !== 'all' || baseTfFilter !== 'all') && (
                             <button
                                 onClick={() => setSearchParams({}, {replace: true})}
                                 className={`text-xs px-2 py-1 rounded ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
