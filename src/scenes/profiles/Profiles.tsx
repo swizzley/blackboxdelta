@@ -11,7 +11,7 @@ import {
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, LHCRun} from '../../context/Types';
 import {flattenProfiles, matchesSearch, isGoldProfile, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
-import {ResultStat, WRFractionStat, StageBadge, BaseTimeframeBadge, CompositeScoreBar, fmtNum, plColor, compositeColor} from './components/shared';
+import {ResultStat, WRFractionStat, StageBadge, BaseTimeframeBadge, CompositeScoreBar, fmtNum, plColor} from './components/shared';
 
 export default function Profiles() {
     const {isDarkMode} = useTheme();
