@@ -210,7 +210,7 @@ export default function ProfilesAll() {
         loadData();
     };
 
-    const doBulkAction = async (action: (name: string, tf: string) => Promise<any>, label?: string) => {
+    const doBulkAction = async (action: (name: string, tf: string) => Promise<any>) => {
         setBulkLoading(true);
         const selected = allProfiles.filter(p => selectedIds.has(`${p.timeframe}:${p.name}`));
         let ok = 0, fail = 0;
