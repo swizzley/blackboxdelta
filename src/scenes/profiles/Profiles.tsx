@@ -4,6 +4,7 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
+import {useToast} from '../../context/Toast';
 import {
     fetchOptimizerAllProfiles, fetchOptimizerSeedRuns,
     enableProfile, disableProfile, soakProfile, goLiveProfile, noLiveProfile,
@@ -16,6 +17,7 @@ import {ResultStat, WRFractionStat, StageBadge, BaseTimeframeBadge, CompositeSco
 export default function Profiles() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
+    const {toast} = useToast();
     const navigate = useNavigate();
 
     const [rawData, setRawData] = useState<OptimizerAllProfilesResponse | null>(null);
@@ -93,9 +95,15 @@ export default function Profiles() {
         ((p.stage === 'live' || p.stage === 'soaking') && getLive(p) && getLive(p)!.total_pl < 0)
     );
 
-    const doAction = async (action: (name: string) => Promise<any>, name: string) => {
+    const doAction = async (action: (name: string) => Promise<any>, name: string, label?: string) => {
         setActionLoading(name);
-        await action(name);
+        try {
+            await action(name);
+            toast(`${name}: ${label ?? 'done'}`, 'success');
+        } catch (e: any) {
+            const msg = e?.message || String(e);
+            toast(`${name}: ${msg}`, 'error');
+        }
         setActionLoading(null);
         setActionDone(name);
         setTimeout(() => setActionDone(null), 2000);
@@ -157,8 +165,10 @@ export default function Profiles() {
                     // TODO: enqueue for LHC when cancel/enqueue LHC endpoints exist
                     break;
             }
-        } catch (err) {
-            console.error('Stage transition failed:', err);
+            toast(`${p.name}: moved to ${target}`, 'success');
+        } catch (err: any) {
+            const msg = err?.message || String(err);
+            toast(`${p.name}: ${msg}`, 'error');
         }
         // Clear override and refresh data
         setStageOverrides(prev => { const m = new Map(prev); m.delete(key); return m; });

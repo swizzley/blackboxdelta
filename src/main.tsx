@@ -4,6 +4,7 @@ import App from './App';
 import { ThemeProvider } from './context/Theme';
 import { ApiProvider } from './context/Api';
 import { DeviceAuthProvider } from './context/DeviceAuth';
+import { ToastProvider } from './context/Toast';
 import { initFingerprint } from './api/fingerprint';
 import './index.css';
 
@@ -19,7 +20,9 @@ if (rootElement) {
             <ThemeProvider>
                 <ApiProvider>
                     <DeviceAuthProvider>
-                        <App/>
+                        <ToastProvider>
+                            <App/>
+                        </ToastProvider>
                     </DeviceAuthProvider>
                 </ApiProvider>
             </ThemeProvider>

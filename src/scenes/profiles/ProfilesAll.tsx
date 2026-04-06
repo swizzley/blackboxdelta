@@ -4,6 +4,7 @@ import Nav from '../common/Nav';
 import Foot from '../common/Foot';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
+import {useToast} from '../../context/Toast';
 import {
     fetchOptimizerAllProfiles, fetchOptimizerSeedRuns,
     enableProfile, disableProfile, deleteProfile,
@@ -24,6 +25,7 @@ const PAGE_SIZE = 50;
 export default function ProfilesAll() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
+    const {toast} = useToast();
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [rawData, setRawData] = useState<OptimizerAllProfilesResponse | null>(null);
@@ -194,19 +196,29 @@ export default function ProfilesAll() {
         }
     };
 
-    const doAction = async (action: (name: string) => Promise<any>, name: string) => {
+    const doAction = async (action: (name: string) => Promise<any>, name: string, label?: string) => {
         setActionLoading(name);
-        await action(name);
+        try {
+            await action(name);
+            toast(`${name}: ${label ?? 'done'}`, 'success');
+        } catch (e: any) {
+            toast(`${name}: ${e?.message || String(e)}`, 'error');
+        }
         setActionLoading(null);
         setActionDone(name);
         setTimeout(() => setActionDone(null), 2000);
         loadData();
     };
 
-    const doBulkAction = async (action: (name: string, tf: string) => Promise<any>) => {
+    const doBulkAction = async (action: (name: string, tf: string) => Promise<any>, label?: string) => {
         setBulkLoading(true);
         const selected = allProfiles.filter(p => selectedIds.has(`${p.timeframe}:${p.name}`));
-        await Promise.all(selected.map(p => action(p.name, p.timeframe)));
+        let ok = 0, fail = 0;
+        await Promise.all(selected.map(async p => {
+            try { await action(p.name, p.timeframe); ok++; } catch { fail++; }
+        }));
+        if (fail > 0) toast(`Bulk: ${ok} succeeded, ${fail} failed`, 'error');
+        else toast(`Bulk: ${ok} profiles updated`, 'success');
         setBulkLoading(false);
         setSelectedIds(new Set());
         loadData();

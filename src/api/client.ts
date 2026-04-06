@@ -161,17 +161,20 @@ export function fetchOptimizerRecommendations(status?: string, limit = 20, page?
 
 export async function apiPost(path: string, body?: any): Promise<any> {
     const base = getApiBase();
-    try {
-        const res = await fetch(`${base}${path}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json', ...authHeaders()},
-            body: body ? JSON.stringify(body) : undefined,
-        });
-        if (!res.ok) return null;
-        return await res.json();
-    } catch {
-        return null;
+    const res = await fetch(`${base}${path}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', ...authHeaders()},
+        body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try {
+            const err = await res.json();
+            if (err?.error) msg = err.error;
+        } catch { /* no json body */ }
+        throw new Error(msg);
     }
+    return await res.json();
 }
 
 export function queueRecommendation(id: number): Promise<any> {
