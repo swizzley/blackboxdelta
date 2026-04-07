@@ -241,12 +241,12 @@
   },
   "2026-04-07": {
     "pl": -0.37,
-    "winners": 18,
-    "losers": 41,
-    "total": 62,
-    "win_pl": 0.09,
-    "loss_pl": -0.46,
-    "dur_sum": 14184,
-    "dur_count": 62
+    "winners": 19,
+    "losers": 43,
+    "total": 65,
+    "win_pl": 0.1,
+    "loss_pl": -0.47,
+    "dur_sum": 14480,
+    "dur_count": 65
   }
 }
