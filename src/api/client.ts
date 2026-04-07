@@ -325,8 +325,8 @@ export function fetchGenerationQueue(): Promise<GenQueueResponse | null> {
 // Seed queue (pending + claimed items for queue display)
 export async function fetchSeedQueue(): Promise<import('../context/Types').SeedQueueItem[] | null> {
     const [pending, claimed] = await Promise.all([
-        apiFetch<import('../context/Types').SeedQueueItem[]>(`/api/optimizer/seed-queue?status=pending&limit=100`),
-        apiFetch<import('../context/Types').SeedQueueItem[]>(`/api/optimizer/seed-queue?status=claimed&limit=100`),
+        apiFetch<import('../context/Types').SeedQueueItem[]>(`/api/optimizer/seed-queue?status=pending&limit=2000`),
+        apiFetch<import('../context/Types').SeedQueueItem[]>(`/api/optimizer/seed-queue?status=claimed&limit=200`),
     ]);
     return [...(claimed ?? []), ...(pending ?? [])];
 }
