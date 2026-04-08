@@ -18,7 +18,7 @@ import Tooltip from '../common/Tooltip';
 import {ClockIcon, ChartBarIcon, ListBulletIcon, AdjustmentsHorizontalIcon, BoltIcon, ArrowsRightLeftIcon, ArrowTrendingUpIcon} from '@heroicons/react/24/outline';
 import ReactECharts from 'echarts-for-react';
 
-type SortKey = 'name' | 'timeframe' | 'base_tf' | 'stage' | 'composite' | 'sharpe' | 'win_rate' | 'pf' | 'silence' | 'trades' | 'pnl' | 'drawdown' | 'gens' | 'failures' | 'updated' | 'live_trades' | 'live_wr' | 'live_pnl' | 'time_live';
+type SortKey = 'name' | 'timeframe' | 'base_tf' | 'stage' | 'composite' | 'sharpe' | 'win_rate' | 'pf' | 'silence' | 'trades' | 'pnl' | 'drawdown' | 'gens' | 'failures' | 'updated' | 'live_trades' | 'live_wr' | 'live_pnl' | 'live_attempts' | 'time_live';
 
 const PAGE_SIZE = 50;
 
