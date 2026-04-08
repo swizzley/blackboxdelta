@@ -877,6 +877,8 @@ export interface ProfileFlat extends OptimizerProfileState {
 export interface NeoStatus {
     timestamp: string;
     uptime: string;
+    autonomy_level: number;
+    autonomy_name: string;
     observers_up: number;
     observers_total: number;
     last_sweep: string;
@@ -884,6 +886,7 @@ export interface NeoStatus {
     incidents_open: number;
     incidents_total: number;
     paused: boolean;
+    tier3_enabled: boolean;
     services: { name: string; healthy: boolean; signals: number }[];
 }
 

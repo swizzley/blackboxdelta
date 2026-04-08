@@ -14,7 +14,7 @@ import {
 
 const GITLAB_BASE = 'http://gitlab.aspendenver.local';
 const NEO_CONFIG_URL = `${GITLAB_BASE}/dmorgan/swizzley-agent-neo/-/edit/master/config.json`;
-const NEO_ISSUES_URL = `${GITLAB_BASE}/dashboard/work_items?sort=created_date&state=opened&label_name[]=agent-neo`;
+const NEO_ISSUES_URL = `${GITLAB_BASE}/dashboard/work_items?sort=created_date&state=opened&author_username=agent-neo`;
 
 const SEV_COLORS: Record<string, {bg: string; text: string; darkBg: string; darkText: string}> = {
     P0: {bg: 'bg-red-100', text: 'text-red-800', darkBg: 'bg-red-900/40', darkText: 'text-red-300'},
@@ -99,7 +99,8 @@ export default function Neo() {
     // Determine overall state
     const neoState = statusDown ? 'down' : status?.paused ? 'paused' : 'active';
     const stateColor = neoState === 'active' ? 'bg-emerald-500' : neoState === 'paused' ? 'bg-amber-500' : 'bg-red-500';
-    const stateLabel = neoState === 'active' ? 'Active (NOOP)' : neoState === 'paused' ? 'Paused' : 'Down';
+    const autonomyLabel = status?.autonomy_name ? `Level ${status.autonomy_level} (${status.autonomy_name})` : '';
+    const stateLabel = neoState === 'active' ? autonomyLabel || 'Active' : neoState === 'paused' ? 'Paused' : 'Down';
 
     return (
         <>
@@ -129,6 +130,7 @@ export default function Neo() {
                                     <span title="Last sweep">Last: {ago(status.last_sweep)}</span>
                                     <span title="Observers">Observers: {status.observers_up}/{status.observers_total}</span>
                                     <span title="Open incidents">Open: {status.incidents_open}</span>
+                                    {status.tier3_enabled && <span className={isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}>T3: Claude</span>}
                                 </div>
                             )}
 
