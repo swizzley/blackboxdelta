@@ -92,7 +92,7 @@ export default function ProfilesAll() {
         if (dash?.by_profile) {
             const map = new Map<string, ProfileStats>();
             for (const ps of dash.by_profile) {
-                map.set(`${ps.timeframe}:${ps.profile}`, ps);
+                map.set(ps.profile, ps);
             }
             setLiveStats(map);
         }
@@ -133,7 +133,7 @@ export default function ProfilesAll() {
     }, [allProfiles, stageFilter, enabledFilter, liveFilter, stalledFilter, baseTfFilter, nameFilter]);
 
     // Helper to get live stats for a profile
-    const getLive = useCallback((p: ProfileFlat) => liveStats.get(`${p.timeframe}:${p.name}`), [liveStats]);
+    const getLive = useCallback((p: ProfileFlat) => liveStats.get(p.name), [liveStats]);
 
     // Sort
     const sorted = useMemo(() => {
