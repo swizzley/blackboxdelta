@@ -755,7 +755,6 @@ export default function ProfilesAll() {
                                                                                 const dateStr = o.closed ?? o.created;
                                                                                 const [y, m, d] = dateStr.slice(0, 10).split('-');
                                                                                 const tradeHref = `/trade/${y}/${m}/${d}/${o.id}`;
-                                                                                return (
                                                                                 const isCancelled = o.status === 'CANCELLED';
                                                                                 const rowOpacity = isCancelled ? 'opacity-40' : '';
                                                                                 return (
