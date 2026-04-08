@@ -250,13 +250,13 @@
     "dur_count": 92
   },
   "2026-04-08": {
-    "pl": 0,
-    "winners": 2,
-    "losers": 4,
-    "total": 8,
-    "win_pl": 0.01,
-    "loss_pl": -0.01,
-    "dur_sum": 954,
-    "dur_count": 8
+    "pl": 0.02,
+    "winners": 5,
+    "losers": 6,
+    "total": 14,
+    "win_pl": 0.04,
+    "loss_pl": -0.02,
+    "dur_sum": 2419,
+    "dur_count": 14
   }
 }
