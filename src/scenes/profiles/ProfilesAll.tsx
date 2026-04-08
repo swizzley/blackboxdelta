@@ -159,6 +159,7 @@ export default function ProfilesAll() {
                 case 'live_trades': av = getLive(a)?.total_orders ?? 0; bv = getLive(b)?.total_orders ?? 0; break;
                 case 'live_wr': av = getLive(a)?.win_rate_pct ?? -999; bv = getLive(b)?.win_rate_pct ?? -999; break;
                 case 'live_pnl': av = getLive(a)?.total_pl ?? -999; bv = getLive(b)?.total_pl ?? -999; break;
+                case 'live_attempts': av = getLive(a)?.attempts ?? 0; bv = getLive(b)?.attempts ?? 0; break;
                 case 'time_live': {
                     const ap = a.baseline?.pushed_at; const bp = b.baseline?.pushed_at;
                     av = ap ? new Date(ap).getTime() : 0; bv = bp ? new Date(bp).getTime() : 0; break;
@@ -262,7 +263,7 @@ export default function ProfilesAll() {
             setTrades([]);
             setTradePage(0);
             setTradesLoading(true);
-            const orders = await fetchOrders({profile: p.name, timeframe: p.timeframe, status: 'CLOSED', limit: 500});
+            const orders = await fetchOrders({profile: p.name, limit: 500});
             setTrades(orders ?? []);
             setTradesLoading(false);
         } else if (panel === 'params') {
@@ -532,6 +533,7 @@ export default function ProfilesAll() {
                                         <SortHeader label="L.Trd" field="live_trades"/>
                                         <SortHeader label="L.WR" field="live_wr"/>
                                         <SortHeader label="L.P&L" field="live_pnl"/>
+                                        <SortHeader label="L.ATT" field="live_attempts" className="hidden lg:table-cell"/>
                                         <SortHeader label="Soak" field="time_live" className="hidden lg:table-cell"/>
                                         {/* Meta */}
                                         <SortHeader label="G" field="gens" className="hidden xl:table-cell"/>
@@ -600,6 +602,9 @@ export default function ProfilesAll() {
                                                     {hasLive ? fmtNum(live.total_pl) : '—'}
                                                 </td>
                                                 </>); })()}
+                                                <td className={`px-1 py-1 text-[11px] font-mono ${live && live.attempts > 0 ? (isDarkMode ? 'text-gray-200' : 'text-gray-800') : muted} hidden lg:table-cell`}>
+                                                    {live && live.attempts > 0 ? live.attempts : '—'}
+                                                </td>
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${muted} hidden lg:table-cell`}>{timeLive(p)}</td>
                                                 {/* Meta */}
                                                 <td className={`px-1 py-1 text-[11px] font-mono ${muted} hidden xl:table-cell`}>{p.baseline?.generation_counter ?? '—'}</td>
@@ -715,7 +720,7 @@ export default function ProfilesAll() {
                                                             return tradesLoading ? <p className={`text-sm ${muted}`}>Loading trades...</p> : trades.length > 0 ? (
                                                             <div>
                                                                 <div className="flex items-center justify-between mb-2">
-                                                                    <p className={`text-xs font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Trades ({trades.length})</p>
+                                                                    <p className={`text-xs font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Trades ({trades.filter(t => t.status === 'CLOSED').length} closed, {trades.length} total)</p>
                                                                     {tradeTotalPages > 1 && (
                                                                         <div className="flex items-center gap-2">
                                                                             <span className={`text-[10px] ${muted}`}>{tradePage + 1}/{tradeTotalPages}</span>
@@ -730,7 +735,7 @@ export default function ProfilesAll() {
                                                                     <table className="w-full text-xs font-mono">
                                                                         <thead>
                                                                             <tr className={`border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                                                                                {['Date', 'Symbol', 'Dir', 'Qty', 'Entry', 'Exit', 'P&L $', 'P&L %', 'R:R', 'Close'].map(h => (
+                                                                                {['Date', 'Symbol', 'Dir', 'Qty', 'Entry', 'Exit', 'P&L $', 'P&L %', 'R:R', 'Status', 'Close'].map(h => (
                                                                                     <th key={h} className={`text-left px-1.5 py-1 text-[10px] font-semibold uppercase ${muted}`}>{h}</th>
                                                                                 ))}
                                                                             </tr>
@@ -751,8 +756,11 @@ export default function ProfilesAll() {
                                                                                 const [y, m, d] = dateStr.slice(0, 10).split('-');
                                                                                 const tradeHref = `/trade/${y}/${m}/${d}/${o.id}`;
                                                                                 return (
+                                                                                const isCancelled = o.status === 'CANCELLED';
+                                                                                const rowOpacity = isCancelled ? 'opacity-40' : '';
+                                                                                return (
                                                                                 <tr key={o.id} onClick={() => window.location.href = tradeHref}
-                                                                                    className={`border-b cursor-pointer transition-colors ${isDarkMode ? 'border-slate-700/30 hover:bg-slate-700/30' : 'border-gray-100 hover:bg-gray-50'}`}>
+                                                                                    className={`border-b cursor-pointer transition-colors ${rowOpacity} ${isDarkMode ? 'border-slate-700/30 hover:bg-slate-700/30' : 'border-gray-100 hover:bg-gray-50'}`}>
                                                                                     <td className={`px-1.5 py-1 ${muted}`}>{dateStr.slice(0, 10)}</td>
                                                                                     <td className={`px-1.5 py-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{o.symbol}</td>
                                                                                     <td className={`px-1.5 py-1 ${isLong ? 'text-emerald-400' : 'text-red-400'}`}>{isLong ? 'L' : 'S'}</td>
@@ -762,6 +770,7 @@ export default function ProfilesAll() {
                                                                                     <td className={`px-1.5 py-1 ${plColor(o.profit ?? undefined)}`} title={o.profit?.toFixed(6)}>{o.profit != null ? fmtNum(o.profit) : '—'}</td>
                                                                                     <td className={`px-1.5 py-1 ${plColor(pctChg ?? undefined)}`}>{pctChg != null ? `${pctChg >= 0 ? '+' : ''}${pctChg.toFixed(2)}%` : '—'}</td>
                                                                                     <td className={`px-1.5 py-1 ${muted}`}>{rr ? rr.toFixed(1) : '—'}</td>
+                                                                                    <td className={`px-1.5 py-1 ${isCancelled ? 'text-red-400/60' : o.status === 'FILLED' ? 'text-blue-400' : muted}`}>{o.status}</td>
                                                                                     <td className={`px-1.5 py-1 ${muted}`}>{o.close_reason ?? '—'}</td>
                                                                                 </tr>);
                                                                             })}

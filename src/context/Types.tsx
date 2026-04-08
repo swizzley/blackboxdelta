@@ -3,6 +3,7 @@ export interface ProfileStats {
     profile: string;
     timeframe: string;
     total_orders: number;
+    attempts: number;
     winners: number;
     losers: number;
     total_pl: number;
