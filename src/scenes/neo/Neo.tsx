@@ -129,7 +129,7 @@ export default function Neo() {
                                     <span title="Sweeps">Sweeps: {status.sweep_count}</span>
                                     <span title="Last sweep">Last: {ago(status.last_sweep)}</span>
                                     <span title="Observers">Observers: {status.observers_up}/{status.observers_total}</span>
-                                    <span title="Open incidents">Open: {status.incidents_open}</span>
+                                    <span title="Open incidents">Open: {incidentFilter === 'open' ? incidents.length : status.incidents_open}</span>
                                     {status.tier3_enabled && <span className={isDarkMode ? 'text-cyan-400' : 'text-cyan-600'}>T3: Claude</span>}
                                 </div>
                             )}
