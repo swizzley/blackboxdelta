@@ -874,6 +874,20 @@ export interface ProfileFlat extends OptimizerProfileState {
 
 // --- Neo Agent ---
 
+// Signal bus events (from Neo :8084/api/neo/stream SSE)
+export interface BusSignal {
+    id: string;
+    event: string;
+    service: string;
+    severity: string;
+    scope: string;
+    scope_key?: string;
+    payload?: Record<string, any>;
+    labels?: Record<string, string>;
+    correlation_id?: string;
+    ts: string;
+}
+
 export interface NeoStatus {
     timestamp: string;
     uptime: string;

@@ -1,6 +1,8 @@
 import {useEffect, useState, useCallback} from 'react';
 import Nav from '../common/Nav';
 import Foot from '../common/Foot';
+import LiveStream from './LiveStream';
+import SignalInspector from './SignalInspector';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {useToast} from '../../context/Toast';
@@ -10,6 +12,7 @@ import {
     EyeIcon, PauseCircleIcon, PlayCircleIcon, CogIcon,
     ExclamationTriangleIcon, CheckCircleIcon, SignalIcon,
     ClockIcon, ArrowTopRightOnSquareIcon, ServerStackIcon,
+    BoltIcon, LinkIcon,
 } from '@heroicons/react/24/outline';
 
 const GITLAB_BASE = 'http://gitlab.aspendenver.local';
@@ -46,6 +49,8 @@ export default function Neo() {
     const [incidentFilter, setIncidentFilter] = useState<'all' | 'open' | 'closed'>('open');
     const [loading, setLoading] = useState(true);
     const [statusDown, setStatusDown] = useState(false);
+    const [activeTab, setActiveTab] = useState<'status' | 'live' | 'inspector'>('status');
+    const [inspectorCorrelation, setInspectorCorrelation] = useState('');
 
     const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
     const heading = `text-lg font-semibold flex items-center gap-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`;
@@ -164,7 +169,39 @@ export default function Neo() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Tab bar */}
+                    <div className={`flex border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                        {([
+                            {key: 'status', label: 'Status', icon: <ServerStackIcon className="w-4 h-4"/>},
+                            {key: 'live', label: 'Live', icon: <BoltIcon className="w-4 h-4"/>},
+                            {key: 'inspector', label: 'Inspector', icon: <LinkIcon className="w-4 h-4"/>},
+                        ] as const).map(tab => (
+                            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                                className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                                    activeTab === tab.key
+                                        ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400'
+                                        : `border-transparent ${isDarkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'}`
+                                }`}>
+                                {tab.icon}{tab.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Live tab */}
+                    {activeTab === 'live' && (
+                        <LiveStream onSelectCorrelation={(id) => {
+                            setInspectorCorrelation(id);
+                            setActiveTab('inspector');
+                        }}/>
+                    )}
+
+                    {/* Inspector tab */}
+                    {activeTab === 'inspector' && (
+                        <SignalInspector initialCorrelationId={inspectorCorrelation}/>
+                    )}
+
+                    {/* Status tab — existing content */}
+                    {activeTab === 'status' && <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Incidents — 2 cols */}
                         <div className={`lg:col-span-2 ${card}`}>
                             <div className="flex items-center justify-between mb-4">
@@ -270,7 +307,7 @@ export default function Neo() {
                                 )}
                             </div>
                         </div>
-                    </div>
+                    </div>}
                 </div>
             </div>
             <Foot/>

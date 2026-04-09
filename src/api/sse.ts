@@ -62,3 +62,20 @@ export function connectAlerts(baseUrl: string, onAlert: (alert: ApiAlert) => voi
 export function connectMonitorStatus(monitorBase: string, onStatus: (status: MonitorStatus) => void): () => void {
     return connectSSE({url: `${monitorBase}/api/monitor/stream`, onMessage: onStatus, eventName: 'status'});
 }
+
+import type {BusSignal} from '../context/Types';
+
+export function connectSignalBus(
+    baseUrl: string,
+    onSignal: (sig: BusSignal) => void,
+    filters?: {service?: string; type?: string; severity?: string}
+): () => void {
+    let url = `${baseUrl}/api/neo/stream`;
+    const params = new URLSearchParams();
+    if (filters?.service) params.set('service', filters.service);
+    if (filters?.type) params.set('type', filters.type);
+    if (filters?.severity) params.set('severity', filters.severity);
+    const qs = params.toString();
+    if (qs) url += (url.includes('?') ? '&' : '?') + qs;
+    return connectSSE({url, onMessage: onSignal, eventName: 'signal'});
+}
