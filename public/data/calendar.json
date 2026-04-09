@@ -260,13 +260,13 @@
     "dur_count": 79
   },
   "2026-04-09": {
-    "pl": -0.67,
-    "winners": 11,
-    "losers": 130,
-    "total": 149,
+    "pl": -0.73,
+    "winners": 13,
+    "losers": 144,
+    "total": 166,
     "win_pl": 0.02,
-    "loss_pl": -0.69,
-    "dur_sum": 22662,
-    "dur_count": 149
+    "loss_pl": -0.75,
+    "dur_sum": 25007,
+    "dur_count": 166
   }
 }
