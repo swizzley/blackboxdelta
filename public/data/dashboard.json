@@ -1,20 +1,20 @@
 {
   "all_time": {
-    "total_orders": 4657,
-    "pending": 84,
-    "open_positions": 73,
-    "closed_orders": 4500,
-    "total_pl": -24.19,
-    "winners": 632,
-    "losers": 1880,
-    "breakeven": 1837,
+    "total_orders": 4704,
+    "pending": 78,
+    "open_positions": 70,
+    "closed_orders": 4556,
+    "total_pl": -24.23,
+    "winners": 636,
+    "losers": 1891,
+    "breakeven": 1870,
     "win_loss_ratio": 0.34,
-    "win_rate_pct": 0.15,
+    "win_rate_pct": 0.14,
     "avg_win": 0.03,
     "avg_loss": -0.02,
     "avg_time_in_trade_mins": 140,
-    "long_pl": -7.43,
-    "short_pl": -16.76
+    "long_pl": -7.48,
+    "short_pl": -16.75
   },
   "by_timeframe": [
     {
@@ -205,8 +205,8 @@
     },
     {
       "date": "2026-04-09",
-      "cumulative_pl": -24.18,
-      "daily_pl": -0.75
+      "cumulative_pl": -24.22,
+      "daily_pl": -0.79
     }
   ],
   "direction_series": [
@@ -447,11 +447,11 @@
     {
       "date": "2026-04-09",
       "long_wins": 12,
-      "long_losses": 55,
-      "short_wins": 10,
-      "short_losses": 99,
-      "long_pl": -0.24,
-      "short_pl": -0.51
+      "long_losses": 62,
+      "short_wins": 14,
+      "short_losses": 103,
+      "long_pl": -0.29,
+      "short_pl": -0.5
     }
   ],
   "score_series": [
@@ -892,27 +892,27 @@
       "avg_final_score": 0.03,
       "avg_confidence": 0,
       "avg_trend": -0,
-      "avg_ma": 0,
+      "avg_ma": 0.01,
       "avg_crossover": 0.02,
       "avg_oscillator": 0.01,
-      "avg_volatility": 0,
+      "avg_volatility": -0,
       "avg_volume": 0.01,
       "avg_fib_stack": 0.04,
-      "avg_momentum_projection": -0.01,
+      "avg_momentum_projection": -0,
       "avg_structure": 0.01,
       "avg_cycle": 0,
       "avg_pattern": 0,
       "avg_sentiment": 0,
-      "count": 3045
+      "count": 3326
     }
   ],
   "recommendation_counts": {
-    "Buy": 11433,
+    "Buy": 11570,
     "Minimal Buy": 2720,
-    "Minimal Sell": 4330,
+    "Minimal Sell": 4331,
     "Moderate Buy": 27204,
     "Moderate Sell": 10227,
-    "Sell": 9332,
+    "Sell": 9475,
     "Strong Buy": 643,
     "Strong Sell": 219,
     "Weak Buy": 12062,
