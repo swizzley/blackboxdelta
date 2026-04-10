@@ -27,7 +27,7 @@ const SEV_DOTS: Record<string, string> = {
     CRITICAL: 'bg-red-500',
 };
 
-const SERVICES = ['all', 'agent-neo', 'trading-engine', 'alerts-engine', 'collection-engine',
+const SERVICES = ['all', 'agent-neo', 'api', 'trading-engine', 'alerts-engine', 'collection-engine',
     'optimization-engine', 'monitoring-service', 'sentdex-engine', 'analysis-engine'];
 
 const SEVERITIES = ['all', 'INFO', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
