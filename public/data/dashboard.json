@@ -1,20 +1,20 @@
 {
   "all_time": {
     "total_orders": 5213,
-    "pending": 119,
+    "pending": 115,
     "open_positions": 63,
-    "closed_orders": 5031,
-    "total_pl": -24.56,
+    "closed_orders": 5035,
+    "total_pl": -24.58,
     "winners": 665,
-    "losers": 1974,
-    "breakeven": 2204,
+    "losers": 1975,
+    "breakeven": 2207,
     "win_loss_ratio": 0.34,
     "win_rate_pct": 0.14,
     "avg_win": 0.03,
     "avg_loss": -0.02,
     "avg_time_in_trade_mins": 144,
     "long_pl": -7.6,
-    "short_pl": -16.96
+    "short_pl": -16.98
   },
   "by_timeframe": [
     {
@@ -210,8 +210,8 @@
     },
     {
       "date": "2026-04-10",
-      "cumulative_pl": -24.55,
-      "daily_pl": -0.05
+      "cumulative_pl": -24.57,
+      "daily_pl": -0.07
     }
   ],
   "direction_series": [
@@ -463,9 +463,9 @@
       "long_wins": 0,
       "long_losses": 4,
       "short_wins": 0,
-      "short_losses": 1,
+      "short_losses": 2,
       "long_pl": -0.04,
-      "short_pl": -0.01
+      "short_pl": -0.03
     }
   ],
   "score_series": [
