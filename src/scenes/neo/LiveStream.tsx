@@ -1,4 +1,4 @@
-import {useEffect, useState, useRef} from 'react';
+import {useEffect, useState, useRef, useMemo} from 'react';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
 import {connectSignalBus} from '../../api/sse';
@@ -56,11 +56,6 @@ export default function LiveStream({onSelectCorrelation}: Props) {
     useEffect(() => {
         if (!apiBase) return;
 
-        const filters: {service?: string; severity?: string} = {};
-        if (serviceFilter !== 'all') filters.service = serviceFilter;
-        if (severityFilter !== 'all') filters.severity = severityFilter;
-
-        setEvents([]); // clear old events on filter change
         setConnected(true);
         const disconnect = connectSignalBus(apiBase, (sig) => {
             if (pausedRef.current) return;
@@ -68,13 +63,13 @@ export default function LiveStream({onSelectCorrelation}: Props) {
                 const next = [sig, ...prev];
                 return next.length > MAX_EVENTS ? next.slice(0, MAX_EVENTS) : next;
             });
-        }, filters);
+        });
 
         return () => {
             disconnect();
             setConnected(false);
         };
-    }, [apiBase, serviceFilter, severityFilter]);
+    }, [apiBase]);
 
     // Auto-scroll to top on new events (newest first)
     useEffect(() => {
@@ -82,6 +77,12 @@ export default function LiveStream({onSelectCorrelation}: Props) {
             scrollRef.current.scrollTop = 0;
         }
     }, [events.length, paused]);
+
+    const filtered = useMemo(() => events.filter(sig => {
+        if (serviceFilter !== 'all' && sig.source_service !== serviceFilter) return false;
+        if (severityFilter !== 'all' && sig.severity !== severityFilter) return false;
+        return true;
+    }), [events, serviceFilter, severityFilter]);
 
     const formatTime = (ts: string) => {
         try {
@@ -164,7 +165,7 @@ export default function LiveStream({onSelectCorrelation}: Props) {
                     </button>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className={`text-xs ${muted}`}>{events.length} events</span>
+                    <span className={`text-xs ${muted}`}>{filtered.length !== events.length ? `${filtered.length}/` : ''}{events.length} events</span>
                     <span className="flex items-center gap-1">
                         <span className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}/>
                         <span className={`text-xs ${muted}`}>{connected ? 'Connected' : 'Disconnected'}</span>
@@ -174,13 +175,13 @@ export default function LiveStream({onSelectCorrelation}: Props) {
 
             {/* Event stream */}
             <div ref={scrollRef} className="overflow-y-auto max-h-[600px] font-mono text-xs space-y-px">
-                {events.length === 0 && (
+                {filtered.length === 0 && (
                     <div className={`text-center py-8 ${muted}`}>
                         <SignalIcon className="w-8 h-8 mx-auto mb-2 opacity-40"/>
                         Waiting for signals...
                     </div>
                 )}
-                {events.map(sig => (
+                {filtered.map(sig => (
                     <div key={sig.id}>
                         <div
                             onClick={() => setExpanded(expanded === sig.id ? null : sig.id)}
