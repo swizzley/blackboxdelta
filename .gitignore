@@ -3,3 +3,4 @@ node_modules
 dist
 public/data/analysis/
 public/data/analysis.json
+public/data/backtest/
