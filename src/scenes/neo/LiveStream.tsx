@@ -191,12 +191,12 @@ export default function LiveStream({onSelectCorrelation}: Props) {
                             {/* Timestamp */}
                             <span className={`flex-shrink-0 ${muted}`}>{formatTime(sig.ts)}</span>
                             {/* Service pill */}
-                            <span className={`flex-shrink-0 px-1.5 py-0.5 rounded text-white text-[10px] font-medium ${SERVICE_COLORS[sig.service] || 'bg-gray-500'}`}>
-                                {sig.service.replace('-engine', '').replace('-service', '')}
+                            <span className={`flex-shrink-0 px-1.5 py-0.5 rounded text-white text-[10px] font-medium ${SERVICE_COLORS[sig.source_service || ''] || 'bg-gray-500'}`}>
+                                {(sig.source_service || 'unknown').replace('-engine', '').replace('-service', '')}
                             </span>
                             {/* Event type */}
                             <span className={`flex-shrink-0 font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                                {shortType(sig.event)}
+                                {shortType(sig.signal_type)}
                             </span>
                             {/* Summary */}
                             <span className={`truncate ${muted}`}>{summarize(sig)}</span>

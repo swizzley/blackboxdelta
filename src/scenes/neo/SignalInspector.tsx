@@ -138,7 +138,7 @@ export default function SignalInspector({initialCorrelationId}: Props) {
                             <div key={sig.id} className="relative pl-8">
                                 {/* Node dot */}
                                 <div className="absolute left-0 top-1 w-5 h-5 flex items-center justify-center text-xs">
-                                    {getIcon(sig.event)}
+                                    {getIcon(sig.signal_type)}
                                 </div>
 
                                 <div
@@ -148,11 +148,11 @@ export default function SignalInspector({initialCorrelationId}: Props) {
                                         ${expanded === sig.id ? (isDarkMode ? 'bg-slate-700' : 'bg-gray-50') : ''}`}>
                                     <div className="flex items-center gap-2 text-xs">
                                         <span className={`font-mono ${muted}`}>{formatTime(sig.ts)}</span>
-                                        <span className={`px-1.5 py-0.5 rounded text-white text-[10px] font-medium ${SERVICE_COLORS[sig.service] || 'bg-gray-500'}`}>
-                                            {sig.service.replace('-engine', '').replace('-service', '')}
+                                        <span className={`px-1.5 py-0.5 rounded text-white text-[10px] font-medium ${SERVICE_COLORS[sig.source_service] || 'bg-gray-500'}`}>
+                                            {sig.source_service.replace('-engine', '').replace('-service', '')}
                                         </span>
                                         <span className={`font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                                            {shortType(sig.event)}
+                                            {shortType(sig.signal_type)}
                                         </span>
                                     </div>
                                     {keyFields(sig).length > 0 && (
