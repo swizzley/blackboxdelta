@@ -60,6 +60,7 @@ export default function LiveStream({onSelectCorrelation}: Props) {
         if (serviceFilter !== 'all') filters.service = serviceFilter;
         if (severityFilter !== 'all') filters.severity = severityFilter;
 
+        setEvents([]); // clear old events on filter change
         setConnected(true);
         const disconnect = connectSignalBus(apiBase, (sig) => {
             if (pausedRef.current) return;
