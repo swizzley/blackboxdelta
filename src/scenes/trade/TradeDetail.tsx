@@ -141,9 +141,12 @@ export default function TradeDetail() {
                                     {trade.timeframe}
                                 </span>
                                 {trade.profile && trade.profile !== 'default' && (
-                                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${isDarkMode ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                                    <a
+                                        href={`/profiles/all?name=${encodeURIComponent(trade.profile)}`}
+                                        className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium transition-colors ${isDarkMode ? 'bg-purple-900/30 text-purple-300 hover:bg-purple-900/50' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
+                                    >
                                         {trade.profile}
-                                    </span>
+                                    </a>
                                 )}
                                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
                                     trade.status === 'CLOSED' ? (isDarkMode ? 'bg-slate-600 text-gray-300' : 'bg-gray-100 text-gray-700') :

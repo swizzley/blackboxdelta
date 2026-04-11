@@ -169,18 +169,21 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
         });
 
         // Candlestick series — hollow candles
-        // autoscaleInfoProvider ensures TP/SL/spread price lines are always visible
-        const tradePrices: number[] = [trade.entry, trade.stop_loss];
-        if (trade.take_profit && trade.take_profit > 0) tradePrices.push(trade.take_profit);
-        if (trade.exit !== undefined) tradePrices.push(trade.exit);
-        if (trade.avg_spread && trade.avg_spread > 0) {
-            const sp = trade.avg_spread * (isJpy ? 0.01 : 0.0001);
-            tradePrices.push(trade.entry + sp, trade.entry - sp);
-        }
-        if (trade.max_spread && trade.max_spread > 0) {
-            const sp = trade.max_spread * (isJpy ? 0.01 : 0.0001);
-            tradePrices.push(trade.entry + sp, trade.entry - sp);
-        }
+        // Y-axis auto-scaled to a pip range derived from the pair's avg_spread × TF multiplier.
+        // This gives each pair+TF a natural viewing window proportional to its volatility.
+        const tfPipMultiplier: Record<string, number> = {
+            '1m': 5, 'scalp': 5,
+            '5m': 10,
+            '15m': 18, 'intraday': 18,
+            '1h': 35,
+            '4h': 70,
+            'daily': 150, 'weekly': 300,
+        };
+        const pip = isJpy ? 0.01 : 0.0001;
+        const spreadPips = trade.avg_spread ?? 10;
+        const tfMult = tfPipMultiplier[trade.timeframe] ?? 18;
+        const viewRangePips = spreadPips * tfMult;
+        const viewRangePrice = viewRangePips * pip;
 
         const candleSeries = chart.addCandlestickSeries({
             upColor: isDarkMode ? '#131722' : '#ffffff',
@@ -197,16 +200,17 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             autoscaleInfoProvider: (original: () => any) => {
                 const res = original();
                 if (res !== null && res.priceRange) {
-                    let lo = res.priceRange.minValue;
-                    let hi = res.priceRange.maxValue;
-                    for (const p of tradePrices) {
-                        if (p < lo) lo = p;
-                        if (p > hi) hi = p;
+                    // Clamp the visible range to the TF×spread pip window centered on entry
+                    const mid = trade.entry;
+                    const lo = mid - viewRangePrice / 2;
+                    const hi = mid + viewRangePrice / 2;
+                    res.priceRange.minValue = Math.max(res.priceRange.minValue, lo);
+                    res.priceRange.maxValue = Math.min(res.priceRange.maxValue, hi);
+                    // If candle data is entirely within our window, use it as-is with margin
+                    if (res.priceRange.minValue >= res.priceRange.maxValue) {
+                        res.priceRange.minValue = lo;
+                        res.priceRange.maxValue = hi;
                     }
-                    // Add a small margin so lines aren't right at the edge
-                    const margin = (hi - lo) * 0.05;
-                    res.priceRange.minValue = lo - margin;
-                    res.priceRange.maxValue = hi + margin;
                 }
                 return res;
             },
@@ -236,8 +240,26 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             );
         }
 
-        // Price lines: entry, SL, TP, exit
-        candleSeries.createPriceLine({
+        // Price lines on an invisible helper series — keeps them off the candle autoscale.
+        // The helper series returns null from autoscaleInfoProvider so it never affects the y-axis.
+        const priceLinesHelper = chart.addLineSeries({
+            color: 'transparent',
+            lineVisible: false,
+            lastValueVisible: false,
+            priceLineVisible: false,
+            crosshairMarkerVisible: false,
+            priceScaleId: 'trade-levels',
+            autoscaleInfoProvider: () => null,
+        });
+        // Mirror the right price scale formatting but hide the scale itself
+        chart.priceScale('trade-levels').applyOptions({
+            visible: false,
+            autoScale: false,
+        });
+        // Give it a single invisible data point so lightweight-charts accepts price lines
+        priceLinesHelper.setData([{time: bars[0].time, value: trade.entry}]);
+
+        priceLinesHelper.createPriceLine({
             price: trade.entry,
             color: '#8b5cf6',
             lineWidth: 1,
@@ -245,7 +267,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             axisLabelVisible: true,
             title: '',
         });
-        candleSeries.createPriceLine({
+        priceLinesHelper.createPriceLine({
             price: trade.stop_loss,
             color: '#ef4444',
             lineWidth: 1,
@@ -254,7 +276,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             title: 'SL',
         });
         if (trade.take_profit && trade.take_profit > 0) {
-            candleSeries.createPriceLine({
+            priceLinesHelper.createPriceLine({
                 price: trade.take_profit,
                 color: '#10b981',
                 lineWidth: 1,
@@ -264,7 +286,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             });
         }
         if (trade.exit !== undefined) {
-            candleSeries.createPriceLine({
+            priceLinesHelper.createPriceLine({
                 price: trade.exit,
                 color: '#f59e0b',
                 lineWidth: 1,
@@ -274,14 +296,14 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             });
         }
 
-        // Spread lines — show estimated ask-side band
+        // Spread lines
         const pipSize = isJpy ? 0.01 : 0.0001;
         if (trade.avg_spread && trade.avg_spread > 0) {
             const isShort = trade.direction === 'Short';
             const sign = isShort ? 1 : -1;
             const avgSpreadPrice = trade.avg_spread * pipSize;
             const avgAsk = trade.entry + sign * avgSpreadPrice;
-            candleSeries.createPriceLine({
+            priceLinesHelper.createPriceLine({
                 price: avgAsk,
                 color: isDarkMode ? 'rgba(251, 191, 36, 0.5)' : 'rgba(245, 158, 11, 0.5)',
                 lineWidth: 1,
@@ -295,7 +317,7 @@ const TradeChart = forwardRef<TradeChartHandle, Props>(function TradeChart({trad
             const sign = isShort ? 1 : -1;
             const maxSpreadPrice = trade.max_spread * pipSize;
             const maxAsk = trade.entry + sign * maxSpreadPrice;
-            candleSeries.createPriceLine({
+            priceLinesHelper.createPriceLine({
                 price: maxAsk,
                 color: isDarkMode ? 'rgba(251, 191, 36, 0.3)' : 'rgba(245, 158, 11, 0.3)',
                 lineWidth: 1,
