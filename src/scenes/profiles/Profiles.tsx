@@ -8,11 +8,12 @@ import {useToast} from '../../context/Toast';
 import {
     fetchOptimizerAllProfiles, fetchOptimizerSeedRuns,
     enableProfile, disableProfile, soakProfile, goLiveProfile, noLiveProfile,
-    reseedProfile, cancelSeedProfile, fetchDashboard, fetchLHCRuns, updateSeedQueuePriority,
+    reseedProfile, cancelSeedProfile, fetchDashboard, fetchLHCRuns,
 } from '../../api/client';
 import type {OptimizerAllProfilesResponse, SeedRun, ProfileFlat, ProfileStage, ProfileStats, LHCRun} from '../../context/Types';
 import {flattenProfiles, matchesSearch, isGoldProfile, STAGE_ORDER, STAGE_COLORS, STAGE_LABELS} from './utils';
-import {ResultStat, WRFractionStat, StageBadge, BaseTimeframeBadge, CompositeScoreBar, fmtNum, plColor} from './components/shared';
+import {BaseTimeframeBadge, CompositeScoreBar, fmtNum, plColor} from './components/shared';
+import GoldenProfiles from './GoldenProfiles';
 
 export default function Profiles() {
     const {isDarkMode} = useTheme();
@@ -26,14 +27,11 @@ export default function Profiles() {
     const [liveStats, setLiveStats] = useState<Map<string, ProfileStats>>(new Map());
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [actionLoading, setActionLoading] = useState<string | null>(null);
-    const [actionDone, setActionDone] = useState<string | null>(null);
     const [expandedCard, setExpandedCard] = useState<string | null>(null);
     const [kanbanSearch, setKanbanSearch] = useState('');
     const [kanbanSort, setKanbanSort] = useState<'sharpe' | 'name' | 'trades' | 'pnl' | 'gens'>('sharpe');
     const [dragProfile, setDragProfile] = useState<ProfileFlat | null>(null);
     const [dragOver, setDragOver] = useState<ProfileStage | null>(null);
-    const [dropTargetCard, setDropTargetCard] = useState<string | null>(null); // card name for intra-column reorder
 
     const card = `${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg shadow p-5 transition-colors duration-500`;
     const muted = isDarkMode ? 'text-gray-400' : 'text-gray-500';
@@ -76,39 +74,11 @@ export default function Profiles() {
     const getLive = (p: ProfileFlat) => liveStats.get(p.name);
     const isGold = (p: ProfileFlat) => isGoldProfile(p.baseline?.stats);
 
-    const soakTime = (p: ProfileFlat): string => {
-        const firstOrder = p.first_order_at;
-        if (!firstOrder) return '—';
-        const days = Math.floor((Date.now() - new Date(firstOrder).getTime()) / 86400000);
-        if (days < 1) return '<1d';
-        if (days < 30) return `${days}d`;
-        return `${Math.floor(days / 30)}mo ${days % 30}d`;
-    };
-
     // Live Trading includes both live and soaking profiles that have actual trades.
     // Profiles with 0W/0L are hidden until they make their first trade.
     const liveProfiles = filtered
         .filter(p => (p.stage === 'live' || p.stage === 'soaking') && (getLive(p)?.total_orders ?? 0) > 0)
         .sort((a, b) => (getLive(b)?.total_pl ?? 0) - (getLive(a)?.total_pl ?? 0));
-    const attentionProfiles = filtered.filter(p =>
-        (p.stage === 'live' || p.stage === 'soaking') && getLive(p) && getLive(p)!.total_pl < 0
-    );
-
-    const doAction = async (action: (name: string) => Promise<any>, name: string, label?: string) => {
-        setActionLoading(name);
-        try {
-            await action(name);
-            toast(`${name}: ${label ?? 'done'}`, 'success');
-        } catch (e: any) {
-            const msg = e?.message || String(e);
-            toast(`${name}: ${msg}`, 'error');
-        }
-        setActionLoading(null);
-        setActionDone(name);
-        setTimeout(() => setActionDone(null), 2000);
-        loadData();
-    };
-
     // Drag-and-drop between kanban columns
     // Kanban is the human override control center — any stage to any stage.
     const canDrop = (from: ProfileStage, to: ProfileStage): boolean => from !== to;
@@ -195,9 +165,6 @@ export default function Profiles() {
         };
     })();
 
-    // Pipeline stage counts — show all stages, even empty
-    const stageCounts = STAGE_ORDER.map(s => ({stage: s, count: filtered.filter(p => p.stage === s).length}));
-    const totalFiltered = filtered.length;
 
     if (loading) {
         return (
@@ -240,213 +207,17 @@ export default function Profiles() {
                         </a>
                     </div>
 
-                    {/* Live Trading Section */}
-                    <div className={card}>
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className={heading}>
-                                <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse inline-block"/>
-                                Live Trading
-                                <span className={`text-sm font-normal font-mono ${muted}`}>({liveProfiles.length})</span>
-                            </h2>
-                            {liveProfiles.length > 0 && (
-                                <span className={`text-xs font-mono ${muted}`}>
-                                    WR:{liveAgg.wr.toFixed(0)}% {liveAgg.trades}t P&L:<span className={plColor(liveAgg.pnl)}>{fmtNum(liveAgg.pnl)}</span>
-                                </span>
-                            )}
-                        </div>
-                        {liveProfiles.length === 0 ? (
-                            <p className={`text-sm ${muted}`}>No profiles currently in live trading.</p>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {liveProfiles.map(p => {
-                                    const live = getLive(p);
-                                    const pnl = live?.total_pl ?? 0;
-                                    return (
-                                        <div
-                                            key={cardKey(p)}
-                                            onClick={() => toggleExpand(p)}
-                                            className={`rounded-lg p-3 cursor-pointer transition-all ${pnl > 0 ? (isDarkMode ? 'bg-emerald-900/20 border border-emerald-800/30' : 'bg-emerald-50 border border-emerald-200') : pnl < 0 ? (isDarkMode ? 'bg-red-900/20 border border-red-800/30' : 'bg-red-50 border border-red-200') : (isDarkMode ? 'bg-slate-700/50' : 'bg-gray-100')} hover:scale-[1.01]`}
-                                        >
-                                            <div className="flex items-center justify-between mb-1">
-                                                <div className="flex items-center gap-1.5">
-                                                    <span className={`font-mono text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
-                                                    <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
-                                                </div>
-                                                <div className="flex items-center gap-1.5">
-                                                    {p.stage === 'soaking' && <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-50 text-amber-700'}`}>SOAK 1/10</span>}
-                                                    <span className={`text-[10px] font-mono ${muted}`}>{soakTime(p)}</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-baseline gap-2">
-                                                <span className={`text-2xl font-bold ${plColor(pnl)}`}>
-                                                    {live ? fmtNum(pnl) : '—'}
-                                                </span>
-                                                <span className={`text-xs ${muted}`}>P&L</span>
-                                            </div>
-                                            {live && (
-                                                <div className={`text-xs font-mono ${muted} mt-1`}>
-                                                    WR:{live.win_rate_pct.toFixed(0)}% {live.total_orders}t {live.winners}W/{live.losers}L
-                                                </div>
-                                            )}
-                                            {isExpanded(p) && (
-                                                <div className="mt-3 pt-3 border-t border-gray-600/30 space-y-2">
-                                                    {live && (
-                                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                                                            <ResultStat label="Sharpe" value={live.sharpe_ratio != null ? live.sharpe_ratio.toFixed(2) : '—'} fullValue={live.sharpe_ratio?.toFixed(6) ?? undefined} isDarkMode={isDarkMode} color={live.sharpe_ratio != null && live.sharpe_ratio >= 1 ? 'text-emerald-400' : live.sharpe_ratio != null && live.sharpe_ratio >= 0 ? (isDarkMode ? 'text-amber-400' : 'text-amber-600') : 'text-red-400'}/>
-                                                            <WRFractionStat wr={live.win_rate_pct} breakevenWR={live.breakeven_pct ?? undefined} isDarkMode={isDarkMode}/>
-                                                            <ResultStat label="Trades" value={String(live.total_orders)} isDarkMode={isDarkMode}/>
-                                                            <ResultStat label="W/L" value={`${live.winners}/${live.losers}`} isDarkMode={isDarkMode}/>
-                                                            <ResultStat label="Avg W" value={live.avg_win != null ? fmtNum(live.avg_win) : '—'} fullValue={live.avg_win?.toFixed(6)} isDarkMode={isDarkMode} color="text-emerald-500"/>
-                                                            <ResultStat label="Avg L" value={live.avg_loss != null ? fmtNum(live.avg_loss) : '—'} fullValue={live.avg_loss?.toFixed(6)} isDarkMode={isDarkMode} color="text-red-500"/>
-                                                            <ResultStat label="Avg P&L" value={live.total_orders > 0 ? fmtNum(live.total_pl / live.total_orders) : '—'} fullValue={live.total_orders > 0 ? (live.total_pl / live.total_orders).toFixed(6) : undefined} isDarkMode={isDarkMode} color={plColor(live.total_pl)}/>
-                                                            <ResultStat label="Soak" value={soakTime(p)} isDarkMode={isDarkMode}/>
-                                                        </div>
-                                                    )}
-                                                    <div className="flex gap-1.5 mt-2">
-                                                        <a
-                                                            href={`/profiles/all?name=${p.name}`}
-                                                            onClick={e => e.stopPropagation()}
-                                                            className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-slate-600/50 text-gray-300 hover:bg-slate-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-                                                        >
-                                                            Details
-                                                        </a>
-                                                        <button
-                                                            disabled={actionLoading === cardKey(p)}
-                                                            onClick={e => { e.stopPropagation(); doAction(noLiveProfile, p.name); }}
-                                                            className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}
-                                                        >
-                                                            Demote
-                                                        </button>
-                                                        <button
-                                                            disabled={actionLoading === cardKey(p) || actionDone === cardKey(p)}
-                                                            onClick={e => { e.stopPropagation(); doAction(reseedProfile, p.name); }}
-                                                            className={`px-2 py-1 text-[10px] font-medium rounded ${actionDone === cardKey(p) ? (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700') : isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'}`}
-                                                        >
-                                                            {actionLoading === cardKey(p) ? 'Queuing...' : actionDone === cardKey(p) ? 'Queued' : 'Re-seed'}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
+                    {/* Golden Profiles */}
+                    <GoldenProfiles profiles={
+                        Array.from(liveStats.entries())
+                            .filter(([, s]) => s.win_rate_pct >= 90 && s.total_orders > 3)
+                            .sort((a, b) => b[1].total_orders - a[1].total_orders)
+                            .map(([name, stats]) => ({name, stats}))
+                    }/>
 
-                    {/* Needs Attention Section */}
+                    {/* Pipeline — kanban columns with scroll + search/sort */}
                     <div className={card}>
-                        <h2 className={`${heading} mb-4`}>
-                            Needs Attention
-                            <span className={`text-sm font-normal font-mono ${muted}`}>({attentionProfiles.length})</span>
-                        </h2>
-                        {attentionProfiles.length === 0 ? (
-                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-emerald-900/20' : 'bg-emerald-50'}`}>
-                                <span className="w-2 h-2 rounded-full bg-emerald-500"/>
-                                <span className={`text-sm ${isDarkMode ? 'text-emerald-400' : 'text-emerald-700'}`}>All clear — no profiles need attention.</span>
-                            </div>
-                        ) : (
-                            <div className="space-y-2">
-                                {attentionProfiles.map(p => {
-                                    return (
-                                        <div key={cardKey(p)} className={`flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
-                                            <span className={`font-mono text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{p.name}</span>
-                                            <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
-                                            <StageBadge stage={p.stage} isDarkMode={isDarkMode}/>
-                                            {getLive(p) && (
-                                                <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${isDarkMode ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700'}`}>
-                                                    Losing {getLive(p)!.total_pl.toFixed(2)} P&amp;L
-                                                </span>
-                                            )}
-                                            <div className="ml-auto flex gap-1.5">
-                                                <button
-                                                    disabled={actionLoading === cardKey(p)}
-                                                    onClick={() => doAction(noLiveProfile, p.name, 'demoted')}
-                                                    className={`px-2 py-1 text-[10px] font-medium rounded ${isDarkMode ? 'bg-red-900/30 text-red-400 hover:bg-red-900/50' : 'bg-red-50 text-red-700 hover:bg-red-100'}`}
-                                                >
-                                                    Demote
-                                                </button>
-                                                <button
-                                                    disabled={actionLoading === cardKey(p) || actionDone === cardKey(p)}
-                                                    onClick={() => doAction(reseedProfile, p.name, 'queued for reseed')}
-                                                    className={`px-2 py-1 text-[10px] font-medium rounded ${actionDone === cardKey(p) ? (isDarkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-700') : isDarkMode ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50' : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'}`}
-                                                >
-                                                    {actionLoading === cardKey(p) ? 'Queuing...' : actionDone === cardKey(p) ? 'Queued' : 'Reseed'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Pipeline Health Bar */}
-                    <div className={card}>
-                        <h2 className={`${heading} mb-4`}>
-                            Pipeline
-                            <span className={`text-sm font-normal font-mono ${muted}`}>({totalFiltered} profiles)</span>
-                        </h2>
-                        <div className="flex rounded-lg overflow-hidden h-10">
-                            {stageCounts.map(({stage, count}) => {
-                                const colors = STAGE_COLORS[stage];
-                                return (
-                                    <button
-                                        key={stage}
-                                        onClick={() => count > 0 ? navigate(`/profiles/all?stage=${stage}${''}`) : undefined}
-                                        className={`flex-1 flex items-center justify-center gap-0.5 text-[10px] font-medium transition-opacity ${count > 0 ? 'hover:opacity-80 cursor-pointer' : 'opacity-40 cursor-default'} ${isDarkMode ? `${colors.darkBg} ${colors.darkText}` : `${colors.bg} ${colors.text}`}`}
-                                        title={`${STAGE_LABELS[stage]}: ${count} profiles`}
-                                    >
-                                        <span className="truncate">{STAGE_LABELS[stage]}</span>
-                                        <span className="font-mono">{count}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* TF Distribution — shows what % of profiles are on each effective TF */}
-                    {(() => {
-                        const tfCounts = new Map<string, number>();
-                        for (const p of filtered) {
-                            const tf = p.base_timeframe || '—';
-                            tfCounts.set(tf, (tfCounts.get(tf) ?? 0) + 1);
-                        }
-                        const total = filtered.length;
-                        if (total === 0) return null;
-                        const entries = Array.from(tfCounts.entries()).sort((a, b) => b[1] - a[1]);
-                        const tfColors: Record<string, string> = {
-                            '1m': 'bg-purple-500', '5m': 'bg-teal-500', '15m': 'bg-blue-500',
-                            '1h': 'bg-cyan-500', '4h': 'bg-sky-500', 'daily': 'bg-amber-500', 'weekly': 'bg-orange-500',
-                        };
-                        // Only show if any profile has a discovered base_timeframe
-                        if (!filtered.some(p => p.base_timeframe)) return null;
-                        return (
-                            <div className={`${card} !py-2`}>
-                                <div className="flex items-center gap-3 mb-1">
-                                    <span className={`text-[10px] font-medium ${muted}`}>TF Distribution</span>
-                                    {entries.map(([tf, count]) => (
-                                        <span key={tf} className={`text-[9px] font-mono ${muted}`}>
-                                            {tf}: {count} ({Math.round(count / total * 100)}%)
-                                        </span>
-                                    ))}
-                                </div>
-                                <div className="flex rounded overflow-hidden h-2">
-                                    {entries.map(([tf, count]) => (
-                                        <div key={tf}
-                                            className={`${tfColors[tf] ?? 'bg-gray-500'}`}
-                                            style={{width: `${(count / total) * 100}%`}}
-                                            title={`${tf}: ${count} profiles (${Math.round(count / total * 100)}%)`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })()}
-
-                    {/* Pipeline Detail — kanban columns with scroll + search/sort */}
-                    <div className={card}>
-                        <h2 className={`${heading} mb-3`}>Pipeline Detail</h2>
+                        <h2 className={`${heading} mb-3`}>Pipeline</h2>
                         <div className="flex gap-2 mb-3 flex-wrap">
                             <input
                                 type="text"
@@ -464,15 +235,12 @@ export default function Profiles() {
                                 <option value="gens">Sort: Gens</option>
                             </select>
                         </div>
-                        <div className="flex gap-3 overflow-x-auto pb-2">
+                        <div className="flex gap-2 overflow-x-auto pb-2">
                             {STAGE_ORDER.map(stage => {
                                 const stageProfiles = filtered
                                     .filter(p => (stageOverrides.get(cardKey(p)) ?? p.stage) === stage && (!kanbanSearch || p.name.toLowerCase().includes(kanbanSearch.toLowerCase())))
                                     .sort((a, b) => {
-                                        // Queued column: sort by seed queue priority (highest first)
-                                        if (stage === 'queued') {
-                                            return (b.seed_queue_priority ?? -1) - (a.seed_queue_priority ?? -1);
-                                        }
+                                        if (stage === 'queued') return (b.seed_queue_priority ?? -1) - (a.seed_queue_priority ?? -1);
                                         switch (kanbanSort) {
                                             case 'name': return a.name.localeCompare(b.name);
                                             case 'trades': return (b.baseline?.stats?.total_trades ?? 0) - (a.baseline?.stats?.total_trades ?? 0);
@@ -482,105 +250,91 @@ export default function Profiles() {
                                         }
                                     });
                                 const colors = STAGE_COLORS[stage];
-                                const isReorderable = stage === 'queued';
+                                const isEmpty = stageProfiles.length === 0;
                                 return (
                                     <div key={stage}
-                                        onDragOver={e => { e.preventDefault(); e.stopPropagation(); if (dragProfile && canDrop(dragProfile.stage, stage)) setDragOver(stage); }}
-                                        onDragLeave={() => { setDragOver(null); setDropTargetCard(null); }}
-                                        onDrop={e => { e.preventDefault(); e.stopPropagation(); setDropTargetCard(null); handleDrop(stage); }}
-                                        className={`min-w-[180px] w-[180px] flex-shrink-0 rounded-lg ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'} flex flex-col transition-all ${dragOver === stage ? (isDarkMode ? 'ring-2 ring-cyan-500/50 bg-slate-700/50' : 'ring-2 ring-cyan-400/50 bg-cyan-50/50') : ''}`}>
-                                        <div className={`flex items-center justify-between px-3 pt-3 pb-2`}>
-                                            <span className={`text-xs font-semibold uppercase ${isDarkMode ? colors.darkText : colors.text}`}>{STAGE_LABELS[stage]}</span>
-                                            <span className={`text-xs font-mono ${muted}`}>{stageProfiles.length}</span>
+                                        onDragOver={e => { e.preventDefault(); if (dragProfile && canDrop(dragProfile.stage, stage)) setDragOver(stage); }}
+                                        onDragLeave={() => setDragOver(null)}
+                                        onDrop={e => { e.preventDefault(); handleDrop(stage); }}
+                                        className={`${isEmpty ? 'min-w-[40px] w-[40px]' : 'min-w-0 flex-1'} flex-shrink-0 rounded-lg ${isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50'} flex flex-col transition-all ${dragOver === stage ? (isDarkMode ? 'ring-2 ring-cyan-500/50 bg-slate-700/50' : 'ring-2 ring-cyan-400/50 bg-cyan-50/50') : ''}`}
+                                    >
+                                        <div className={`flex items-center ${isEmpty ? 'flex-col py-3 px-1' : 'justify-between px-3 pt-3 pb-2'}`}>
+                                            <span className={`text-[10px] font-semibold uppercase ${isEmpty ? 'writing-mode-vertical' : ''} ${isDarkMode ? colors.darkText : colors.text}`}
+                                                style={isEmpty ? {writingMode: 'vertical-rl', textOrientation: 'mixed', letterSpacing: '0.1em'} : undefined}
+                                            >{STAGE_LABELS[stage]}</span>
+                                            <span className={`text-[10px] font-mono ${muted} ${isEmpty ? 'mt-1' : ''}`}>{stageProfiles.length}</span>
                                         </div>
-                                        <div className="overflow-y-auto px-2 pb-2 space-y-1" style={{maxHeight: '400px'}}>
-                                            {stageProfiles.length === 0 ? (
-                                                <p className={`text-[10px] ${muted} text-center py-4`}>Empty</p>
-                                            ) : stageProfiles.map((p, idx) => (
-                                                <div key={cardKey(p)}
-                                                    draggable
-                                                    onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; setDragProfile(p); }}
-                                                    onDragEnd={() => { setDragProfile(null); setDragOver(null); setDropTargetCard(null); }}
-                                                    onDragOver={isReorderable ? (e) => {
-                                                        e.preventDefault(); e.stopPropagation();
-                                                        if (dragProfile && dragProfile.stage === 'queued' && cardKey(dragProfile) !== cardKey(p)) {
-                                                            setDropTargetCard(cardKey(p));
-                                                        }
-                                                    } : undefined}
-                                                    onDrop={isReorderable ? async (e) => {
-                                                        e.preventDefault(); e.stopPropagation();
-                                                        setDropTargetCard(null);
-                                                        if (!dragProfile || dragProfile.stage !== 'queued' || cardKey(dragProfile) === cardKey(p)) return;
-                                                        // Set dragged profile's priority above the target
-                                                        const srcId = dragProfile.seed_queue_id;
-                                                        const targetPriority = p.seed_queue_priority ?? 0;
-                                                        if (srcId != null) {
-                                                            // Place above: target priority + 1. If dropping below last card, use target - 1.
-                                                            const newPriority = idx === 0 ? targetPriority + 1 : targetPriority + 1;
-                                                            await updateSeedQueuePriority(srcId, newPriority);
-                                                            setDragProfile(null);
-                                                            setDragOver(null);
-                                                            loadData();
-                                                        }
-                                                    } : undefined}
-                                                    onClick={() => navigate(`/profiles/all?name=${p.name}`)}
-                                                    className={`block rounded px-2 py-1.5 transition-colors cursor-grab active:cursor-grabbing ${
-                                                        isGold(p) ? (isDarkMode ? 'bg-amber-900/10 ring-1 ring-amber-500/40 hover:bg-amber-900/20' : 'bg-amber-50/50 ring-1 ring-amber-400/40 hover:bg-amber-50')
-                                                        : isDarkMode ? 'bg-slate-800/60 hover:bg-slate-800' : 'bg-white hover:bg-gray-100'
-                                                    } ${dragProfile && cardKey(dragProfile) === cardKey(p) ? 'opacity-40' : ''} ${dropTargetCard === cardKey(p) ? (isDarkMode ? 'ring-2 ring-cyan-400/60' : 'ring-2 ring-cyan-500/60') : ''}`}>
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-1">
-                                                            {isReorderable && p.seed_queue_id != null && (
-                                                                <div className="flex flex-col -my-1 mr-0.5" onClick={e => e.stopPropagation()}>
-                                                                    <button
-                                                                        disabled={idx === 0}
-                                                                        onClick={async (e) => {
-                                                                            e.stopPropagation();
-                                                                            const above = stageProfiles[idx - 1];
-                                                                            const newPri = (above?.seed_queue_priority ?? 0) + 1;
-                                                                            await updateSeedQueuePriority(p.seed_queue_id!, newPri);
-                                                                            loadData();
-                                                                        }}
-                                                                        className={`text-[9px] leading-none px-0.5 rounded hover:bg-cyan-500/20 ${idx === 0 ? 'opacity-20 cursor-default' : isDarkMode ? 'text-gray-500 hover:text-cyan-400' : 'text-gray-400 hover:text-cyan-600'}`}
-                                                                    >▲</button>
-                                                                    <button
-                                                                        disabled={idx === stageProfiles.length - 1}
-                                                                        onClick={async (e) => {
-                                                                            e.stopPropagation();
-                                                                            const below = stageProfiles[idx + 1];
-                                                                            const newPri = Math.max((below?.seed_queue_priority ?? 0) - 1, 0);
-                                                                            await updateSeedQueuePriority(p.seed_queue_id!, newPri);
-                                                                            loadData();
-                                                                        }}
-                                                                        className={`text-[9px] leading-none px-0.5 rounded hover:bg-cyan-500/20 ${idx === stageProfiles.length - 1 ? 'opacity-20 cursor-default' : isDarkMode ? 'text-gray-500 hover:text-cyan-400' : 'text-gray-400 hover:text-cyan-600'}`}
-                                                                    >▼</button>
-                                                                </div>
-                                                            )}
-                                                            <span className={`font-mono text-[11px] font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
+                                        {!isEmpty && (
+                                            <div className="overflow-y-auto px-1.5 pb-2 space-y-0.5" style={{maxHeight: '400px'}}>
+                                                {stageProfiles.map(p => (
+                                                    <div key={cardKey(p)}
+                                                        draggable
+                                                        onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; setDragProfile(p); }}
+                                                        onDragEnd={() => { setDragProfile(null); setDragOver(null); }}
+                                                        onClick={() => navigate(`/profiles/all?name=${p.name}`)}
+                                                        className={`block rounded px-2 py-1 overflow-hidden transition-colors cursor-grab active:cursor-grabbing ${
+                                                            isGold(p) ? (isDarkMode ? 'bg-amber-900/10 ring-1 ring-amber-500/40 hover:bg-amber-900/20' : 'bg-amber-50/50 ring-1 ring-amber-400/40 hover:bg-amber-50')
+                                                            : isDarkMode ? 'bg-slate-800/60 hover:bg-slate-800' : 'bg-white hover:bg-gray-100'
+                                                        } ${dragProfile && cardKey(dragProfile) === cardKey(p) ? 'opacity-40' : ''}`}
+                                                    >
+                                                        <div className="flex items-center justify-between gap-1 overflow-hidden">
+                                                            <span className={`font-mono text-[10px] font-medium truncate min-w-0 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`} title={p.name}>{p.name}</span>
+                                                            {p.base_timeframe && <span className={`text-[8px] font-mono flex-shrink-0 ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{p.base_timeframe}</span>}
                                                         </div>
-                                                        <div className="flex items-center gap-1">
-                                                            {isReorderable && p.seed_queue_priority != null && p.seed_queue_priority > 0 && (
-                                                                <span className={`text-[8px] font-mono ${isDarkMode ? 'text-cyan-400/60' : 'text-cyan-600/60'}`}>p:{p.seed_queue_priority}</span>
-                                                            )}
-                                                            {p.base_timeframe && <span className={`text-[9px] font-mono ${isDarkMode ? 'text-teal-400' : 'text-teal-600'}`}>{p.base_timeframe}</span>}
-                                                        </div>
+                                                        {p.baseline?.stats && (
+                                                            <div className="mt-0.5">
+                                                                <CompositeScoreBar stats={p.baseline.stats} isDarkMode={isDarkMode}/>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    {p.baseline?.stats && (
-                                                        <div className="mt-0.5">
-                                                            <CompositeScoreBar stats={p.baseline.stats} isDarkMode={isDarkMode}/>
-                                                        </div>
-                                                    )}
-                                                    {p.disabled_reason && (
-                                                        <span className={`text-[9px] ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>{p.disabled_reason}</span>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
                         </div>
                     </div>
+
+                    {/* Live Trading — compact rows */}
+                    {liveProfiles.length > 0 && (
+                        <div className={card}>
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className={heading}>
+                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse inline-block"/>
+                                    Live Trading
+                                    <span className={`text-sm font-normal font-mono ${muted}`}>({liveProfiles.length})</span>
+                                </h2>
+                                <span className={`text-xs font-mono ${muted}`}>
+                                    WR:{liveAgg.wr.toFixed(0)}% {liveAgg.trades}t P&L:<span className={plColor(liveAgg.pnl)}>{fmtNum(liveAgg.pnl)}</span>
+                                </span>
+                            </div>
+                            <div className="space-y-0.5">
+                                {liveProfiles.map(p => {
+                                    const live = getLive(p);
+                                    const pnl = live?.total_pl ?? 0;
+                                    return (
+                                        <div
+                                            key={cardKey(p)}
+                                            onClick={() => toggleExpand(p)}
+                                            className={`flex items-center justify-between px-3 py-1.5 rounded cursor-pointer transition-colors ${isDarkMode ? 'hover:bg-slate-700/50' : 'hover:bg-gray-50'} ${isExpanded(p) ? (isDarkMode ? 'bg-slate-700/30' : 'bg-gray-50') : ''}`}
+                                        >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${pnl > 0 ? 'bg-emerald-400' : pnl < 0 ? 'bg-red-400' : 'bg-gray-500'}`}/>
+                                                <span className={`font-mono text-xs font-medium truncate ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{p.name}</span>
+                                                <BaseTimeframeBadge baseTf={p.base_timeframe} isDarkMode={isDarkMode}/>
+                                                {p.stage === 'soaking' && <span className={`text-[9px] px-1 py-0.5 rounded ${isDarkMode ? 'bg-amber-900/40 text-amber-400' : 'bg-amber-50 text-amber-700'}`}>SOAK</span>}
+                                            </div>
+                                            <div className="flex items-center gap-4 flex-shrink-0">
+                                                {live && <span className={`text-[10px] font-mono ${muted}`}>WR:{live.win_rate_pct.toFixed(0)}% {live.total_orders}t</span>}
+                                                <span className={`font-mono text-xs font-semibold w-16 text-right ${plColor(pnl)}`}>{live ? fmtNum(pnl) : '—'}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             </main>

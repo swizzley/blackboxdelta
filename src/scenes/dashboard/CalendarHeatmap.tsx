@@ -12,7 +12,6 @@ export default function CalendarHeatmap({data}: CalendarHeatmapProps) {
     const {isDarkMode} = useTheme();
     const navigate = useNavigate();
 
-    // Show the last 3 months
     const today = dayjs();
     const months: dayjs.Dayjs[] = [];
     for (let i = 2; i >= 0; i--) {
@@ -24,10 +23,14 @@ export default function CalendarHeatmap({data}: CalendarHeatmapProps) {
 
     function getCellColor(dateStr: string): string {
         const day = data[dateStr];
-        if (!day) return isDarkMode ? 'bg-slate-700' : 'bg-gray-100';
-        if (day.pl > 0) return day.pl > 50 ? 'bg-emerald-500' : 'bg-emerald-400/70';
-        if (day.pl < 0) return day.pl < -50 ? 'bg-red-500' : 'bg-red-400/70';
-        return isDarkMode ? 'bg-slate-600' : 'bg-gray-300';
+        if (!day) return isDarkMode ? 'bg-[#1a1a1a]' : 'bg-gray-100';
+        if (day.pl > 0) return isDarkMode
+            ? (day.pl > 50 ? 'bg-cyan-500' : 'bg-cyan-600/50')
+            : (day.pl > 50 ? 'bg-pink-500' : 'bg-pink-400/60');
+        if (day.pl < 0) return isDarkMode
+            ? (day.pl < -50 ? 'bg-[#6b2020]' : 'bg-[#3a1a1a]')
+            : (day.pl < -50 ? 'bg-red-400' : 'bg-red-300/60');
+        return isDarkMode ? 'bg-[#252525]' : 'bg-gray-300';
     }
 
     function renderMonth(month: dayjs.Dayjs) {
@@ -35,7 +38,6 @@ export default function CalendarHeatmap({data}: CalendarHeatmapProps) {
         const end = month.endOf('month');
         const days: (dayjs.Dayjs | null)[] = [];
 
-        // Pad beginning
         for (let i = 0; i < start.day(); i++) {
             days.push(null);
         }
@@ -45,13 +47,13 @@ export default function CalendarHeatmap({data}: CalendarHeatmapProps) {
 
         return (
             <div key={month.format('YYYY-MM')} className="flex-1 min-w-0">
-                <h4 className={`text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <h4 className={`text-xs font-sans font-medium mb-2 ${isDarkMode ? 'text-[#888]' : 'text-gray-600'}`}>
                     {month.format('MMMM YYYY')}
                 </h4>
                 <div className="grid grid-cols-7 gap-1">
                     {weekdaysFull.map((wd, i) => (
                         <div key={wd}
-                             className={`text-xs text-center ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                             className={`text-[10px] text-center font-sans ${isDarkMode ? 'text-[#444]' : 'text-gray-400'}`}>
                             <span className="hidden sm:inline">{wd}</span>
                             <span className="sm:hidden">{weekdaysShort[i]}</span>
                         </div>
@@ -66,11 +68,11 @@ export default function CalendarHeatmap({data}: CalendarHeatmapProps) {
                                 key={dateStr}
                                 onClick={() => !isFuture && entry && navigate(`/day/${day.format('YYYY/MM/DD')}`)}
                                 className={`
-                                    aspect-square rounded-sm flex items-center justify-center text-xs
-                                    ${isFuture ? 'opacity-30' : ''}
-                                    ${!isFuture && entry ? 'cursor-pointer hover:ring-2 hover:ring-cyan-500' : ''}
+                                    aspect-square rounded-sm flex items-center justify-center text-[10px] font-sans
+                                    ${isFuture ? 'opacity-20' : ''}
+                                    ${!isFuture && entry ? 'cursor-pointer hover:ring-1 hover:ring-cyan-500' : ''}
                                     ${getCellColor(dateStr)}
-                                    ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}
+                                    ${isDarkMode ? 'text-[#999]' : 'text-gray-700'}
                                 `}
                                 title={entry ? `${dateStr}: ${formatPct(entry.pl)} (${entry.winners}W/${entry.losers}L)` : dateStr}
                             >
@@ -84,28 +86,24 @@ export default function CalendarHeatmap({data}: CalendarHeatmapProps) {
     }
 
     return (
-        <div
-            className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`}>
-            <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                Daily Performance
-            </h3>
+        <>
             <div className="flex gap-6 overflow-x-auto">
                 {months.map(m => renderMonth(m))}
             </div>
-            <div className="flex items-center gap-4 mt-4 text-xs">
+            <div className="flex items-center gap-4 mt-3 text-[10px] font-sans">
                 <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-sm bg-emerald-500"/>
-                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Profit</span>
+                    <div className={`w-2.5 h-2.5 rounded-sm ${isDarkMode ? 'bg-cyan-500' : 'bg-pink-500'}`}/>
+                    <span className={isDarkMode ? 'text-[#555]' : 'text-gray-500'}>Profit</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-sm bg-red-500"/>
-                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Loss</span>
+                    <div className={`w-2.5 h-2.5 rounded-sm ${isDarkMode ? 'bg-[#6b2020]' : 'bg-red-400'}`}/>
+                    <span className={isDarkMode ? 'text-[#555]' : 'text-gray-500'}>Loss</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <div className={`w-3 h-3 rounded-sm ${isDarkMode ? 'bg-slate-700' : 'bg-gray-100'}`}/>
-                    <span className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>No trades</span>
+                    <div className={`w-2.5 h-2.5 rounded-sm ${isDarkMode ? 'bg-[#1a1a1a]' : 'bg-gray-100'}`}/>
+                    <span className={isDarkMode ? 'text-[#555]' : 'text-gray-500'}>No trades</span>
                 </div>
             </div>
-        </div>
+        </>
     );
 }

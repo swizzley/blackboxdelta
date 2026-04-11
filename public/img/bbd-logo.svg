@@ -1,4 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1316" height="1500" fill="none" viewBox="0 0 1316 1500">
-  <path fill="#fff" d="M0 1500 657.534 0h36.77l620.766 1500H0Zm1056.6-91.93L618.601 330.93 144.917 1408.07H1056.6Z"/>
+  <defs>
+    <linearGradient id="gold" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#FFFACD"/>
+      <stop offset="20%" stop-color="#FFD700"/>
+      <stop offset="45%" stop-color="#DAA520"/>
+      <stop offset="55%" stop-color="#FFD700"/>
+      <stop offset="80%" stop-color="#B8860B"/>
+      <stop offset="100%" stop-color="#8B6914"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#gold)" d="M0 1500 657.534 0h36.77l620.766 1500H0Zm1056.6-91.93L618.601 330.93 144.917 1408.07H1056.6Z"/>
   <path fill="#000" d="M662.591 708 270.494 883.448l392.479 174.072L1059.5 883.052 662.591 708Zm16.081 371.44V1500L1060 1312V911.211L678.672 1079.44ZM268 1312l382.619 188v-420.56L268 911.211V1312Z"/>
 </svg>

@@ -10,123 +10,137 @@ interface TimeframeBreakdownProps {
     onTimeframeClick: (tf: string | null) => void;
 }
 
+// Map legacy names to standard TF labels and merge duplicates
+const TF_LABEL: Record<string, string> = {
+    'scalp': '1m', '1m': '1m',
+    '5m': '5m',
+    'intraday': '15m', '15m': '15m',
+    '1h': '1h',
+    '4h': '4h',
+    'swing': '1D', 'daily': '1D',
+    'weekly': '1W', '1w': '1W',
+};
+
+const TF_ORDER = ['1m', '5m', '15m', '1h', '4h', '1D', '1W'];
+
+function mergeTimeframes(data: TimeframeRow[]): {label: string; rawTf: string; long_pl: number; short_pl: number; total_orders: number}[] {
+    const merged = new Map<string, {label: string; rawTf: string; long_pl: number; short_pl: number; total_orders: number}>();
+    for (const row of data) {
+        const label = TF_LABEL[row.timeframe] ?? row.timeframe;
+        const existing = merged.get(label);
+        if (existing) {
+            existing.long_pl += row.long_pl;
+            existing.short_pl += row.short_pl;
+            existing.total_orders += row.total_orders;
+        } else {
+            merged.set(label, {label, rawTf: row.timeframe, long_pl: row.long_pl, short_pl: row.short_pl, total_orders: row.total_orders});
+        }
+    }
+    return TF_ORDER.filter(tf => merged.has(tf)).map(tf => merged.get(tf)!);
+}
+
 export default function TimeframeBreakdown({data, selectedTimeframe, onTimeframeClick}: TimeframeBreakdownProps) {
     const {isDarkMode} = useTheme();
     const chartRef = useRef<ReactECharts>(null);
 
-    const timeframes = data.map(d => d.timeframe);
-    const timeframeLabels = timeframes.map(d => d.charAt(0).toUpperCase() + d.slice(1));
+    const merged = mergeTimeframes(data);
+    const labels = merged.map(d => d.label);
 
+    const selectedLabel = selectedTimeframe ? (TF_LABEL[selectedTimeframe] ?? selectedTimeframe) : null;
     const dimOpacity = 0.25;
 
     const onClick = useCallback((params: any) => {
         if (params.componentType !== 'series') return;
-        const clickedTf = timeframes[params.dataIndex];
-        if (!clickedTf) return;
-        onTimeframeClick(selectedTimeframe === clickedTf ? null : clickedTf);
-    }, [timeframes, selectedTimeframe, onTimeframeClick]);
+        const clicked = merged[params.dataIndex];
+        if (!clicked) return;
+        const clickedLabel = clicked.label;
+        onTimeframeClick(selectedLabel === clickedLabel ? null : clicked.rawTf);
+    }, [merged, selectedLabel, onTimeframeClick]);
 
     const option = {
         backgroundColor: 'transparent',
         tooltip: {
             trigger: 'axis',
             axisPointer: {type: 'shadow'},
+            backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
+            borderColor: isDarkMode ? '#333' : '#e5e7eb',
+            textStyle: {color: isDarkMode ? '#e0e0e0' : '#1f2937', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 11},
             formatter: (params: any) => {
                 const tf = params[0]?.axisValue ?? '';
-                let html = `<b>${tf}</b>`;
+                const idx = params[0]?.dataIndex ?? 0;
+                const orders = merged[idx]?.total_orders ?? 0;
+                let html = `<b>${tf}</b> (${orders} trades)`;
                 let total = 0;
                 for (const p of params) {
                     if (p.value === 0) continue;
-                    const marker = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};margin-right:4px;"></span>`;
+                    const marker = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:4px;"></span>`;
                     html += `<br/>${marker}${p.seriesName}: <b>${formatPct(p.value)}</b>`;
                     total += p.value;
                 }
-                html += `<br/><b>Total: ${formatPct(total)}</b>`;
+                html += `<br/><b>Net: ${formatPct(total)}</b>`;
                 return html;
             },
         },
-        legend: {
-            data: ['Long P&L', 'Short P&L'],
-            textStyle: {color: isDarkMode ? '#9ca3af' : '#374151'},
-            top: 0,
-        },
-        grid: {
-            left: '3%',
-            right: '3%',
-            bottom: '3%',
-            top: '15%',
-            containLabel: true,
-        },
+        legend: {show: false},
+        grid: {left: 0, right: 0, bottom: 0, top: 10, containLabel: true},
         xAxis: {
             type: 'category',
-            data: timeframeLabels,
+            data: labels,
             axisLabel: {
-                color: isDarkMode ? '#9ca3af' : '#6b7280',
+                color: isDarkMode ? '#666' : '#6b7280',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontSize: 11,
                 fontWeight: ((_: any, index: number) =>
-                    selectedTimeframe === timeframes[index] ? 'bold' : 'normal'
+                    selectedLabel === labels[index] ? 'bold' : 'normal'
                 ) as any,
             },
-            axisLine: {lineStyle: {color: isDarkMode ? '#374151' : '#d1d5db'}},
+            axisLine: {lineStyle: {color: isDarkMode ? '#222' : '#d1d5db'}},
+            axisTick: {show: false},
         },
         yAxis: {
             type: 'value',
-            name: 'P&L',
-            axisLabel: {color: isDarkMode ? '#9ca3af' : '#6b7280', formatter: (v: number) => `$${v}`},
-            splitLine: {lineStyle: {color: isDarkMode ? '#1e293b' : '#f3f4f6'}},
+            axisLabel: {color: isDarkMode ? '#555' : '#6b7280', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 10, formatter: (v: number) => `$${v}`},
+            splitLine: {lineStyle: {color: isDarkMode ? '#1a1a1a' : '#f3f4f6'}},
+            axisLine: {show: false},
         },
         series: [
             {
                 name: 'Long P&L',
                 type: 'bar',
                 stack: 'pl',
-                data: data.map((d, i) => ({
+                data: merged.map((d, i) => ({
                     value: d.long_pl,
                     itemStyle: {
-                        color: '#10b981',
-                        opacity: selectedTimeframe && selectedTimeframe !== timeframes[i] ? dimOpacity : 1,
+                        color: isDarkMode ? '#22d3ee' : '#ec4899',
+                        opacity: selectedLabel && selectedLabel !== labels[i] ? dimOpacity : 1,
                     },
                 })),
                 cursor: 'pointer',
+                barMaxWidth: 24,
             },
             {
                 name: 'Short P&L',
                 type: 'bar',
                 stack: 'pl',
-                data: data.map((d, i) => ({
+                data: merged.map((d, i) => ({
                     value: d.short_pl,
                     itemStyle: {
-                        color: '#f59e0b',
-                        opacity: selectedTimeframe && selectedTimeframe !== timeframes[i] ? dimOpacity : 1,
+                        color: isDarkMode ? '#06b6d4' : '#f472b6',
+                        opacity: selectedLabel && selectedLabel !== labels[i] ? dimOpacity : 0.7,
                     },
                 })),
                 cursor: 'pointer',
+                barMaxWidth: 24,
             },
         ],
     };
 
     return (
-        <div className={`${isDarkMode ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 shadow transition-colors duration-500`}>
-            <div className="flex items-center justify-between mb-2">
-                <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    By Timeframe
-                </h3>
-                {selectedTimeframe && (
-                    <button
-                        onClick={() => onTimeframeClick(null)}
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                            isDarkMode ? 'bg-cyan-900/50 text-cyan-300' : 'bg-cyan-100 text-cyan-700'
-                        }`}
-                    >
-                        {selectedTimeframe.charAt(0).toUpperCase() + selectedTimeframe.slice(1)} &times;
-                    </button>
-                )}
-            </div>
-            <ReactECharts
-                ref={chartRef}
-                option={option}
-                style={{height: '350px'}}
-                onEvents={{click: onClick}}
-            />
-        </div>
+        <ReactECharts
+            ref={chartRef}
+            option={option}
+            style={{height: '280px'}}
+            onEvents={{click: onClick}}
+        />
     );
 }

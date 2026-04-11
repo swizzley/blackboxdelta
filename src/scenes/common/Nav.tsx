@@ -28,7 +28,7 @@ export default function Nav() {
 
     return (
         <Popover as="header"
-                 className={`${isDarkMode ? 'bg-slate-900' : 'bg-gray-500'} transition-colors duration-500 pb-24`}>
+                 className={`${isDarkMode ? 'bg-slate-800' : 'bg-gray-500'} transition-colors duration-500 pb-24`}>
             {({open}) => (
                 <>
                     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">

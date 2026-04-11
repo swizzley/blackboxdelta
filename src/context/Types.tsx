@@ -15,11 +15,17 @@ export interface ProfileStats {
 }
 
 // Dashboard (homepage) data
+export interface EquityPoint {
+    t: string; // ISO timestamp
+    p: number; // cumulative P&L
+}
+
 export interface DashboardData {
     all_time: TimeframeStats;
     by_timeframe: TimeframeRow[];
     by_profile?: ProfileStats[];
     pl_series: PLDataPoint[];
+    equity_curve?: EquityPoint[];
     direction_series: DirectionDataPoint[];
     score_series: ScoreDataPoint[];
     recommendation_counts?: Record<string, number>;

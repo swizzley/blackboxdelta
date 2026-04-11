@@ -108,7 +108,7 @@ export function CompositeScoreBar({stats, isDarkMode}: {
     const muted = isDarkMode ? 'text-gray-500' : 'text-gray-400';
     const silColor = sil === 0 ? 'text-emerald-400' : sil < 0.2 ? (isDarkMode ? 'text-amber-400' : 'text-amber-600') : sil < 0 ? muted : 'text-red-400';
     return (
-        <div className="flex gap-2 text-[10px] font-mono items-center">
+        <div className="flex gap-2 text-[10px] font-mono items-center overflow-hidden whitespace-nowrap">
             {composite != null && composite > -999 && (
                 <span className={`font-semibold ${compositeColor(composite)}`} title={`Composite: 35% silence + 30% pnl + 20% sharpe + 15% trades`}>
                     C:{composite.toFixed(2)}

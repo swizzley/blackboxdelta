@@ -67,6 +67,15 @@ export function fetchCalendar(days = 90): Promise<ApiCalendarDay[] | null> {
     return apiFetch(`/api/calendar?days=${days}`);
 }
 
+export interface EquityPoint { t: string; p: number; }
+export function fetchEquity(since?: string, bucket?: string): Promise<EquityPoint[] | null> {
+    const params = new URLSearchParams();
+    if (since) params.set('since', since);
+    if (bucket) params.set('bucket', bucket);
+    const qs = params.toString();
+    return apiFetch(`/api/equity${qs ? '?' + qs : ''}`);
+}
+
 interface OrderOpts {
     status?: string;
     timeframe?: string;
