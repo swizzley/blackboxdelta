@@ -10,7 +10,6 @@ import type {
     ApiSentimentPair, ApiSentimentArticle, ApiSentimentFeed,
     HealthStatus,
     SurgeProfile, SurgeGeneration, SurgeBranch, SurgeHistoryEntry,
-    NeoStatus, NeoIncident, NeoSweep, BusSignal,
 } from '../context/Types';
 
 const TIMEOUT = 5000;
@@ -520,22 +519,3 @@ export function noliveSurgeProfile(name: string): Promise<any> {
     return apiPost(`/api/optimizer/surge/profiles/${name}/nolive`, {});
 }
 
-// --- Neo Agent ---
-export function fetchNeoStatus(): Promise<NeoStatus | null> { return apiFetch('/api/neo/status'); }
-export function fetchNeoIncidents(limit = 50, status?: string): Promise<NeoIncident[] | null> {
-    const params = new URLSearchParams({limit: String(limit)});
-    if (status) params.set('status', status);
-    return apiFetch(`/api/neo/incidents?${params}`);
-}
-export function fetchNeoSweeps(limit = 20): Promise<NeoSweep[] | null> { return apiFetch(`/api/neo/sweeps?limit=${limit}`); }
-export function pauseNeo(): Promise<any> { return apiPost('/api/neo/pause'); }
-export function resumeNeo(): Promise<any> { return apiPost('/api/neo/resume'); }
-export function fetchSignalsByCorrelation(correlationId: string): Promise<BusSignal[] | null> {
-    return apiFetch(`/api/neo/signals?correlation_id=${encodeURIComponent(correlationId)}`);
-}
-export function fetchRecentSignals(limit = 50, service?: string, type?: string): Promise<BusSignal[] | null> {
-    const params = new URLSearchParams({limit: String(limit)});
-    if (service) params.set('service', service);
-    if (type) params.set('type', type);
-    return apiFetch(`/api/neo/signals?${params}`);
-}
