@@ -59,6 +59,7 @@ export default function TradeDetail() {
                 closed: apiOrder.closed,
                 duration_mins: null,
                 alert_id: apiOrder.alert_id,
+                correlation_id: apiOrder.correlation_id,
                 risk_reward: apiOrder.risk_reward,
                 avg_spread: apiOrder.avg_spread,
                 max_spread: apiOrder.max_spread,
@@ -155,6 +156,23 @@ export default function TradeDetail() {
                                     <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${isDarkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'}`}>
                                         {trade.close_reason}
                                     </span>
+                                )}
+                                {trade.correlation_id && (
+                                    <a
+                                        href={`http://grafana.aspendenver.local:3000/d/pipeline-trace/pipeline-trace?var-correlation_id=${trade.correlation_id}&from=now-30d&to=now`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+                                            isDarkMode
+                                                ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50'
+                                                : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
+                                        }`}
+                                    >
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                        </svg>
+                                        Trace Pipeline
+                                    </a>
                                 )}
                             </div>
 
