@@ -384,11 +384,15 @@ export default function Dashboard() {
     if (!dashboard || !filteredStats) {
         return (
             <div className="dashboard-theme">
-                {isDarkMode && <style>{`
+                <style>{isDarkMode ? `
                     .dashboard-theme header { background: #0a0a0a !important; }
                     .dashboard-theme footer { background: #0a0a0a !important; border-color: #1a1a1a !important; }
                     .dashboard-theme footer div { border-color: #1a1a1a !important; color: #444 !important; }
-                `}</style>}
+                ` : `
+                    .dashboard-theme header { background: #fff !important; }
+                    .dashboard-theme footer { background: #fff !important; }
+                    .dashboard-theme footer div { border-color: #e5e7eb !important; color: #9ca3af !important; }
+                `}</style>
                 <Nav/>
                 <div className={`min-h-screen ${pageBg} transition-colors duration-500`}>
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-20">
@@ -406,11 +410,15 @@ export default function Dashboard() {
 
     return (
         <div className="dashboard-theme">
-            {isDarkMode && <style>{`
-                .dashboard-theme header { background: #0d0d0d !important; }
+            <style>{isDarkMode ? `
+                .dashboard-theme header { background: #0a0a0a !important; }
                 .dashboard-theme footer { background: #0a0a0a !important; border-color: #1a1a1a !important; }
                 .dashboard-theme footer div { border-color: #1a1a1a !important; color: #444 !important; }
-            `}</style>}
+            ` : `
+                .dashboard-theme header { background: #fff !important; }
+                .dashboard-theme footer { background: #fff !important; }
+                .dashboard-theme footer div { border-color: #e5e7eb !important; color: #9ca3af !important; }
+            `}</style>
             <Nav/>
             <div className={`min-h-screen pb-12 ${pageBg} transition-colors duration-500`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-20">
