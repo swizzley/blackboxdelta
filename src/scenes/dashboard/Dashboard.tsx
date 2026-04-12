@@ -157,9 +157,22 @@ function computeStatsFromOrders(orders: OrderForStats[]): TimeframeStats {
 export default function Dashboard() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
+
+    // Set html/body background to match dashboard dark theme — prevents
+    // slate bleed on iOS pull-to-refresh overscroll
+    useEffect(() => {
+        if (!isDarkMode) return;
+        const prev = document.documentElement.style.backgroundColor;
+        document.documentElement.style.backgroundColor = '#0a0a0a';
+        document.body.style.backgroundColor = '#0a0a0a';
+        return () => {
+            document.documentElement.style.backgroundColor = prev;
+            document.body.style.backgroundColor = '';
+        };
+    }, [isDarkMode]);
     const [dashboard, setDashboard] = useState<DashboardData | null>(null);
     const [calendar, setCalendar] = useState<CalendarData | null>(null);
-    const [period, setPeriod] = useState<Period>('1D');
+    const [period, setPeriod] = useState<Period>('All');
     const [liveStats, setLiveStats] = useState(false);
     const [selectedTimeframe, setSelectedTimeframe] = useState<string | null>(null);
     // API-computed stats for the selected period (null = not yet fetched or API unavailable)
@@ -372,7 +385,7 @@ export default function Dashboard() {
         return (
             <div className="dashboard-theme">
                 {isDarkMode && <style>{`
-                    .dashboard-theme header { background: #0d0d0d !important; }
+                    .dashboard-theme header { background: #0a0a0a !important; }
                     .dashboard-theme footer { background: #0a0a0a !important; border-color: #1a1a1a !important; }
                     .dashboard-theme footer div { border-color: #1a1a1a !important; color: #444 !important; }
                 `}</style>}
@@ -404,10 +417,10 @@ export default function Dashboard() {
 
                     {/* ═══ HERO: Equity Curve ═══ */}
                     <div className={`${cardBg} rounded-xl border ${cardBorder} shadow-lg ${accentGlow} p-6 mb-6`}>
-                        <div className="flex items-start justify-between mb-2">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-2">
                             <div>
                                 <div className="flex items-center gap-3 mb-1">
-                                    <h1 className={`text-3xl font-bold font-sans tracking-tight ${stats.total_pl >= 0 ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600') : 'text-red-400'}`}>
+                                    <h1 className={`text-2xl sm:text-3xl font-bold font-sans tracking-tight ${stats.total_pl >= 0 ? (isDarkMode ? 'text-emerald-400' : 'text-emerald-600') : 'text-red-400'}`}>
                                         {formatDollar(stats.total_pl)}
                                     </h1>
                                     {liveStats && period === 'All' && (
@@ -419,12 +432,12 @@ export default function Dashboard() {
                                 </div>
                                 <p className={`text-sm font-sans ${mutedText}`}>Equity</p>
                             </div>
-                            <div className="flex items-center gap-1">
+                            <div className="flex flex-wrap items-center gap-1">
                                 {PERIODS.filter(p => !['1H','4H','12H'].includes(p)).map(p => (
                                     <button
                                         key={p}
                                         onClick={() => setPeriod(p)}
-                                        className={`px-2.5 py-1 text-[11px] font-sans font-medium rounded transition-all ${
+                                        className={`px-2 sm:px-2.5 py-1 text-[10px] sm:text-[11px] font-sans font-medium rounded transition-all ${
                                             period === p
                                                 ? `${isDarkMode ? 'bg-cyan-500/20 text-cyan-400 ring-1 ring-cyan-500/30' : 'bg-pink-500/20 text-pink-600 ring-1 ring-pink-500/30'}`
                                                 : `${isDarkMode ? 'text-slate-500 hover:text-slate-300 hover:bg-white/5' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`
@@ -439,9 +452,8 @@ export default function Dashboard() {
                     </div>
 
                     {/* ═══ STAT BAR ═══ */}
-                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                         {[
-                            {label: 'Total P&L', value: formatDollar(stats.total_pl), color: stats.total_pl >= 0 ? 'text-emerald-400' : 'text-red-400'},
                             {label: 'Win Rate', value: stats.win_rate_pct != null ? `${Number(stats.win_rate_pct).toFixed(1)}%` : 'N/A', color: accent},
                             {label: 'Trades', value: String(stats.total_orders), color: accent},
                             {label: 'W / L / BE', value: `${stats.winners} / ${stats.losers} / ${stats.breakeven}`, color: accent},
@@ -478,9 +490,9 @@ export default function Dashboard() {
                             {label: 'W/L Ratio', value: stats.win_loss_ratio != null ? stats.win_loss_ratio.toFixed(2) : 'N/A', color: accent},
                             {label: 'Breakeven', value: String(stats.breakeven), color: accent},
                         ].map(s => (
-                            <div key={s.label} className={`${cardBg} border ${cardBorder} rounded-lg p-3 text-center`}>
+                            <div key={s.label} className={`${cardBg} border ${cardBorder} rounded-lg p-4 text-center`}>
                                 <p className={`text-[10px] font-sans uppercase tracking-widest ${mutedText} mb-1`}>{s.label}</p>
-                                <p className={`text-sm font-bold font-sans ${s.color}`}>{s.value}</p>
+                                <p className={`text-lg font-bold font-sans ${s.color}`}>{s.value}</p>
                             </div>
                         ))}
                     </div>

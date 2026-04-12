@@ -32,19 +32,19 @@ export default function Nav() {
             {({open}) => (
                 <>
                     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-                        <div className="relative flex items-center justify-center py-5 lg:justify-between">
+                        <div className="relative flex items-center justify-center pt-6 pb-5 lg:justify-between">
                             <div className="absolute left-0 flex-shrink-0 lg:static">
                                 <a href="/">
                                     <span className="sr-only">Black Box Delta</span>
                                     <img
-                                        className="h-12 w-auto"
-                                        src={innerWidth < 1024 ? `/img/bbd-logo.svg` : `/img/bbd-logo-nav.svg`}
+                                        className="h-10 sm:h-12 w-auto"
+                                        src="/img/bbd-logo-nav.svg"
                                         alt="Black Box Delta"
                                     />
                                 </a>
                             </div>
 
-                            <div className="hidden lg:ml-4 lg:flex lg:items-center lg:pr-0.5 gap-2">
+                            <div className="absolute right-0 lg:relative lg:ml-4 flex items-center gap-2">
                                 <span
                                     title={checking ? 'Checking API...' : apiAvailable ? 'API connected' : 'API unavailable'}
                                     className={`inline-block w-2.5 h-2.5 rounded-full ${
