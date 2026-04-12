@@ -12718,6 +12718,24 @@
       "avg_pattern": 0,
       "avg_sentiment": 0.005,
       "count": 10139
+    },
+    {
+      "date": "2026-04-12",
+      "avg_final_score": 1,
+      "avg_confidence": 1,
+      "avg_trend": 0,
+      "avg_ma": 0,
+      "avg_crossover": 0,
+      "avg_oscillator": 0,
+      "avg_volatility": 0,
+      "avg_volume": 0,
+      "avg_fib_stack": 0,
+      "avg_momentum_projection": 0,
+      "avg_structure": 0,
+      "avg_cycle": 0,
+      "avg_pattern": 0,
+      "avg_sentiment": 0,
+      "count": 4
     }
   ],
   "recommendation_counts": {
