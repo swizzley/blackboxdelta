@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import dayjs from 'dayjs';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {useTheme} from '../../context/Theme';
 import type {AnalysisRunDetailApi, AnalysisTodoApi} from '../../context/Types';
 import {scopeColors, triggerColors} from './constants';
@@ -109,7 +110,7 @@ export default function RunDetail({detail, compareDetail, onClose, onExitCompare
                         {summaryOpen && (
                             <div className="mt-3">
                                 <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''}`}>
-                                    <ReactMarkdown>{detail.run.synthesis}</ReactMarkdown>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{detail.run.synthesis}</ReactMarkdown>
                                 </div>
 
                                 {/* Queue All button */}
@@ -181,9 +182,9 @@ export default function RunDetail({detail, compareDetail, onClose, onExitCompare
                                         </svg>
                                     </button>
                                     {phasesOpen.has(phase.phase) && (
-                                        <div className={`px-2 py-2 mb-2 rounded text-sm ${isDarkMode ? 'bg-slate-900/50' : 'bg-gray-50'}`}>
+                                        <div className={`px-2 py-2 mb-2 rounded text-sm overflow-x-auto ${isDarkMode ? 'bg-slate-900/50' : 'bg-gray-50'}`}>
                                             <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''}`}>
-                                                <ReactMarkdown>{phase.content}</ReactMarkdown>
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{phase.content}</ReactMarkdown>
                                             </div>
                                         </div>
                                     )}
@@ -265,7 +266,7 @@ function CompareView({a, b, onExit}: {a: AnalysisRunDetailApi; b: AnalysisRunDet
                                     </p>
                                     {detail.run.synthesis ? (
                                         <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''} text-sm`}>
-                                            <ReactMarkdown>{detail.run.synthesis}</ReactMarkdown>
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{detail.run.synthesis}</ReactMarkdown>
                                         </div>
                                     ) : (
                                         <p className={`text-sm italic ${textMuted}`}>No synthesis available</p>

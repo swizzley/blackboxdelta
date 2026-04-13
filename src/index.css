@@ -16,3 +16,24 @@
 .bg-light {
     @apply bg-white text-gray-800;
 }
+
+/* Analysis phase markdown tables */
+.prose table {
+    @apply w-full text-xs border-collapse;
+    font-variant-numeric: tabular-nums;
+}
+.prose thead th {
+    @apply text-left font-semibold px-2 py-1.5 border-b-2 border-gray-600 whitespace-nowrap;
+}
+.prose tbody td {
+    @apply px-2 py-1 border-b border-gray-700/50 whitespace-nowrap;
+}
+.prose tbody tr:last-child td {
+    @apply border-b-0;
+}
+.prose-invert thead th {
+    @apply border-gray-500;
+}
+.prose-invert tbody td {
+    @apply border-gray-700/50;
+}
