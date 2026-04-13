@@ -292,11 +292,11 @@
   "2026-04-13": {
     "pl": -0.04,
     "winners": 0,
-    "losers": 2,
-    "total": 2,
+    "losers": 4,
+    "total": 4,
     "win_pl": 0,
     "loss_pl": -0.04,
-    "dur_sum": 7002,
-    "dur_count": 2
+    "dur_sum": 7217,
+    "dur_count": 4
   }
 }
