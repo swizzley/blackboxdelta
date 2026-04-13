@@ -291,12 +291,12 @@
   },
   "2026-04-13": {
     "pl": -0.15,
-    "winners": 10,
-    "losers": 39,
-    "total": 51,
-    "win_pl": 0.19,
-    "loss_pl": -0.34,
-    "dur_sum": 46770,
-    "dur_count": 51
+    "winners": 11,
+    "losers": 42,
+    "total": 55,
+    "win_pl": 0.21,
+    "loss_pl": -0.36,
+    "dur_sum": 47874,
+    "dur_count": 55
   }
 }
