@@ -974,9 +974,16 @@ export interface AnalysisTodoApi {
     recommendation_status?: string;
 }
 
+export interface AnalysisPhaseApi {
+    phase: number;
+    name: string;
+    content: string;
+}
+
 export interface AnalysisRunDetailApi {
     run: AnalysisRunApi;
     todos: AnalysisTodoApi[];
+    phases: AnalysisPhaseApi[];
 }
 
 // LHC run types
