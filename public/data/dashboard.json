@@ -1,7 +1,7 @@
 {
   "all_time": {
-    "total_orders": 6151,
-    "pending": 8,
+    "total_orders": 6154,
+    "pending": 11,
     "open_positions": 22,
     "closed_orders": 6121,
     "total_pl": -24.91,
@@ -13515,7 +13515,7 @@
     },
     {
       "date": "2026-04-23",
-      "avg_final_score": -0.36,
+      "avg_final_score": -0.37,
       "avg_confidence": 0,
       "avg_trend": 0,
       "avg_ma": 0,
@@ -13529,16 +13529,16 @@
       "avg_cycle": 0,
       "avg_pattern": 0,
       "avg_sentiment": 0,
-      "count": 551
+      "count": 567
     }
   ],
   "recommendation_counts": {
-    "Buy": 19326,
+    "Buy": 19328,
     "Minimal Buy": 2720,
     "Minimal Sell": 4331,
     "Moderate Buy": 27204,
     "Moderate Sell": 10227,
-    "Sell": 21193,
+    "Sell": 21207,
     "Strong Buy": 643,
     "Strong Sell": 219,
     "Weak Buy": 12062,
