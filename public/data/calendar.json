@@ -320,13 +320,13 @@
     "dur_count": 61
   },
   "2026-04-24": {
-    "pl": 0.06,
+    "pl": 0.04,
     "winners": 5,
-    "losers": 1,
-    "total": 6,
+    "losers": 2,
+    "total": 7,
     "win_pl": 0.07,
-    "loss_pl": -0.01,
-    "dur_sum": 33863,
-    "dur_count": 6
+    "loss_pl": -0.03,
+    "dur_sum": 34378,
+    "dur_count": 7
   }
 }
