@@ -350,13 +350,13 @@
     "dur_count": 6
   },
   "2026-04-28": {
-    "pl": -0.03,
+    "pl": -0.04,
     "winners": 0,
-    "losers": 1,
-    "total": 1,
+    "losers": 6,
+    "total": 6,
     "win_pl": 0,
-    "loss_pl": -0.03,
-    "dur_sum": 6535,
-    "dur_count": 1
+    "loss_pl": -0.04,
+    "dur_sum": 6714,
+    "dur_count": 6
   }
 }
