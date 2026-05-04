@@ -401,12 +401,12 @@
   },
   "2026-05-04": {
     "pl": -0.01,
-    "winners": 0,
+    "winners": 1,
     "losers": 1,
-    "total": 1,
+    "total": 2,
     "win_pl": 0,
     "loss_pl": -0.01,
-    "dur_sum": 3360,
-    "dur_count": 1
+    "dur_sum": 3424,
+    "dur_count": 2
   }
 }
