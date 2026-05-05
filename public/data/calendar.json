@@ -412,11 +412,11 @@
   "2026-05-05": {
     "pl": -0.03,
     "winners": 0,
-    "losers": 4,
-    "total": 4,
+    "losers": 5,
+    "total": 5,
     "win_pl": 0,
     "loss_pl": -0.03,
-    "dur_sum": 465,
-    "dur_count": 4
+    "dur_sum": 466,
+    "dur_count": 5
   }
 }
