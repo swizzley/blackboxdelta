@@ -472,11 +472,11 @@
   "2026-05-12": {
     "pl": -0.64,
     "winners": 13,
-    "losers": 10,
-    "total": 23,
+    "losers": 11,
+    "total": 24,
     "win_pl": 0.62,
     "loss_pl": -1.26,
-    "dur_sum": 109205,
-    "dur_count": 23
+    "dur_sum": 109214,
+    "dur_count": 24
   }
 }
