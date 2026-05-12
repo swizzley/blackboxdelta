@@ -5,10 +5,15 @@ import TodoCard from './TodoCard';
 
 function detectTodoTimeframe(todo: AnalysisTodoApi): string {
     if (!todo.mutations) return '';
+    const tfSuffixes: Record<string, string> = {
+        '.1m': '1m', '.5m': '5m', '.15m': '15m', '.1h': '1h', '.4h': '4h',
+        '.daily': 'daily', '.weekly': 'weekly',
+        '.scalp': '1m', '.intraday': '15m', '.swing': 'daily',
+    };
     for (const key of Object.keys(todo.mutations)) {
-        if (key.endsWith('.scalp')) return 'scalp';
-        if (key.endsWith('.intraday')) return 'intraday';
-        if (key.endsWith('.swing')) return 'swing';
+        for (const [suffix, tf] of Object.entries(tfSuffixes)) {
+            if (key.endsWith(suffix)) return tf;
+        }
     }
     return '';
 }

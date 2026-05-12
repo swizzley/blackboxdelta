@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {useTheme} from '../../context/Theme';
 import {useApi} from '../../context/Api';
-import {triggerAnalysisRun, fetchAnalysisJobs, stopAnalysisJob, createPromptRecommendation, type AnalysisJob} from '../../api/client';
+import {triggerAnalysisRun, fetchAnalysisJobs, stopAnalysisJob, type AnalysisJob} from '../../api/client';
 import {PROVIDERS, KNOWN_MODELS, type Provider} from './constants';
 
 function defaultMarketDay(): string {
@@ -31,12 +31,6 @@ export default function AdHocPanel({onRunComplete}: Props) {
     const [runTimeframe, setRunTimeframe] = useState('');
     const [runningJob, setRunningJob] = useState<AnalysisJob | null>(null);
 
-    // Hypothesis testing
-    const [optPrompt, setOptPrompt] = useState('');
-    const [optPromptTf, setOptPromptTf] = useState('daily');
-    const [optPromptSending, setOptPromptSending] = useState(false);
-    const [optPromptResult, setOptPromptResult] = useState<{ok: boolean; msg: string} | null>(null);
-
     // Check for running jobs on mount
     useEffect(() => {
         if (!apiAvailable) return;
@@ -62,21 +56,6 @@ export default function AdHocPanel({onRunComplete}: Props) {
         }, 5000);
         return () => clearInterval(interval);
     }, [runningJob, onRunComplete]);
-
-    const submitHypothesis = () => {
-        if (!optPrompt.trim() || optPromptSending) return;
-        setOptPromptSending(true);
-        setOptPromptResult(null);
-        createPromptRecommendation(optPrompt.trim(), optPromptTf).then(res => {
-            if (res) {
-                setOptPromptResult({ok: true, msg: `Queued as recommendation #${res.id} (${optPromptTf})`});
-                setOptPrompt('');
-            } else {
-                setOptPromptResult({ok: false, msg: 'Failed to submit'});
-            }
-        }).catch(() => setOptPromptResult({ok: false, msg: 'Failed to submit'}))
-          .finally(() => setOptPromptSending(false));
-    };
 
     return (
         <>
@@ -236,55 +215,6 @@ export default function AdHocPanel({onRunComplete}: Props) {
                 )}
             </div>
 
-            {/* Optimizer Hypothesis */}
-            <div className={`${cardClass} mb-6`}>
-                <div className="flex items-center gap-2 mb-3">
-                    <svg className={`w-5 h-5 ${isDarkMode ? 'text-amber-400' : 'text-amber-600'}`} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" /></svg>
-                    <h2 className={`text-sm font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>Test Optimizer Hypothesis</h2>
-                </div>
-                <div className="flex flex-wrap items-end gap-3">
-                    <div className="flex-1 min-w-[280px]">
-                        <input
-                            type="text"
-                            value={optPrompt}
-                            onChange={e => { setOptPrompt(e.target.value); setOptPromptResult(null); }}
-                            placeholder="e.g. try daily with trailing stop of 1.0, or loosen 1m min_confidence to 0.45"
-                            className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600 placeholder-slate-500' : 'bg-white text-gray-900 border-gray-300 placeholder-gray-400'}`}
-                            onKeyDown={e => { if (e.key === 'Enter') submitHypothesis(); }}
-                        />
-                    </div>
-                    <div className="min-w-[100px]">
-                        <select
-                            value={optPromptTf}
-                            onChange={e => setOptPromptTf(e.target.value)}
-                            className={`w-full px-3 py-1.5 rounded text-sm border ${isDarkMode ? 'bg-slate-800 text-gray-200 border-slate-600' : 'bg-white text-gray-900 border-gray-300'}`}
-                        >
-                            <option value="1m">1m</option>
-                            <option value="5m">5m</option>
-                            <option value="15m">15m</option>
-                            <option value="1h">1h</option>
-                            <option value="4h">4h</option>
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                        </select>
-                    </div>
-                    <button
-                        onClick={submitHypothesis}
-                        disabled={!optPrompt.trim() || optPromptSending}
-                        className="px-4 py-1.5 rounded text-sm font-medium bg-amber-600 hover:bg-amber-500 text-white disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                    >
-                        {optPromptSending ? 'Submitting...' : 'Test Hypothesis'}
-                    </button>
-                </div>
-                {optPromptResult && (
-                    <p className={`mt-2 text-xs ${optPromptResult.ok ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {optPromptResult.msg}
-                    </p>
-                )}
-                <p className={`mt-2 text-xs ${textMuted}`}>
-                    Describe a parameter change in plain English. The optimizer AI translates it to mutations and runs IS+OOS verification with full guardrails.
-                </p>
-            </div>
         </>
     );
 }
