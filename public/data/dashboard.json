@@ -1,13 +1,13 @@
 {
   "all_time": {
     "total_orders": 7035,
-    "pending": 11,
+    "pending": 2,
     "open_positions": 27,
-    "closed_orders": 6997,
+    "closed_orders": 7006,
     "total_pl": -30.89,
     "winners": 964,
     "losers": 2466,
-    "breakeven": 3253,
+    "breakeven": 3262,
     "win_loss_ratio": 0.39,
     "win_rate_pct": 0.14,
     "avg_win": 0.03,
