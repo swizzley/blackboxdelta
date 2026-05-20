@@ -530,13 +530,13 @@
     "dur_count": 28
   },
   "2026-05-20": {
-    "pl": -0.03,
+    "pl": -0.16,
     "winners": 1,
-    "losers": 5,
-    "total": 9,
+    "losers": 11,
+    "total": 15,
     "win_pl": 0,
-    "loss_pl": -0.04,
-    "dur_sum": 5743,
-    "dur_count": 9
+    "loss_pl": -0.16,
+    "dur_sum": 7018,
+    "dur_count": 15
   }
 }
