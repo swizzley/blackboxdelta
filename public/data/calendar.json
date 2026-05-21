@@ -542,11 +542,11 @@
   "2026-05-21": {
     "pl": -0.88,
     "winners": 3,
-    "losers": 19,
-    "total": 38,
+    "losers": 20,
+    "total": 39,
     "win_pl": 0.05,
     "loss_pl": -0.93,
-    "dur_sum": 421380,
-    "dur_count": 38
+    "dur_sum": 421429,
+    "dur_count": 39
   }
 }
