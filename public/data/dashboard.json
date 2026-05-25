@@ -1,8 +1,8 @@
 {
   "all_time": {
-    "total_orders": 7178,
-    "pending": 15,
-    "open_positions": 3,
+    "total_orders": 7180,
+    "pending": 16,
+    "open_positions": 4,
     "closed_orders": 7160,
     "total_pl": -32.05,
     "winners": 976,
@@ -16269,16 +16269,16 @@
       "avg_cycle": 0,
       "avg_pattern": 0,
       "avg_sentiment": 0,
-      "count": 373
+      "count": 409
     }
   ],
   "recommendation_counts": {
-    "Buy": 22377,
+    "Buy": 22384,
     "Minimal Buy": 2720,
     "Minimal Sell": 4331,
     "Moderate Buy": 27204,
     "Moderate Sell": 10227,
-    "Sell": 32789,
+    "Sell": 32818,
     "Strong Buy": 643,
     "Strong Sell": 219,
     "Weak Buy": 12062,
