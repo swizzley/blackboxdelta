@@ -581,12 +581,12 @@
   },
   "2026-05-26": {
     "pl": -0.19,
-    "winners": 2,
+    "winners": 3,
     "losers": 2,
-    "total": 5,
-    "win_pl": 0,
+    "total": 6,
+    "win_pl": 0.01,
     "loss_pl": -0.19,
-    "dur_sum": 3464,
-    "dur_count": 5
+    "dur_sum": 4096,
+    "dur_count": 6
   }
 }
