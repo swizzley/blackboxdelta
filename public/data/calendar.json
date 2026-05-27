@@ -592,11 +592,11 @@
   "2026-05-27": {
     "pl": 0.01,
     "winners": 7,
-    "losers": 1,
-    "total": 8,
+    "losers": 2,
+    "total": 9,
     "win_pl": 0.03,
     "loss_pl": -0.02,
-    "dur_sum": 7854,
-    "dur_count": 8
+    "dur_sum": 7902,
+    "dur_count": 9
   }
 }
