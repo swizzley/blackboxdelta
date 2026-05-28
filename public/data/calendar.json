@@ -602,11 +602,11 @@
   "2026-05-28": {
     "pl": -0.42,
     "winners": 7,
-    "losers": 15,
-    "total": 23,
+    "losers": 16,
+    "total": 24,
     "win_pl": 0.14,
     "loss_pl": -0.56,
-    "dur_sum": 22841,
-    "dur_count": 23
+    "dur_sum": 23320,
+    "dur_count": 24
   }
 }
