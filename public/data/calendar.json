@@ -611,12 +611,12 @@
   },
   "2026-05-29": {
     "pl": -0.07,
-    "winners": 16,
-    "losers": 14,
-    "total": 32,
-    "win_pl": 0.25,
+    "winners": 17,
+    "losers": 15,
+    "total": 34,
+    "win_pl": 0.26,
     "loss_pl": -0.32,
-    "dur_sum": 49411,
-    "dur_count": 32
+    "dur_sum": 50143,
+    "dur_count": 34
   }
 }
