@@ -632,11 +632,11 @@
   "2026-06-01": {
     "pl": -0.31,
     "winners": 0,
-    "losers": 1,
-    "total": 1,
+    "losers": 2,
+    "total": 2,
     "win_pl": 0,
     "loss_pl": -0.31,
-    "dur_sum": 3155,
-    "dur_count": 1
+    "dur_sum": 3214,
+    "dur_count": 2
   }
 }
