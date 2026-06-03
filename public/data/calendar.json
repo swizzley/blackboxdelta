@@ -651,12 +651,12 @@
   },
   "2026-06-03": {
     "pl": -0,
-    "winners": 2,
+    "winners": 3,
     "losers": 4,
-    "total": 6,
+    "total": 7,
     "win_pl": 0.04,
     "loss_pl": -0.04,
-    "dur_sum": 4549,
-    "dur_count": 6
+    "dur_sum": 4757,
+    "dur_count": 7
   }
 }
