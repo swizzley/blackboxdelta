@@ -1,7 +1,7 @@
 {
   "all_time": {
-    "total_orders": 7521,
-    "pending": 33,
+    "total_orders": 7522,
+    "pending": 34,
     "open_positions": 14,
     "closed_orders": 7474,
     "total_pl": -35.22,
@@ -15018,11 +15018,11 @@
     },
     {
       "t": "2026-05-29T00:01:27Z",
-      "p": -33.28
+      "p": -33.25
     },
     {
       "t": "2026-05-29T00:01:27Z",
-      "p": -33.31
+      "p": -33.29
     },
     {
       "t": "2026-05-29T00:01:27Z",
@@ -15038,7 +15038,7 @@
     },
     {
       "t": "2026-05-29T00:01:27Z",
-      "p": -33.32
+      "p": -33.28
     },
     {
       "t": "2026-05-29T00:01:27Z",
@@ -17263,8 +17263,8 @@
     },
     {
       "date": "2026-06-03",
-      "avg_final_score": 0.45,
-      "avg_confidence": 0.45,
+      "avg_final_score": 0.44,
+      "avg_confidence": 0.44,
       "avg_trend": 0,
       "avg_ma": 0,
       "avg_crossover": 0,
@@ -17277,12 +17277,12 @@
       "avg_cycle": 0,
       "avg_pattern": 0,
       "avg_sentiment": 0,
-      "count": 10
+      "count": 22
     }
   ],
   "recommendation_counts": {
     "Buy": 22809,
-    "MODEL-V2": 1195,
+    "MODEL-V2": 1207,
     "Minimal Buy": 2720,
     "Minimal Sell": 4331,
     "Moderate Buy": 27204,
