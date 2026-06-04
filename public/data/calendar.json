@@ -662,11 +662,11 @@
   "2026-06-04": {
     "pl": -0.05,
     "winners": 22,
-    "losers": 12,
-    "total": 42,
+    "losers": 13,
+    "total": 44,
     "win_pl": 0.05,
     "loss_pl": -0.1,
-    "dur_sum": 11318,
-    "dur_count": 42
+    "dur_sum": 12412,
+    "dur_count": 44
   }
 }
