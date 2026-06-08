@@ -692,11 +692,11 @@
   "2026-06-08": {
     "pl": -0.33,
     "winners": 11,
-    "losers": 18,
-    "total": 29,
+    "losers": 19,
+    "total": 30,
     "win_pl": 0.08,
     "loss_pl": -0.41,
-    "dur_sum": 46995,
-    "dur_count": 29
+    "dur_sum": 47175,
+    "dur_count": 30
   }
 }
