@@ -701,12 +701,12 @@
   },
   "2026-06-09": {
     "pl": -0.01,
-    "winners": 3,
-    "losers": 3,
-    "total": 6,
+    "winners": 4,
+    "losers": 4,
+    "total": 8,
     "win_pl": 0.01,
     "loss_pl": -0.02,
-    "dur_sum": 2467,
-    "dur_count": 6
+    "dur_sum": 2722,
+    "dur_count": 8
   }
 }
