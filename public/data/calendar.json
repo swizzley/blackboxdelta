@@ -722,11 +722,11 @@
   "2026-06-11": {
     "pl": -0.05,
     "winners": 6,
-    "losers": 6,
-    "total": 16,
+    "losers": 7,
+    "total": 17,
     "win_pl": 0.05,
     "loss_pl": -0.1,
-    "dur_sum": 10326,
-    "dur_count": 16
+    "dur_sum": 10723,
+    "dur_count": 17
   }
 }
