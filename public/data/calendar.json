@@ -733,10 +733,10 @@
     "pl": -0.23,
     "winners": 3,
     "losers": 3,
-    "total": 6,
+    "total": 9,
     "win_pl": 0,
     "loss_pl": -0.23,
-    "dur_sum": 11766,
-    "dur_count": 6
+    "dur_sum": 11958,
+    "dur_count": 9
   }
 }
