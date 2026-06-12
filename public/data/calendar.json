@@ -732,11 +732,11 @@
   "2026-06-12": {
     "pl": -0.2,
     "winners": 8,
-    "losers": 6,
-    "total": 19,
+    "losers": 7,
+    "total": 20,
     "win_pl": 0.03,
     "loss_pl": -0.23,
-    "dur_sum": 12645,
-    "dur_count": 19
+    "dur_sum": 13542,
+    "dur_count": 20
   }
 }
