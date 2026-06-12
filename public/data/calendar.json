@@ -730,13 +730,13 @@
     "dur_count": 52
   },
   "2026-06-12": {
-    "pl": -0.26,
+    "pl": -0.27,
     "winners": 9,
-    "losers": 11,
-    "total": 28,
+    "losers": 13,
+    "total": 30,
     "win_pl": 0.04,
-    "loss_pl": -0.29,
-    "dur_sum": 17300,
-    "dur_count": 28
+    "loss_pl": -0.31,
+    "dur_sum": 17840,
+    "dur_count": 30
   }
 }
