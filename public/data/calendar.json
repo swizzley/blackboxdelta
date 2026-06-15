@@ -762,11 +762,11 @@
   "2026-06-15": {
     "pl": 0.2,
     "winners": 3,
-    "losers": 3,
-    "total": 6,
+    "losers": 5,
+    "total": 8,
     "win_pl": 0.22,
     "loss_pl": -0.02,
-    "dur_sum": 15513,
-    "dur_count": 6
+    "dur_sum": 15745,
+    "dur_count": 8
   }
 }
