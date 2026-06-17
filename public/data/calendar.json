@@ -781,12 +781,12 @@
   },
   "2026-06-17": {
     "pl": -0.67,
-    "winners": 9,
+    "winners": 10,
     "losers": 11,
-    "total": 21,
+    "total": 23,
     "win_pl": 0.08,
     "loss_pl": -0.75,
-    "dur_sum": 28623,
-    "dur_count": 21
+    "dur_sum": 29820,
+    "dur_count": 23
   }
 }
