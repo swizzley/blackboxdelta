@@ -1,13 +1,13 @@
 {
   "all_time": {
-    "total_orders": 8094,
-    "pending": 6,
-    "open_positions": 12,
-    "closed_orders": 8076,
+    "total_orders": 8109,
+    "pending": 18,
+    "open_positions": 13,
+    "closed_orders": 8078,
     "total_pl": -38.37,
     "winners": 1224,
     "losers": 2851,
-    "breakeven": 3681,
+    "breakeven": 3683,
     "win_loss_ratio": 0.43,
     "win_rate_pct": 0.16,
     "avg_win": 0.03,
@@ -15083,23 +15083,7 @@
     },
     {
       "t": "2026-05-29T00:01:27Z",
-      "p": -33.32
-    },
-    {
-      "t": "2026-05-29T00:01:27Z",
-      "p": -33.3
-    },
-    {
-      "t": "2026-05-29T00:01:27Z",
-      "p": -33.28
-    },
-    {
-      "t": "2026-05-29T00:01:27Z",
-      "p": -33.25
-    },
-    {
-      "t": "2026-05-29T00:01:27Z",
-      "p": -33.23
+      "p": -33.26
     },
     {
       "t": "2026-05-29T00:01:27Z",
@@ -15111,7 +15095,23 @@
     },
     {
       "t": "2026-05-29T00:01:27Z",
-      "p": -33.28
+      "p": -33.27
+    },
+    {
+      "t": "2026-05-29T00:01:27Z",
+      "p": -33.31
+    },
+    {
+      "t": "2026-05-29T00:01:27Z",
+      "p": -33.35
+    },
+    {
+      "t": "2026-05-29T00:01:27Z",
+      "p": -33.33
+    },
+    {
+      "t": "2026-05-29T00:01:27Z",
+      "p": -33.3
     },
     {
       "t": "2026-05-29T00:01:27Z",
@@ -15119,15 +15119,11 @@
     },
     {
       "t": "2026-05-29T00:01:28Z",
+      "p": -33.25
+    },
+    {
+      "t": "2026-05-29T00:01:28Z",
       "p": -33.3
-    },
-    {
-      "t": "2026-05-29T00:01:28Z",
-      "p": -33.27
-    },
-    {
-      "t": "2026-05-29T00:01:28Z",
-      "p": -33.32
     },
     {
       "t": "2026-05-29T00:01:28Z",
@@ -15135,19 +15131,23 @@
     },
     {
       "t": "2026-05-29T00:01:28Z",
-      "p": -33.33
+      "p": -33.37
     },
     {
       "t": "2026-05-29T00:01:28Z",
-      "p": -33.34
+      "p": -33.39
     },
     {
       "t": "2026-05-29T00:01:28Z",
-      "p": -33.36
+      "p": -33.37
     },
     {
       "t": "2026-05-29T00:01:28Z",
-      "p": -33.38
+      "p": -33.39
+    },
+    {
+      "t": "2026-05-29T00:01:28Z",
+      "p": -33.41
     },
     {
       "t": "2026-05-29T00:01:28Z",
@@ -16603,7 +16603,7 @@
     },
     {
       "t": "2026-06-09T21:00:47Z",
-      "p": -36.9
+      "p": -36.89
     },
     {
       "t": "2026-06-09T21:00:47Z",
@@ -19445,6 +19445,24 @@
     },
     {
       "date": "2026-06-15",
+      "avg_final_score": -0.68,
+      "avg_confidence": 0,
+      "avg_trend": 0,
+      "avg_ma": 0,
+      "avg_crossover": 0,
+      "avg_oscillator": 0,
+      "avg_volatility": 0,
+      "avg_volume": 0,
+      "avg_fib_stack": 0,
+      "avg_momentum_projection": 0,
+      "avg_structure": 0,
+      "avg_cycle": 0,
+      "avg_pattern": 0,
+      "avg_sentiment": 0,
+      "count": 372
+    },
+    {
+      "date": "2026-06-16",
       "avg_final_score": -0.7,
       "avg_confidence": 0,
       "avg_trend": 0,
@@ -19459,35 +19477,17 @@
       "avg_cycle": 0,
       "avg_pattern": 0,
       "avg_sentiment": 0,
-      "count": 357
-    },
-    {
-      "date": "2026-06-16",
-      "avg_final_score": -0.78,
-      "avg_confidence": 0,
-      "avg_trend": 0,
-      "avg_ma": 0,
-      "avg_crossover": 0,
-      "avg_oscillator": 0,
-      "avg_volatility": 0,
-      "avg_volume": 0,
-      "avg_fib_stack": 0,
-      "avg_momentum_projection": 0,
-      "avg_structure": 0,
-      "avg_cycle": 0,
-      "avg_pattern": 0,
-      "avg_sentiment": 0,
-      "count": 327
+      "count": 366
     }
   ],
   "recommendation_counts": {
-    "Buy": 23601,
+    "Buy": 23627,
     "MODEL-V2": 2813,
     "Minimal Buy": 2720,
     "Minimal Sell": 4331,
     "Moderate Buy": 27204,
     "Moderate Sell": 10227,
-    "Sell": 37913,
+    "Sell": 37941,
     "Strong Buy": 643,
     "Strong Sell": 219,
     "Weak Buy": 12062,
