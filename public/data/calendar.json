@@ -792,11 +792,11 @@
   "2026-06-18": {
     "pl": -0.02,
     "winners": 13,
-    "losers": 15,
-    "total": 30,
+    "losers": 17,
+    "total": 32,
     "win_pl": 0.56,
     "loss_pl": -0.58,
-    "dur_sum": 10184,
-    "dur_count": 30
+    "dur_sum": 14051,
+    "dur_count": 32
   }
 }
