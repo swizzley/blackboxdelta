@@ -800,13 +800,13 @@
     "dur_count": 45
   },
   "2026-06-19": {
-    "pl": 0.16,
-    "winners": 6,
+    "pl": 0.17,
+    "winners": 7,
     "losers": 1,
-    "total": 7,
+    "total": 8,
     "win_pl": 0.2,
     "loss_pl": -0.04,
-    "dur_sum": 1520,
-    "dur_count": 7
+    "dur_sum": 2060,
+    "dur_count": 8
   }
 }
