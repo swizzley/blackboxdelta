@@ -808,5 +808,15 @@
     "loss_pl": -0.33,
     "dur_sum": 8435,
     "dur_count": 16
+  },
+  "2026-06-21": {
+    "pl": -0.08,
+    "winners": 0,
+    "losers": 2,
+    "total": 2,
+    "win_pl": 0,
+    "loss_pl": -0.08,
+    "dur_sum": 7148,
+    "dur_count": 2
   }
 }
