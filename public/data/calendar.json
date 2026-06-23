@@ -822,11 +822,11 @@
   "2026-06-22": {
     "pl": 0.08,
     "winners": 2,
-    "losers": 9,
-    "total": 11,
+    "losers": 10,
+    "total": 12,
     "win_pl": 0.24,
     "loss_pl": -0.16,
-    "dur_sum": 5870,
-    "dur_count": 11
+    "dur_sum": 11329,
+    "dur_count": 12
   }
 }
