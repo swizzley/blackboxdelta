@@ -840,13 +840,13 @@
     "dur_count": 32
   },
   "2026-06-24": {
-    "pl": 0.06,
-    "winners": 15,
-    "losers": 15,
-    "total": 32,
-    "win_pl": 0.42,
-    "loss_pl": -0.36,
-    "dur_sum": 28482,
-    "dur_count": 32
+    "pl": 0.09,
+    "winners": 17,
+    "losers": 16,
+    "total": 35,
+    "win_pl": 0.46,
+    "loss_pl": -0.37,
+    "dur_sum": 32442,
+    "dur_count": 35
   }
 }
