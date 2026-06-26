@@ -861,12 +861,12 @@
   },
   "2026-06-26": {
     "pl": 0.03,
-    "winners": 10,
-    "losers": 6,
-    "total": 18,
-    "win_pl": 0.06,
-    "loss_pl": -0.03,
-    "dur_sum": 7053,
-    "dur_count": 18
+    "winners": 11,
+    "losers": 7,
+    "total": 20,
+    "win_pl": 0.11,
+    "loss_pl": -0.08,
+    "dur_sum": 8332,
+    "dur_count": 20
   }
 }
