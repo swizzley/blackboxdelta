@@ -882,11 +882,11 @@
   "2026-06-29": {
     "pl": 0.15,
     "winners": 3,
-    "losers": 4,
-    "total": 9,
+    "losers": 5,
+    "total": 11,
     "win_pl": 0.16,
     "loss_pl": -0.01,
-    "dur_sum": 24963,
-    "dur_count": 9
+    "dur_sum": 25152,
+    "dur_count": 11
   }
 }
