@@ -891,12 +891,12 @@
   },
   "2026-06-30": {
     "pl": -0.28,
-    "winners": 7,
+    "winners": 8,
     "losers": 13,
-    "total": 25,
+    "total": 26,
     "win_pl": 0.17,
     "loss_pl": -0.45,
-    "dur_sum": 6132,
-    "dur_count": 25
+    "dur_sum": 6252,
+    "dur_count": 26
   }
 }
