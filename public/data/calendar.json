@@ -901,12 +901,12 @@
   },
   "2026-07-01": {
     "pl": -0.15,
-    "winners": 3,
+    "winners": 4,
     "losers": 11,
-    "total": 14,
+    "total": 15,
     "win_pl": 0.01,
     "loss_pl": -0.16,
-    "dur_sum": 3898,
-    "dur_count": 14
+    "dur_sum": 4978,
+    "dur_count": 15
   }
 }
