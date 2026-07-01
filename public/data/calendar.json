@@ -902,11 +902,11 @@
   "2026-07-01": {
     "pl": -0.15,
     "winners": 3,
-    "losers": 10,
-    "total": 13,
+    "losers": 11,
+    "total": 14,
     "win_pl": 0.01,
-    "loss_pl": -0.15,
-    "dur_sum": 3358,
-    "dur_count": 13
+    "loss_pl": -0.16,
+    "dur_sum": 3898,
+    "dur_count": 14
   }
 }
