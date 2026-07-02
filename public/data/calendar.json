@@ -911,12 +911,12 @@
   },
   "2026-07-02": {
     "pl": -0.04,
-    "winners": 10,
+    "winners": 11,
     "losers": 8,
-    "total": 18,
+    "total": 19,
     "win_pl": 0.23,
     "loss_pl": -0.26,
-    "dur_sum": 19180,
-    "dur_count": 18
+    "dur_sum": 20379,
+    "dur_count": 19
   }
 }
