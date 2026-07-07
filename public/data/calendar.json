@@ -941,12 +941,12 @@
   },
   "2026-07-07": {
     "pl": -0.04,
-    "winners": 12,
+    "winners": 13,
     "losers": 10,
-    "total": 22,
+    "total": 23,
     "win_pl": 0.46,
     "loss_pl": -0.5,
-    "dur_sum": 148644,
-    "dur_count": 22
+    "dur_sum": 148703,
+    "dur_count": 23
   }
 }
