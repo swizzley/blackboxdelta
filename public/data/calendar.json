@@ -952,11 +952,11 @@
   "2026-07-08": {
     "pl": -0.25,
     "winners": 2,
-    "losers": 3,
-    "total": 5,
+    "losers": 4,
+    "total": 6,
     "win_pl": 0,
     "loss_pl": -0.25,
-    "dur_sum": 1196,
-    "dur_count": 5
+    "dur_sum": 1494,
+    "dur_count": 6
   }
 }
