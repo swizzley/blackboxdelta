@@ -970,13 +970,13 @@
     "dur_count": 6
   },
   "2026-07-10": {
-    "pl": 0.2,
-    "winners": 10,
-    "losers": 22,
-    "total": 33,
+    "pl": 0.19,
+    "winners": 11,
+    "losers": 24,
+    "total": 36,
     "win_pl": 0.95,
-    "loss_pl": -0.75,
-    "dur_sum": 66379,
-    "dur_count": 33
+    "loss_pl": -0.76,
+    "dur_sum": 66664,
+    "dur_count": 36
   }
 }
