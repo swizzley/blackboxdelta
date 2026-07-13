@@ -1000,13 +1000,13 @@
     "dur_count": 1
   },
   "2026-07-13": {
-    "pl": -0.63,
+    "pl": -0.72,
     "winners": 8,
-    "losers": 8,
-    "total": 25,
+    "losers": 11,
+    "total": 29,
     "win_pl": 0.04,
-    "loss_pl": -0.67,
-    "dur_sum": 39562,
-    "dur_count": 25
+    "loss_pl": -0.76,
+    "dur_sum": 40422,
+    "dur_count": 29
   }
 }
