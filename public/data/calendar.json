@@ -1011,12 +1011,12 @@
   },
   "2026-07-14": {
     "pl": -0.35,
-    "winners": 4,
-    "losers": 7,
-    "total": 13,
+    "winners": 5,
+    "losers": 8,
+    "total": 17,
     "win_pl": 0.01,
     "loss_pl": -0.36,
-    "dur_sum": 2546,
-    "dur_count": 13
+    "dur_sum": 3610,
+    "dur_count": 17
   }
 }
