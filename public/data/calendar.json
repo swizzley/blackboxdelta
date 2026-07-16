@@ -1020,13 +1020,23 @@
     "dur_count": 80
   },
   "2026-07-15": {
-    "pl": -0.11,
-    "winners": 13,
-    "losers": 9,
-    "total": 29,
-    "win_pl": 0.08,
-    "loss_pl": -0.19,
-    "dur_sum": 20928,
-    "dur_count": 29
+    "pl": -0.83,
+    "winners": 16,
+    "losers": 20,
+    "total": 46,
+    "win_pl": 0.46,
+    "loss_pl": -1.29,
+    "dur_sum": 32265,
+    "dur_count": 46
+  },
+  "2026-07-16": {
+    "pl": 0.01,
+    "winners": 1,
+    "losers": 1,
+    "total": 3,
+    "win_pl": 0.02,
+    "loss_pl": -0,
+    "dur_sum": 4777,
+    "dur_count": 3
   }
 }
