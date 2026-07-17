@@ -1038,5 +1038,15 @@
     "loss_pl": -0.1,
     "dur_sum": 25747,
     "dur_count": 33
+  },
+  "2026-07-17": {
+    "pl": 0.01,
+    "winners": 1,
+    "losers": 5,
+    "total": 6,
+    "win_pl": 0.23,
+    "loss_pl": -0.22,
+    "dur_sum": 7130,
+    "dur_count": 6
   }
 }
