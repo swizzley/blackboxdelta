@@ -1213,10 +1213,10 @@
     "pl": -0.23,
     "winners": 0,
     "losers": 2,
-    "total": 2,
+    "total": 3,
     "win_pl": 0,
     "loss_pl": -0.23,
-    "dur_sum": 2882,
-    "dur_count": 2
+    "dur_sum": 3065,
+    "dur_count": 3
   }
 }
