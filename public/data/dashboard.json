@@ -1,8 +1,8 @@
 {
   "all_time": {
     "total_orders": 9467,
-    "pending": 4,
-    "open_positions": 13,
+    "pending": 3,
+    "open_positions": 14,
     "closed_orders": 9450,
     "total_pl": -45.27,
     "winners": 1632,
@@ -24701,7 +24701,7 @@
     },
     {
       "date": "2026-08-05",
-      "avg_final_score": -0.61,
+      "avg_final_score": -0.68,
       "avg_confidence": 0,
       "avg_trend": 0,
       "avg_ma": 0,
@@ -24715,17 +24715,17 @@
       "avg_cycle": 0,
       "avg_pattern": 0,
       "avg_sentiment": 0,
-      "count": 114
+      "count": 187
     }
   ],
   "recommendation_counts": {
-    "Buy": 28839,
+    "Buy": 28847,
     "MODEL-V2": 3494,
     "Minimal Buy": 2720,
     "Minimal Sell": 4332,
     "Moderate Buy": 27204,
     "Moderate Sell": 10227,
-    "Sell": 57375,
+    "Sell": 57440,
     "Strong Buy": 643,
     "Strong Sell": 219,
     "Weak Buy": 12062,
