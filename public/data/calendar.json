@@ -1220,13 +1220,13 @@
     "dur_count": 16
   },
   "2026-08-05": {
-    "pl": 0.22,
-    "winners": 14,
-    "losers": 0,
-    "total": 16,
-    "win_pl": 0.22,
-    "loss_pl": 0,
-    "dur_sum": 7511,
-    "dur_count": 16
+    "pl": 0.25,
+    "winners": 16,
+    "losers": 2,
+    "total": 20,
+    "win_pl": 0.26,
+    "loss_pl": -0,
+    "dur_sum": 9631,
+    "dur_count": 20
   }
 }
