@@ -1231,12 +1231,12 @@
   },
   "2026-08-06": {
     "pl": -0.04,
-    "winners": 1,
-    "losers": 4,
-    "total": 11,
+    "winners": 2,
+    "losers": 5,
+    "total": 13,
     "win_pl": 0,
     "loss_pl": -0.04,
-    "dur_sum": 5027,
-    "dur_count": 11
+    "dur_sum": 10399,
+    "dur_count": 13
   }
 }
