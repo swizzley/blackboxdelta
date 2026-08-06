@@ -1232,11 +1232,11 @@
   "2026-08-06": {
     "pl": 0,
     "winners": 1,
-    "losers": 1,
-    "total": 4,
+    "losers": 2,
+    "total": 5,
     "win_pl": 0,
     "loss_pl": -0,
-    "dur_sum": 556,
-    "dur_count": 4
+    "dur_sum": 739,
+    "dur_count": 5
   }
 }
