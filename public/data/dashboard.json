@@ -24969,7 +24969,7 @@
     },
     {
       "date": "2026-08-07",
-      "avg_final_score": -0.13,
+      "avg_final_score": -0.2,
       "avg_confidence": 0,
       "avg_trend": 0,
       "avg_ma": 0,
@@ -24983,17 +24983,17 @@
       "avg_cycle": 0,
       "avg_pattern": 0,
       "avg_sentiment": 0,
-      "count": 150
+      "count": 237
     }
   ],
   "recommendation_counts": {
-    "Buy": 29417,
+    "Buy": 29447,
     "MODEL-V2": 3494,
     "Minimal Buy": 2720,
     "Minimal Sell": 4332,
     "Moderate Buy": 27204,
     "Moderate Sell": 10227,
-    "Sell": 58981,
+    "Sell": 59038,
     "Strong Buy": 643,
     "Strong Sell": 219,
     "Weak Buy": 12062,
