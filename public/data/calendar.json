@@ -1242,11 +1242,11 @@
   "2026-08-07": {
     "pl": 0.45,
     "winners": 8,
-    "losers": 1,
-    "total": 9,
+    "losers": 2,
+    "total": 10,
     "win_pl": 0.64,
     "loss_pl": -0.2,
-    "dur_sum": 14635,
-    "dur_count": 9
+    "dur_sum": 14801,
+    "dur_count": 10
   }
 }
