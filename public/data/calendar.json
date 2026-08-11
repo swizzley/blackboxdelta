@@ -1281,12 +1281,12 @@
   },
   "2026-08-11": {
     "pl": 0,
-    "winners": 4,
+    "winners": 6,
     "losers": 2,
-    "total": 7,
+    "total": 9,
     "win_pl": 0.01,
     "loss_pl": -0.01,
-    "dur_sum": 1833,
-    "dur_count": 7
+    "dur_sum": 2003,
+    "dur_count": 9
   }
 }
