@@ -1331,12 +1331,12 @@
   },
   "2026-08-17": {
     "pl": -0.37,
-    "winners": 4,
+    "winners": 5,
     "losers": 3,
-    "total": 8,
-    "win_pl": 0,
+    "total": 9,
+    "win_pl": 0.01,
     "loss_pl": -0.38,
-    "dur_sum": 10161,
-    "dur_count": 8
+    "dur_sum": 10455,
+    "dur_count": 9
   }
 }
