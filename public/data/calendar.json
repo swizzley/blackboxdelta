@@ -1402,11 +1402,11 @@
   "2026-08-24": {
     "pl": -0.08,
     "winners": 4,
-    "losers": 1,
-    "total": 6,
+    "losers": 3,
+    "total": 8,
     "win_pl": 0.06,
     "loss_pl": -0.15,
-    "dur_sum": 5477,
-    "dur_count": 6
+    "dur_sum": 5995,
+    "dur_count": 8
   }
 }
