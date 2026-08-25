@@ -1411,12 +1411,12 @@
   },
   "2026-08-25": {
     "pl": -0.11,
-    "winners": 11,
+    "winners": 12,
     "losers": 5,
-    "total": 20,
-    "win_pl": 0.08,
+    "total": 21,
+    "win_pl": 0.09,
     "loss_pl": -0.19,
-    "dur_sum": 5362,
-    "dur_count": 20
+    "dur_sum": 5716,
+    "dur_count": 21
   }
 }
