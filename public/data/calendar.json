@@ -1442,11 +1442,11 @@
   "2026-08-28": {
     "pl": -0.88,
     "winners": 4,
-    "losers": 7,
-    "total": 14,
+    "losers": 8,
+    "total": 17,
     "win_pl": 0,
     "loss_pl": -0.88,
-    "dur_sum": 11817,
-    "dur_count": 14
+    "dur_sum": 13166,
+    "dur_count": 17
   }
 }
