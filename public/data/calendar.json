@@ -1491,12 +1491,12 @@
   },
   "2026-09-02": {
     "pl": -0.29,
-    "winners": 2,
+    "winners": 3,
     "losers": 1,
-    "total": 5,
+    "total": 6,
     "win_pl": 0.01,
     "loss_pl": -0.3,
-    "dur_sum": 3185,
-    "dur_count": 5
+    "dur_sum": 3260,
+    "dur_count": 6
   }
 }
