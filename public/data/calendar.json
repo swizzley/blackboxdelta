@@ -1500,13 +1500,13 @@
     "dur_count": 30
   },
   "2026-09-03": {
-    "pl": -0.3,
-    "winners": 3,
-    "losers": 4,
-    "total": 8,
-    "win_pl": 0.01,
-    "loss_pl": -0.31,
-    "dur_sum": 5426,
-    "dur_count": 8
+    "pl": -0.71,
+    "winners": 4,
+    "losers": 7,
+    "total": 12,
+    "win_pl": 0.05,
+    "loss_pl": -0.76,
+    "dur_sum": 6738,
+    "dur_count": 12
   }
 }
