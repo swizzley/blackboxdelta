@@ -1502,11 +1502,11 @@
   "2026-09-03": {
     "pl": 0.32,
     "winners": 17,
-    "losers": 23,
-    "total": 42,
+    "losers": 24,
+    "total": 43,
     "win_pl": 2.88,
     "loss_pl": -2.56,
-    "dur_sum": 18632,
-    "dur_count": 42
+    "dur_sum": 18717,
+    "dur_count": 43
   }
 }
