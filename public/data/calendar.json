@@ -1560,13 +1560,13 @@
     "dur_count": 10
   },
   "2026-09-10": {
-    "pl": -1.46,
-    "winners": 3,
-    "losers": 2,
-    "total": 5,
-    "win_pl": 0.01,
-    "loss_pl": -1.47,
-    "dur_sum": 9167,
-    "dur_count": 5
+    "pl": -1.99,
+    "winners": 5,
+    "losers": 5,
+    "total": 10,
+    "win_pl": 0.06,
+    "loss_pl": -2.05,
+    "dur_sum": 9584,
+    "dur_count": 10
   }
 }
