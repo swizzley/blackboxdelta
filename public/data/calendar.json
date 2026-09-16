@@ -1620,13 +1620,13 @@
     "dur_count": 14
   },
   "2026-09-16": {
-    "pl": -0.33,
+    "pl": -0.59,
     "winners": 1,
-    "losers": 2,
-    "total": 3,
+    "losers": 3,
+    "total": 4,
     "win_pl": 0.04,
-    "loss_pl": -0.37,
-    "dur_sum": 4297,
-    "dur_count": 3
+    "loss_pl": -0.63,
+    "dur_sum": 6520,
+    "dur_count": 4
   }
 }
