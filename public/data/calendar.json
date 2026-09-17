@@ -1632,11 +1632,11 @@
   "2026-09-17": {
     "pl": -0.08,
     "winners": 2,
-    "losers": 2,
-    "total": 5,
+    "losers": 3,
+    "total": 6,
     "win_pl": 0,
     "loss_pl": -0.08,
-    "dur_sum": 9792,
-    "dur_count": 5
+    "dur_sum": 9969,
+    "dur_count": 6
   }
 }
