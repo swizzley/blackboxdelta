@@ -1718,5 +1718,15 @@
     "loss_pl": 0,
     "dur_sum": 4328,
     "dur_count": 3
+  },
+  "2026-09-27": {
+    "pl": 0,
+    "winners": 0,
+    "losers": 0,
+    "total": 1,
+    "win_pl": 0,
+    "loss_pl": 0,
+    "dur_sum": 4323,
+    "dur_count": 1
   }
 }
