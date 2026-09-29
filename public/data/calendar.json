@@ -1741,12 +1741,12 @@
   },
   "2026-09-29": {
     "pl": -0.03,
-    "winners": 8,
+    "winners": 10,
     "losers": 2,
-    "total": 10,
+    "total": 12,
     "win_pl": 0.05,
     "loss_pl": -0.08,
-    "dur_sum": 3889,
-    "dur_count": 10
+    "dur_sum": 4383,
+    "dur_count": 12
   }
 }
