@@ -1752,11 +1752,11 @@
   "2026-09-30": {
     "pl": -0.06,
     "winners": 19,
-    "losers": 5,
-    "total": 28,
+    "losers": 6,
+    "total": 29,
     "win_pl": 0.45,
     "loss_pl": -0.51,
-    "dur_sum": 7965,
-    "dur_count": 28
+    "dur_sum": 8027,
+    "dur_count": 29
   }
 }
