@@ -1771,12 +1771,12 @@
   },
   "2026-10-02": {
     "pl": 0.29,
-    "winners": 9,
+    "winners": 10,
     "losers": 1,
-    "total": 11,
+    "total": 12,
     "win_pl": 0.32,
     "loss_pl": -0.03,
-    "dur_sum": 7471,
-    "dur_count": 11
+    "dur_sum": 8800,
+    "dur_count": 12
   }
 }
