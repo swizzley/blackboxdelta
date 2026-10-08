@@ -31415,17 +31415,17 @@
       "avg_cycle": 0,
       "avg_pattern": 0,
       "avg_sentiment": 0,
-      "count": 1036
+      "count": 1116
     }
   ],
   "recommendation_counts": {
-    "Buy": 47674,
+    "Buy": 47686,
     "MODEL-V2": 3494,
     "Minimal Buy": 2720,
     "Minimal Sell": 4333,
     "Moderate Buy": 27206,
     "Moderate Sell": 10232,
-    "Sell": 115517,
+    "Sell": 115585,
     "Strong Buy": 643,
     "Strong Sell": 219,
     "Weak Buy": 12062,
