@@ -1820,13 +1820,13 @@
     "dur_count": 15
   },
   "2026-10-08": {
-    "pl": 0.14,
-    "winners": 9,
+    "pl": 0.18,
+    "winners": 10,
     "losers": 4,
-    "total": 14,
-    "win_pl": 0.21,
+    "total": 15,
+    "win_pl": 0.25,
     "loss_pl": -0.07,
-    "dur_sum": 15043,
-    "dur_count": 14
+    "dur_sum": 15206,
+    "dur_count": 15
   }
 }
