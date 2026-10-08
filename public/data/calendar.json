@@ -1822,11 +1822,11 @@
   "2026-10-08": {
     "pl": 0.05,
     "winners": 10,
-    "losers": 5,
-    "total": 16,
+    "losers": 6,
+    "total": 17,
     "win_pl": 0.25,
     "loss_pl": -0.2,
-    "dur_sum": 16648,
-    "dur_count": 16
+    "dur_sum": 17672,
+    "dur_count": 17
   }
 }
