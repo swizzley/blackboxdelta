@@ -1,13 +1,13 @@
 {
   "all_time": {
     "total_orders": 11467,
-    "pending": 5,
+    "pending": 4,
     "open_positions": 10,
-    "closed_orders": 11452,
+    "closed_orders": 11453,
     "total_pl": -72.17,
     "winners": 2237,
     "losers": 3848,
-    "breakeven": 5039,
+    "breakeven": 5040,
     "win_loss_ratio": 0.58,
     "win_rate_pct": 0.2,
     "avg_win": 0.03,
@@ -31541,7 +31541,7 @@
     },
     {
       "date": "2026-10-09",
-      "avg_final_score": -0.68,
+      "avg_final_score": -0.69,
       "avg_confidence": 0,
       "avg_trend": 0,
       "avg_ma": 0,
@@ -31555,17 +31555,17 @@
       "avg_cycle": 0,
       "avg_pattern": 0,
       "avg_sentiment": 0,
-      "count": 908
+      "count": 961
     }
   ],
   "recommendation_counts": {
-    "Buy": 47936,
+    "Buy": 47941,
     "MODEL-V2": 3494,
     "Minimal Buy": 2720,
     "Minimal Sell": 4333,
     "Moderate Buy": 27206,
     "Moderate Sell": 10232,
-    "Sell": 116769,
+    "Sell": 116817,
     "Strong Buy": 643,
     "Strong Sell": 219,
     "Weak Buy": 12062,
