@@ -1862,11 +1862,11 @@
   "2026-10-12": {
     "pl": -0.04,
     "winners": 2,
-    "losers": 1,
-    "total": 4,
+    "losers": 3,
+    "total": 7,
     "win_pl": 0.03,
     "loss_pl": -0.07,
-    "dur_sum": 580,
-    "dur_count": 4
+    "dur_sum": 1293,
+    "dur_count": 7
   }
 }
