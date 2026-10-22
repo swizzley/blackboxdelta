@@ -7,6 +7,9 @@ import { DeviceAuthProvider } from './context/DeviceAuth';
 import { ToastProvider } from './context/Toast';
 import { initFingerprint } from './api/fingerprint';
 import './index.css';
+import { installArchiveGuard } from './archive';
+
+installArchiveGuard();
 
 // Eagerly initialize device fingerprint (cached for all subsequent API calls)
 initFingerprint();

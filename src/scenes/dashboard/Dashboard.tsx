@@ -154,6 +154,24 @@ function computeStatsFromOrders(orders: OrderForStats[]): TimeframeStats {
     };
 }
 
+// The engine's snapshot stores win_rate_pct as a fraction of all trades (0.2 for
+// ~20%). Recompute it as winners / decided, the rule used for every other period.
+function fixWinRates<T>(data: T): T {
+    const walk = (o: unknown): void => {
+        if (Array.isArray(o)) { o.forEach(walk); return; }
+        if (o && typeof o === 'object') {
+            const r = o as Record<string, unknown>;
+            if ('win_rate_pct' in r && typeof r.winners === 'number' && typeof r.losers === 'number') {
+                const decided = r.winners + r.losers;
+                r.win_rate_pct = decided > 0 ? Math.round((r.winners / decided) * 10000) / 100 : null;
+            }
+            Object.values(r).forEach(walk);
+        }
+    };
+    walk(data);
+    return data;
+}
+
 export default function Dashboard() {
     const {isDarkMode} = useTheme();
     const {apiAvailable} = useApi();
@@ -181,7 +199,7 @@ export default function Dashboard() {
     const [periodStatsKey, setPeriodStatsKey] = useState<string>('');
     useEffect(() => {
         // Always load static dashboard (has chart series the API doesn't serve)
-        axios.get('/data/dashboard.json').then(r => setDashboard(r.data)).catch(console.error);
+        axios.get('/data/dashboard.json').then(r => setDashboard(fixWinRates(r.data))).catch(console.error);
 
         if (apiAvailable) {
             // API for live stats overlay (all-time)

@@ -1,4 +1,5 @@
 import {Bars3Icon, XMarkIcon} from "@heroicons/react/24/outline";
+import {ARCHIVED} from '../../archive';
 import {Popover, Transition} from "@headlessui/react";
 import {Fragment, useState} from "react";
 import {useTheme} from '../../context/Theme';
@@ -24,7 +25,8 @@ export default function Nav() {
     const {apiAvailable, checking} = useApi();
     const {isAdmin} = useDeviceAuth();
     const [currentPath] = useState(location.pathname);
-    const navItems = apiAvailable && isAdmin ? adminNav : [];
+    // The archive opens every page, so the tour needs the full menu.
+    const navItems = ARCHIVED || (apiAvailable && isAdmin) ? adminNav : [];
 
     return (
         <Popover as="header"

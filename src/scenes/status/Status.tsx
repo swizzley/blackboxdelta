@@ -78,7 +78,8 @@ export default function Status() {
     const settingsGroups = settings ? groupSettings(settings) : {};
 
     const commitUrl = (service: string, sha: string) => {
-        const gl = 'http://gambit.aspendenver.local/dmorgan';
+        // Private GitLab repos have no public URL; only the GitHub ones link out.
+        const gl = '';
         const gh = 'https://github.com/swizzley';
         const repoMap: Record<string, string> = {
             'collection-engine': `${gl}/massive-market/commit/${sha}`,
@@ -94,7 +95,8 @@ export default function Status() {
             'ai-lib': `${gh}/langchaingo/commit/${sha}`,
             'reporting-frontend': `${gh}/blackboxdelta/commit/${sha}`,
         };
-        return repoMap[service];
+        const url = repoMap[service];
+        return url && url.startsWith('http') ? url : undefined;
     };
 
     return (

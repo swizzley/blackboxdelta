@@ -13,6 +13,9 @@ import ProfilesAll from './scenes/profiles/ProfilesAll';
 import Devices from './scenes/devices/Devices';
 import Error404 from './scenes/common/404';
 import ErrorBoundary from './scenes/common/ErrorBoundary';
+import ArchiveBanner from './scenes/common/ArchiveBanner';
+import {ARCHIVED} from './archive';
+import SystemArchive from './scenes/archive/SystemArchive';
 
 function AuthedRoute({children}: {children: React.ReactNode}) {
     const {trusted} = useDeviceAuth();
@@ -31,22 +34,25 @@ function AdminRoute({children}: {children: React.ReactNode}) {
 export default function App() {
     return (
         <ErrorBoundary>
+            <ArchiveBanner/>
+            <div className={ARCHIVED ? 'archived' : undefined}>
             <Router>
                 <Routes>
                     <Route path="/" element={<Dashboard/>}/>
-                    <Route path="/history" element={<AuthedRoute><History/></AuthedRoute>}/>
-                    <Route path="/analysis" element={<AdminRoute><Analysis/></AdminRoute>}/>
-                    <Route path="/system" element={<AdminRoute><Status/></AdminRoute>}/>
-                    <Route path="/health" element={<AdminRoute><System/></AdminRoute>}/>
-                    <Route path="/profiles" element={<AdminRoute><Profiles/></AdminRoute>}/>
-                    <Route path="/profiles/all" element={<AdminRoute><ProfilesAll/></AdminRoute>}/>
-                    <Route path="/optimizer" element={<AdminRoute><Optimizer/></AdminRoute>}/>
+                    <Route path="/history" element={ARCHIVED ? <SystemArchive focus="history"/> : <AuthedRoute><History/></AuthedRoute>}/>
+                    <Route path="/analysis" element={ARCHIVED ? <SystemArchive focus="analysis"/> : <AdminRoute><Analysis/></AdminRoute>}/>
+                    <Route path="/system" element={ARCHIVED ? <SystemArchive focus="system"/> : <AdminRoute><Status/></AdminRoute>}/>
+                    <Route path="/health" element={ARCHIVED ? <SystemArchive focus="health"/> : <AdminRoute><System/></AdminRoute>}/>
+                    <Route path="/profiles" element={ARCHIVED ? <SystemArchive focus="profiles"/> : <AdminRoute><Profiles/></AdminRoute>}/>
+                    <Route path="/profiles/all" element={ARCHIVED ? <SystemArchive focus="profiles"/> : <AdminRoute><ProfilesAll/></AdminRoute>}/>
+                    <Route path="/optimizer" element={ARCHIVED ? <SystemArchive focus="optimizer"/> : <AdminRoute><Optimizer/></AdminRoute>}/>
                     <Route path="/day/:year/:month/:day" element={<AuthedRoute><DayDetail/></AuthedRoute>}/>
                     <Route path="/trade/:year/:month/:day/:id" element={<AuthedRoute><TradeDetail/></AuthedRoute>}/>
-                    <Route path="/devices" element={<Devices/>}/>
+                    <Route path="/devices" element={ARCHIVED ? <Navigate to="/" replace/> : <Devices/>}/>
                     <Route path="*" element={<Error404/>}/>
                 </Routes>
             </Router>
+            </div>
         </ErrorBoundary>
     );
 }

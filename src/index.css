@@ -37,3 +37,16 @@
 .prose-invert tbody td {
     @apply border-gray-700/50;
 }
+/* Archive mode: the whole app grayed out, actions disabled, navigation still works. */
+.archive-banner {
+    position: sticky; top: 0; z-index: 60;
+    padding: 10px 16px; font-size: 14px; line-height: 1.45;
+    background: #1f2937; color: #f3f4f6; text-align: center;
+}
+.archive-banner a { color: #67e8f9; text-decoration: underline; }
+.archived { filter: grayscale(1); }
+.archived main, .archived .min-h-screen { opacity: 0.8; }
+.archived button:not(nav button):not([aria-haspopup]):not([data-archive-allow]),
+.archived input, .archived select, .archived textarea {
+    pointer-events: none !important; opacity: 0.45 !important; cursor: not-allowed !important;
+}

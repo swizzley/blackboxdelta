@@ -1,6 +1,7 @@
 import React, {createContext, useContext, useEffect, useState, useCallback, useRef} from 'react';
 import {checkHealth, checkHealthAt} from '../api/client';
 import {getApiBase, setApiBase as persistApiBase, DEFAULT_BASE, FALLBACK_BASE} from '../api/config';
+import {ARCHIVED} from '../archive';
 
 interface ApiContextProps {
     apiAvailable: boolean;
@@ -20,7 +21,7 @@ export const useApi = (): ApiContextProps => {
 export const ApiProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
     const [apiAvailable, setApiAvailable] = useState(false);
     const [apiBase, setApiBaseState] = useState(getApiBase);
-    const [checking, setChecking] = useState(true);
+    const [checking, setChecking] = useState(!ARCHIVED);
     const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
     const probe = useCallback(async () => {
@@ -45,6 +46,7 @@ export const ApiProvider: React.FC<{children: React.ReactNode}> = ({children}) =
     }, []);
 
     useEffect(() => {
+        if (ARCHIVED) return;
         probe();
         intervalRef.current = setInterval(probe, 30_000);
         return () => clearInterval(intervalRef.current);

@@ -1,15 +1,14 @@
 const STORAGE_KEY = 'api_base';
-export const DEFAULT_BASE = 'https://api.blackboxdelta.com';
-export const FALLBACK_BASE = 'http://10.0.0.21:8080';
+import {ARCHIVED} from '../archive';
+
+// The API is retired; in archive mode nothing points at it.
+export const DEFAULT_BASE = '';
+export const FALLBACK_BASE = '';
 
 export function getApiBase(): string {
+    if (ARCHIVED) return DEFAULT_BASE;
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return DEFAULT_BASE;
-    // Migrate old local hostnames to Cloudflare Tunnel
-    if (stored.includes('cipher.aspendenver.local') || stored.includes('genesis.aspendenver.local')) {
-        localStorage.setItem(STORAGE_KEY, DEFAULT_BASE);
-        return DEFAULT_BASE;
-    }
     return stored;
 }
 

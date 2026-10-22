@@ -160,23 +160,7 @@ export default function TradeDetail() {
                                         {trade.close_reason}
                                     </span>
                                 )}
-                                {trade.correlation_id && (
-                                    <a
-                                        href={`http://grafana.aspendenver.local:3000/d/pipeline-trace/pipeline-trace?var-correlation_id=${trade.correlation_id}&from=now-30d&to=now`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-                                            isDarkMode
-                                                ? 'bg-cyan-900/30 text-cyan-400 hover:bg-cyan-900/50'
-                                                : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200'
-                                        }`}
-                                    >
-                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                        </svg>
-                                        Trace Pipeline
-                                    </a>
-                                )}
+                                {/* The Grafana trace link pointed at a private host and was removed for the archive. */}
                             </div>
 
                             {/* Stat Cards */}
@@ -440,7 +424,8 @@ function formatDuration(mins: number): string {
     return `${Math.floor(mins / 1440)}d ${Math.floor((mins % 1440) / 60)}h`;
 }
 
-const GITLAB_BASE = 'http://gitlab.aspendenver.local/dmorgan';
+// Commit links pointed at a private GitLab; the archive shows the SHA only.
+const GITLAB_BASE = '';
 
 function VersionLinks({versions, isDarkMode}: { versions: Record<string, { sha: string; message: string }>; isDarkMode: boolean }) {
     const services = Object.entries(versions);
@@ -453,14 +438,18 @@ function VersionLinks({versions, isDarkMode}: { versions: Record<string, { sha: 
                         <span className={`text-xs font-medium w-28 shrink-0 pt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                             {name}
                         </span>
-                        <a
-                            href={`${GITLAB_BASE}/${name}/commit/${v.sha}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-cyan-500 hover:text-cyan-400 font-mono"
-                        >
-                            {v.sha.slice(0, 8)}
-                        </a>
+                        {GITLAB_BASE ? (
+                            <a
+                                href={`${GITLAB_BASE}/${name}/commit/${v.sha}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-cyan-500 hover:text-cyan-400 font-mono"
+                            >
+                                {v.sha.slice(0, 8)}
+                            </a>
+                        ) : (
+                            <span className="text-xs text-cyan-500 font-mono">{v.sha.slice(0, 8)}</span>
+                        )}
                         <span className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                             {v.message}
                         </span>

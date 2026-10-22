@@ -1,0 +1,973 @@
+{
+ "snapshot": "2026-10-22",
+ "tables": [
+  {
+   "name": "signals_1m",
+   "rows_est": 98229517,
+   "mb": 127738
+  },
+  {
+   "name": "optimize_branches",
+   "rows_est": 5665423,
+   "mb": 121958
+  },
+  {
+   "name": "signals_5m",
+   "rows_est": 21007752,
+   "mb": 27453
+  },
+  {
+   "name": "prices_1m",
+   "rows_est": 120332265,
+   "mb": 20351
+  },
+  {
+   "name": "signals_15m",
+   "rows_est": 7370700,
+   "mb": 9544
+  },
+  {
+   "name": "prices_5m",
+   "rows_est": 22626455,
+   "mb": 3785
+  },
+  {
+   "name": "optimize_param_stats",
+   "rows_est": 6417600,
+   "mb": 3148
+  },
+  {
+   "name": "optimize_branch_signals",
+   "rows_est": 4216787,
+   "mb": 2886
+  },
+  {
+   "name": "signals_1h",
+   "rows_est": 1734248,
+   "mb": 2299
+  },
+  {
+   "name": "prices_15m",
+   "rows_est": 8890662,
+   "mb": 1882
+  },
+  {
+   "name": "signals_4h",
+   "rows_est": 410088,
+   "mb": 588
+  },
+  {
+   "name": "optimize_verification_queue",
+   "rows_est": 3900097,
+   "mb": 511
+  },
+  {
+   "name": "prices_1h",
+   "rows_est": 1864759,
+   "mb": 352
+  },
+  {
+   "name": "optimize_lhc_runs",
+   "rows_est": 3437,
+   "mb": 235
+  },
+  {
+   "name": "optimize_mutation_blacklist",
+   "rows_est": 374162,
+   "mb": 187
+  },
+  {
+   "name": "optimize_generations",
+   "rows_est": 875106,
+   "mb": 174
+  },
+  {
+   "name": "prices",
+   "rows_est": 608209,
+   "mb": 155
+  },
+  {
+   "name": "optimize_generation_queue",
+   "rows_est": 791662,
+   "mb": 151
+  },
+  {
+   "name": "signals",
+   "rows_est": 68210,
+   "mb": 102
+  },
+  {
+   "name": "prices_4h",
+   "rows_est": 440373,
+   "mb": 95
+  },
+  {
+   "name": "sentdex_articles",
+   "rows_est": 111830,
+   "mb": 80
+  },
+  {
+   "name": "optimize_seed_runs",
+   "rows_est": 13834,
+   "mb": 50
+  },
+  {
+   "name": "scores",
+   "rows_est": 164606,
+   "mb": 38
+  },
+  {
+   "name": "sentdex_article_pairs",
+   "rows_est": 167967,
+   "mb": 30
+  },
+  {
+   "name": "alerts",
+   "rows_est": 180819,
+   "mb": 30
+  },
+  {
+   "name": "optimize_profile_history",
+   "rows_est": 13638,
+   "mb": 24
+  },
+  {
+   "name": "orders",
+   "rows_est": 7630,
+   "mb": 22
+  },
+  {
+   "name": "signals_1w",
+   "rows_est": 12648,
+   "mb": 20
+  },
+  {
+   "name": "optimize_profile_mutations",
+   "rows_est": 20918,
+   "mb": 16
+  },
+  {
+   "name": "code_nodes",
+   "rows_est": 12877,
+   "mb": 12
+  },
+  {
+   "name": "optimize_seed_queue",
+   "rows_est": 20022,
+   "mb": 9
+  },
+  {
+   "name": "code_edges",
+   "rows_est": 22686,
+   "mb": 8
+  },
+  {
+   "name": "prices_1w",
+   "rows_est": 16085,
+   "mb": 6
+  },
+  {
+   "name": "surge_branches",
+   "rows_est": 28776,
+   "mb": 6
+  },
+  {
+   "name": "surge_mutations",
+   "rows_est": 27892,
+   "mb": 5
+  },
+  {
+   "name": "optimize_profiles",
+   "rows_est": 3755,
+   "mb": 5
+  },
+  {
+   "name": "weekend_gaps",
+   "rows_est": 13993,
+   "mb": 3
+  },
+  {
+   "name": "neo_incidents",
+   "rows_est": 187,
+   "mb": 3
+  },
+  {
+   "name": "surge_generations",
+   "rows_est": 4247,
+   "mb": 1
+  },
+  {
+   "name": "analysis_phases",
+   "rows_est": 140,
+   "mb": 1
+  },
+  {
+   "name": "analysis_runs",
+   "rows_est": 386,
+   "mb": 0
+  },
+  {
+   "name": "neo_signals",
+   "rows_est": 814,
+   "mb": 0
+  },
+  {
+   "name": "optimize_orders",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "analysis_todos",
+   "rows_est": 475,
+   "mb": 0
+  },
+  {
+   "name": "neo_sweeps",
+   "rows_est": 2743,
+   "mb": 0
+  },
+  {
+   "name": "backtest_runs",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "backtest_validations",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "neo_patterns",
+   "rows_est": 73,
+   "mb": 0
+  },
+  {
+   "name": "pips",
+   "rows_est": 272,
+   "mb": 0
+  },
+  {
+   "name": "backtest_orders",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "shadow_trades",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "backtest_snapshots",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "optimize_trunks",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "sentdex_sites",
+   "rows_est": 202,
+   "mb": 0
+  },
+  {
+   "name": "optimize_recommendations",
+   "rows_est": 4,
+   "mb": 0
+  },
+  {
+   "name": "surge_lhc_runs",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "optimize_profile_baselines",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "optimize_profile_seed_defaults",
+   "rows_est": 16,
+   "mb": 0
+  },
+  {
+   "name": "surge_profile_history",
+   "rows_est": 2,
+   "mb": 0
+  },
+  {
+   "name": "surge_seed_queue",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "surge_seed_runs",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "neo_actions",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "markets",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "service_versions",
+   "rows_est": 10,
+   "mb": 0
+  },
+  {
+   "name": "sentdex_rejected_feeds",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "sentdex_pair_summary",
+   "rows_est": 221,
+   "mb": 0
+  },
+  {
+   "name": "sentdex_date_patterns",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "scoring_baseline",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "candles",
+   "rows_est": 0,
+   "mb": 0
+  },
+  {
+   "name": "prob_matrix",
+   "rows_est": 106,
+   "mb": 0
+  }
+ ],
+ "db": {
+  "tables": 77,
+  "gb": 316,
+  "rows_est": 306677856
+ },
+ "indicators_per_candle": 251,
+ "markets": 66,
+ "timeframes": [
+  "1m",
+  "5m",
+  "15m",
+  "1h",
+  "4h",
+  "1w"
+ ],
+ "price_range": {
+  "first": "2021-06-09T00:00:00Z",
+  "last": "2026-10-12T20:00:00Z"
+ },
+ "orders": {
+  "total": 11407,
+  "net_pl": -71.46,
+  "wins": 2213,
+  "losses": 3818,
+  "breakeven": 5376,
+  "first": "2026-02-24T12:30:00Z",
+  "last": "2026-10-13T02:00:16.986089078Z",
+  "symbols": 67,
+  "profiles": 510
+ },
+ "orders_by_timeframe": [
+  {
+   "tf": "1h",
+   "n": 3517,
+   "pl": -36.64
+  },
+  {
+   "tf": "15m",
+   "n": 2105,
+   "pl": -3.41
+  },
+  {
+   "tf": "scalp",
+   "n": 1608,
+   "pl": -14.8
+  },
+  {
+   "tf": "intraday",
+   "n": 1348,
+   "pl": -4.36
+  },
+  {
+   "tf": "4h",
+   "n": 1158,
+   "pl": -8.88
+  },
+  {
+   "tf": "weekly",
+   "n": 485,
+   "pl": -2.03
+  },
+  {
+   "tf": "daily",
+   "n": 475,
+   "pl": 2.21
+  },
+  {
+   "tf": "5m",
+   "n": 395,
+   "pl": -0.61
+  },
+  {
+   "tf": "1m",
+   "n": 279,
+   "pl": -0.46
+  },
+  {
+   "tf": "swing",
+   "n": 37,
+   "pl": -2.48
+  }
+ ],
+ "orders_by_close": [
+  {
+   "reason": "(no close reason)",
+   "n": 6232
+  },
+  {
+   "reason": "SL",
+   "n": 3579
+  },
+  {
+   "reason": "TRAILING_SL",
+   "n": 315
+  },
+  {
+   "reason": "EXIT_WATCHER_V2",
+   "n": 277
+  },
+  {
+   "reason": "MANUAL_OVERRIDE",
+   "n": 259
+  },
+  {
+   "reason": "MAX_AGE",
+   "n": 207
+  },
+  {
+   "reason": "RECONCILE",
+   "n": 200
+  },
+  {
+   "reason": "LIMIT_ORDER",
+   "n": 142
+  }
+ ],
+ "orders_by_symbol": [
+  {
+   "symbol": "USD_DKK",
+   "n": 326,
+   "pl": -1.2
+  },
+  {
+   "symbol": "CAD_HKD",
+   "n": 325,
+   "pl": -0.93
+  },
+  {
+   "symbol": "NZD_HKD",
+   "n": 294,
+   "pl": -1.91
+  },
+  {
+   "symbol": "CAD_SGD",
+   "n": 286,
+   "pl": -0.56
+  },
+  {
+   "symbol": "EUR_USD",
+   "n": 286,
+   "pl": -1.62
+  },
+  {
+   "symbol": "NZD_SGD",
+   "n": 277,
+   "pl": -2.11
+  },
+  {
+   "symbol": "EUR_SGD",
+   "n": 275,
+   "pl": -1.38
+  },
+  {
+   "symbol": "AUD_HKD",
+   "n": 273,
+   "pl": -0.71
+  },
+  {
+   "symbol": "HKD_JPY",
+   "n": 250,
+   "pl": -0.16
+  },
+  {
+   "symbol": "EUR_HKD",
+   "n": 247,
+   "pl": -1.95
+  },
+  {
+   "symbol": "GBP_SGD",
+   "n": 244,
+   "pl": -2.39
+  },
+  {
+   "symbol": "SGD_CHF",
+   "n": 243,
+   "pl": -2.35
+  }
+ ],
+ "alerts": {
+  "total": 254181,
+  "strategies": 16,
+  "first": "2026-02-24T23:59:59Z",
+  "last": "2026-10-13T01:00:00Z"
+ },
+ "alerts_by_timeframe": [
+  {
+   "tf": "scalp",
+   "n": 92868
+  },
+  {
+   "tf": "1m",
+   "n": 62953
+  },
+  {
+   "tf": "1h",
+   "n": 57177
+  },
+  {
+   "tf": "4h",
+   "n": 12218
+  },
+  {
+   "tf": "5m",
+   "n": 9892
+  },
+  {
+   "tf": "15m",
+   "n": 7924
+  },
+  {
+   "tf": "intraday",
+   "n": 7150
+  },
+  {
+   "tf": "daily",
+   "n": 2828
+  },
+  {
+   "tf": "weekly",
+   "n": 1019
+  },
+  {
+   "tf": "swing",
+   "n": 160
+  }
+ ],
+ "scores": {
+  "total": 238903,
+  "avg_final": 2.386,
+  "avg_conf": 0.238
+ },
+ "score_components": [
+  "TrendScore",
+  "MaScore",
+  "CrossoverScore",
+  "OscillatorScore",
+  "VolatilityScore",
+  "VolumeScore",
+  "FibStackScore",
+  "MomentumProjectionScore",
+  "StructureScore",
+  "CycleScore",
+  "PatternScore",
+  "SentimentScore"
+ ],
+ "recommendations": [
+  {
+   "rec": "Sell",
+   "n": 117598
+  },
+  {
+   "rec": "Buy",
+   "n": 48170
+  },
+  {
+   "rec": "Moderate Buy",
+   "n": 27206
+  },
+  {
+   "rec": "Weak Sell",
+   "n": 12386
+  },
+  {
+   "rec": "Weak Buy",
+   "n": 12062
+  },
+  {
+   "rec": "Moderate Sell",
+   "n": 10233
+  },
+  {
+   "rec": "Minimal Sell",
+   "n": 4333
+  },
+  {
+   "rec": "MODEL-V2",
+   "n": 3320
+  },
+  {
+   "rec": "Minimal Buy",
+   "n": 2720
+  },
+  {
+   "rec": "Strong Buy",
+   "n": 643
+  },
+  {
+   "rec": "Strong Sell",
+   "n": 219
+  },
+  {
+   "rec": "(none)",
+   "n": 13
+  }
+ ],
+ "optimizer": {
+  "generations": {
+   "n": 885641,
+   "first": "2026-03-30 17:10:12",
+   "last": "2026-10-08 12:07:43"
+  },
+  "generations_by_status": [
+   {
+    "status": "failed",
+    "n": 656629
+   },
+   {
+    "status": "cancelled",
+    "n": 201273
+   },
+   {
+    "status": "complete",
+    "n": 27560
+   },
+   {
+    "status": "active",
+    "n": 179
+   }
+  ],
+  "branches_est": 5665423,
+  "param_stats_est": 6417600,
+  "verification_queue_est": 3900097,
+  "profiles": {
+   "total": 3792,
+   "enabled": 16,
+   "live": 2234,
+   "pipelines": 3
+  },
+  "profiles_by_tier": [
+   {
+    "tier": "B",
+    "n": 3777
+   },
+   {
+    "tier": "A",
+    "n": 14
+   },
+   {
+    "tier": "D",
+    "n": 1
+   }
+  ],
+  "profiles_by_timeframe": [
+   {
+    "tf": "daily",
+    "n": 893
+   },
+   {
+    "tf": "weekly",
+    "n": 612
+   },
+   {
+    "tf": "1h",
+    "n": 567
+   },
+   {
+    "tf": "15m",
+    "n": 537
+   },
+   {
+    "tf": "4h",
+    "n": 471
+   },
+   {
+    "tf": "1m",
+    "n": 389
+   },
+   {
+    "tf": "5m",
+    "n": 323
+   }
+  ],
+  "mutations": 27189,
+  "blacklisted_mutations": 423920,
+  "seed_runs": 25446,
+  "lhc_runs": 3804,
+  "surge": {
+   "generations": 4466,
+   "branches": 30401,
+   "mutations": 30655
+  }
+ },
+ "sentiment": {
+  "articles": {
+   "n": 144764,
+   "first": "2026-03-01 07:49:25.000",
+   "last": "2026-10-13 01:45:10.000",
+   "llm_scored": 143
+  },
+  "sites": 209,
+  "by_method": [
+   {
+    "method": "vader",
+    "n": 144621
+   },
+   {
+    "method": "llm",
+    "n": 143
+   }
+  ],
+  "pair_links": 240137
+ },
+ "analysis": {
+  "runs": {
+   "n": 386,
+   "orders_reviewed": 13148,
+   "first": "2026-03-10 06:00:00",
+   "last": "2026-05-12 09:00:32"
+  },
+  "by_model": [
+   {
+    "model": "service / none",
+    "n": 284
+   },
+   {
+    "model": "ollama / qwen3:14b",
+    "n": 63
+   },
+   {
+    "model": "ollama / qwen2.5:14b",
+    "n": 20
+   },
+   {
+    "model": "ollama / quant-optimizer",
+    "n": 6
+   },
+   {
+    "model": "hybrid / qwen3:14b + claude-sonnet-4-20250514",
+    "n": 3
+   },
+   {
+    "model": "hybrid / qwen2.5:14b + claude-sonnet-4-20250514",
+    "n": 3
+   },
+   {
+    "model": "ollama / qwen3.5:latest",
+    "n": 2
+   },
+   {
+    "model": "roundrobin / nvidia/meta/llama-3.3-70b-instruct",
+    "n": 2
+   }
+  ],
+  "todos": 493,
+  "phases": 174
+ },
+ "neo": {
+  "incidents": 223,
+  "by_status": [
+   {
+    "status": "closed",
+    "n": 218
+   },
+   {
+    "status": "new",
+    "n": 5
+   }
+  ],
+  "by_severity": [
+   {
+    "severity": "P5",
+    "n": 100
+   },
+   {
+    "severity": "P3",
+    "n": 59
+   },
+   {
+    "severity": "P1",
+    "n": 32
+   },
+   {
+    "severity": "P4",
+    "n": 18
+   },
+   {
+    "severity": "P2",
+    "n": 10
+   },
+   {
+    "severity": "P0",
+    "n": 4
+   }
+  ],
+  "by_category": [
+   {
+    "category": "error_log_spike",
+    "n": 21
+   },
+   {
+    "category": "optimizer_service_down",
+    "n": 18
+   },
+   {
+    "category": "live_drift",
+    "n": 17
+   },
+   {
+    "category": "branch_zero_pass_rate",
+    "n": 14
+   },
+   {
+    "category": "memory_pressure",
+    "n": 13
+   },
+   {
+    "category": "many_stalled_profiles",
+    "n": 10
+   },
+   {
+    "category": "stall_pre_disable",
+    "n": 10
+   },
+   {
+    "category": "seed_repeated_failures",
+    "n": 9
+   }
+  ],
+  "sweeps": 3009,
+  "signals": 846,
+  "patterns": 73
+ },
+ "code_graph": {
+  "nodes": {
+   "n": 13023,
+   "modules": 16
+  },
+  "by_kind": [
+   {
+    "kind": "func",
+    "n": 7614
+   },
+   {
+    "kind": "method",
+    "n": 3485
+   },
+   {
+    "kind": "struct",
+    "n": 1587
+   },
+   {
+    "kind": "type",
+    "n": 230
+   },
+   {
+    "kind": "interface",
+    "n": 107
+   }
+  ],
+  "edges": 24480
+ },
+ "services": [
+  {
+   "service": "ai-lib",
+   "sha": "15eaefd0",
+   "updated": "2026-08-13"
+  },
+  {
+   "service": "alerts-engine",
+   "sha": "00c74d99",
+   "updated": "2026-08-13"
+  },
+  {
+   "service": "analysis-engine",
+   "sha": "277ad8b8",
+   "updated": "2026-08-02"
+  },
+  {
+   "service": "api",
+   "sha": "e62e9266",
+   "updated": "2026-07-26"
+  },
+  {
+   "service": "collection-engine",
+   "sha": "6dada789",
+   "updated": "2026-08-02"
+  },
+  {
+   "service": "common-lib",
+   "sha": "183bd81d",
+   "updated": "2026-08-02"
+  },
+  {
+   "service": "monitoring-service",
+   "sha": "4295e372",
+   "updated": "2026-03-30"
+  },
+  {
+   "service": "monitoring-service-gambit",
+   "sha": "b060c7de",
+   "updated": "2026-08-02"
+  },
+  {
+   "service": "monitoring-service-sage",
+   "sha": "b060c7de",
+   "updated": "2026-07-12"
+  },
+  {
+   "service": "optimization-engine",
+   "sha": "4cb2b386",
+   "updated": "2026-08-16"
+  },
+  {
+   "service": "sentdex-engine",
+   "sha": "dfe81b38",
+   "updated": "2026-08-02"
+  },
+  {
+   "service": "signals-lib",
+   "sha": "213ecb4d",
+   "updated": "2026-08-02"
+  },
+  {
+   "service": "trading-engine",
+   "sha": "6a25d301",
+   "updated": "2026-08-13"
+  }
+ ]
+}
